@@ -1,1 +1,1 @@
-#for all push create pull request first
+# for all push create pull request first
