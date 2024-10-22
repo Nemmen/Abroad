@@ -1,4 +1,4 @@
-import './assets/css/App.css';
+import './App.css';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import {} from 'react-router-dom';
 import AuthLayout from './layouts/auth';
@@ -10,6 +10,7 @@ import {
 } from '@chakra-ui/react';
 import initialTheme from './theme/theme'; //  { themeGreen }
 import { useState } from 'react';
+import PublicLayouts from 'views/mainpages/Layouts/PublicLayouts';
 // Chakra imports
 
 export default function Main() {
@@ -29,6 +30,12 @@ export default function Main() {
           path="agent/*"
           element={
             <AgentLayout theme={currentTheme} setTheme={setCurrentTheme} />
+          }
+        />
+        <Route
+          path="auth/*"
+          element={
+            <PublicLayouts />
           }
         />
         <Route path="/" element={<Navigate to="/admin" replace />} />
