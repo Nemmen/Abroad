@@ -99,7 +99,7 @@ export const routeAjent = [
   },
 ];
 
-// fpr doing commit
+// for commiy
 export const Auth = [
   {
     name: 'Login',
