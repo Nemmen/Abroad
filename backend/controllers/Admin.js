@@ -1,5 +1,6 @@
-
 import UserModel from "../models/user.js"
+
+
 const Getuser=async(req,res)=>{
     try {
         const users=await UserModel.find()
@@ -29,4 +30,32 @@ const deletUser=async(req,res)=>{
     }
 }
 
-export {Getuser,deletUser}
+// addUser
+const addUser=async(req,res)=>{
+    try {
+        const {name,email,password,role,organization}=req.body
+        const user=await UserModel.create({name,email,password,role,organization})
+        res.status(200).json({message:"user added successfully",user})
+    } catch (error) {
+        res.status(500).json({message:"intenral server error"})
+        console.log(error)
+    }
+}
+
+// blockUser
+const blockUser=async(req,res)=>{
+    try {
+        const userId=req.params.id
+        const user=await UserModel.findByIdAndUpdate(userId,{userStatus:"block"})
+        if (!user) {
+          return  res.status(404).json({message:"user not found"})
+        }
+        res.status(200).json({message:"user block successfully",user})
+    } catch (error) {
+        res.status(500).json({message:"intenral server error"})
+        console.log(error)
+    }
+}
+
+
+export {Getuser,deletUser, addUser, blockUser}

@@ -10,6 +10,16 @@ const userSechmea= new mongoose.Schema({
         required:true,
         unique: true
     },
+    userStatus:{
+        type:String,
+        enum:['active','block'],
+        default:'active'
+    },
+    organization:{
+        type:String,
+        required:true,
+        enum:['facebook','google','microsoft','apple','amazon','netflix','tesla','other']
+    },
     role:{
         type:String,
         enum:['admin',"user"],
