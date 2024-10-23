@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { post } from '../services/ApiEndpoint';
-import { toast } from 'react-hot-toast';
+import { Button, useToast } from "@chakra-ui/react"; // Import useToast from Chakra UI
 import registerimg from '../../../assets/img/auth/register.png'; 
 
 export default function Register() {
@@ -9,7 +9,10 @@ export default function Register() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [organization, setOrganization] = useState(''); // Organization state
+  const [organization, setOrganization] = useState('');
+  
+  // Initialize the toast
+  const toast = useToast();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -17,14 +20,29 @@ export default function Register() {
     try {
       const request = await post('http://localhost:4000/auth/register', { 
         name, email, password, organization 
-      }); // Include organization in the request body
+      });
       const response = request.data;
+
       if (request.status === 200) {
-        toast.success(response.message);
+        toast({
+          title: "Registration Successful",
+          description: response.message, // Assuming the response contains a success message
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
         navigate('/auth/login');
       }
       console.log(response);
     } catch (error) {
+      // Show error toast
+      toast({
+        title: "Registration Failed",
+        description: "An error occurred while registering. Please try again.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
       console.log(error);
     }
   };
@@ -35,7 +53,7 @@ export default function Register() {
         <div className="flex items-center justify-center bg-blue-100 p-6">
           <img src={registerimg} alt="Person registering" className="w-[30vw] h-auto" />
         </div>
-        <div className="p-10 flex flex-col justify-center  w-[450px]">
+        <div className="p-10 flex flex-col justify-center w-[450px]">
           <h2 className="text-2xl font-semibold text-gray-800">Sign Up</h2>
           <p className="text-sm text-gray-600 mb-6">Create your account.</p>
           
@@ -88,14 +106,12 @@ export default function Register() {
             <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition duration-300">Register</button>
           </form>
 
-
-          <p className=" flex justify-center items-center mt-6 text-center text-gray-600">
+          <p className="flex justify-center items-center mt-6 text-center text-gray-600">
             Already have an account?{' '}
             <Link to="/auth/login" className="text-blue-500 hover:underline">
               Sign in
             </Link>
           </p>
-    
         </div>
       </div>
     </div>
