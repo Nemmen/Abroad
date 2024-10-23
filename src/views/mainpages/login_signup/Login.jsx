@@ -1,22 +1,23 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { post } from '../services/ApiEndpoint';
-import { toast } from 'react-hot-toast';
+import { Button, useToast } from "@chakra-ui/react"; // Import useToast from Chakra UI
 import { useDispatch, useSelector } from 'react-redux';
 import { SetUser } from '../redux/AuthSlice';
 import loginimg from '../../../assets/img/auth/login.png';
 
 export default function Login() {
   const user = useSelector((state) => state.Auth);
-  console.log(user);
   const dispatch = useDispatch();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  
+  // Initialize the toast
+  const toast = useToast();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(email, password);
     try {
       const request = await post('http://localhost:4000/auth/login', { email, password });
       const response = request.data;
@@ -24,16 +25,34 @@ export default function Login() {
       if (request.status === 200) {
         localStorage.setItem('token_auth', response.token);
         localStorage.setItem('user_role', response.user.role);
+        
+        // Navigate based on user role
         if (response.user.role === 'admin') {
           navigate('/admin');
         } else if (response.user.role === 'user') {
           navigate('/agent');
         }
-        toast.success(response.message);
+
+        // Show success toast
+        toast({
+          title: "Login Successful",
+          description: "Welcome back!",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+
         dispatch(SetUser(response.user));
       }
-      console.log(response);
     } catch (error) {
+      // Show error toast
+      toast({
+        title: "Login Failed",
+        description: "Please check your credentials and try again.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
       console.log(error);
     }
   };
@@ -44,7 +63,7 @@ export default function Login() {
         <div className="w-1/2 bg-blue-100 flex justify-center items-center">
           <img src={loginimg} alt="Person on laptop" className="w-[40vw] h-auto" />
         </div>
-        <div className=" p-12 flex flex-col justify-center  w-[450px]">
+        <div className="p-12 flex flex-col justify-center w-[450px]">
           <h2 className="text-2xl font-semibold text-gray-800">Sign In</h2>
           <p className="text-sm text-gray-600 mb-6">Unlock your world.</p>
           <form onSubmit={handleSubmit}>
