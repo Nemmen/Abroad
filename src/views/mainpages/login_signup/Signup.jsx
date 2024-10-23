@@ -88,14 +88,14 @@ export default function Register() {
             <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition duration-300">Register</button>
           </form>
 
-<div className=''>
-          <p className="mt-6 text-center text-gray-600">
+
+          <p className=" flex justify-center items-center mt-6 text-center text-gray-600">
             Already have an account?{' '}
             <Link to="/auth/login" className="text-blue-500 hover:underline">
               Sign in
             </Link>
           </p>
-          </div>
+    
         </div>
       </div>
     </div>
