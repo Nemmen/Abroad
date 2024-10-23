@@ -1,13 +1,21 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
-
-const DbCon=async()=>{
-    try {
-       await mongoose.connect(process.env.MONGODB_URL)
-       console.log('mongo db is connected')
-    } catch (error) {
-        console.log(error)
+const DbCon = async () => {
+    if (!process.env.MONGODB_URL) {
+        console.error('MongoDB URL is not defined in the environment variables');
+        process.exit(1); // Exit process if URL is missing
     }
-}
 
-export default DbCon
+    try {
+        await mongoose.connect(process.env.MONGODB_URL, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true
+        });
+        console.log('MongoDB is successfully connected');
+    } catch (error) {
+        console.error('Error connecting to MongoDB:', error);
+        process.exit(1); // Exit process if connection fails
+    }
+};
+
+export default DbCon;

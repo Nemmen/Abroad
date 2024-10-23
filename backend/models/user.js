@@ -18,7 +18,6 @@ const userSechmea= new mongoose.Schema({
     organization:{
         type:String,
         required:true,
-        enum:['facebook','google','microsoft','apple','amazon','netflix','tesla','other']
     },
     role:{
         type:String,
