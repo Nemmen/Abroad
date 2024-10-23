@@ -38,8 +38,12 @@ export default function Login() {
           title: "Login Successful",
           description: "Welcome back!",
           status: "success",
-          duration: 5000,
+          duration: 1000,
           isClosable: true,
+            position: "bottom-right",
+            containerStyle: {
+              width: "400px", 
+            },
         });
 
         dispatch(SetUser(response.user));
@@ -50,8 +54,12 @@ export default function Login() {
         title: "Login Failed",
         description: "Please check your credentials and try again.",
         status: "error",
-        duration: 5000,
+        duration: 1000,
         isClosable: true,
+        position: "bottom-right",
+            containerStyle: {
+              width: "400px", 
+            },
       });
       console.log(error);
     }
