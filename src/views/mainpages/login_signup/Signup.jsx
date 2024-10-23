@@ -2,20 +2,40 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { post } from '../services/ApiEndpoint';
 import { Button, useToast } from "@chakra-ui/react"; // Import useToast from Chakra UI
+import { HiEye, HiEyeOff } from 'react-icons/hi'; // Import eye icons from react-icons
 import registerimg from '../../../assets/img/auth/register.png'; 
 
 export default function Register() {
   const navigate = useNavigate();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [organization, setOrganization] = useState('');
-  
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState(''); // State for confirm password
+  const [showPassword, setShowPassword] = useState(false); // State for password visibility
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // State for confirm password visibility
+
   // Initialize the toast
   const toast = useToast();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Check if password and confirm password match
+    if (password !== confirmPassword) {
+      toast({
+        title: "Password Mismatch",
+        description: "Passwords do not match. Please try again.",
+        status: "error",
+        duration: 1000,
+        isClosable: true,
+        position: "bottom-right",
+        containerStyle: {
+          width: "400px", 
+        },
+      });
+      return;
+    }
 
     try {
       const request = await post('http://localhost:4000/auth/register', { 
@@ -28,8 +48,12 @@ export default function Register() {
           title: "Registration Successful",
           description: response.message, // Assuming the response contains a success message
           status: "success",
-          duration: 5000,
+          duration: 1000,
           isClosable: true,
+          position: "bottom-right",
+          containerStyle: {
+            width: "400px", 
+          },
         });
         navigate('/auth/login');
       }
@@ -40,8 +64,12 @@ export default function Register() {
         title: "Registration Failed",
         description: "An error occurred while registering. Please try again.",
         status: "error",
-        duration: 5000,
+        duration: 1000,
         isClosable: true,
+        position: "bottom-right",
+        containerStyle: {
+          width: "400px", 
+        },
       });
       console.log(error);
     }
@@ -91,16 +119,39 @@ export default function Register() {
                 className="w-full px-4 py-2 border rounded-lg mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-            <div className="mb-6">
+            <div className="mb-4 relative">
               <label htmlFor="password" className="block text-gray-700 font-semibold">Password</label>
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'} // Toggle input type for password visibility
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
                 className="w-full px-4 py-2 border rounded-lg mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
+              <span
+                onClick={() => setShowPassword(!showPassword)} // Toggle password visibility
+                className="absolute right-3 top-11 cursor-pointer"
+              >
+                {showPassword ? <HiEyeOff className="text-gray-600" /> : <HiEye className="text-gray-600" />}
+              </span>
+            </div>
+            <div className="mb-6 relative">
+              <label htmlFor="confirmPassword" className="block text-gray-700 font-semibold">Confirm Password</label>
+              <input
+                type={showConfirmPassword ? 'text' : 'password'} // Toggle input type for confirm password visibility
+                id="confirmPassword"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm your password"
+                className="w-full px-4 py-2 border rounded-lg mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <span
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)} // Toggle confirm password visibility
+                className="absolute right-3 top-11 cursor-pointer"
+              >
+                {showConfirmPassword ? <HiEyeOff className="text-gray-600" /> : <HiEye className="text-gray-600" />}
+              </span>
             </div>
 
             <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition duration-300">Register</button>

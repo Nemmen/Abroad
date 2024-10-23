@@ -5,12 +5,14 @@ import { Button, useToast } from "@chakra-ui/react"; // Import useToast from Cha
 import { useDispatch, useSelector } from 'react-redux';
 import { SetUser } from '../redux/AuthSlice';
 import loginimg from '../../../assets/img/auth/login.png';
+import { HiEye, HiEyeOff } from 'react-icons/hi'; // Import eye icons from react-icons
 
 export default function Login() {
   const user = useSelector((state) => state.Auth);
   const dispatch = useDispatch();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false); // State for password visibility
   const navigate = useNavigate();
   
   // Initialize the toast
@@ -40,10 +42,10 @@ export default function Login() {
           status: "success",
           duration: 1000,
           isClosable: true,
-            position: "bottom-right",
-            containerStyle: {
-              width: "400px", 
-            },
+          position: "bottom-right",
+          containerStyle: {
+            width: "400px", 
+          },
         });
 
         dispatch(SetUser(response.user));
@@ -57,9 +59,9 @@ export default function Login() {
         duration: 1000,
         isClosable: true,
         position: "bottom-right",
-            containerStyle: {
-              width: "400px", 
-            },
+        containerStyle: {
+          width: "400px", 
+        },
       });
       console.log(error);
     }
@@ -86,16 +88,22 @@ export default function Login() {
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 mt-1"
               />
             </div>
-            <div className="mb-6">
+            <div className="mb-6 relative">
               <label htmlFor="password" className="block text-sm font-semibold text-gray-800">Password</label>
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'} // Toggle input type based on state
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 mt-1"
               />
+              <span
+                onClick={() => setShowPassword(!showPassword)} // Toggle password visibility
+                className="absolute right-3 top-9 cursor-pointer"
+              >
+                {showPassword ? <HiEyeOff className="text-gray-600" /> : <HiEye className="text-gray-600" />}
+              </span>
             </div>
             <button
               type="submit"
