@@ -1,22 +1,22 @@
 import React from 'react';
 
 import { Icon } from '@chakra-ui/react';
+
 import {
-  MdBarChart,
   MdPerson,
   MdHome,
-  MdLock,
-  MdOutlineShoppingCart,
+  MdAttachMoney,
+  MdSwapHoriz,
+  MdBusiness,
 } from 'react-icons/md';
 
-import { SiAuthentik } from "react-icons/si";
+import { SiAuthentik } from 'react-icons/si';
 
-import Agent from './views/mainpages/agent'
+import Agent from './views/mainpages/agent';
 
-//Auth import 
+//Auth import
 import Login from 'views/mainpages/login_signup/Login';
 import Signup from 'views/mainpages/login_signup/Signup';
-
 
 const routes = [
   {
@@ -27,75 +27,46 @@ const routes = [
     component: '',
   },
   {
-    name: 'NFT Marketplace',
+    name: 'Agent',
     layout: '/admin',
     path: '/nft-marketplace',
-    icon: (
-      <Icon
-        as={MdOutlineShoppingCart}
-        width="20px"
-        height="20px"
-        color="inherit"
-      />
-    ),
+    icon: <Icon as={MdPerson} width="20px" height="20px" color="inherit" />,
     component: '',
     secondary: true,
   },
-  {
-    name: 'Data Tables',
-    layout: '/admin',
-    icon: <Icon as={MdBarChart} width="20px" height="20px" color="inherit" />,
-    path: '/data-tables',
-    component: '',
-  },
-  {
-    name: 'Profile',
-    layout: '/admin',
-    path: '/profile',
-    icon: <Icon as={MdPerson} width="20px" height="20px" color="inherit" />,
-    component:'',
-  },
 ];
-
-
-
 
 export const routeAjent = [
   {
-    name: 'Main Dashboard ajent',
+    name: 'Main Dashboard',
     layout: '/agent',
     path: '/default',
     icon: <Icon as={MdHome} width="20px" height="20px" color="inherit" />,
     component: <Agent />,
   },
   {
-    name: 'NFT Marketplace yes agent',
+    name: 'GIC',
     layout: '/agent',
-    path: '/nft-marketplace',
+    path: '/gic',
     icon: (
-      <Icon
-        as={MdOutlineShoppingCart}
-        width="20px"
-        height="20px"
-        color="inherit"
-      />
+      <Icon as={MdAttachMoney} width="20px" height="20px" color="inherit" />
     ),
     component: '',
     secondary: true,
   },
   {
-    name: 'Data Tables',
+    name: 'FOREX',
     layout: '/agent',
-    icon: <Icon as={MdBarChart} width="20px" height="20px" color="inherit" />,
-    path: '/data-tables',
+    icon: <Icon as={MdSwapHoriz} width="20px" height="20px" color="inherit" />,
+    path: '/forex',
     component: '',
   },
   {
-    name: 'Profile',
+    name: 'IMM',
     layout: '/agent',
-    path: '/profile',
-    icon: <Icon as={MdPerson} width="20px" height="20px" color="inherit" />,
-    component:'',
+    path: '/imm',
+    icon: <Icon as={MdBusiness} width="20px" height="20px" color="inherit" />,
+    component: '',
   },
 ];
 
