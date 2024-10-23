@@ -27,14 +27,14 @@ export default function Register() {
 
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100">
-      <div className="flex bg-white rounded-lg shadow-lg overflow-hidden">
+      <div className="flex bg-white rounded-lg shadow-lg overflow-hidden h-[655px]">
         {/* Left-side image */}
         <div className="flex items-center justify-center bg-blue-100 p-6">
-          <img src={registerimg} alt="Person registering" className="w-96 h-auto" />
+          <img src={registerimg} alt="Person registering" className="w-[30vw] h-auto" />
         </div>
 
         {/* Form container */}
-        <div className="p-10 flex flex-col justify-center">
+        <div className="p-10 flex flex-col justify-center w-[450px]">
           <h2 className="text-2xl font-semibold text-gray-800">Sign Up</h2>
           <p className="text-sm text-gray-600 mb-6">Create your account.</p>
           
