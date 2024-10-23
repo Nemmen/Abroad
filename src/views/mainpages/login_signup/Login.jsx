@@ -43,11 +43,18 @@ export default function Login() {
 
         // Show success toast
         toast({
-          title: 'Login Successful',
-          description: 'Welcome back!',
-          status: 'success',
-          duration: 5000,
+
+
+          title: "Login Successful",
+          description: "Welcome back!",
+          status: "success",
+          duration: 1000,
+
           isClosable: true,
+            position: "bottom-right",
+            containerStyle: {
+              width: "400px", 
+            },
         });
 
         dispatch(SetUser(response.user));
@@ -56,11 +63,17 @@ export default function Login() {
       // Show error toast
       setLoading(false);
       toast({
-        title: 'Login Failed',
-        description: 'Please check your credentials and try again.',
-        status: 'error',
-        duration: 5000,
+
+        title: "Login Failed",
+        description: "Please check your credentials and try again.",
+        status: "error",
+        duration: 1000,
+
         isClosable: true,
+        position: "bottom-right",
+            containerStyle: {
+              width: "400px", 
+            },
       });
       console.log(error);
     }
