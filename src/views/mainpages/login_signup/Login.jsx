@@ -22,6 +22,8 @@ export default function Login() {
       const response = request.data;
 
       if (request.status === 200) {
+        localStorage.setItem('token_auth', response.token);
+        localStorage.setItem('user_role', response.user.role);
         if (response.user.role === 'admin') {
           navigate('/admin');
         } else if (response.user.role === 'user') {

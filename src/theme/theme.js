@@ -21,5 +21,9 @@ export default extendTheme(
   inputStyles, // input styles
   textareaStyles, // textarea styles
   switchStyles, // switch styles
-  CardComponent // card component
+  CardComponent, // card component
+  {fonts: {
+    heading: `'Roboto', sans-serif`,  // Font for headings
+    body: `'Roboto', sans-serif`,     // Font for body text
+  },}
 );
