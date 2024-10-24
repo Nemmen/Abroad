@@ -5,9 +5,9 @@ import Footer from 'components/footer/FooterAdmin.js';
 import Navbar from 'components/navbar/NavbarAdmin.js';
 import Sidebar from 'components/sidebar/Sidebar.js';
 import { SidebarContext } from 'contexts/SidebarContext';
-import React, { useState } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
-import {routeAjent as routes} from 'routes.js';
+import React, { useState, useEffect } from 'react';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { routeAjent as routes } from 'routes.js';
 
 // Custom Chakra theme
 export default function Dashboard(props) {
@@ -15,6 +15,14 @@ export default function Dashboard(props) {
   // states and functions
   const [fixed] = useState(false);
   const [toggleSidebar, setToggleSidebar] = useState(false);
+  const location = useLocation(); // To track location changes
+  const [routeChanged, setRouteChanged] = useState(location.pathname);
+
+  // Re-render component when the route changes
+  useEffect(() => {
+    setRouteChanged(location.pathname);
+  }, [location]);
+
   // functions for changing the states from components
   const getRoute = () => {
     return window.location.pathname !== '/agent/full-screen-maps';
@@ -105,6 +113,7 @@ export default function Dashboard(props) {
   document.documentElement.dir = 'ltr';
   const { onOpen } = useDisclosure();
   document.documentElement.dir = 'ltr';
+
   return (
     <Box>
       <Box>
@@ -142,7 +151,7 @@ export default function Dashboard(props) {
                 />
               </Box>
             </Portal>
-          
+
             {getRoute() ? (
               <Box
                 mx="auto"
@@ -160,8 +169,7 @@ export default function Dashboard(props) {
                 </Routes>
               </Box>
             ) : null}
-            <Box>
-            </Box>
+            <Box></Box>
           </Box>
         </SidebarContext.Provider>
       </Box>
