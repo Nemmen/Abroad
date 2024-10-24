@@ -1,39 +1,33 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { post } from '../services/ApiEndpoint';
-import { Button, useToast } from '@chakra-ui/react'; // Import useToast from Chakra UI
+import { Button, useToast } from "@chakra-ui/react"; // Import useToast from Chakra UI
 import { useDispatch, useSelector } from 'react-redux';
 import { SetUser } from '../redux/AuthSlice';
 import loginimg from '../../../assets/img/auth/login.png';
-
-import { Spinner } from '@chakra-ui/react';
+import { HiEye, HiEyeOff } from 'react-icons/hi'; // Import eye icons from react-icons
 
 export default function Login() {
   const user = useSelector((state) => state.Auth);
   const dispatch = useDispatch();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false); // State for password visibility
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-
+  
   // Initialize the toast
   const toast = useToast();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     try {
-      const request = await post('http://localhost:4000/auth/login', {
-        email,
-        password,
-      });
+      const request = await post('http://localhost:4000/auth/login', { email, password });
       const response = request.data;
 
       if (request.status === 200) {
         localStorage.setItem('token_auth', response.token);
         localStorage.setItem('user_role', response.user.role);
-        setLoading(false);
-
+        
         // Navigate based on user role
         if (response.user.role === 'admin') {
           navigate('/admin');
@@ -43,64 +37,48 @@ export default function Login() {
 
         // Show success toast
         toast({
-
-
           title: "Login Successful",
           description: "Welcome back!",
           status: "success",
           duration: 1000,
-
           isClosable: true,
-            position: "bottom-right",
-            containerStyle: {
-              width: "400px", 
-            },
+          position: "bottom-right",
+          containerStyle: {
+            width: "400px", 
+          },
         });
 
         dispatch(SetUser(response.user));
       }
     } catch (error) {
       // Show error toast
-      setLoading(false);
       toast({
-
         title: "Login Failed",
         description: "Please check your credentials and try again.",
         status: "error",
         duration: 1000,
-
         isClosable: true,
         position: "bottom-right",
-            containerStyle: {
-              width: "400px", 
-            },
+        containerStyle: {
+          width: "400px", 
+        },
       });
       console.log(error);
     }
-    setLoading(false);
   };
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">
       <div className="flex bg-white rounded-lg shadow-lg overflow-hidden max-w-4xl h-[655px]">
         <div className="w-1/2 bg-blue-100 flex justify-center items-center">
-          <img
-            src={loginimg}
-            alt="Person on laptop"
-            className="w-[40vw] h-auto"
-          />
+          <img src={loginimg} alt="Person on laptop" className="w-[40vw] h-auto" />
         </div>
         <div className="p-12 flex flex-col justify-center w-[450px]">
           <h2 className="text-2xl font-semibold text-gray-800">Sign In</h2>
           <p className="text-sm text-gray-600 mb-6">Unlock your world.</p>
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
-              <label
-                htmlFor="email"
-                className="block text-sm font-semibold text-gray-800"
-              >
-                Email
-              </label>
+              <label htmlFor="email" className="block text-sm font-semibold text-gray-800">Email</label>
               <input
                 type="email"
                 id="email"
@@ -110,41 +88,31 @@ export default function Login() {
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 mt-1"
               />
             </div>
-            <div className="mb-6">
-              <label
-                htmlFor="password"
-                className="block text-sm font-semibold text-gray-800"
-              >
-                Password
-              </label>
+            <div className="mb-6 relative">
+              <label htmlFor="password" className="block text-sm font-semibold text-gray-800">Password</label>
               <input
-                type="password"
+                type={showPassword ? 'text' : 'password'} // Toggle input type based on state
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 mt-1"
               />
-            </div>
-            {loading ? (
-             <div className='text-center'>
-               <Spinner />
-             </div>
-            ) : (
-              <button
-                type="submit"
-                className="w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200"
+              <span
+                onClick={() => setShowPassword(!showPassword)} // Toggle password visibility
+                className="absolute right-3 top-9 cursor-pointer"
               >
-                Sign In
-              </button>
-            )}
+                {showPassword ? <HiEyeOff className="text-gray-600" /> : <HiEye className="text-gray-600" />}
+              </span>
+            </div>
+            <button
+              type="submit"
+              className="w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-200"
+            >
+              Sign In
+            </button>
           </form>
-          <Link
-            to="/auth/signup"
-            className="block text-center text-blue-600 hover:underline mt-6"
-          >
-            Create an account
-          </Link>
+          <Link to="/auth/signup" className="block text-center text-blue-600 hover:underline mt-6">Create an account</Link>
         </div>
       </div>
     </div>
