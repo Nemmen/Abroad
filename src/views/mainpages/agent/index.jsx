@@ -1,19 +1,47 @@
 import * as React from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import Paper from '@mui/material/Paper';
-import { Box, ThemeProvider } from '@mui/material';
-import { createTheme } from '@mui/material/styles';
-
-const muiTheme = createTheme({
-  palette: {
-    mode: 'light', // or 'dark', toggle this according to your logic
-  },
-});
-
-// Pagination settings
-const paginationModel = { page: 0, pageSize: 5 };
+import { Box, ThemeProvider, createTheme } from '@mui/material';
+import { useColorMode } from '@chakra-ui/react'; // Import Chakra's color mode hook
 
 export default function Index() {
+  // Use Chakra's color mode to determine if it's light or dark
+  const { colorMode } = useColorMode();
+
+  // Create a dynamic MUI theme based on the Chakra color mode
+  const muiTheme = React.useMemo(
+    () =>
+      createTheme({
+        palette: {
+          mode: colorMode, // This sets the theme mode based on Chakra's color mode ('light' or 'dark')
+          primary: {
+            main: colorMode === 'light' ? '#000000' : '#ffffff', // Black in light mode, white in dark mode
+          },
+          background: {
+            default: colorMode === 'light' ? '#ffffff' : '#121212', // White background for light, dark for dark mode
+            paper: colorMode === 'light' ? '#f0f0f0' : '#1e1e1e', // Slightly darker paper background in dark mode
+          },
+          text: {
+            primary: colorMode === 'light' ? '#000000' : '#ffffff', // Black text for light, white for dark mode
+            secondary: colorMode === 'light' ? '#4f4f4f' : '#b0b0b0', // Secondary text color
+          },
+        },
+        components: {
+          MuiDataGrid: {
+            styleOverrides: {
+              root: {
+                border: '1px solid',
+                borderColor: colorMode === 'light' ? '#000000' : '#ffffff', // Border color adjusts based on the mode
+              },
+            },
+          },
+        },
+      }),
+    [colorMode] // Recompute the theme when the color mode changes
+  );
+
+  // Pagination settings
+  const paginationModel = { page: 0, pageSize: 5 };
+
   // Column definitions
   const columns = [
     { field: 'id', headerName: 'ID', width: 70 },
@@ -31,7 +59,6 @@ export default function Index() {
       description: 'This column has a value getter and is not sortable.',
       sortable: false,
       width: 160,
-      // Safely handle params and row existence
       valueGetter: (params) => {
         if (params && params.row) {
           return `${params.row.firstName || ''} ${params.row.lastName || ''}`;
