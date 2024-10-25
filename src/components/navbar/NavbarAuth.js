@@ -479,7 +479,7 @@ export default function AuthNavbar(props) {
             />
           </Box>
           {linksAuth}
-          <Link href='https://www.horizon-ui.com/pro'>
+          <Link>
             <Button
               bg={bgButton}
               color={colorButton}
