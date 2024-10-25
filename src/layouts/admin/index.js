@@ -5,20 +5,32 @@ import Footer from 'components/footer/FooterAdmin.js';
 import Navbar from 'components/navbar/NavbarAdmin.js';
 import Sidebar from 'components/sidebar/Sidebar.js';
 import { SidebarContext } from 'contexts/SidebarContext';
-import React, { useState } from 'react';
-import { Navigate, Route, Routes } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import routes from 'routes.js';
 
 // Custom Chakra theme
 export default function Dashboard(props) {
   const { ...rest } = props;
+  const location = useLocation(); // To detect route changes
   // states and functions
   const [fixed] = useState(false);
   const [toggleSidebar, setToggleSidebar] = useState(false);
-  // functions for changing the states from components
+  const [activeRoute, setActiveRoute] = useState('Default Brand Text');
+  const [activeNavbar, setActiveNavbar] = useState(false);
+  const [activeNavbarText, setActiveNavbarText] = useState('');
+
+  // Update state on route change
+  useEffect(() => {
+    setActiveRoute(getActiveRoute(routes));
+    setActiveNavbar(getActiveNavbar(routes));
+    setActiveNavbarText(getActiveNavbarText(routes));
+  }, [location.pathname, routes]); // Re-run whenever the location or routes change
+
   const getRoute = () => {
     return window.location.pathname !== '/admin/full-screen-maps';
   };
+
   const getActiveRoute = (routes) => {
     let activeRoute = 'Default Brand Text';
     for (let i = 0; i < routes.length; i++) {
@@ -42,6 +54,7 @@ export default function Dashboard(props) {
     }
     return activeRoute;
   };
+
   const getActiveNavbar = (routes) => {
     let activeNavbar = false;
     for (let i = 0; i < routes.length; i++) {
@@ -65,6 +78,7 @@ export default function Dashboard(props) {
     }
     return activeNavbar;
   };
+
   const getActiveNavbarText = (routes) => {
     let activeNavbar = false;
     for (let i = 0; i < routes.length; i++) {
@@ -88,6 +102,7 @@ export default function Dashboard(props) {
     }
     return activeNavbar;
   };
+
   const getRoutes = (routes) => {
     return routes.map((route, key) => {
       if (route.layout === '/admin') {
@@ -102,9 +117,10 @@ export default function Dashboard(props) {
       }
     });
   };
-  document.documentElement.dir = 'ltr';
+
   const { onOpen } = useDisclosure();
   document.documentElement.dir = 'ltr';
+
   return (
     <Box>
       <Box>
@@ -134,15 +150,15 @@ export default function Dashboard(props) {
                 <Navbar
                   onOpen={onOpen}
                   logoText={'abroad educares'}
-                  brandText={getActiveRoute(routes)}
-                  secondary={getActiveNavbar(routes)}
-                  message={getActiveNavbarText(routes)}
+                  brandText={activeRoute}
+                  secondary={activeNavbar}
+                  message={activeNavbarText}
                   fixed={fixed}
                   {...rest}
                 />
               </Box>
             </Portal>
-          
+
             {getRoute() ? (
               <Box
                 mx="auto"
