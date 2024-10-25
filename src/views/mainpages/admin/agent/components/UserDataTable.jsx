@@ -1,8 +1,6 @@
 import React from 'react';
 import {
-  Avatar,
   Box,
-  Button,
   Flex,
   Table,
   Tbody,
@@ -23,20 +21,20 @@ import {
 
 const columnHelper = createColumnHelper();
 
-export default function TopUserTable(props) {
-  const { tableData } = props;
+export default function UserDataTable(props) {
+  const { tableData, onRowClick } = props; // Props passed to component
   const [sorting, setSorting] = React.useState([]);
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const textColorSecondary = useColorModeValue('secondaryGray.600', 'white');
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
   let defaultData = tableData;
-  
+
   const columns = [
-    columnHelper.accessor('username', {
-      id: 'username',
+    columnHelper.accessor('name', {
+      id: 'name',
       header: () => (
         <Text fontSize={{ sm: '10px', lg: '12px' }} color="gray.400">
-          USERNAME
+          NAME
         </Text>
       ),
       cell: (info) => (
@@ -58,22 +56,30 @@ export default function TopUserTable(props) {
         </Text>
       ),
     }),
-    columnHelper.accessor('action', {
-      id: 'action',
+    columnHelper.accessor('city', {
+      id: 'city',
       header: () => (
         <Text fontSize={{ sm: '10px', lg: '12px' }} color="gray.400">
-          ACTION
+          CITY
         </Text>
       ),
       cell: (info) => (
-        <Flex gap={2}>
-          <Button size="sm" colorScheme="green">
-            Approve
-          </Button>
-          <Button size="sm" colorScheme="red">
-            Disapprove
-          </Button>
-        </Flex>
+        <Text color={textColorSecondary} fontSize="sm" fontWeight="500">
+          {info.getValue()}
+        </Text>
+      ),
+    }),
+    columnHelper.accessor('serviceRegisteredOn', {
+      id: 'serviceRegisteredOn',
+      header: () => (
+        <Text fontSize={{ sm: '10px', lg: '12px' }} color="gray.400">
+          SERVICE REGISTERED ON
+        </Text>
+      ),
+      cell: (info) => (
+        <Text color={textColorSecondary} fontSize="sm" fontWeight="500">
+          {info.getValue()}
+        </Text>
       ),
     }),
   ];
@@ -91,6 +97,10 @@ export default function TopUserTable(props) {
     debugTable: true,
   });
 
+  const handleRowClick = (row) => {
+    if (onRowClick) onRowClick(row.original); // Call onRowClick prop
+  };
+
   return (
     <Flex direction="column" w="100%" overflowX={{ sm: 'scroll', lg: 'hidden' }}>
       <Flex
@@ -103,10 +113,9 @@ export default function TopUserTable(props) {
         boxShadow="0px 40px 58px -20px rgba(112, 144, 176, 0.26)"
       >
         <Text color={textColor} fontSize="xl" fontWeight="600">
-          Recent Signups
+          User Registrations
         </Text>
       </Flex>
-      {/* Fixed height container for the table with vertical scrolling */}
       <Box height="300px" overflowY="auto">
         <Table variant="simple" color="gray.500" mt="12px">
           <Thead>
@@ -132,7 +141,11 @@ export default function TopUserTable(props) {
           </Thead>
           <Tbody>
             {table.getRowModel().rows.slice(0, 11).map((row) => (
-              <Tr key={row.id}>
+              <Tr
+                key={row.id}
+                onClick={() => handleRowClick(row)} // Call handleRowClick on row click
+                _hover={{ bg: 'gray.100', cursor: 'pointer' }}
+              >
                 {row.getVisibleCells().map((cell) => (
                   <Td
                     key={cell.id}

@@ -17,21 +17,22 @@ import Agent from './views/mainpages/agent';
 //Auth import
 import Login from 'views/mainpages/login_signup/Login';
 import Signup from 'views/mainpages/login_signup/Signup';
-
+import MainDashboard from 'views/mainpages/admin/main/MainDashboard';
+import AdminAgent from 'views/mainpages/admin/agent/Agent'
 const routes = [
   {
     name: 'Main Dashboard',
     layout: '/admin',
     path: '/default',
     icon: <Icon as={MdHome} width="20px" height="20px" color="inherit" />,
-    component: '',
+    component: <MainDashboard />,
   },
   {
     name: 'Agent',
     layout: '/admin',
-    path: '/nft-marketplace',
+    path: '/agent',
     icon: <Icon as={MdPerson} width="20px" height="20px" color="inherit" />,
-    component: '',
+    component: <AdminAgent />,
     secondary: true,
   },
 ];

@@ -1,0 +1,37 @@
+[
+  {
+    "username": "@maddison_c21",
+    "email": "maddison_c21@example.com",
+    "action": ["Approve", "Disapprove"]
+  },
+  {
+    "username": "@karl.will02",
+    "email": "karl.will02@example.com",
+    "action": ["Approve", "Disapprove"]
+  },
+  {
+    "username": "@andreea.1z",
+    "email": "andreea.1z@example.com",
+    "action": ["Approve", "Disapprove"]
+  },
+  {
+    "username": "@abraham47.y",
+    "email": "abraham47@example.com",
+    "action": ["Approve", "Disapprove"]
+  },
+  {
+    "username": "@simmmple.web",
+    "email": "simmmple.web@example.com",
+    "action": ["Approve", "Disapprove"]
+  },
+  {
+    "username": "@horizon.ui",
+    "email": "horizon.ui@example.com",
+    "action": ["Approve", "Disapprove"]
+  },
+  {
+    "username": "@venus.sys",
+    "email": "venus.sys@example.com",
+    "action": ["Approve", "Disapprove"]
+  }
+]
