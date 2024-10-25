@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import bcryptjs from 'bcryptjs';
 const register = async (req, res) => {
   try {
-    const { name, email, password, organization } = req.body;
+    const { name, email, password, organization,phoneNumber, state, city } = req.body;
 
     const existUser = await UserModel.findOne({ email });
     if (existUser) {
@@ -17,6 +17,9 @@ const register = async (req, res) => {
       email,
       password: hasepassword,
       organization,
+      phoneNumber,  
+      state,        
+      city 
     });
 
     await newUser.save();
