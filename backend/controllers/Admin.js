@@ -33,8 +33,8 @@ const deletUser=async(req,res)=>{
 // addUser
 const addUser=async(req,res)=>{
     try {
-        const {name,email,password,role,organization}=req.body
-        const user=await UserModel.create({name,email,password,role,organization})
+        const {name,email,password,role,organization,phoneNumber, state, city}=req.body
+        const user=await UserModel.create({name,email,password,role,organization,phoneNumber, state, city})
         res.status(200).json({message:"user added successfully",user})
     } catch (error) {
         res.status(500).json({message:"intenral server error"})

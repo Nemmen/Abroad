@@ -6,7 +6,7 @@ import DbCon from './utlis/db.js'
 import AuthRoutes from './routes/Auth.js'
 import AdminRoutes from './routes/AdminRoutes.js'
 dotenv.config()
-const PORT=process.env.PORT || 3000
+const PORT=process.env.PORT || 4000
 const app=express()
 
 // mongo db 
