@@ -31,23 +31,39 @@ const register = async (req, res) => {
   }
 };
 
+// login if the user status is active then login, if pending then show the message that your account is pending, if block then show the message that your account is blocked
 const Login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await UserModel.findOne({ email });
+    const user = await UserModel.findOne({
+      email,
+    });
 
     if (!user) {
-      return res
-        .status(404)
-        .json({ success: false, message: 'Invalid credentials' });
+      return res.status(404).json({
+        success: false,
+        message: 'Invalid credentials',
+      });
     }
-
+    if (user.userStatus === 'pending') {
+      return res.status(404).json({
+        success: false,
+        message: 'Wait for admin approval',
+      });
+    }
+    if (user.userStatus === 'block') {
+      return res.status(404).json({
+        success: false,
+        message: 'Your account is blocked',
+      });
+    }
     const ispassaowrdValid = await bcryptjs.compare(password, user.password);
     if (!ispassaowrdValid) {
-      return res
-        .status(404)
-        .json({ success: false, message: 'Invalid credentials' });
+      return res.status(404).json({
+        success: false,
+        message: 'Invalid credentials',
+      });
     }
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRETE);
 
@@ -56,14 +72,53 @@ const Login = async (req, res) => {
       secure: false,
       maxAge: 3600000,
     });
-    res
-      .status(200)
-      .json({ success: true, message: 'Login successfully', user, token });
+    res.status(200).json({
+      success: true,
+      message: 'Login successfully',
+      user,
+      token,
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: 'interanl server ereo' });
     console.log(error);
   }
 };
+
+
+    
+// const Login = async (req, res) => {
+//   try {
+//     const { email, password } = req.body;
+
+//     const user = await UserModel.findOne({ email });
+
+//     if (!user) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: 'Invalid credentials' });
+//     }
+
+//     const ispassaowrdValid = await bcryptjs.compare(password, user.password);
+//     if (!ispassaowrdValid) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: 'Invalid credentials' });
+//     }
+//     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRETE);
+
+//     res.cookie('token', token, {
+//       httpOnly: true,
+//       secure: false,
+//       maxAge: 3600000,
+//     });
+//     res
+//       .status(200)
+//       .json({ success: true, message: 'Login successfully', user, token });
+//   } catch (error) {
+//     res.status(500).json({ success: false, message: 'interanl server ereo' });
+//     console.log(error);
+//   }
+// };
 const Logout = async (req, res) => {
   try {
     res.clearCookie('token');

@@ -12,8 +12,8 @@ const userSchema = new mongoose.Schema({
     },
     userStatus: {
         type: String,
-        enum: ['active', 'block'],
-        default: 'active'
+        enum: ['active','pending', 'block'],
+        default: 'pending'
     },
     organization: {
         type: String,
@@ -43,7 +43,8 @@ const userSchema = new mongoose.Schema({
     city: {  // Added field for city
         type: String,
         required: true
-    }
+    },
+    
 }, { timestamps: true });
 
 const UserModel = mongoose.model('users', userSchema);
