@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { DataGrid } from '@mui/x-data-grid';
-import { Box, ThemeProvider, createTheme } from '@mui/material';
+import { Box, Typography, ThemeProvider, createTheme } from '@mui/material';
 import { useColorMode } from '@chakra-ui/react'; // Import Chakra's color mode hook
 
 export default function Index() {
@@ -83,15 +83,38 @@ export default function Index() {
 
   return (
     <ThemeProvider theme={muiTheme}>
-      <Box sx={{ mt: 20, height: 400, width: '100%' }}>
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          paginationModel={paginationModel}
-          pageSizeOptions={[5]}
-          checkboxSelection
-          disableRowSelectionOnClick
-        />
+      <Box sx={{ mt: 10, width: '100%' }}>
+
+        {/* Welcome Banner */}
+        
+        <Box 
+          sx={{
+            backgroundColor: '#11047A', // Updated banner background color
+            color: colorMode === 'light' ? '#ffffff' : '#ffffff', // Keep the text white for good contrast
+            padding: '48px', 
+            borderRadius: '8px',
+            mb: 3
+          }}
+        >
+          <Typography variant="h4" component="h1" align="center" fontWeight="bold">
+            Welcome to Your Dashboard!
+          </Typography>
+          <Typography variant="body1" align="center">
+            Manage your data with ease. Here’s a quick overview of your records.
+          </Typography>
+        </Box>
+
+        {/* DataGrid Table */}
+        <Box sx={{ height: 400, width: '100%' }}>
+          <DataGrid
+            rows={rows}
+            columns={columns}
+            paginationModel={paginationModel}
+            pageSizeOptions={[5]}
+            checkboxSelection
+            disableRowSelectionOnClick
+          />
+        </Box>
       </Box>
     </ThemeProvider>
   );
