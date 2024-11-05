@@ -1,32 +1,46 @@
-import axios from 'axios'
+// ApiEndpoint.js
+import axios from 'axios';
 
 const instance = axios.create({
-    baseURL:'http://127.0.0.1:4000',
-    headers:{
-        'Content-Type': 'application/json'
-    },
-    withCredentials:true
-})
+  baseURL: 'http://127.0.0.1:4000',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  withCredentials: true
+});
 
+// Functions to handle different request types
 export const get = (url, params) => instance.get(url, { params });
 export const post = (url, data) => instance.post(url, data);
 export const put = (url, data) => instance.put(url, data);
 export const deleteUser = (url) => instance.delete(url);
 
+// New function for handling multipart form-data uploads
+export const postWithFiles = (url, data) => {
+  return instance.post(url, data, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  });
+};
 
-  instance.interceptors.request.use(function (config) {
-    // Do something before request is sent
+// Request and response interceptors (unchanged)
+instance.interceptors.request.use(
+  function (config) {
     return config;
-  }, function (error) {
-    // Do something with request error
+  },
+  function (error) {
     return Promise.reject(error);
-  });
+  }
+);
 
-// Add a response interceptor
-instance.interceptors.response.use(function (response) {
-        console.log('intercpert reponse',response)
+instance.interceptors.response.use(
+  function (response) {
+    console.log('Interceptor response:', response);
     return response;
-  }, function (error) {
-    console.log('intercpert reponse',error)
+  },
+  function (error) {
+    console.log('Interceptor response:', error);
     return Promise.reject(error);
-  });
+  }
+);
