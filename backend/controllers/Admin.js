@@ -1,5 +1,5 @@
 import UserModel from "../models/user.js"
-
+import { sendApprovalEmail, sendRejectionEmail, sendBlockNotification,sendUnblockNotification } from '../services/emailService.js';
 const Getuser=async(req,res)=>{
     try {
         const users=await UserModel.find()
@@ -43,20 +43,23 @@ const addUser=async(req,res)=>{
 }
 
 // blockUser
-const blockUser=async(req,res)=>{
+const blockUser = async (req, res) => {
     try {
-        const userId=req.params.id
-        const user=await UserModel.findByIdAndUpdate(userId,{userStatus:"block"})
+        const userId = req.params.id;
+        const user = await UserModel.findByIdAndUpdate(userId, { userStatus: "block" }, { new: true });
         if (!user) {
-          return  res.status(404).json({message:"user not found"})
+            return res.status(404).json({ message: "User not found" });
         }
-        res.status(200).json({message:"user block successfully",user})
-    } catch (error) {
-        res.status(500).json({message:"intenral server error"})
-        console.log(error)
-    }
-}
+        
+        // Send email notification
+        await sendBlockNotification(user.email, user.name);
 
+        res.status(200).json({ message: "User blocked successfully", user });
+    } catch (error) {
+        res.status(500).json({ message: "Internal server error" });
+        console.error(error);
+    }
+};
 // get user that are flagged as deleted
 
 const getDeletedUser=async()=>{
@@ -89,47 +92,55 @@ const getBlockUser=async()=>{
 }
 // unblock user
 
-const unblockUser=async(req,res)=>{
+const unblockUser = async (req, res) => {
     try {
-        const userId=req.params.id
-        const user=await UserModel.findByIdAndUpdate(userId,{userStatus:"active"})
+        const userId = req.params.id;
+        const user = await UserModel.findByIdAndUpdate(userId, { userStatus: "active" }, { new: true });
         if (!user) {
-          return  res.status(404).json({message:"user not found"})
+            return res.status(404).json({ message: "User not found" });
         }
-        res.status(200).json({message:"user unblock successfully",user})
-    } catch (error) {
-        res.status(500).json({message:"intenral server error"})
-        console.log(error)
-    }
-}
+        
+        // Send email notification
+        await sendUnblockNotification(user.email, user.name);
 
+        res.status(200).json({ message: "User unblocked successfully", user });
+    } catch (error) {
+        res.status(500).json({ message: "Internal server error" });
+        console.error(error);
+    }
+};
 // pending to either active or block
-const approveUser=async(req,res)=>{
+const approveUser = async (req, res) => {
     try {
-        const userId=req.params.id
-        const user=await UserModel.findByIdAndUpdate(userId,{userStatus:"active"})
+        const userId = req.params.id;
+        const user = await UserModel.findByIdAndUpdate(userId, { userStatus: "active" });
         if (!user) {
-          return  res.status(404).json({message:"user not found"})
+            return res.status(404).json({ message: "User not found" });
         }
-        res.status(200).json({message:"user approved successfully",user})
+
+        await sendApprovalEmail(user.email); // Send approval email
+        res.status(200).json({ message: "User approved successfully", user });
     } catch (error) {
-        res.status(500).json({message:"intenral server error"})
-        console.log(error)
+        res.status(500).json({ message: "Internal server error" });
+        console.error(error);
     }
-}
-const rejectUser=async(req,res)=>{
+};
+
+const rejectUser = async (req, res) => {
     try {
-        const userId=req.params.id
-        const user=await UserModel.findByIdAndUpdate(userId,{userStatus:"block"})
+        const userId = req.params.id;
+        const user = await UserModel.findByIdAndUpdate(userId, { userStatus: "block" });
         if (!user) {
-          return  res.status(404).json({message:"user not found"})
+            return res.status(404).json({ message: "User not found" });
         }
-        res.status(200).json({message:"user rejected successfully",user})
+
+        await sendRejectionEmail(user.email); // Send rejection email
+        res.status(200).json({ message: "User rejected successfully", user });
     } catch (error) {
-        res.status(500).json({message:"intenral server error"})
-        console.log(error)
+        res.status(500).json({ message: "Internal server error" });
+        console.error(error);
     }
-}
+};
 
 
 

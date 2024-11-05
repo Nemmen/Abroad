@@ -19,7 +19,7 @@ AdminRoutes.get('/getuser', isAdmin, Getuser);
 AdminRoutes.put('/delete/:id', isAdmin, deletUser);
 AdminRoutes.get('/getdeleteduser', isAdmin, getDeletedUser);
 AdminRoutes.post('/adduser', isAdmin, addUser);
-AdminRoutes.put('/block/:id', isAdmin, blockUser);
+AdminRoutes.put('/block/:id', blockUser);
 AdminRoutes.get('/getblockuser', isAdmin, getBlockUser);
 AdminRoutes.put('/unblock/:id', isAdmin, unblockUser);
 AdminRoutes.put('/approve/:id', isAdmin, approveUser);
