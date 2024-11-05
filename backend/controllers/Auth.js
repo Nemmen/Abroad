@@ -1,32 +1,36 @@
 import UserModel from '../models/user.js';
 import jwt from 'jsonwebtoken';
 import bcryptjs from 'bcryptjs';
-const register = async (req, res) => {
+import { sendRegistrationEmail } from '../services/emailService.js';
+
+export const register = async (req, res) => {
   try {
-    const { name, email, password, organization,phoneNumber, state, city } = req.body;
+    const { name, email, password, organization, phoneNumber, state, city } = req.body;
 
     const existUser = await UserModel.findOne({ email });
     if (existUser) {
-      return res
-        .status(401)
-        .json({ success: false, message: 'User already Exist' });
+      return res.status(401).json({ success: false, message: 'User already exists' });
     }
-    const hasepassword = await bcryptjs.hashSync(password, 10);
+
+    const hashedPassword = bcryptjs.hashSync(password, 10);
     const newUser = new UserModel({
       name,
       email,
-      password: hasepassword,
+      password: hashedPassword,
       organization,
-      phoneNumber,  
-      state,        
-      city 
+      phoneNumber,
+      state,
+      city
     });
 
     await newUser.save();
 
-    res.status(200).json({ message: 'user register successfully', newUser });
+    // Send registration email
+    await sendRegistrationEmail(email);
+
+    res.status(200).json({ message: 'User registered successfully', newUser });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'interanl server ereo' });
+    res.status(500).json({ success: false, message: 'Internal server error' });
     console.log(error);
   }
 };
@@ -141,4 +145,4 @@ const CheckUser = async (req, res) => {
   }
 };
 
-export { register, Login, Logout, CheckUser };
+export { Login, Logout, CheckUser };
