@@ -43,7 +43,23 @@ const userSchema = new mongoose.Schema({
     city: {  // Added field for city
         type: String,
         required: true
-    }
+    },
+    abroadReason: {
+        type: String,
+        required: true 
+    },
+    document1: {  // Change type to Mixed
+        type: String,
+        required: true
+    },
+    document2: {  // Change type to Mixed
+        type: String,
+        required: true 
+    },
+    businessDivision: {
+        type: String, 
+        required: true 
+    },
 }, { timestamps: true });
 
 const UserModel = mongoose.model('users', userSchema);

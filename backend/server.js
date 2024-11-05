@@ -23,7 +23,7 @@ app.use('/auth',AuthRoutes)
 app.use('/admin',AdminRoutes)
 
 app.get('/',(req,res)=>{
-    res.send('test')
+    res.send('Server is running')
 })
 
 app.listen(PORT,()=>{
