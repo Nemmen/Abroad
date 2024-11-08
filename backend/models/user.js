@@ -12,8 +12,8 @@ const userSchema = new mongoose.Schema({
     },
     userStatus: {
         type: String,
-        enum: ['active', 'block'],
-        default: 'active'
+        enum: ['active','pending', 'block'],
+        default: 'pending'
     },
     organization: {
         type: String,
