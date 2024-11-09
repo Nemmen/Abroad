@@ -5,17 +5,11 @@ import { Link } from 'react-router-dom';
 
 const NotificationBar = () => {
   const [notifications, setNotifications] = useState([]);
-  const [currentUserId, setCurrentUserId] = useState(null);
   const [selectedNotification, setSelectedNotification] = useState(null);
 
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const userResponse = await axios.get(
-          'http://localhost:4000/admin/getcurrentuser',
-          { withCredentials: true },
-        );
-        setCurrentUserId(userResponse.data.user);
 
         const usersResponse = await axios.get(
           'http://localhost:4000/admin/getuser',

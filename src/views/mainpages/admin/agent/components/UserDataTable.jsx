@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Box,
   Flex,
@@ -10,6 +10,8 @@ import {
   Thead,
   Tr,
   useColorModeValue,
+  Button,
+  Spinner,
 } from '@chakra-ui/react';
 import {
   createColumnHelper,
@@ -18,16 +20,23 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table';
+import axios from 'axios';
 
 const columnHelper = createColumnHelper();
 
 export default function UserDataTable(props) {
   const { tableData, onRowClick } = props; // Props passed to component
   const [sorting, setSorting] = React.useState([]);
+  const [data, setData] = React.useState([]);
+  const [loadingButtonId, setLoadingButtonId] = React.useState(null); // Add this state
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const textColorSecondary = useColorModeValue('secondaryGray.600', 'white');
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
-  let defaultData = tableData;
+
+  useEffect(() => {
+    // Update the data state when tableData prop changes
+    setData([...tableData]);
+  }, [tableData]);
 
   const columns = [
     columnHelper.accessor('name', {
@@ -56,11 +65,11 @@ export default function UserDataTable(props) {
         </Text>
       ),
     }),
-    columnHelper.accessor('city', {
-      id: 'city',
+    columnHelper.accessor('userStatus', {
+      id: 'userStatus',
       header: () => (
         <Text fontSize={{ sm: '10px', lg: '12px' }} color="gray.400">
-          CITY
+          STATUS
         </Text>
       ),
       cell: (info) => (
@@ -69,11 +78,11 @@ export default function UserDataTable(props) {
         </Text>
       ),
     }),
-    columnHelper.accessor('serviceRegisteredOn', {
-      id: 'serviceRegisteredOn',
+    columnHelper.accessor('organization', {
+      id: 'organization',
       header: () => (
         <Text fontSize={{ sm: '10px', lg: '12px' }} color="gray.400">
-          SERVICE REGISTERED ON
+          ORGANIZATION
         </Text>
       ),
       cell: (info) => (
@@ -81,10 +90,94 @@ export default function UserDataTable(props) {
           {info.getValue()}
         </Text>
       ),
+    }),
+    columnHelper.accessor('phoneNumber', {
+      id: 'phoneNumber',
+      header: () => (
+        <Text fontSize={{ sm: '10px', lg: '12px' }} color="gray.400">
+          PHONE NUMBER
+        </Text>
+      ),
+      cell: (info) => (
+        <Text color={textColorSecondary} fontSize="sm" fontWeight="500">
+          {info.getValue()}
+        </Text>
+      ),
+    }),
+    columnHelper.accessor('state', {
+      id: 'state',
+      header: () => (
+        <Text fontSize={{ sm: '10px', lg: '12px' }} color="gray.400">
+          STATE
+        </Text>
+      ),
+      cell: (info) => (
+        <Text color={textColorSecondary} fontSize="sm" fontWeight="500">
+          {info.getValue()}
+        </Text>
+      ),
+    }),
+    columnHelper.accessor('createdAt', {
+      id: 'createdAt',
+      header: () => (
+        <Text fontSize={{ sm: '10px', lg: '12px' }} color="gray.400">
+          CREATED ON
+        </Text>
+      ),
+      cell: (info) => (
+        <Text color={textColorSecondary} fontSize="sm" fontWeight="500">
+          {new Date(info.getValue()).toLocaleDateString()}
+        </Text>
+      ),
+    }),
+    columnHelper.display({
+      id: 'actions',
+      header: () => (
+        <Text fontSize={{ sm: '10px', lg: '12px' }} color="gray.400">
+          ACTIONS
+        </Text>
+      ),
+      cell: (info) => {
+        const userStatus = info.row.original.userStatus;
+        const userId = info.row.original._id; // Get userId here
+        return (
+          <Box>
+            {userStatus === 'active' && (
+              <Button
+                size="sm"
+                colorScheme="red"
+                onClick={() => handleStatusChange(userId, 'active')}
+                disabled={loadingButtonId === userId}
+              >
+                {loadingButtonId === userId ? (
+                  <Spinner color="white" />
+                ) : (
+                  'Block'
+                )}{' '}
+                {/* White Spinner */}
+              </Button>
+            )}
+            {userStatus === 'block' && (
+              <Button
+                size="sm"
+                colorScheme="blue"
+                onClick={() => handleStatusChange(userId, 'block')}
+                disabled={loadingButtonId === userId}
+              >
+                {loadingButtonId === userId ? (
+                  <Spinner color="white" />
+                ) : (
+                  'Unblock'
+                )}{' '}
+                {/* White Spinner */}
+              </Button>
+            )}
+          </Box>
+        );
+      },
     }),
   ];
 
-  const [data, setData] = React.useState(() => [...defaultData]);
   const table = useReactTable({
     data,
     columns,
@@ -94,15 +187,47 @@ export default function UserDataTable(props) {
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    debugTable: true,
   });
 
   const handleRowClick = (row) => {
     if (onRowClick) onRowClick(row.original); // Call onRowClick prop
   };
 
+  const handleStatusChange = async (userId, currentStatus) => {
+    setLoadingButtonId(userId); // Set the loading state
+    try {
+      let url = '';
+      let newStatus = currentStatus === 'active' ? 'block' : 'active';
+
+      // Define the correct API endpoint based on the action
+      if (currentStatus === 'active') {
+        url = `http://localhost:4000/admin/block/${userId}`;
+      } else if (currentStatus === 'block') {
+        url = `http://localhost:4000/admin/unblock/${userId}`;
+      }
+
+      await axios.put(url, {}, { withCredentials: true });
+
+      // Update the data state with a new array reference
+      const updatedData = data.map((item) =>
+        item._id === userId ? { ...item, userStatus: newStatus } : item,
+      );
+
+      // Set new array in state (this triggers re-render)
+      setData([...updatedData]);
+    } catch (error) {
+      console.error('Error updating user status:', error);
+    } finally {
+      setLoadingButtonId(null); // Clear the loading state
+    }
+  };
+
   return (
-    <Flex direction="column" w="100%" overflowX={{ sm: 'scroll', lg: 'hidden' }}>
+    <Flex
+      direction="column"
+      w="100%"
+      overflowX={{ sm: 'scroll', lg: 'hidden' }}
+    >
       <Flex
         align={{ sm: 'flex-start', lg: 'center' }}
         justify="space-between"
@@ -130,9 +255,18 @@ export default function UserDataTable(props) {
                     cursor="pointer"
                     onClick={header.column.getToggleSortingHandler()}
                   >
-                    <Flex justifyContent="space-between" align="center" fontSize={{ sm: '10px', lg: '12px' }} color="gray.400">
-                      {flexRender(header.column.columnDef.header, header.getContext())}
-                      {{ asc: '', desc: '' }[header.column.getIsSorted()] ?? null}
+                    <Flex
+                      justifyContent="space-between"
+                      align="center"
+                      fontSize={{ sm: '10px', lg: '12px' }}
+                      color="gray.400"
+                    >
+                      {flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
+                      {{ asc: '', desc: '' }[header.column.getIsSorted()] ??
+                        null}
                     </Flex>
                   </Th>
                 ))}
@@ -140,18 +274,17 @@ export default function UserDataTable(props) {
             ))}
           </Thead>
           <Tbody>
-            {table.getRowModel().rows.slice(0, 11).map((row) => (
+            {table.getRowModel().rows.map((row) => (
               <Tr
-                key={row.id}
-                onClick={() => handleRowClick(row)} // Call handleRowClick on row click
-                _hover={{ bg: 'gray.100', cursor: 'pointer' }}
+                key={row.original._id}
+                onClick={() => handleRowClick(row)}
+                cursor="pointer"
               >
                 {row.getVisibleCells().map((cell) => (
                   <Td
                     key={cell.id}
                     fontSize={{ sm: '14px' }}
-                    minW={{ sm: '150px', md: '200px', lg: 'auto' }}
-                    borderColor="transparent"
+                    borderColor={borderColor}
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </Td>

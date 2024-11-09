@@ -1,37 +1,36 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 // Chakra imports
 import { Box, Flex, Grid } from '@chakra-ui/react';
 
 // Custom components
-import PieCard from 'views/admin/default/components/PieCard';
+import PieCard from 'views/mainpages/admin/agent/components/PieCard';
 
 import Card from 'components/card/Card.js';
-import TableTopCreators from 'views/admin/marketplace/components/TableTopCreators';
-import tableDataTopCreators from '../variable/tableDataTopCreators.json';
-import { tableColumnsTopCreators } from 'views/mainpages/admin/variable/tableColumnsTopCreators';
+import TableTopCreators from 'views/mainpages/admin/agent/components/TopUserTable';
 import UserDataTable from './components/UserDataTable';
+import axios from 'axios';
 
-const users = [
-  {
-    name: 'John Doe',
-    email: 'john@example.com',
-    city: 'New York',
-    serviceRegisteredOn: '2024-01-01',
-  },
-  {
-    name: 'Jane Smith',
-    email: 'jane@example.com',
-    city: 'Los Angeles',
-    serviceRegisteredOn: '2024-02-15',
-  },
-  {
-    name: 'Alice Johnson',
-    email: 'alice@example.com',
-    city: 'Chicago',
-    serviceRegisteredOn: '2024-03-20',
-  },
-];
+// const users = [
+//   {
+//     name: 'John Doe',
+//     email: 'john@example.com',
+//     city: 'New York',
+//     serviceRegisteredOn: '2024-01-01',
+//   },
+//   {
+//     name: 'Jane Smith',
+//     email: 'jane@example.com',
+//     city: 'Los Angeles',
+//     serviceRegisteredOn: '2024-02-15',
+//   },
+//   {
+//     name: 'Alice Johnson',
+//     email: 'alice@example.com',
+//     city: 'Chicago',
+//     serviceRegisteredOn: '2024-03-20',
+//   },
+// ];
 
 function handleUserRowClick(userData) {
   console.log('Clicked user:', userData);
@@ -40,6 +39,23 @@ function handleUserRowClick(userData) {
 
 export default function Agent() {
   // Chakra Color Mode
+  const [users, setUsers] = React.useState([]);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const usersResponse = await axios.get(
+          'http://localhost:4000/admin/getuser',
+          { withCredentials: true },
+        );
+        setUsers(usersResponse.data.users);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      }
+    };
+    fetchUsers();
+  }, []);
+
 
   return (
     <Box pt={{ base: '180px', md: '80px', xl: '80px' }}>
@@ -55,10 +71,7 @@ export default function Agent() {
           gridArea={{ xl: '1 / 1 / 2 / 2', '2xl': '1 / 1 / 2 / 9' }}
         >
           <Card px="0px" mb="20px">
-            <TableTopCreators
-              tableData={tableDataTopCreators}
-              columnsData={tableColumnsTopCreators}
-            />
+            <TableTopCreators />
           </Card>
         </Flex>
         <Flex
