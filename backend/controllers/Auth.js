@@ -4,8 +4,47 @@ import bcryptjs from 'bcryptjs';
 import { sendRegistrationEmail } from '../services/emailService.js';
 
 export const register = async (req, res) => {
+import dotenv from 'dotenv';
+dotenv.config()
+
+const register = async (req, res) => {
   try {
     const { name, email, password, organization, phoneNumber, state, city } = req.body;
+    const {
+      name,
+      email,
+      password,
+      organization,
+      phoneNumber,
+      state,
+      city,
+      abroadReason,
+      businessDivision,
+      document1,
+      document2
+    } = req.body;
+
+    // Validate request body
+    if (
+      !name ||
+      !email ||
+      !password ||
+      !organization ||
+      !phoneNumber ||
+      !state ||
+      !city ||
+      !document1||
+      !document2
+    ) {
+      return res.status(400).json({ success: false, message: 'All fields, including both documents, are required.' });
+    }
+
+    // Validate file types (should be PDFs)
+
+
+    // if (document1.mimetype !== 'application/pdf' || document2.mimetype !== 'application/pdf') {
+    //   return res.status(400).json({ success: false, message: 'Both documents must be in PDF format.' });
+    // }
 
     const existUser = await UserModel.findOne({ email });
     if (existUser) {
@@ -17,10 +56,18 @@ export const register = async (req, res) => {
       name,
       email,
       password: hashedPassword,
+      password: hashedPassword,
       organization,
       phoneNumber,
       state,
       city
+      phoneNumber,
+      state,
+      city,
+      abroadReason,
+      document1, 
+      document2,
+      businessDivision,
     });
 
     await newUser.save();
@@ -29,21 +76,23 @@ export const register = async (req, res) => {
     await sendRegistrationEmail(email);
 
     res.status(200).json({ message: 'User registered successfully', newUser });
+    res.status(201).json({ success: true, message: 'User registered successfully', newUser });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Internal server error' });
     console.log(error);
+    console.error('Registration Error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
 
 // login if the user status is active then login, if pending then show the message that your account is pending, if block then show the message that your account is blocked
-const Login = async (req, res) => {
+const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
     const user = await UserModel.findOne({
       email,
     });
-
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -68,13 +117,18 @@ const Login = async (req, res) => {
         success: false,
         message: 'Invalid credentials',
       });
+
+    const isPasswordValid = await bcryptjs.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ success: false, message: 'Invalid credentials' });
     }
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRETE);
+
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
     res.cookie('token', token, {
       httpOnly: true,
-      secure: false,
-      maxAge: 3600000,
+      secure: process.env.NODE_ENV === 'production', // Secure cookies in production
+      maxAge: 3600000, // 1 hour
     });
     res.status(200).json({
       success: true,
@@ -82,9 +136,11 @@ const Login = async (req, res) => {
       user,
       token,
     });
+
+    res.status(200).json({ success: true, message: 'Login successfully', user: { ...user._doc, password: undefined }, token }); // Hide password
   } catch (error) {
-    res.status(500).json({ success: false, message: 'interanl server ereo' });
-    console.log(error);
+    console.error('Login Error:', error); // Log the error
+    res.status(500).json({ success: false, message: 'Internal server error', error: error.message }); // Include error message in response
   }
 };
 
@@ -124,25 +180,30 @@ const Login = async (req, res) => {
 //   }
 // };
 const Logout = async (req, res) => {
+
+
+const logout = async (req, res) => {
   try {
     res.clearCookie('token');
-    res.status(200).json({ message: 'user Logout successfully' });
+    res.status(200).json({ success: true, message: 'User logged out successfully' });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'interanl server ereo' });
-    console.log(error);
+    console.error('Logout Error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
-const CheckUser = async (req, res) => {
+
+const checkUser = async (req, res) => {
   try {
-    const user = req.user;
+    const user = req.user; // Assuming middleware populates req.user
     if (!user) {
-      res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ success: false, message: 'User not found' });
     }
-    res.status(200).json(user);
+    res.status(200).json({ success: true, user: { ...user._doc, password: undefined } }); // Hide password
   } catch (error) {
-    res.status(500).json({ message: 'internal server error' });
-    console.log(error);
+    console.error('Check User Error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
 
 export { Login, Logout, CheckUser };
+export { register, login, logout, checkUser };
