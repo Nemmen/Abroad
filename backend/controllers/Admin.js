@@ -149,9 +149,11 @@ const unblockUser = async (req, res) => {
 // pending to either active or block
 const approveUser = async (req, res) => {
   try {
+    const {approvedBy}=req.body
     const userId = req.params.id;
     const user = await UserModel.findByIdAndUpdate(userId, {
       userStatus: 'active',
+      approvedBy
     });
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
