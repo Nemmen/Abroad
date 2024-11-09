@@ -1,6 +1,6 @@
 import express from 'express';
 import multer from 'multer';
-import { checkUser, login, logout, register } from '../controllers/Auth.js';
+import { checkUser, login, logout, register,getAccountRecords,addAccountRecord } from '../controllers/Auth.js';
 import { IsUser } from '../middleware/verifyToken.js';
 
 const AuthRoutes = express.Router();
@@ -42,5 +42,9 @@ AuthRoutes.post('/register', upload.fields([{ name: 'document1' }, { name: 'docu
 AuthRoutes.post('/login', login);
 AuthRoutes.post('/logout', logout);
 AuthRoutes.get('/checkUser', IsUser, checkUser);
+AuthRoutes.get('/getAllAccount', getAccountRecords);
+AuthRoutes.post('/addAccount', addAccountRecord);
+
+
 
 export default AuthRoutes;

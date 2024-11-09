@@ -1,4 +1,5 @@
 import UserModel from '../models/user.js';
+import accountRecordModel from '../models/accountRec.js';
 import jwt from 'jsonwebtoken';
 import bcryptjs from 'bcryptjs';
 import dotenv from 'dotenv';
@@ -22,31 +23,24 @@ const register = async (req, res) => {
       document2
     } = req.body;
 
-    // Validate request body
+    // Validate required fields
     if (
-      !name ||
-      !email ||
-      !password ||
-      !organization ||
-      !phoneNumber ||
-      !state ||
-      !city ||
-      !document1||
-      !document2
+      !name || !email || !password || !organization ||
+      !phoneNumber || !state || !city || !document1 || !document2
     ) {
-      return res.status(400).json({ success: false, message: 'All fields, including both documents, are required.' });
+      return res.status(400).json({
+        success: false,
+        message: 'All fields, including both documents, are required.'
+      });
     }
 
-    // Validate file types (should be PDFs)
-
-
-    // if (document1.mimetype !== 'application/pdf' || document2.mimetype !== 'application/pdf') {
-    //   return res.status(400).json({ success: false, message: 'Both documents must be in PDF format.' });
-    // }
-
+    // Validate if user already exists
     const existUser = await UserModel.findOne({ email });
     if (existUser) {
-      return res.status(409).json({ success: false, message: 'User already exists' });
+      return res.status(401).json({
+        success: false,
+        message: 'User already exists'
+      });
     }
 
     const hashedPassword = await bcryptjs.hash(password, 10);
@@ -91,13 +85,13 @@ const login = async (req, res) => {
       });
     }
     if (user.userStatus === 'pending') {
-      return res.status(404).json({
+      return res.status(401).json({
         success: false,
         message: 'Wait for admin approval',
       });
     }
     if (user.userStatus === 'block') {
-      return res.status(404).json({
+      return res.status(401).json({
         success: false,
         message: 'Your account is blocked',
       });
@@ -116,7 +110,7 @@ const login = async (req, res) => {
 
     res.cookie('token', token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // Secure cookies in production
+      secure: process.env.NODE_ENV === 'production',
       maxAge: 3600000, // 1 hour
     });
     res.status(200).json({ success: true, message: 'Login successfully', user: { ...user._doc, password: undefined }, token }); // Hide password
@@ -133,20 +127,32 @@ const logout = async (req, res) => {
     res.status(200).json({ success: true, message: 'User logged out successfully' });
   } catch (error) {
     console.error('Logout Error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
   }
 };
 
-const checkUser = async (req, res) => {
+export const checkUser = async (req, res) => {
   try {
     const user = req.user; // Assuming middleware populates req.user
     if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
     }
-    res.status(200).json({ success: true, user: { ...user._doc, password: undefined } }); // Hide password
+    return res.status(200).json({
+      success: true,
+      user: { ...user._doc, password: undefined }
+    });
   } catch (error) {
     console.error('Check User Error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
   }
 };
 
@@ -168,6 +174,93 @@ const getCurrentUser = async (req, res) => {
 
 
 
+// account controllers
 
-export { register, login, logout, checkUser , getCurrentUser};
+const addAccountRecord = async (req, res) => {
+  try {
+    
+    const {
+      vendor,
+      openingMonth,
+      date,
+      studentName,
+      contact,
+      email,
+      pwd,
+      passport,
+      accountNo,
+      payout,
+      poc,
+      paymentStatus,
+      fundingMonth
+    } = req.body;
+
+    // Validate that all required fields are provided
+    if (
+      !vendor ||
+      !openingMonth ||
+      !date ||
+      !studentName ||
+      !contact ||
+      !email ||
+      !pwd ||
+      !passport ||
+      !accountNo ||
+      !payout ||
+      !poc ||
+      !paymentStatus ||
+      !fundingMonth
+    ) {
+      return res.status(400).json({ message: 'All required fields must be provided' });
+    }
+
+    // Create a new student record
+    const newRecord = new accountRecordModel({
+      vendor,
+      openingMonth,
+      date,
+      studentName,
+      contact,
+      email,
+      pwd,
+      passport,
+      accountNo,
+      payout,
+      poc,
+      paymentStatus,
+      fundingMonth
+    });
+
+    // Save the new record to the database
+    await newRecord.save();
+
+    res.status(201).json({ message: 'Record added successfully', data: newRecord });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error adding record', error: error.message });
+  }
+};
+
+// get all account records
+const getAccountRecords = async (req, res) => {
+  try {
+    // get records for the current user
+    const records = await accountRecordModel.find({});
+
+    if (!records) {
+      return res.status(404).json({ message: 'No records found' });
+    }
+    res.status(200).json({ message: 'Records fetched successfully', data: records });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching records', error: error.message });
+  }
+};
+
+  
+
+
+
+
+export { register, login, logout , getCurrentUser,addAccountRecord, getAccountRecords};
 

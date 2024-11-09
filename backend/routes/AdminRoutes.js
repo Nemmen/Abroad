@@ -21,7 +21,7 @@ const AdminRoutes = express.Router();
 AdminRoutes.get('/getuser', isAdmin, Getuser);
 AdminRoutes.get('/getcurrentuser', isAdmin, getCurrentUser);
 AdminRoutes.put('/delete/:id', isAdmin, deletUser);
-AdminRoutes.get('/getdeleteduser', isAdmin, getDeletedUser);
+AdminRoutes.get('/getdeleteduser',isAdmin, getDeletedUser);
 AdminRoutes.post('/adduser', isAdmin, addUser);
 AdminRoutes.put('/block/:id', blockUser);
 AdminRoutes.get('/getblockuser', isAdmin, getBlockUser);

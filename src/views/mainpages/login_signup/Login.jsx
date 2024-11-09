@@ -34,6 +34,7 @@ export default function Login() {
         } else if (response.user.role === 'user') {
           navigate('/agent');
         }
+        
 
         // Show success toast
         toast({
@@ -47,15 +48,29 @@ export default function Login() {
             width: "400px", 
           },
         });
+        if(response.status===401){
+          toast({
+            title: "Login Failed",
+            description: response.user.message,
+            status: "error",
+            duration: 1000,
+            isClosable: true,
+            position: "bottom-right",
+            containerStyle: {
+              width: "400px", 
+            },
+          });
+        }
 
         dispatch(SetUser(response.user));
       }
     } catch (error) {
       // Show error toast
+      
       toast({
         title: "Login Failed",
-        description: "Please check your credentials and try again.",
-        status: "error",
+        description: error.response.data.message,
+        status: error.response.data.message=="Invalid credentials" ? "error" : "warning",
         duration: 1000,
         isClosable: true,
         position: "bottom-right",

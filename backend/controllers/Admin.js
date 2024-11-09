@@ -1,4 +1,5 @@
 import UserModel from '../models/user.js';
+import RecordModel from '../models/record.js';
 import {
   sendApprovalEmail,
   sendRejectionEmail,
