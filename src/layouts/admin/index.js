@@ -1,6 +1,5 @@
 // Chakra imports
 import { Portal, Box, useDisclosure } from '@chakra-ui/react';
-import Footer from 'components/footer/FooterAdmin.js';
 // Layout components
 import Navbar from 'components/navbar/NavbarAdmin.js';
 import Sidebar from 'components/sidebar/Sidebar.js';
@@ -8,6 +7,7 @@ import { SidebarContext } from 'contexts/SidebarContext';
 import React, { useEffect, useState } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import routes from 'routes.js';
+import UserDetailPage from 'views/mainpages/admin/main/components/UserDetailPage';
 
 // Custom Chakra theme
 export default function Dashboard(props) {
@@ -27,9 +27,6 @@ export default function Dashboard(props) {
     setActiveNavbarText(getActiveNavbarText(routes));
   }, [location.pathname, routes]); // Re-run whenever the location or routes change
 
-  const getRoute = () => {
-    return window.location.pathname !== '/admin/full-screen-maps';
-  };
 
   const getActiveRoute = (routes) => {
     let activeRoute = 'Default Brand Text';
@@ -51,6 +48,9 @@ export default function Dashboard(props) {
           return routes[i].name;
         }
       }
+    }
+    if (activeRoute === 'Default Brand Text') {
+      return <Navigate to="/admin/default" replace />;
     }
     return activeRoute;
   };
@@ -119,7 +119,7 @@ export default function Dashboard(props) {
   };
 
   const { onOpen } = useDisclosure();
-  document.documentElement.dir = 'ltr';
+
 
   return (
     <Box>
@@ -159,25 +159,26 @@ export default function Dashboard(props) {
               </Box>
             </Portal>
 
-            {getRoute() ? (
-              <Box
-                mx="auto"
-                p={{ base: '20px', md: '30px' }}
-                pe="20px"
-                minH="100vh"
-                pt="50px"
-              >
-                <Routes>
-                  {getRoutes(routes)}
-                  <Route
-                    path="/"
-                    element={<Navigate to="/admin/default" replace />}
-                  />
-                </Routes>
-              </Box>
-            ) : null}
-            <Box>
+            <Box
+              mx="auto"
+              p={{ base: '20px', md: '30px' }}
+              pe="20px"
+              minH="100vh"
+              pt="50px"
+            >
+              <Routes>
+                {getRoutes(routes)}
+                <Route
+                  path="/"
+                  element={<Navigate to="/admin/default" replace />}
+                />
+                <Route
+                  path="/agent/userdetail/:id"
+                  element={<UserDetailPage />}
+                />
+              </Routes>
             </Box>
+            <Box></Box>
           </Box>
         </SidebarContext.Provider>
       </Box>

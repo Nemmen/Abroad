@@ -1,5 +1,7 @@
 import  jwt from 'jsonwebtoken'
 import UserModel from '../models/user.js'
+import dotenv from 'dotenv'
+dotenv.config()
 
 
 const isAdmin=async(req,res,next)=>{
@@ -9,7 +11,7 @@ const isAdmin=async(req,res,next)=>{
             return res.status(401).json({messsage:"'Unauthorized: No token provided'"})
          }
 
-         const decoded= jwt.verify(token,process.env.JWT_SECRETE)
+         const decoded= jwt.verify(token,process.env.JWT_SECRET)
          const user=await UserModel.findById(decoded.userId)
          if (!user) {
             return res.status(401).json({messsage:"'user not found'"})
