@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import { sendRegistrationEmail } from '../services/emailService.js';
 dotenv.config()
 
+
 const register = async (req, res) => {
   try {
     const {
@@ -76,7 +77,7 @@ const register = async (req, res) => {
 
 
 // login if the user status is active then login, if pending then show the message that your account is pending, if block then show the message that your account is blocked
-const Login = async (req, res) => {
+const login = async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await UserModel.findOne({
@@ -110,6 +111,8 @@ const Login = async (req, res) => {
     }
 
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+
 
     res.cookie('token', token, {
       httpOnly: true,
@@ -147,5 +150,24 @@ const checkUser = async (req, res) => {
   }
 };
 
-export { register, Login, logout, checkUser };
+
+// get current user
+const getCurrentUser = async (req, res) => {
+  try {
+    const user = req.user; // Assuming middleware populates req.user
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    res.status(200).json({ success: true, user: { ...user._doc, password: undefined } }); // Hide password
+  } catch (error) {
+    console.error('Get Current User Error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
+
+
+
+export { register, login, logout, checkUser , getCurrentUser};
 
