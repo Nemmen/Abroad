@@ -8,9 +8,9 @@ import Banner from 'views/admin/marketplace/components/Banner';
 
 
 import Card from 'components/card/Card.js';
-import TableTopCreators from 'views/admin/marketplace/components/TableTopCreators';
-import tableDataTopCreators from '../variable/tableDataTopCreators.json';
-import { tableColumnsTopCreators } from 'views/mainpages/admin/variable/tableColumnsTopCreators';
+
+import NotificationBar from './components/NotificationBar';
+import UserDetailPage from './components/UserDetailPage';
 
 export default function MainDashboard() {
   // Chakra Color Mode
@@ -36,14 +36,12 @@ export default function MainDashboard() {
           gridArea={{ xl: '1 / 3 / 2 / 4', '2xl': '1 / 2 / 2 / 3' }}
         >
           <Card px="0px" mb="20px">
-            <TableTopCreators
-              tableData={tableDataTopCreators}
-              columnsData={tableColumnsTopCreators}
-            />
+           <NotificationBar />
           </Card>
         </Flex>
       </Grid>
       {/* Delete Product */}
+      {/* <UserDetailPage /> */}
     </Box>
   );
 }

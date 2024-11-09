@@ -12,8 +12,8 @@ const userSchema = new mongoose.Schema({
     },
     userStatus: {
         type: String,
-        enum: ['active', 'block'],
-        default: 'active'
+        enum: ['active','pending', 'block'],
+        default: 'pending'
     },
     organization: {
         type: String,
@@ -60,6 +60,14 @@ const userSchema = new mongoose.Schema({
         type: String, 
         required: true 
     },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    approvedBy:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'users'
+    }
 }, { timestamps: true });
 
 const UserModel = mongoose.model('users', userSchema);
