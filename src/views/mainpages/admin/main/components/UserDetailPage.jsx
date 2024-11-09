@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   Box,
   Button,
@@ -9,8 +9,14 @@ import {
   Badge,
   SimpleGrid,
   Spinner,
+  useToast,
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogContent,
+  AlertDialogOverlay,
 } from '@chakra-ui/react';
-import { useToast } from '@chakra-ui/react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
@@ -20,7 +26,11 @@ const UserDetailPage = () => {
   const [user, setUser] = useState(null);
   const [loadingApprove, setLoadingApprove] = useState(false);
   const [loadingBlock, setLoadingBlock] = useState(false);
+  const [isApproveDialogOpen, setIsApproveDialogOpen] = useState(false);
+  const [isBlockDialogOpen, setIsBlockDialogOpen] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState(null);
   const toast = useToast();
+  const cancelRef = useRef();
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -29,7 +39,13 @@ const UserDetailPage = () => {
           `http://localhost:4000/admin/getuser/${id}`,
           { withCredentials: true },
         );
+
         setUser(userResponse.data.user);
+        const userResponse1 = await axios.get(
+          'http://localhost:4000/admin/getcurrentuser',
+          { withCredentials: true },
+        );
+        setCurrentUserId(userResponse1.data.user);
       } catch (error) {
         console.error('Error fetching user:', error);
       }
@@ -44,11 +60,12 @@ const UserDetailPage = () => {
 
   const handleApprove = async () => {
     setLoadingApprove(true);
+    setIsApproveDialogOpen(false);
     try {
       const data = await axios.put(
         `http://localhost:4000/admin/approve/${id}`,
-        {},
-        { withCredentials: true }
+        {approvedBy: currentUserId},
+        { withCredentials: true },
       );
       if (data.status === 200) {
         toast({
@@ -71,11 +88,12 @@ const UserDetailPage = () => {
 
   const handleBlock = async () => {
     setLoadingBlock(true);
+    setIsBlockDialogOpen(false);
     try {
       const data = await axios.put(
         `http://localhost:4000/admin/block/${id}`,
         {},
-        { withCredentials: true }
+        { withCredentials: true },
       );
       toast({
         title: 'User Blocked',
@@ -86,7 +104,7 @@ const UserDetailPage = () => {
         position: 'bottom-right',
         containerStyle: { width: '400px' },
       });
-      navigate('/admin/agent', { replace: true } );
+      navigate('/admin/agent', { replace: true });
     } catch (error) {
       console.error('Error blocking user:', error);
     } finally {
@@ -114,34 +132,58 @@ const UserDetailPage = () => {
           <Text fontSize="2xl" fontWeight="bold">
             {user.name}
           </Text>
-          <Badge colorScheme={user.userStatus === 'pending' ? 'yellow' : 'green'}>
+          <Badge
+            colorScheme={user.userStatus === 'pending' ? 'yellow' : 'green'}
+          >
             {user.userStatus}
           </Badge>
         </HStack>
 
         <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={4}>
-          <Text fontSize="lg"><strong>Email:</strong> {user.email}</Text>
-          <Text fontSize="lg"><strong>Role:</strong> {user.role}</Text>
-          <Text fontSize="lg"><strong>Organization:</strong> {user.organization}</Text>
-          <Text fontSize="lg"><strong>Phone:</strong> {user.phoneNumber}</Text>
-          <Text fontSize="lg"><strong>Location:</strong> {user.state}, {user.city}</Text>
+          <Text fontSize="lg">
+            <strong>Email:</strong> {user.email}
+          </Text>
+          <Text fontSize="lg">
+            <strong>Role:</strong> {user.role}
+          </Text>
+          <Text fontSize="lg">
+            <strong>Organization:</strong> {user.organization}
+          </Text>
+          <Text fontSize="lg">
+            <strong>Phone:</strong> {user.phoneNumber}
+          </Text>
+          <Text fontSize="lg">
+            <strong>Location:</strong> {user.state}, {user.city}
+          </Text>
         </SimpleGrid>
 
         <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={4}>
-          <Text fontSize="lg"><strong>Abroad Reason:</strong> {user.abroadReason}</Text>
-          <Text fontSize="lg"><strong>Business Division:</strong> {user.businessDivision}</Text>
+          <Text fontSize="lg">
+            <strong>Abroad Reason:</strong> {user.abroadReason}
+          </Text>
+          <Text fontSize="lg">
+            <strong>Business Division:</strong> {user.businessDivision}
+          </Text>
         </SimpleGrid>
 
         <SimpleGrid columns={{ base: 1, sm: 2 }} spacing={4}>
           <Text fontSize="lg">
             <strong>Document 1:</strong>{' '}
-            <a href={`/documents/${user.document1}`} target="_blank" rel="noopener noreferrer">
+            <a
+              href={`/documents/${user.document1}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               View
             </a>
           </Text>
           <Text fontSize="lg">
             <strong>Document 2:</strong>{' '}
-            <a href={`/documents/${user.document2}`} target="_blank" rel="noopener noreferrer">
+            <a
+              href={`/documents/${user.document2}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               View
             </a>
           </Text>
@@ -152,7 +194,7 @@ const UserDetailPage = () => {
             colorScheme="green"
             size="lg"
             flex="1"
-            onClick={handleApprove}
+            onClick={() => setIsApproveDialogOpen(true)}
             isLoading={loadingApprove}
             spinner={<Spinner />}
           >
@@ -162,7 +204,7 @@ const UserDetailPage = () => {
             colorScheme="red"
             size="lg"
             flex="1"
-            onClick={handleBlock}
+            onClick={() => setIsBlockDialogOpen(true)}
             isLoading={loadingBlock}
             spinner={<Spinner />}
           >
@@ -170,6 +212,64 @@ const UserDetailPage = () => {
           </Button>
         </HStack>
       </VStack>
+
+      {/* Approve Confirmation Modal */}
+      <AlertDialog
+        isOpen={isApproveDialogOpen}
+        leastDestructiveRef={cancelRef}
+        onClose={() => setIsApproveDialogOpen(false)}
+      >
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader fontSize="lg" fontWeight="bold">
+              Approve User
+            </AlertDialogHeader>
+            <AlertDialogBody>
+              Are you sure you want to approve this user?
+            </AlertDialogBody>
+            <AlertDialogFooter>
+              <Button
+                ref={cancelRef}
+                onClick={() => setIsApproveDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button colorScheme="green" onClick={handleApprove} ml={3}>
+                Yes, Approve
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
+
+      {/* Block Confirmation Modal */}
+      <AlertDialog
+        isOpen={isBlockDialogOpen}
+        leastDestructiveRef={cancelRef}
+        onClose={() => setIsBlockDialogOpen(false)}
+      >
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader fontSize="lg" fontWeight="bold">
+              Block User
+            </AlertDialogHeader>
+            <AlertDialogBody>
+              Are you sure you want to block this user?
+            </AlertDialogBody>
+            <AlertDialogFooter>
+              <Button
+                ref={cancelRef}
+                onClick={() => setIsBlockDialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button colorScheme="red" onClick={handleBlock} ml={3}>
+                Yes, Block
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
     </Box>
   );
 };
