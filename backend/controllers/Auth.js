@@ -1,4 +1,5 @@
 import UserModel from '../models/user.js';
+import accountRecordModel from '../models/accountRec.js';
 import jwt from 'jsonwebtoken';
 import bcryptjs from 'bcryptjs';
 import dotenv from 'dotenv';
@@ -84,13 +85,13 @@ const login = async (req, res) => {
       });
     }
     if (user.userStatus === 'pending') {
-      return res.status(404).json({
+      return res.status(401).json({
         success: false,
         message: 'Wait for admin approval',
       });
     }
     if (user.userStatus === 'block') {
-      return res.status(404).json({
+      return res.status(401).json({
         success: false,
         message: 'Your account is blocked',
       });
@@ -173,6 +174,93 @@ const getCurrentUser = async (req, res) => {
 
 
 
+// account controllers
 
-export { register, login, logout, checkUser , getCurrentUser};
+const addAccountRecord = async (req, res) => {
+  try {
+    
+    const {
+      vendor,
+      openingMonth,
+      date,
+      studentName,
+      contact,
+      email,
+      pwd,
+      passport,
+      accountNo,
+      payout,
+      poc,
+      paymentStatus,
+      fundingMonth
+    } = req.body;
+
+    // Validate that all required fields are provided
+    if (
+      !vendor ||
+      !openingMonth ||
+      !date ||
+      !studentName ||
+      !contact ||
+      !email ||
+      !pwd ||
+      !passport ||
+      !accountNo ||
+      !payout ||
+      !poc ||
+      !paymentStatus ||
+      !fundingMonth
+    ) {
+      return res.status(400).json({ message: 'All required fields must be provided' });
+    }
+
+    // Create a new student record
+    const newRecord = new accountRecordModel({
+      vendor,
+      openingMonth,
+      date,
+      studentName,
+      contact,
+      email,
+      pwd,
+      passport,
+      accountNo,
+      payout,
+      poc,
+      paymentStatus,
+      fundingMonth
+    });
+
+    // Save the new record to the database
+    await newRecord.save();
+
+    res.status(201).json({ message: 'Record added successfully', data: newRecord });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error adding record', error: error.message });
+  }
+};
+
+// get all account records
+const getAccountRecords = async (req, res) => {
+  try {
+    // get records for the current user
+    const records = await accountRecordModel.find({});
+
+    if (!records) {
+      return res.status(404).json({ message: 'No records found' });
+    }
+    res.status(200).json({ message: 'Records fetched successfully', data: records });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching records', error: error.message });
+  }
+};
+
+  
+
+
+
+
+export { register, login, logout , getCurrentUser,addAccountRecord, getAccountRecords};
 
