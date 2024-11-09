@@ -19,6 +19,7 @@ import Login from 'views/mainpages/login_signup/Login';
 import Signup from 'views/mainpages/login_signup/Signup';
 import MainDashboard from 'views/mainpages/admin/main/MainDashboard';
 import AdminAgent from 'views/mainpages/admin/agent/Agent'
+import GicPage from 'views/mainpages/agent/GicPage';
 const routes = [
   {
     name: 'Main Dashboard',
@@ -52,7 +53,7 @@ export const routeAjent = [
     icon: (
       <Icon as={MdAttachMoney} width="20px" height="20px" color="inherit" />
     ),
-    component: '',
+    component: <GicPage/>,
     secondary: true,
   },
   {
