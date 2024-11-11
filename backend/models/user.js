@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
-import GICModel from "./gicModel";
-import BLOCKEDModel from "./blockedModel";
+
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -82,11 +81,11 @@ const userSchema = new mongoose.Schema({
     },
     gic: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: GICModel
+        ref: "GIC"
     },
     blockedAcc:{
         type: mongoose.Schema.Types.ObjectId,
-        ref: BLOCKEDModel
+        ref: "BLOCKED"
     }
 }, { timestamps: true });
 
