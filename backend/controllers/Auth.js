@@ -1,5 +1,5 @@
 import UserModel from '../models/user.js';
-import accountRecordModel from '../models/accountRec.js';
+import accountRecordModel from '../models/gicModel.js';
 import jwt from 'jsonwebtoken';
 import bcryptjs from 'bcryptjs';
 import dotenv from 'dotenv';

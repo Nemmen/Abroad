@@ -1,9 +1,13 @@
 import mongoose from "mongoose";
-
+import GICModel from "./gicModel";
+import BLOCKEDModel from "./blockedModel";
 const userSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true
+    },
+    agentCode:{
+        type: String,
     },
     email: {
         type: String,
@@ -67,6 +71,22 @@ const userSchema = new mongoose.Schema({
     approvedBy:{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'users'
+    },
+    blockedBy:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'users'
+    },
+    deletedBy:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'users'
+    },
+    gic: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: GICModel
+    },
+    blockedAcc:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: BLOCKEDModel
     }
 }, { timestamps: true });
 
