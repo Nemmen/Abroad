@@ -7,6 +7,10 @@ import { SidebarContext } from 'contexts/SidebarContext';
 import React, { useEffect, useState } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import routes from 'routes.js';
+import ForexForm from 'views/mainpages/admin/forex/ForexForm';
+import ForexView from 'views/mainpages/admin/forex/ForexView';
+import GicForm from 'views/mainpages/admin/gic/GicForm';
+import GicView from 'views/mainpages/admin/gic/GicView';
 import UserDetailPage from 'views/mainpages/admin/main/components/UserDetailPage';
 
 // Custom Chakra theme
@@ -164,7 +168,7 @@ export default function Dashboard(props) {
               p={{ base: '20px', md: '30px' }}
               pe="20px"
               minH="100vh"
-              pt="50px"
+              pt={{ base: '200px', md: '130px', xl: '130px' }}
             >
               <Routes>
                 {getRoutes(routes)}
@@ -176,6 +180,23 @@ export default function Dashboard(props) {
                   path="/agent/userdetail/:id"
                   element={<UserDetailPage />}
                 />
+                <Route
+                path='/gic/form'
+                element={<GicForm />}
+                />
+                <Route 
+                path='/forex/form'
+                element={<ForexForm />}
+                />
+                <Route 
+                path='/gic/:id'
+                element={<GicView />}
+                />
+                <Route 
+                path='/forex/:id'
+                element={<ForexView />}
+                />
+
               </Routes>
             </Box>
             <Box></Box>

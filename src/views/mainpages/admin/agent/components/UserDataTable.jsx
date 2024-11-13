@@ -21,6 +21,8 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import axios from 'axios';
+import { IconButton } from '@chakra-ui/react';
+import { DeleteIcon } from '@chakra-ui/icons';
 
 const columnHelper = createColumnHelper();
 
@@ -35,7 +37,10 @@ export default function UserDataTable(props) {
 
   useEffect(() => {
     // Update the data state when tableData prop changes
-    setData([...tableData]);
+    const data = tableData.sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+    ).filter((user) => user.isDeleted !== true);
+    setData([...data]);
   }, [tableData]);
 
   const columns = [
@@ -141,7 +146,7 @@ export default function UserDataTable(props) {
         const userStatus = info.row.original.userStatus;
         const userId = info.row.original._id; // Get userId here
         return (
-          <Box>
+          <Box display={'flex'} gap={'10px'}>
             {userStatus === 'active' && (
               <Button
                 size="sm"
@@ -172,6 +177,13 @@ export default function UserDataTable(props) {
                 {/* White Spinner */}
               </Button>
             )}
+            <IconButton
+              icon={<DeleteIcon />}
+              colorScheme="red"
+              aria-label="Delete"
+              onClick={() => handleStatusChange(userId, 'isdeleted')}
+              variant="outline"
+            />
           </Box>
         );
       },
@@ -204,6 +216,8 @@ export default function UserDataTable(props) {
         url = `http://localhost:4000/admin/block/${userId}`;
       } else if (currentStatus === 'block') {
         url = `http://localhost:4000/admin/unblock/${userId}`;
+      }else if (currentStatus === 'isdeleted') {
+        url = `http://localhost:4000/admin/delete/${userId}`;
       }
 
       await axios.put(url, {}, { withCredentials: true });
