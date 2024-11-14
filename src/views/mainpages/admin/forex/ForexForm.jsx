@@ -32,8 +32,8 @@ function ForexForm() {
     tds: '',
     netPayable: '',
     commissionStatus: '',
-	  passportFile: null,
-    offerLetterFile: null,
+    passportFile: '',
+    offerLetterFile: '',
   });
   const [countries, setCountries] = useState([]);
   const [documents, setDocuments] = useState([]);
@@ -87,21 +87,17 @@ function ForexForm() {
   };
 
   const handleFileChange = (index, fileType, file) => {
-
-	
-	
     const updatedDocuments = documents.map((doc, i) =>
       i === index ? { ...doc, [fileType]: file } : doc,
     );
     setDocuments(updatedDocuments);
-	
   };
 
   const handlePassOfferFileChange = (e) => {
     const { name, files } = e.target;
-    setFormData({ ...formData, [name]: files[0] });
+    console.log(files[0].name )
+    setFormData({ ...formData, [name]: files[0].name });
   };
-
 
   const validateForm = () => {
     const {
@@ -149,7 +145,13 @@ function ForexForm() {
     if (validateForm()) {
       console.log('Form data:', formData);
       console.log('Documents:', documents);
-      await axios.post("http://localhost:4000/auth/addForexForm",{...formData, documents})
+      const documentFiles = documents.map((doc) => ({ ...doc, documentFile: doc.documentFile.name}));
+      setFormData({ ...formData, documents: documentFiles});
+
+
+      await axios.post('http://localhost:4000/auth/addForexForm', {
+        ...formData
+      });
       toast({
         title: 'Form Submitted',
         description: 'Your data has been submitted successfully.',
@@ -256,6 +258,7 @@ function ForexForm() {
               <NumberInputField
                 name="quotation"
                 value={formData.quotation}
+                placeholder="Number is Accepted"
                 onChange={handleChange}
                 h="50px"
               />
@@ -361,7 +364,7 @@ function ForexForm() {
               </Button>
               <Text>
                 {formData.passportFile
-                  ? formData.passportFile.name
+                  ? formData.passportFile
                   : 'No file chosen'}
               </Text>
               <Input
@@ -388,7 +391,7 @@ function ForexForm() {
               </Button>
               <Text>
                 {formData.offerLetterFile
-                  ? formData.offerLetterFile.name
+                  ? formData.offerLetterFile
                   : 'No file chosen'}
               </Text>
               <Input
