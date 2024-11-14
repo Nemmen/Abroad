@@ -20,6 +20,10 @@ import Signup from 'views/mainpages/login_signup/Signup';
 import MainDashboard from 'views/mainpages/admin/main/MainDashboard';
 import AdminAgent from 'views/mainpages/admin/agent/Agent'
 import GicPage from 'views/mainpages/agent/GicPage';
+import Gic from 'views/mainpages/admin/gic/Gic';
+import Forex from 'views/mainpages/admin/forex/Forex';
+
+
 const routes = [
   {
     name: 'Main Dashboard',
@@ -35,6 +39,23 @@ const routes = [
     icon: <Icon as={MdPerson} width="20px" height="20px" color="inherit" />,
     component: <AdminAgent />,
     secondary: true,
+  },
+  {
+    name: 'GIC',
+    layout: '/admin',
+    path: '/gic',
+    icon: (
+      <Icon as={MdAttachMoney} width="20px" height="20px" color="inherit" />
+    ),
+    component: <Gic />,
+    secondary: true,
+  },
+  {
+    name: 'FOREX',
+    layout: '/admin',
+    icon: <Icon as={MdSwapHoriz} width="20px" height="20px" color="inherit" />,
+    path: '/forex',
+    component: <Forex />,
   },
 ];
 

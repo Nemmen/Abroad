@@ -97,7 +97,7 @@ const UserDetailPage = () => {
       );
       toast({
         title: 'User Blocked',
-        description: 'User has been blocked successfully.',
+        description: 'User has been rejected successfully.',
         status: 'success',
         duration: 1000,
         isClosable: true,
@@ -208,7 +208,7 @@ const UserDetailPage = () => {
             isLoading={loadingBlock}
             spinner={<Spinner />}
           >
-            Block
+            Reject
           </Button>
         </HStack>
       </VStack>
@@ -251,10 +251,10 @@ const UserDetailPage = () => {
         <AlertDialogOverlay>
           <AlertDialogContent>
             <AlertDialogHeader fontSize="lg" fontWeight="bold">
-              Block User
+              Reject User
             </AlertDialogHeader>
             <AlertDialogBody>
-              Are you sure you want to block this user?
+              Are you sure you want to Reject this user?
             </AlertDialogBody>
             <AlertDialogFooter>
               <Button
@@ -264,7 +264,7 @@ const UserDetailPage = () => {
                 Cancel
               </Button>
               <Button colorScheme="red" onClick={handleBlock} ml={3}>
-                Yes, Block
+                Yes, Reject
               </Button>
             </AlertDialogFooter>
           </AlertDialogContent>
