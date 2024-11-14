@@ -49,15 +49,15 @@ const userSchema = new mongoose.Schema({
     },
     abroadReason: {
         type: String,
-        required: true 
+         
     },
     document1: {  // Change type to Mixed
         type: String,
-        required: true
+        
     },
     document2: {  // Change type to Mixed
         type: String,
-        required: true 
+        
     },
     businessDivision: {
         type: String, 

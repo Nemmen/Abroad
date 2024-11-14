@@ -1,8 +1,8 @@
 import express from 'express';
 import multer from 'multer';
-import { checkUser, login, logout, register } from '../controllers/Auth.js';
+import { checkUser, login, logout, register, addGicForm, viewAllGicForm } from '../controllers/Auth.js';
 import { IsUser } from '../middleware/verifyToken.js';
-
+import { uploadFileToCloudinary } from '../controllers/uploadController.js';
 const AuthRoutes = express.Router();
 
 // Configure multer for file uploads, specifying the upload directory and file filter
@@ -29,7 +29,7 @@ const upload = multer({
 });
 
 // Apply the upload middleware to the register route to handle `document1` and `document2`
-AuthRoutes.post('/register', upload.fields([{ name: 'document1' }, { name: 'document2' }]), async (req, res) => {
+AuthRoutes.post('/register', uploadFileToCloudinary, async (req, res) => {
   try {
     // Call the register controller with the request and response objects
     await register(req, res);
@@ -42,6 +42,8 @@ AuthRoutes.post('/register', upload.fields([{ name: 'document1' }, { name: 'docu
 AuthRoutes.post('/login', login);
 AuthRoutes.post('/logout', logout);
 AuthRoutes.get('/checkUser', IsUser, checkUser);
+AuthRoutes.post('/addGicForm', addGicForm);
+AuthRoutes.get('/viewAllGicForm', viewAllGicForm);
 // AuthRoutes.get('/getAllAccount', getAccountRecords);
 // AuthRoutes.post('/addAccount', addAccountRecord);
 

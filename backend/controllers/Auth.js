@@ -3,7 +3,9 @@ import UserModel from '../models/user.js';
 import jwt from 'jsonwebtoken';
 import bcryptjs from 'bcryptjs';
 import dotenv from 'dotenv';
+import {uploadFileToCloudinary} from './uploadController.js'
 import { sendRegistrationEmail } from '../services/emailService.js';
+import GICModel from '../models/gicModel.js';
 dotenv.config()
 
 
@@ -19,22 +21,19 @@ const register = async (req, res) => {
       city,
       abroadReason,
       businessDivision,
-      document1,
-      document2
     } = req.body;
 
-    // Validate required fields
+    // Validate required fields, including files
     if (
       !name || !email || !password || !organization ||
-      !phoneNumber || !state || !city || !document1 || !document2
-    ) {
+      !phoneNumber || !state || !city || !businessDivision) {
       return res.status(400).json({
         success: false,
         message: 'All fields, including both documents, are required.'
       });
     }
 
-    // Validate if user already exists
+    // Check if the user already exists
     const existUser = await UserModel.findOne({ email });
     if (existUser) {
       return res.status(401).json({
@@ -43,7 +42,20 @@ const register = async (req, res) => {
       });
     }
 
+    // Hash the password
     const hashedPassword = await bcryptjs.hash(password, 10);
+
+    // Upload documents to Cloudinary
+    if(!req.files || !req.files.document1 || !req.files.document2) {
+      return res.status(400).json({
+        success: false,
+        message: 'Both documents are required'
+      });
+    }
+    const document1Url = await uploadFileToCloudinary(req.files.document1[0].path, 'documents');
+    const document2Url = await uploadFileToCloudinary(req.files.document2[0].path, 'documents');
+
+    // Create new user instance
     const newUser = new UserModel({
       name,
       email,
@@ -53,16 +65,22 @@ const register = async (req, res) => {
       state,
       city,
       abroadReason,
-      document1, 
-      document2,
       businessDivision,
+      document1: document1Url,
+      document2: document2Url,
     });
 
     await newUser.save();
+
     // Send registration email
     await sendRegistrationEmail(email);
 
-    res.status(200).json({ message: 'User registered successfully', newUser });
+    // Respond with success
+    res.status(200).json({
+      success: true,
+      message: 'User registered successfully',
+      newUser,
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Internal server error' });
     console.log(error);
@@ -172,6 +190,71 @@ const getCurrentUser = async (req, res) => {
   }
 };
 
+// user adding data in the form of gic form
+const addGicForm = async (req, res) => {
+  try {
+    const {
+      studentName,
+      commissionAmt,
+      tds,
+      netPayable,
+      commissionStatus,
+      agentRef,
+      studentEmail,
+      studentPhoneNo,
+      studentPassportNo,
+      studentDocuments,
+    } = req.body;
+
+    // atleast student name, commissionAmt, tds, netPayable, commissionStatus, agentRef, studentEmail, studentPhoneNo, studentPassportNo are required
+
+    if ( !studentName || !commissionAmt || !tds || !netPayable || !commissionStatus || !agentRef || !studentEmail || !studentPhoneNo || !studentPassportNo) {
+      return res.status(400).json({
+        success: false,
+        message: 'All fields are required'
+      });
+    }
+    // Create new GIC instance
+    const newGIC = new GICModel({
+      studentName,
+      commissionAmt,
+      tds,
+      netPayable,
+      commissionStatus,
+      agentRef,
+      studentEmail,
+      studentPhoneNo,
+      studentPassportNo,
+      studentDocuments,
+    });
+
+    await newGIC.save();
+
+    // Respond with success
+    res.status(200).json({
+      success: true,
+      message: 'GIC form added successfully',
+      newGIC,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Internal server error' });
+    console.log(error);
+  }
+};
+
+// view all gic form
+const viewAllGicForm = async (req, res) => {
+  try {
+    const gicForms = await GICModel.find();
+    res.status(200).json({ success: true, gicForms });
+  } catch (error) {
+    console.error('View GIC Form Error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
+
+
 
 
 
@@ -180,5 +263,5 @@ const getCurrentUser = async (req, res) => {
 
 
 
-export { register, login, logout , getCurrentUser};
+export { register, login, logout , getCurrentUser, addGicForm, viewAllGicForm};
 

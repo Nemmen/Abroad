@@ -5,7 +5,7 @@ import cookieparser from 'cookie-parser'
 import DbCon from './utlis/db.js'
 import AuthRoutes from './routes/Auth.js'
 import AdminRoutes from './routes/AdminRoutes.js'
-import uploadRoutes from './routes/uploadRoutes.js';
+// import uploadRoutes from './routes/uploadRoutes.js';
 
 
 dotenv.config()
@@ -24,7 +24,7 @@ app.use(cors({
 
 app.use('/auth',AuthRoutes)
 app.use('/admin',AdminRoutes)
-app.use('/api/uploads', uploadRoutes);
+// app.use('/api/uploads', uploadRoutes);
 
 app.get('/',(req,res)=>{
     res.send('Server is running')
