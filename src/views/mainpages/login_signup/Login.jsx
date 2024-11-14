@@ -127,7 +127,8 @@ export default function Login() {
               Sign In
             </button>
           </form>
-          <Link to="/auth/signup" className="block text-center text-blue-600 hover:underline mt-6">Create an account</Link>
+          <p className='text-center text-slate-500 text-[16px] mx-auto flex pt-3'>Don't have an account ? <Link to="/auth/signup" className="block text-center text-blue-600 hover:underline ml-2 "> Sign up</Link></p>
+          
         </div>
       </div>
     </div>
