@@ -8,6 +8,9 @@ import { SidebarContext } from 'contexts/SidebarContext';
 import React, { useState, useEffect } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { routeAjent as routes } from 'routes.js';
+import CreateGICModal from '../../views/mainpages/agent/gic/CreateGICModal'
+import GicView from '../../views/mainpages/agent/gic/GicView'
+import AgentForexView from '../../views/mainpages/agent/forex/AgentForexView'
 
 // Custom Chakra theme
 export default function Dashboard(props) {
@@ -166,6 +169,18 @@ export default function Dashboard(props) {
                     path="/"
                     element={<Navigate to="/agent/default" replace />}
                   />
+                   <Route
+                path='/gic/modal'
+                element={<CreateGICModal />}
+                />
+                <Route 
+                path='/gic/:id'
+                element={<GicView />}
+                />
+                <Route 
+                path='/forex/:id'
+                element={<AgentForexView />}
+                />
                 </Routes>
               </Box>
             ) : null}
