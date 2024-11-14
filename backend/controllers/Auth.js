@@ -3,8 +3,9 @@ import UserModel from '../models/user.js';
 import jwt from 'jsonwebtoken';
 import bcryptjs from 'bcryptjs';
 import dotenv from 'dotenv';
-import {uploadFileToCloudinary} from './uploadController.js'
+// import {uploadFileToCloudinary} from './uploadController.js'
 import { sendRegistrationEmail } from '../services/emailService.js';
+import ForexModel from '../models/forexModel.js';
 import GICModel from '../models/gicModel.js';
 dotenv.config()
 
@@ -46,16 +47,15 @@ const register = async (req, res) => {
     const hashedPassword = await bcryptjs.hash(password, 10);
 
     // Upload documents to Cloudinary
-    if(!req.files || !req.files.document1 || !req.files.document2) {
-      return res.status(400).json({
-        success: false,
-        message: 'Both documents are required'
-      });
-    }
-    const document1Url = await uploadFileToCloudinary(req.files.document1[0].path, 'documents');
-    const document2Url = await uploadFileToCloudinary(req.files.document2[0].path, 'documents');
+    // if(!req.files || !req.files.document1 || !req.files.document2) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: 'Both documents are required'
+    //   });
+    // }
+    // const document1Url = await uploadFileToCloudinary(req.files.document1[0].path, 'documents');
+    // const document2Url = await uploadFileToCloudinary(req.files.document2[0].path, 'documents');
 
-    // Create new user instance
     const newUser = new UserModel({
       name,
       email,
@@ -66,8 +66,8 @@ const register = async (req, res) => {
       city,
       abroadReason,
       businessDivision,
-      document1: document1Url,
-      document2: document2Url,
+      // document1: document1Url,
+      // document2: document2Url,
     });
 
     await newUser.save();
@@ -196,10 +196,14 @@ const addGicForm = async (req, res) => {
     const {
       studentName,
       commissionAmt,
+      fundingMonth,
       tds,
       netPayable,
       commissionStatus,
       agentRef,
+      accOpeningMonth,
+      bankVendor,
+      amount,
       studentEmail,
       studentPhoneNo,
       studentPassportNo,
@@ -220,8 +224,12 @@ const addGicForm = async (req, res) => {
       commissionAmt,
       tds,
       netPayable,
+      bankVendor,
+      amount,
+      accOpeningMonth,
       commissionStatus,
       agentRef,
+      fundingMonth,
       studentEmail,
       studentPhoneNo,
       studentPassportNo,
@@ -253,7 +261,92 @@ const viewAllGicForm = async (req, res) => {
   }
 };
 
+const addForexForm = async (req, res) => {
+  try {
+    const {
+      sNo,
+      studentName,
+      country,
+      currencyBooked,
+      quotation,
+      studentPaid,
+      docsStatus,
+      ttCopyStatus,
+      agentCommission,
+      tds,
+      netPayable,
+      commissionStatus,
+      agentRef,
+      passportFile,
+      offerLetterFile,
+      documents,
+    } = req.body;
 
+    // Required fields validation
+    if (
+      !sNo ||
+      !studentName ||
+      !country ||
+      !currencyBooked ||
+      !quotation ||
+      !studentPaid ||
+      !docsStatus ||
+      !ttCopyStatus ||
+      !agentCommission ||
+      !tds ||
+      !netPayable ||
+      !commissionStatus
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: 'All required fields must be provided',
+      });
+    }
+
+    // Create new Forex instance
+    const newForex = new ForexModel({
+      sNo,
+      studentName,
+      country,
+      currencyBooked,
+      quotation,
+      studentPaid,
+      docsStatus,
+      ttCopyStatus,
+      agentCommission,
+      tds,
+      netPayable,
+      commissionStatus,
+      agentRef,
+      passportFile,
+      offerLetterFile,
+      documents,
+    });
+
+    await newForex.save();
+
+    // Respond with success
+    res.status(200).json({
+      success: true,
+      message: 'Forex form added successfully',
+      newForex,
+    });
+  } catch (error) {
+    console.error('Add Forex Form Error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
+// Controller to fetch all Forex account details
+const viewAllForexForms = async (req, res) => {
+  try {
+    const forexForms = await ForexModel.find();
+    res.status(200).json({ success: true, forexForms });
+  } catch (error) {
+    console.error('View Forex Forms Error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
 
 
 
@@ -263,5 +356,5 @@ const viewAllGicForm = async (req, res) => {
 
 
 
-export { register, login, logout , getCurrentUser, addGicForm, viewAllGicForm};
+export { register, login, logout , getCurrentUser, addGicForm, viewAllGicForm, addForexForm, viewAllForexForms};
 

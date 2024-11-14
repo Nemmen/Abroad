@@ -32,7 +32,7 @@ function ForexForm() {
     tds: '',
     netPayable: '',
     commissionStatus: '',
-	passportFile: null,
+	  passportFile: null,
     offerLetterFile: null,
   });
   const [countries, setCountries] = useState([]);
@@ -50,7 +50,7 @@ function ForexForm() {
     'Grand Mother',
   ];
   const documentOptions = [
-    'Adhar',
+    'Aadhar',
     'Pan',
     'Account statement',
     'Passbook Front',
@@ -144,11 +144,12 @@ function ForexForm() {
     return true;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (validateForm()) {
       console.log('Form data:', formData);
       console.log('Documents:', documents);
+      await axios.post("http://localhost:4000/auth/addForexForm",{...formData, documents})
       toast({
         title: 'Form Submitted',
         description: 'Your data has been submitted successfully.',

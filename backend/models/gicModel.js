@@ -1,3 +1,4 @@
+// import { type } from '@testing-library/user-event/dist/types/utility';
 import mongoose from 'mongoose';
 
 const gicSchema = new mongoose.Schema({
@@ -8,6 +9,9 @@ const gicSchema = new mongoose.Schema({
   studentName: {
     type: String,
      
+  },
+  amount:{
+    type: String,
   },
   passportNo: {
     type: String,
@@ -27,15 +31,15 @@ const gicSchema = new mongoose.Schema({
      
   },
   commissionAmt: {
-    type: Number,
+    type: String,
      
   },
   tds: {
-    type: Number,
+    type: String,
      
   },
   netPayable: {
-    type: Number,
+    type: String,
      
   },
   commissionStatus: {
