@@ -19,10 +19,10 @@ import Login from 'views/mainpages/login_signup/Login';
 import Signup from 'views/mainpages/login_signup/Signup';
 import MainDashboard from 'views/mainpages/admin/main/MainDashboard';
 import AdminAgent from 'views/mainpages/admin/agent/Agent'
-import GicPage from 'views/mainpages/agent/GicPage';
+import GicPage from 'views/mainpages/agent/gic/GicPage';
 import Gic from 'views/mainpages/admin/gic/Gic';
 import Forex from 'views/mainpages/admin/forex/Forex';
-
+import AgentForex from './views/mainpages/agent/forex/AgentForex.jsx'
 
 const routes = [
   {
@@ -82,7 +82,7 @@ export const routeAjent = [
     layout: '/agent',
     icon: <Icon as={MdSwapHoriz} width="20px" height="20px" color="inherit" />,
     path: '/forex',
-    component: '',
+    component: <AgentForex/>,
   },
   {
     name: 'IMM',

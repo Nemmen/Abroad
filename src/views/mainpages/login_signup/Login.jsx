@@ -127,10 +127,8 @@ export default function Login() {
               Sign In
             </button>
           </form>
-          <div className='mt-5'>
-            <p className='text-sm text-center text-black'>Don't have an account?</p>
-            <Link to="/auth/signup" className="block text-center text-blue-600 hover:underline">Create an account</Link>
-          </div>
+          <p className='text-center text-slate-500 text-[16px] mx-auto flex pt-3'>Don't have an account ? <Link to="/auth/signup" className="block text-center text-blue-600 hover:underline ml-2 "> Sign up</Link></p>
+          
         </div>
       </div>
     </div>
