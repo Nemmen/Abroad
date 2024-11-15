@@ -1,5 +1,6 @@
-import React from 'react';
-import { Box, Button, Card, Divider, Text } from '@chakra-ui/react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { Box, Button, Divider, Text } from '@chakra-ui/react';
 import DataTable from 'components/DataTable';
 import { Link } from 'react-router-dom';
 
@@ -19,43 +20,37 @@ const columns = [
   { field: 'commissionStatus', headerName: 'Commission Status', width: 180 },
 ];
 
-const rows = [
-  {
-    id: 1,
-    sNo: 1,
-    date: '2024-11-01',
-    studentName: 'John Doe',
-    country: 'USA',
-    currencyBooked: 'USD',
-    quotation: '5000',
-    studentPaid: '4500',
-    docsStatus: 'Submitted',
-    ttCopyStatus: 'Received',
-    agentCommission: '500',
-    tds: '50',
-    netPayable: '450',
-    commissionStatus: 'Paid',
-  },
-  {
-    id: 2,
-    sNo: 2,
-    date: '2024-11-02',
-    studentName: 'Jane Smith',
-    country: 'Canada',
-    currencyBooked: 'CAD',
-    quotation: '7000',
-    studentPaid: '6500',
-    docsStatus: 'Pending',
-    ttCopyStatus: 'Not Received',
-    agentCommission: '600',
-    tds: '60',
-    netPayable: '540',
-    commissionStatus: 'Pending',
-  },
-  // Additional rows as needed
-];
-
 const Forex = () => {
+  const [rows, setRows] = useState([]);
+
+  useEffect(() => {
+    // Fetch data from the API
+    axios.get('http://localhost:4000/auth/viewAllForexForms')
+      .then((response) => {
+        // Map the response data to the format expected by the DataTable
+        const fetchedData = response.data.forexForms.map((item, index) => ({
+          id: item._id,
+          sNo: item.sNo,
+          date: new Date(item.date).toLocaleDateString(), // Format date as needed
+          studentName: item.studentName,
+          country: item.country,
+          currencyBooked: item.currencyBooked,
+          quotation: item.quotation,
+          studentPaid: item.studentPaid,
+          docsStatus: item.docsStatus,
+          ttCopyStatus: item.ttCopyStatus,
+          agentCommission: item.agentCommission,
+          tds: item.tds,
+          netPayable: item.netPayable,
+          commissionStatus: item.commissionStatus,
+        }));
+        setRows(fetchedData);
+      })
+      .catch((error) => {
+        console.error("Error fetching forex forms:", error);
+      });
+  }, []);
+
   return (
     <Box width={'full'}>
       <Box

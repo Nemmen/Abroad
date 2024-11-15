@@ -1,14 +1,16 @@
-import React from 'react';
-import { Box, Button, Card, Divider, Text } from '@chakra-ui/react';
+import React, { useEffect, useState } from 'react';
+import { Box, Button, Divider, Text } from '@chakra-ui/react';
 import DataTable from 'components/DataTable';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 
 // Define the columns
 const columns = [
   { field: 'sNo', headerName: 'SNo', width: 70 },
-  { field: 'accOpeningDate', headerName: 'Acc Opening Date', width: 150 },
+  { field: 'accOpeningMonth', headerName: 'Acc Opening Month', width: 150 },
   { field: 'studentName', headerName: 'Student Name', width: 150 },
   { field: 'passportNo', headerName: 'Passport No.', width: 130 },
+  { field: 'studentPhoneNo', headerName:  'Student Contact', width: 130 },
   { field: 'bankVendor', headerName: 'Bank Vendor', width: 150 },
   { field: 'accOpeningMonth', headerName: 'Acc Opening Month', width: 160 },
   { field: 'accFundingMonth', headerName: 'Acc Funding Month', width: 160 },
@@ -16,73 +18,56 @@ const columns = [
     field: 'commissionAmt',
     headerName: 'Commission Amt',
     width: 140,
-    valueFormatter: ({ value }) => `$${value}`,
+    // valueFormatter: ({ value }) => `$${value}`,
   },
   {
     field: 'tds',
     headerName: 'TDS',
     width: 100,
-    valueFormatter: ({ value }) => `$${value}`,
+    // valueFormatter: ({ value }) => `$${value}`,
   },
   {
     field: 'netPayable',
     headerName: 'Net Payable',
     width: 140,
-    valueFormatter: ({ value }) => `$${value}`,
+    // valueFormatter: ({ value }) => `$${value}`,
   },
   { field: 'commissionStatus', headerName: 'Commission Status', width: 160 },
 ];
 
-// Example rows data
-const rows = [
-  {
-    id: 1,
-    sNo: 1,
-    accOpeningDate: '2024-01-15',
-    studentName: 'Alice Johnson',
-    passportNo: 'A1234567',
-    bankVendor: 'Bank of America',
-    accOpeningMonth: 'January',
-    accFundingMonth: 'February',
-    commissionAmt: 500,
-    tds: 50,
-    netPayable: 450,
-    commissionStatus: 'Paid',
-  },
-  {
-    id: 2,
-    sNo: 2,
-    accOpeningDate: '2024-02-20',
-    studentName: 'Bob Smith',
-    passportNo: 'B7654321',
-    bankVendor: 'Chase Bank',
-    accOpeningMonth: 'February',
-    accFundingMonth: 'March',
-    commissionAmt: 700,
-    tds: 70,
-    netPayable: 630,
-    commissionStatus: 'Pending',
-  },
-  {
-    id: 3,
-    sNo: 3,
-    accOpeningDate: '2024-03-05',
-    studentName: 'Carol White',
-    passportNo: 'C8765432',
-    bankVendor: 'Wells Fargo',
-    accOpeningMonth: 'March',
-    accFundingMonth: 'April',
-    commissionAmt: 600,
-    tds: 60,
-    netPayable: 540,
-    commissionStatus: 'Paid',
-  },
-  // Add more rows as needed
-];
-
-export { columns, rows };
-
 const Gic = () => {
+  const [rows, setRows] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get('http://localhost:4000/auth/viewAllGicForm');
+        if (response.data.success) {
+          const gicForms = response.data.gicForms.map((form, index) => ({
+            id: form._id,
+            sNo: index + 1,
+            accOpeningMonth: form.accOpeningMonth || 'N/A',
+            studentName: form.studentName || 'N/A',
+            passportNo: form.studentPassportNo || 'N/A',
+            studentPhoneNo: form.studentPhoneNo || 'N/A',
+            bankVendor: form.bankVendor || 'N/A',
+            accOpeningMonth: form.accOpeningMonth || 'N/A',
+            accFundingMonth: form.fundingMonth || 'N/A',
+            commissionAmt: form.commissionAmt || 0,
+            tds: form.tds || '0',
+            netPayable: form.netPayable || 0,
+            commissionStatus: form.commissionStatus || 'N/A',
+          }));
+          setRows(gicForms);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <Box width={'full'}>
       <Box
@@ -94,10 +79,8 @@ const Gic = () => {
       >
         <div>
           <Text
-            href="#"
             bg="inherit"
             borderRadius="inherit"
-            fontWeight=""
             fontSize="34px"
             _active={{
               bg: 'inherit',
@@ -120,9 +103,9 @@ const Gic = () => {
               colorScheme="blue"
               borderRadius={'none'}
               _hover={{
-                bg: 'blue.500', // Fill color on hover
-                color: 'white', // Text color on hover
-                borderColor: 'blue.500', // Border color remains consistent
+                bg: 'blue.500',
+                color: 'white',
+                borderColor: 'blue.500',
               }}
             >
               Add New
