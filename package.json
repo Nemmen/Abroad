@@ -47,7 +47,8 @@
     "styled-components": "^6.1.13",
     "stylis": "^4.3.2",
     "stylis-plugin-rtl": "^2.0.2",
-    "web-vitals": "^4.2.2"
+    "web-vitals": "^4.2.2",
+    "xlsx": "^0.18.5"
   },
   "scripts": {
     "start": "react-scripts start",
