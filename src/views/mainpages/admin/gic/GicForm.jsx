@@ -90,10 +90,10 @@ function GicForm() {
     return true;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (validateForm()) {
-      // Rename the file before submission
       const { documentFile, documentType, studentName } = formData;
       const fileExtension = documentFile.name.split('.').pop();
       const renamedFile = new File(
@@ -102,18 +102,66 @@ function GicForm() {
         { type: documentFile.type },
       );
 
-      // Log renamed file for testing
-      console.log('Renamed file:', renamedFile);
+      // Prepare form data for API submission
+      const formDataToSend = {
+        studentName: formData.studentName,
+        commissionAmt: formData.commission,
+        fundingMonth: formData.accFundingMonth,
+        tds: formData.tds,
+        netPayable: formData.netPayable,
+        commissionStatus: formData.commissionStatus,
+        agentRef: formData.sNo,
+        accOpeningMonth: getCurrentMonth(),
+        bankVendor: formData.bankVendor,
+        amount: formData.amt,
+        studentEmail: formData.email,
+        studentPhoneNo: formData.phoneNo,
+        studentPassportNo: formData.passportNo,
+      };
 
-      toast({
-        title: 'Form Submitted',
-        description: 'Your data has been submitted successfully.',
-        status: 'success',
-        duration: 3000,
-        isClosable: true,
-      });
+      const apiUrl = 'http://localhost:4000/auth/addGicForm';
 
-      // Additional code to upload renamedFile goes here
+      try {
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formDataToSend),
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          toast({
+            title: 'Form Submitted',
+            description: 'Your data has been submitted successfully.',
+            status: 'success',
+            duration: 3000,
+            isClosable: true,
+          });
+          console.log('Server Response:', result);
+        } else {
+          toast({
+            title: 'Submission Failed',
+            description:
+              result.message || 'An error occurred during submission.',
+            status: 'error',
+            duration: 3000,
+            isClosable: true,
+          });
+          console.error('Server Error:', result);
+        }
+      } catch (error) {
+        toast({
+          title: 'Error',
+          description: 'Unable to submit form. Please try again later.',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        });
+        console.error('Network Error:', error);
+      }
     }
   };
 
@@ -338,7 +386,9 @@ function GicForm() {
               <Flex align="center">
                 <Button
                   colorScheme="blue"
-                  onClick={() => document.getElementById('documentFile').click()}
+                  onClick={() =>
+                    document.getElementById('documentFile').click()
+                  }
                   mr={2}
                 >
                   Choose File
