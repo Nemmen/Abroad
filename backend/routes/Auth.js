@@ -1,6 +1,6 @@
 import express from 'express';
 import multer from 'multer';
-import { checkUser, login, logout, register, addGicForm, viewAllGicForm, addForexForm, viewAllForexForms } from '../controllers/Auth.js';
+import { checkUser, login, logout, register, addGicForm, viewAllGicForm, addForexForm, viewAllForexForms, getAllBlockedData, createBlockedData} from '../controllers/Auth.js';
 import { IsUser } from '../middleware/verifyToken.js';
 // import { uploadFileToCloudinary } from '../controllers/uploadController.js';
 const AuthRoutes = express.Router();
@@ -48,6 +48,8 @@ AuthRoutes.post('/addForexForm', addForexForm);
 AuthRoutes.get('/viewAllForexForms', viewAllForexForms);
 // AuthRoutes.get('/getAllAccount', getAccountRecords);
 // AuthRoutes.post('/addAccount', addAccountRecord);
+AuthRoutes.get('/getAllBlockedData', getAllBlockedData);
+AuthRoutes.post('/createBlockedData', createBlockedData);
 
 
 

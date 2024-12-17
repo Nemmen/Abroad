@@ -10,9 +10,6 @@ const gicSchema = new mongoose.Schema({
     type: String,
      
   },
-  amount:{
-    type: String,
-  },
   passportNo: {
     type: String,
      

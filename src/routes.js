@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Icon } from '@chakra-ui/react';
-
+import { BsFillPiggyBankFill } from "react-icons/bs";
 import {
   MdPerson,
   MdHome,
@@ -23,6 +23,7 @@ import GicPage from 'views/mainpages/agent/gic/GicPage';
 import Gic from 'views/mainpages/admin/gic/Gic';
 import Forex from 'views/mainpages/admin/forex/Forex';
 import AgentForex from './views/mainpages/agent/forex/AgentForex.jsx'
+import BlockedPage from 'views/mainpages/agent/blocked/BlockedPage';
 
 const routes = [
   {
@@ -91,6 +92,13 @@ export const routeAjent = [
     icon: <Icon as={MdBusiness} width="20px" height="20px" color="inherit" />,
     component: '',
   },
+  {
+    name: 'Blocked',
+    layout: '/agent',
+    path: '/blocked',
+    icon: <Icon as={MdBusiness} width="20px" height="20px" color="inherit" />,
+    component: <BlockedPage/>,
+  },
 ];
 
 // for commiy
@@ -106,7 +114,7 @@ export const Auth = [
     name: 'Sign Up',
     layout: '/auth',
     path: '/signup',
-    icon: <Icon as={SiAuthentik} width="20px" height="20px" color="inherit" />,
+    icon: <Icon as={BsFillPiggyBankFill} width="20px" height="20px" color="inherit" />,
     component: <Signup />,
   },
 ];

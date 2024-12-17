@@ -203,7 +203,6 @@ const addGicForm = async (req, res) => {
       agentRef,
       accOpeningMonth,
       bankVendor,
-      amount,
       studentEmail,
       studentPhoneNo,
       studentPassportNo,
@@ -225,7 +224,6 @@ const addGicForm = async (req, res) => {
       tds,
       netPayable,
       bankVendor,
-      amount,
       accOpeningMonth,
       commissionStatus,
       agentRef,
@@ -264,7 +262,6 @@ const viewAllGicForm = async (req, res) => {
 const addForexForm = async (req, res) => {
   try {
     const {
-      sNo,
       studentName,
       country,
       currencyBooked,
@@ -349,12 +346,36 @@ const viewAllForexForms = async (req, res) => {
 };
 
 
+const createBlockedData = async (req, res) => {
+  try {
+    const blockedData = new BLOCKEDModel(req.body);
+    const savedBlockedData = await blockedData.save();
+    res.status(201).json({
+      message: "Blocked data created successfully",
+      data: savedBlockedData,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error creating blocked data", error });
+  }
+};
 
+// Get all blocked data
+const getAllBlockedData = async (req, res) => {
+  try {
+    const blockedData = await BLOCKEDModel.find().populate("agentRef");
+    res.status(200).json({
+      message: "Blocked data fetched successfully",
+      data: blockedData,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching blocked data", error });
+  }
+};
 
   
 
 
 
 
-export { register, login, logout , getCurrentUser, addGicForm, viewAllGicForm, addForexForm, viewAllForexForms};
+export { register, login, logout , getCurrentUser, addGicForm, viewAllGicForm, addForexForm, viewAllForexForms, getAllBlockedData, createBlockedData};
 
