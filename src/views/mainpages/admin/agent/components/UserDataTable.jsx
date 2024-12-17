@@ -149,8 +149,11 @@ export default function UserDataTable(props) {
           <Box display={'flex'} gap={'10px'}>
             {userStatus === 'active' && (
               <Button
-                size="sm"
+              fontSize="15px"
+              paddingRight="32px"
+              paddingLeft="32px"
                 colorScheme="red"
+                borderRadius="50px"
                 onClick={() => handleStatusChange(userId, 'active')}
                 disabled={loadingButtonId === userId}
               >
@@ -164,7 +167,10 @@ export default function UserDataTable(props) {
             )}
             {userStatus === 'block' && (
               <Button
-                size="sm"
+               fontSize="15px"
+                paddingRight="24px"
+              paddingLeft="24px"
+               borderRadius="50px"
                 colorScheme="blue"
                 onClick={() => handleStatusChange(userId, 'block')}
                 disabled={loadingButtonId === userId}
