@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 
 const columns = [
-  { field: 'sNo', headerName: 'SNo', width: 80 },
+  { field: 'Agent', headerName: 'Agent', width: 120 },
   { field: 'date', headerName: 'Date', width: 150 },
   { field: 'studentName', headerName: 'Student Name', width: 200 },
   { field: 'country', headerName: 'Country', width: 150 },
@@ -30,6 +30,7 @@ const Forex = () => {
       .then((response) => {
         const fetchedData = response.data.forexForms.map((item, index) => ({
           ...item,
+          agentRef: item.agentRef.agentCode || 'N/A',
           id: item._id,
          
         }));

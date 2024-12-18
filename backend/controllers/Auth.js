@@ -203,7 +203,6 @@ const addGicForm = async (req, res) => {
       agentRef,
       accOpeningMonth,
       bankVendor,
-      amount,
       studentEmail,
       studentPhoneNo,
       studentPassportNo,
@@ -225,7 +224,6 @@ const addGicForm = async (req, res) => {
       tds,
       netPayable,
       bankVendor,
-      amount,
       accOpeningMonth,
       commissionStatus,
       agentRef,
@@ -253,7 +251,7 @@ const addGicForm = async (req, res) => {
 // view all gic form
 const viewAllGicForm = async (req, res) => {
   try {
-    const gicForms = await GICModel.find();
+    const gicForms = await GICModel.find().populate('agentRef', 'agentCode');
     res.status(200).json({ success: true, gicForms });
   } catch (error) {
     console.error('View GIC Form Error:', error);
@@ -264,7 +262,6 @@ const viewAllGicForm = async (req, res) => {
 const addForexForm = async (req, res) => {
   try {
     const {
-      sNo,
       studentName,
       country,
       currencyBooked,
@@ -340,7 +337,7 @@ const addForexForm = async (req, res) => {
 // Controller to fetch all Forex account details
 const viewAllForexForms = async (req, res) => {
   try {
-    const forexForms = await ForexModel.find();
+    const forexForms = await ForexModel.find().populate('agentRef', 'agentCode');
     res.status(200).json({ success: true, forexForms });
   } catch (error) {
     console.error('View Forex Forms Error:', error);
@@ -349,12 +346,49 @@ const viewAllForexForms = async (req, res) => {
 };
 
 
+const createBlockedData = async (req, res) => {
+  try {
+    const blockedData = new BLOCKEDModel(req.body);
+    const savedBlockedData = await blockedData.save();
+    res.status(201).json({
+      message: "Blocked data created successfully",
+      data: savedBlockedData,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error creating blocked data", error });
+  }
+};
 
+// Get all blocked data
+const getAllBlockedData = async (req, res) => {
+  try {
+    const blockedData = await BLOCKEDModel.find().populate("agentRef");
+    res.status(200).json({
+      message: "Blocked data fetched successfully",
+      data: blockedData,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching blocked data", error });
+  }
+};
+
+
+const getAllusers = async (req, res) => {
+  try {
+    const users = await UserModel.find();
+    res.status(200).json({
+      message: "All users fetched successfully",
+      data: users,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching users", error });
+  }
+}
 
   
 
 
 
 
-export { register, login, logout , getCurrentUser, addGicForm, viewAllGicForm, addForexForm, viewAllForexForms};
+export { register, login, logout ,getAllusers , getCurrentUser, addGicForm, viewAllGicForm, addForexForm, viewAllForexForms, getAllBlockedData, createBlockedData};
 

@@ -20,7 +20,7 @@ const getCurrentDate = () => format(new Date(), 'yyyy-MM-dd');
 
 function ForexForm() {
   const [formData, setFormData] = useState({
-    sNo: '',
+    Agent: '',
     studentName: '',
     country: '',
     currencyBooked: '',
@@ -38,6 +38,25 @@ function ForexForm() {
   const [countries, setCountries] = useState([]);
   const [documents, setDocuments] = useState([]);
   const toast = useToast();
+  const [agents, setAgents] = useState([]);
+
+  useEffect(() => {
+    const fetchAgents = async () => {
+      const apiUrl = 'http://localhost:4000/auth/getAllusers';
+      try {
+        const response = await fetch(apiUrl);
+        const result = await response.json();
+        if (response.ok) {
+          setAgents(result.data);
+        } else {
+          console.error('Server Error:', result);
+        }
+      } catch (error) {
+        console.error('Network Error:', error);
+      }
+    };
+    fetchAgents();
+  }, []);
 
   const whoOptions = [
     'Self',
@@ -95,13 +114,13 @@ function ForexForm() {
 
   const handlePassOfferFileChange = (e) => {
     const { name, files } = e.target;
-    console.log(files[0].name )
+    console.log(files[0].name);
     setFormData({ ...formData, [name]: files[0].name });
   };
 
   const validateForm = () => {
     const {
-      sNo,
+      Agent,
       studentName,
       country,
       currencyBooked,
@@ -115,7 +134,7 @@ function ForexForm() {
       commissionStatus,
     } = formData;
     if (
-      !sNo ||
+      !Agent ||
       !studentName ||
       !country ||
       !currencyBooked ||
@@ -145,12 +164,14 @@ function ForexForm() {
     if (validateForm()) {
       console.log('Form data:', formData);
       console.log('Documents:', documents);
-      const documentFiles = documents.map((doc) => ({ ...doc, documentFile: doc.documentFile.name}));
-      setFormData({ ...formData, documents: documentFiles});
-
+      const documentFiles = documents.map((doc) => ({
+        ...doc,
+        documentFile: doc.documentFile.name,
+      }));
+      setFormData({ ...formData, documents: documentFiles });
 
       await axios.post('http://localhost:4000/auth/addForexForm', {
-        ...formData
+        ...formData,
       });
       toast({
         title: 'Form Submitted',
@@ -188,15 +209,21 @@ function ForexForm() {
       <form onSubmit={handleSubmit}>
         <SimpleGrid columns={2} spacing={4}>
           <FormControl isRequired>
-            <FormLabel>SNo</FormLabel>
-            <Input
-              type="text"
-              name="sNo"
-              value={formData.sNo}
+            <FormLabel>Agent</FormLabel>
+            <Select
+              name="Agent"
+              value={formData.Agent}
               onChange={handleChange}
               h="50px"
               w="full"
-            />
+              placeholder="Select an agent"
+            >
+              {agents.map((agent) => (
+                <option key={agent._id} value={agent.agentCode}>
+                  {agent.agentCode}
+                </option>
+              ))}
+            </Select>
           </FormControl>
 
           <FormControl isReadOnly>

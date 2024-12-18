@@ -22,7 +22,7 @@ export default function Register() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [abroadReason, setAbroadReason] = useState('');
+  // const [abroadReason, setAbroadReason] = useState('');
   const [document1, setDocument1] = useState(null);
   const [document2, setDocument2] = useState(null);
   const [businessDivision, setBusinessDivision] = useState('');
@@ -117,7 +117,7 @@ export default function Register() {
     formData.append('state', state);
     formData.append('city', city);
     formData.append('password', password);
-    formData.append('abroadReason', abroadReason);
+    // formData.append('abroadReason', abroadReason);
     formData.append('businessDivision', businessDivision);
     if (document1) formData.append('document1', document1.name);
     if (document2) formData.append('document2', document2.name);
@@ -325,7 +325,7 @@ export default function Register() {
             </div>
             {/* ... */}
 
-            <div className="mb-4">
+            {/* <div className="mb-4">
               <label
                 htmlFor="abroadReason"
                 className="block text-gray-700 font-semibold"
@@ -340,7 +340,7 @@ export default function Register() {
                 placeholder="Explain your reason"
                 className="w-full px-4 py-2 border rounded-lg mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-            </div>
+            </div> */}
 
             <div className="mb-4">
               <label

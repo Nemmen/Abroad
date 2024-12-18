@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   FormControl,
@@ -19,8 +19,10 @@ const getCurrentDate = () => format(new Date(), 'yyyy-MM-dd');
 const getCurrentMonth = () => format(new Date(), 'MMMM');
 
 function GicForm() {
+  const [agents, setAgents] = useState([]);
+
   const [formData, setFormData] = useState({
-    sNo: '',
+    Agents: '',
     studentName: '',
     passportNo: '',
     email: '',
@@ -28,7 +30,6 @@ function GicForm() {
     bankVendor: '',
     accFundingMonth: '',
     commission: '',
-    amt: '',
     tds: '',
     netPayable: '',
     commissionStatus: '',
@@ -36,6 +37,24 @@ function GicForm() {
     documentFile: null,
   });
   const toast = useToast();
+
+  useEffect(() => {
+    const fetchAgents = async () => {
+      const apiUrl = 'http://localhost:4000/auth/getAllusers';
+      try {
+        const response = await fetch(apiUrl);
+        const result = await response.json();
+        if (response.ok) {
+          setAgents(result.data);
+        } else {
+          console.error('Server Error:', result);
+        }
+      } catch (error) {
+        console.error('Network Error:', error);
+      }
+    };
+    fetchAgents();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -47,7 +66,7 @@ function GicForm() {
 
   const validateForm = () => {
     const {
-      sNo,
+      Agents,
       studentName,
       passportNo,
       email,
@@ -55,7 +74,6 @@ function GicForm() {
       bankVendor,
       accFundingMonth,
       commission,
-      amt,
       tds,
       netPayable,
       commissionStatus,
@@ -63,7 +81,7 @@ function GicForm() {
       documentFile,
     } = formData;
     if (
-      !sNo ||
+      !Agents ||
       !studentName ||
       !passportNo ||
       !email ||
@@ -71,7 +89,6 @@ function GicForm() {
       !bankVendor ||
       !accFundingMonth ||
       !commission ||
-      !amt ||
       !tds ||
       !netPayable ||
       !commissionStatus ||
@@ -110,10 +127,9 @@ function GicForm() {
         tds: formData.tds,
         netPayable: formData.netPayable,
         commissionStatus: formData.commissionStatus,
-        agentRef: formData.sNo,
+        agentRef: formData.Agents,
         accOpeningMonth: getCurrentMonth(),
         bankVendor: formData.bankVendor,
-        amount: formData.amt,
         studentEmail: formData.email,
         studentPhoneNo: formData.phoneNo,
         studentPassportNo: formData.passportNo,
@@ -179,15 +195,21 @@ function GicForm() {
       <form onSubmit={handleSubmit}>
         <SimpleGrid columns={2} spacing={4}>
           <FormControl isRequired>
-            <FormLabel>SNo</FormLabel>
-            <Input
-              type="text"
-              name="sNo"
-              value={formData.sNo}
+            <FormLabel>Agents</FormLabel>
+            <Select
+              name="Agents"
+              value={formData.Agents}
               onChange={handleChange}
               h="50px"
               w="full"
-            />
+              placeholder="Select an agent"
+            >
+              {
+                agents.map((agents)=>(
+                  <option key={agents._id} value={agents._id}>{agents.agentCode}</option>
+                ))
+              }
+            </Select>
           </FormControl>
 
           <FormControl isReadOnly>
@@ -302,18 +324,6 @@ function GicForm() {
               <NumberInputField
                 name="commission"
                 value={formData.commission}
-                onChange={handleChange}
-                h="50px"
-              />
-            </NumberInput>
-          </FormControl>
-
-          <FormControl isRequired>
-            <FormLabel>Amount (Amt)</FormLabel>
-            <NumberInput min={0} h="50px" w="full">
-              <NumberInputField
-                name="amt"
-                value={formData.amt}
                 onChange={handleChange}
                 h="50px"
               />

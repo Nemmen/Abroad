@@ -65,7 +65,7 @@ function GicView() {
       mt={10}
       p={10}
       bg={bgColor}
-      borderRadius="xl"
+      borderRadius="none"
       boxShadow="2xl"
     >
       <Flex align="center" mb={8}>
