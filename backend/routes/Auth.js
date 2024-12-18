@@ -1,6 +1,6 @@
 import express from 'express';
 import multer from 'multer';
-import {checkUser, login, logout, register, addGicForm, viewAllGicForm, addForexForm, viewAllForexForms, getAllBlockedData, createBlockedData } from '../controllers/Auth.js';
+import {checkUser, login, logout,getAllusers, register, addGicForm, viewAllGicForm, addForexForm, viewAllForexForms, getAllBlockedData, createBlockedData } from '../controllers/Auth.js';
 import { uploadFile } from '../controllers/googleDrive.js'; // Import Google Drive upload controller
 import { IsUser } from '../middleware/verifyToken.js';
 
