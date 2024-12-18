@@ -10,7 +10,10 @@ import Banner from 'views/admin/marketplace/components/Banner';
 import Card from 'components/card/Card.js';
 
 import NotificationBar from './components/NotificationBar';
-import UserDetailPage from './components/UserDetailPage';
+import DynamicLineChart1 from './components/GicChart';
+import DynamicLineChart from './components/Chart';
+import ForexcurrentMonth from './components/ForexcurrentMonth';
+import GICcurrentMonth from './components/GicCurrent';
 
 export default function MainDashboard() {
   // Chakra Color Mode
@@ -29,7 +32,6 @@ export default function MainDashboard() {
           gridArea={{ xl: '1 / 1 / 2 / 3', '2xl': '1 / 1 / 2 / 2' }}
         >
           <Banner />
-          <Flex direction="column"></Flex>
         </Flex>
         <Flex
           flexDirection="column"
@@ -41,6 +43,15 @@ export default function MainDashboard() {
         </Flex>
       </Grid>
       {/* Delete Product */}
+
+      <div className='flex justify-around'>
+        <ForexcurrentMonth />
+        <DynamicLineChart />
+      </div>
+      <div className='flex justify-around'>
+        <GICcurrentMonth />
+        <DynamicLineChart1 />
+      </div>
       {/* <UserDetailPage /> */}
     </Box>
   );
