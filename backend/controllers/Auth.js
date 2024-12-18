@@ -251,7 +251,7 @@ const addGicForm = async (req, res) => {
 // view all gic form
 const viewAllGicForm = async (req, res) => {
   try {
-    const gicForms = await GICModel.find();
+    const gicForms = await GICModel.find().populate('agentRef', 'agentCode');
     res.status(200).json({ success: true, gicForms });
   } catch (error) {
     console.error('View GIC Form Error:', error);
@@ -337,7 +337,7 @@ const addForexForm = async (req, res) => {
 // Controller to fetch all Forex account details
 const viewAllForexForms = async (req, res) => {
   try {
-    const forexForms = await ForexModel.find();
+    const forexForms = await ForexModel.find().populate('agentRef', 'agentCode');
     res.status(200).json({ success: true, forexForms });
   } catch (error) {
     console.error('View Forex Forms Error:', error);
@@ -372,10 +372,23 @@ const getAllBlockedData = async (req, res) => {
   }
 };
 
+
+const getAllusers = async (req, res) => {
+  try {
+    const users = await UserModel.find();
+    res.status(200).json({
+      message: "All users fetched successfully",
+      data: users,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching users", error });
+  }
+}
+
   
 
 
 
 
-export { register, login, logout , getCurrentUser, addGicForm, viewAllGicForm, addForexForm, viewAllForexForms, getAllBlockedData, createBlockedData};
+export { register, login, logout ,getAllusers , getCurrentUser, addGicForm, viewAllGicForm, addForexForm, viewAllForexForms, getAllBlockedData, createBlockedData};
 

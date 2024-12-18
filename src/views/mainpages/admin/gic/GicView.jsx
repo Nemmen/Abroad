@@ -9,7 +9,14 @@ import {
   Icon,
   useColorModeValue,
 } from '@chakra-ui/react';
-import { FiFileText, FiUser, FiPhone, FiMail, FiDollarSign, FiBriefcase } from 'react-icons/fi';
+import {
+  FiFileText,
+  FiUser,
+  FiPhone,
+  FiMail,
+  FiDollarSign,
+  FiBriefcase,
+} from 'react-icons/fi';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 
@@ -40,13 +47,17 @@ function GicView() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:4000/auth/viewAllGicForm');
+        const response = await axios.get(
+          'http://localhost:4000/auth/viewAllGicForm',
+        );
         if (response.data.success) {
-          const formData1 = response.data.gicForms.find((form) => form._id === id);
+          const formData1 = response.data.gicForms.find(
+            (form) => form._id === id,
+          );
           setFormData(formData1);
         }
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error('Error fetching data:', error);
       }
     };
 
@@ -77,50 +88,69 @@ function GicView() {
       </Flex>
 
       <SimpleGrid columns={{ base: 1, md: 2 }} spacing={10}>
-        {Object.entries(formData).map(([label, value], index) => (
-          label !== '__v' && label !=='_id' && label !== 'studentDocuments' && (
-            <VStack key={index} align="start" spacing={2} w="full">
-              <Flex align="center">
-                <Icon as={fieldIcons[label] || FiFileText} color="blue.500" mr={2} />
-                <Text fontSize="sm" fontWeight="medium" color={labelColor}>
-                  {label.replace(/([A-Z])/g, ' $1')}
-                </Text>
-              </Flex>
-              <Box
-                p={4}
-                bg={fieldBgColor}
-                borderRadius="md"
-                width="full"
-              >
-                <Text fontSize="lg" fontWeight="bold" color={valueColor}>
-                  {value}
-                </Text>
-              </Box>
-            </VStack>
-          )
-        ))}
+        {Object.entries(formData).map(
+          ([label, value], index) =>
+            label !== '__v' &&
+            label !== '_id' &&
+            label !== 'studentDocuments' && (
+              <VStack key={index} align="start" spacing={2} w="full">
+                <Flex align="center">
+                  <Icon
+                    as={fieldIcons[label] || FiFileText}
+                    color="blue.500"
+                    mr={2}
+                  />
+                  <Text fontSize="sm" fontWeight="medium" color={labelColor}>
+                    {label.replace(/([A-Z])/g, ' $1')}{' '}
+                    {/* Format label names */}
+                  </Text>
+                </Flex>
+                <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
+                  <Text fontSize="lg" fontWeight="bold" color={valueColor}>
+                    {typeof value === 'object' && value !== null
+                      ? // Handle specific cases for nested objects
+                        label === 'agentRef' && value.agentCode
+                        ? value.agentCode // Render only the agentCode if the label is 'agentRef'
+                        : Object.entries(value)
+                            .map(([key, val]) => `${key}: ${val}`)
+                            .join(', ') // Fallback: render key-value pairs for other objects
+                      : value}{' '}
+                    {/* Render simple values */}
+                  </Text>
+                </Box>
+              </VStack>
+            ),
+        )}
 
         {/* Render each student document as a separate field */}
-        {formData.studentDocuments && Object.entries(formData.studentDocuments).map(([docLabel, docLink]) => (
-          <VStack key={docLabel} gridColumn={docLabel === 'passport' ? 'span 2' : 'span 1'} align="start" spacing={2} w="full">
-            <Flex align="center">
-              <Icon as={fieldIcons[docLabel] || FiFileText} color="blue.500" mr={2} />
-              <Text fontSize="sm" fontWeight="medium" color={labelColor}>
-                {docLabel.toUpperCase()}
-              </Text>
-            </Flex>
-            <Box
-              p={4}
-              bg={fieldBgColor}
-              borderRadius="md"
-              width="full"
-            >
-              <Text fontSize="lg" fontWeight="bold" color={valueColor}>
-                {docLink}
-              </Text>
-            </Box>
-          </VStack>
-        ))}
+        {formData.studentDocuments &&
+          Object.entries(formData.studentDocuments).map(
+            ([docLabel, docLink]) => (
+              <VStack
+                key={docLabel}
+                gridColumn={docLabel === 'passport' ? 'span 2' : 'span 1'}
+                align="start"
+                spacing={2}
+                w="full"
+              >
+                <Flex align="center">
+                  <Icon
+                    as={fieldIcons[docLabel] || FiFileText}
+                    color="blue.500"
+                    mr={2}
+                  />
+                  <Text fontSize="sm" fontWeight="medium" color={labelColor}>
+                    {docLabel.toUpperCase()}
+                  </Text>
+                </Flex>
+                <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
+                  <Text fontSize="lg" fontWeight="bold" color={valueColor}>
+                    {docLink}
+                  </Text>
+                </Box>
+              </VStack>
+            ),
+          )}
       </SimpleGrid>
     </Box>
   );
