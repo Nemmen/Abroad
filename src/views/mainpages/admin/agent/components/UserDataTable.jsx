@@ -47,7 +47,7 @@ export default function UserDataTable(props) {
     columnHelper.accessor('name', {
       id: 'name',
       header: () => (
-        <Text fontSize={{ sm: '10px', lg: '12px' }} color="gray.400">
+        <Text fontSize={{ sm: '10px', lg: '13px' } } color="white" fontWeight="500">
           NAME
         </Text>
       ),
@@ -60,12 +60,12 @@ export default function UserDataTable(props) {
     columnHelper.accessor('email', {
       id: 'email',
       header: () => (
-        <Text fontSize={{ sm: '10px', lg: '12px' }} color="gray.400">
+        <Text fontSize={{sm: '10px', lg: '13px' }}  color="white" fontWeight="500">
           EMAIL
         </Text>
       ),
       cell: (info) => (
-        <Text color={textColorSecondary} fontSize="sm" fontWeight="500">
+        <Text color="gray.500" fontSize="sm" fontWeight="500">
           {info.getValue()}
         </Text>
       ),
@@ -73,12 +73,12 @@ export default function UserDataTable(props) {
     columnHelper.accessor('userStatus', {
       id: 'userStatus',
       header: () => (
-        <Text fontSize={{ sm: '10px', lg: '12px' }} color="gray.400">
+        <Text fontSize={{ sm: '10px', lg: '13px'}}  color="white" fontWeight="500">
           STATUS
         </Text>
       ),
       cell: (info) => (
-        <Text color={textColorSecondary} fontSize="sm" fontWeight="500">
+        <Text  color="gray.500" fontSize="sm" fontWeight="500">
           {info.getValue()}
         </Text>
       ),
@@ -86,12 +86,12 @@ export default function UserDataTable(props) {
     columnHelper.accessor('organization', {
       id: 'organization',
       header: () => (
-        <Text fontSize={{ sm: '10px', lg: '12px' }} color="gray.400">
+        <Text fontSize={{ sm: '10px', lg: '13px' }} color="white" fontWeight="500">
           ORGANIZATION
         </Text>
       ),
       cell: (info) => (
-        <Text color={textColorSecondary} fontSize="sm" fontWeight="500">
+        <Text  color="gray.500" fontSize="sm" fontWeight="500">
           {info.getValue()}
         </Text>
       ),
@@ -99,12 +99,12 @@ export default function UserDataTable(props) {
     columnHelper.accessor('phoneNumber', {
       id: 'phoneNumber',
       header: () => (
-        <Text fontSize={{ sm: '10px', lg: '12px' }} color="gray.400">
+        <Text fontSize={{  sm: '10px', lg: '13px'  }} color="white" fontWeight="500">
           PHONE NUMBER
         </Text>
       ),
       cell: (info) => (
-        <Text color={textColorSecondary} fontSize="sm" fontWeight="500">
+        <Text  color="gray.500" fontSize="sm" fontWeight="500">
           {info.getValue()}
         </Text>
       ),
@@ -112,12 +112,12 @@ export default function UserDataTable(props) {
     columnHelper.accessor('state', {
       id: 'state',
       header: () => (
-        <Text fontSize={{ sm: '10px', lg: '12px' }} color="gray.400">
+        <Text fontSize={{  sm: '10px', lg: '13px'  }} color="white" fontWeight="500">
           STATE
         </Text>
       ),
       cell: (info) => (
-        <Text color={textColorSecondary} fontSize="sm" fontWeight="500">
+        <Text  color="gray.500" fontSize="sm" fontWeight="500">
           {info.getValue()}
         </Text>
       ),
@@ -125,12 +125,12 @@ export default function UserDataTable(props) {
     columnHelper.accessor('createdAt', {
       id: 'createdAt',
       header: () => (
-        <Text fontSize={{ sm: '10px', lg: '12px' }} color="gray.400">
+        <Text fontSize={{  sm: '10px', lg: '13px' }} color="white" fontWeight="500">
           CREATED ON
         </Text>
       ),
       cell: (info) => (
-        <Text color={textColorSecondary} fontSize="sm" fontWeight="500">
+        <Text  color="gray.500" fontSize="sm" fontWeight="500">
           {new Date(info.getValue()).toLocaleDateString()}
         </Text>
       ),
@@ -138,7 +138,7 @@ export default function UserDataTable(props) {
     columnHelper.display({
       id: 'actions',
       header: () => (
-        <Text fontSize={{ sm: '10px', lg: '12px' }} color="gray.400">
+        <Text fontSize={{ sm: '10px', lg: '13px' }} color="white" fontWeight="500">
           ACTIONS
         </Text>
       ),
@@ -149,8 +149,11 @@ export default function UserDataTable(props) {
           <Box display={'flex'} gap={'10px'}>
             {userStatus === 'active' && (
               <Button
-                size="sm"
+              fontSize="15px"
+              paddingRight="32px"
+              paddingLeft="32px"
                 colorScheme="red"
+                borderRadius="50px"
                 onClick={() => handleStatusChange(userId, 'active')}
                 disabled={loadingButtonId === userId}
               >
@@ -164,7 +167,10 @@ export default function UserDataTable(props) {
             )}
             {userStatus === 'block' && (
               <Button
-                size="sm"
+               fontSize="15px"
+                paddingRight="24px"
+              paddingLeft="24px"
+               borderRadius="50px"
                 colorScheme="blue"
                 onClick={() => handleStatusChange(userId, 'block')}
                 disabled={loadingButtonId === userId}
@@ -208,33 +214,41 @@ export default function UserDataTable(props) {
   const handleStatusChange = async (userId, currentStatus) => {
     setLoadingButtonId(userId); // Set the loading state
     try {
+      if (currentStatus === 'isdeleted') {
+        // Send PUT request to mark the user as deleted
+        const url = `http://localhost:4000/admin/delete/${userId}`;
+        await axios.put(url, {}, { withCredentials: true });
+  
+        // Remove the deleted user from the state
+        const updatedData = data.filter((user) => user._id !== userId);
+        setData(updatedData);
+        return; // Exit the function as delete operation is complete
+      }
+  
+      // Handle block/unblock actions
       let url = '';
       let newStatus = currentStatus === 'active' ? 'block' : 'active';
-
-      // Define the correct API endpoint based on the action
+  
       if (currentStatus === 'active') {
         url = `http://localhost:4000/admin/block/${userId}`;
       } else if (currentStatus === 'block') {
         url = `http://localhost:4000/admin/unblock/${userId}`;
-      }else if (currentStatus === 'isdeleted') {
-        url = `http://localhost:4000/admin/delete/${userId}`;
       }
-
+  
       await axios.put(url, {}, { withCredentials: true });
-
-      // Update the data state with a new array reference
-      const updatedData = data.map((item) =>
-        item._id === userId ? { ...item, userStatus: newStatus } : item,
+  
+      // Update the user status in the state
+      const updatedData = data.map((user) =>
+        user._id === userId ? { ...user, userStatus: newStatus } : user
       );
-
-      // Set new array in state (this triggers re-render)
-      setData([...updatedData]);
+      setData(updatedData);
     } catch (error) {
-      console.error('Error updating user status:', error);
+      console.error('Error handling user status change:', error);
     } finally {
       setLoadingButtonId(null); // Clear the loading state
     }
   };
+  
 
   return (
     <Flex
@@ -246,12 +260,12 @@ export default function UserDataTable(props) {
         align={{ sm: 'flex-start', lg: 'center' }}
         justify="space-between"
         w="100%"
-        px="22px"
-        pb="20px"
+        px="15px"
+        pb="5px"
         mb="10px"
         boxShadow="0px 40px 58px -20px rgba(112, 144, 176, 0.26)"
       >
-        <Text color={textColor} fontSize="xl" fontWeight="600">
+        <Text color={textColor} fontSize="2xl" fontWeight="600">
           User Registrations
         </Text>
       </Flex>
@@ -262,6 +276,7 @@ export default function UserDataTable(props) {
               <Tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <Th
+                  className='bg-gray-800'
                     key={header.id}
                     colSpan={header.colSpan}
                     pe="10px"

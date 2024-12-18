@@ -53,7 +53,7 @@ export default function TopUserTable() {
     columnHelper.accessor('name', {
       id: 'name',
       header: () => (
-        <Text fontSize={{ sm: '10px', lg: '12px' }} color="gray.400">
+        <Text fontSize={{ sm: '10px', lg: '13px' }} color="white" fontWeight="500">
           NAME
         </Text>
       ),
@@ -66,12 +66,12 @@ export default function TopUserTable() {
     columnHelper.accessor('email', {
       id: 'email',
       header: () => (
-        <Text fontSize={{ sm: '10px', lg: '12px' }} color="gray.400">
+        <Text fontSize={{ sm: '10px', lg: '13px' }} color="white" fontWeight="500">
           EMAIL
         </Text>
       ),
       cell: (info) => (
-        <Text color={textColorSecondary} fontSize="sm" fontWeight="500">
+        <Text color="gray.500" fontSize="sm" fontWeight="500">
           {info.getValue()}
         </Text>
       ),
@@ -79,13 +79,16 @@ export default function TopUserTable() {
     columnHelper.accessor('_id', {
       id: 'view',
       header: () => (
-        <Text fontSize={{ sm: '10px', lg: '12px' }} color="gray.400">
+        <Text fontSize={{ sm: '10px', lg: '13px' }} color="white" fontWeight="500">
           ACTION
         </Text>
       ),
       cell: (info) => (
         <Button
-          size="sm"
+        fontSize="15px"
+        paddingRight="32px"
+        paddingLeft="32px"
+        borderRadius="50px"
           colorScheme="blue"
           onClick={() => navigate(`/admin/agent/userdetail/${info.getValue()}`)}
         >
@@ -113,12 +116,12 @@ export default function TopUserTable() {
         align={{ sm: 'flex-start', lg: 'center' }}
         justify="space-between"
         w="100%"
-        px="22px"
-        pb="20px"
+        px="15px"
+        pb="5px"
         mb="10px"
         boxShadow="0px 40px 58px -20px rgba(112, 144, 176, 0.26)"
       >
-        <Text color={textColor} fontSize="xl" fontWeight="600">
+        <Text color={textColor} fontSize="2xl" fontWeight="600">
           Recent Signups
         </Text>
       </Flex>
@@ -130,6 +133,7 @@ export default function TopUserTable() {
                 <Tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
                     <Th
+                     className='bg-gray-800'
                       key={header.id}
                       colSpan={header.colSpan}
                       pe="10px"
