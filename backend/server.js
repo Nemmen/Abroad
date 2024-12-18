@@ -5,6 +5,7 @@ import cookieparser from 'cookie-parser'
 import DbCon from './utlis/db.js'
 import AuthRoutes from './routes/Auth.js'
 import AdminRoutes from './routes/AdminRoutes.js'
+
 // import uploadRoutes from './routes/uploadRoutes.js';
 
 

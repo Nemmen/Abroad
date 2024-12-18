@@ -8,6 +8,7 @@ import {
   MdAttachMoney,
   MdSwapHoriz,
   MdBusiness,
+  MdVerifiedUser
 } from 'react-icons/md';
 
 import { SiAuthentik } from 'react-icons/si';
@@ -24,6 +25,7 @@ import Gic from 'views/mainpages/admin/gic/Gic';
 import Forex from 'views/mainpages/admin/forex/Forex';
 import AgentForex from './views/mainpages/agent/forex/AgentForex.jsx'
 import BlockedPage from 'views/mainpages/agent/blocked/BlockedPage';
+import StudentPage from 'views/mainpages/agent/students/StudentPage';
 
 const routes = [
   {
@@ -98,6 +100,13 @@ export const routeAjent = [
     path: '/blocked',
     icon: <Icon as={MdBusiness} width="20px" height="20px" color="inherit" />,
     component: <BlockedPage/>,
+  },
+  {
+    name: 'Students',
+    layout: '/agent',
+    path: '/students',
+    icon: <Icon as={MdVerifiedUser} width="20px" height="20px" color="inherit" />,
+    component: <StudentPage/>,
   },
 ];
 
