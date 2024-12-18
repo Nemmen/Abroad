@@ -1,57 +1,58 @@
 import express from 'express';
 import multer from 'multer';
-import { checkUser, login, logout,getAllusers, register, addGicForm, viewAllGicForm, addForexForm, viewAllForexForms, getAllBlockedData, createBlockedData} from '../controllers/Auth.js';
+import {checkUser, login, logout, register, addGicForm, viewAllGicForm, addForexForm, viewAllForexForms, getAllBlockedData, createBlockedData } from '../controllers/Auth.js';
+import { uploadFile } from '../controllers/googleDrive.js'; // Import Google Drive upload controller
 import { IsUser } from '../middleware/verifyToken.js';
-// import { uploadFileToCloudinary } from '../controllers/uploadController.js';
+
 const AuthRoutes = express.Router();
 
-// Configure multer for file uploads, specifying the upload directory and file filter
+// Configure Multer for handling PDF uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // specify the directory for uploaded files
+    cb(null, 'uploads/'); // Temporary folder for storing uploads
   },
   filename: (req, file, cb) => {
-    // Store files with a unique name to prevent overwriting
-    cb(null, `${Date.now()}-${file.originalname}`);
+    cb(null, `${Date.now()}-${file.originalname}`); // Unique filename
   },
 });
 
 const upload = multer({
-  storage: storage,
+  storage,
   fileFilter: (req, file, cb) => {
     // Allow only PDF files
     if (file.mimetype === 'application/pdf') {
       cb(null, true);
     } else {
-      cb(new Error('Only PDF files are allowed for documents'), false);
+      cb(new Error('Only PDF files are allowed'), false);
     }
   },
 });
 
-// Apply the upload middleware to the register route to handle `document1` and `document2`
+// Authentication Routes
 AuthRoutes.post('/register', async (req, res) => {
   try {
-    // Call the register controller with the request and response objects
     await register(req, res);
   } catch (error) {
-    console.error("Error in registration route:", error);
+    console.error('Error in registration route:', error);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
-
 AuthRoutes.post('/login', login);
 AuthRoutes.post('/logout', logout);
 AuthRoutes.get('/checkUser', IsUser, checkUser);
+
+// Form Handling Routes
 AuthRoutes.post('/addGicForm', addGicForm);
 AuthRoutes.get('/viewAllGicForm', viewAllGicForm);
 AuthRoutes.post('/addForexForm', addForexForm);
 AuthRoutes.get('/getAllusers', getAllusers);
 AuthRoutes.get('/viewAllForexForms', viewAllForexForms);
-// AuthRoutes.get('/getAllAccount', getAccountRecords);
-// AuthRoutes.post('/addAccount', addAccountRecord);
+
+// Blocked Data Routes
 AuthRoutes.get('/getAllBlockedData', getAllBlockedData);
 AuthRoutes.post('/createBlockedData', createBlockedData);
 
-
+// File Upload to Google Drive
+AuthRoutes.post('/upload', upload.array('files', 5), uploadFile); // Limit to 5 files per request
 
 export default AuthRoutes;
