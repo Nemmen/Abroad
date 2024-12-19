@@ -219,7 +219,7 @@ function ForexForm() {
               placeholder="Select an agent"
             >
               {agents.map((agent) => (
-                <option key={agent._id} value={agent.agentCode}>
+                <option key={agent._id} value={agent._id}>
                   {agent.agentCode}
                 </option>
               ))}

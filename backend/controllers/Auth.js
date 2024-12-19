@@ -309,25 +309,25 @@ const addForexForm = async (req, res) => {
       agentRef,
     } = req.body;
 
-    if (
-      !studentName ||
-      !country ||
-      !currencyBooked ||
-      !quotation ||
-      !studentPaid ||
-      !docsStatus ||
-      !ttCopyStatus ||
-      !agentCommission ||
-      !tds ||
-      !netPayable ||
-      !commissionStatus ||
-      !agentRef
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: 'All required fields must be provided',
-      });
-    }
+    // if (
+    //   !studentName ||
+    //   !country ||
+    //   !currencyBooked ||
+    //   !quotation ||
+    //   !studentPaid ||
+    //   !docsStatus ||
+    //   !ttCopyStatus ||
+    //   !agentCommission ||
+    //   !tds ||
+    //   !netPayable ||
+    //   !commissionStatus ||
+    //   !agentRef
+    // ) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: 'All required fields must be provided',
+    //   });
+    // }
 
     // Step 1: Create a folder for the student in Google Drive
     const folderName = `${studentName}-Forex-Documents`;

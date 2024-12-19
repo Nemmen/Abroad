@@ -30,7 +30,7 @@ const Forex = () => {
       .then((response) => {
         const fetchedData = response.data.forexForms.map((item, index) => ({
           ...item,
-          agentRef: item.agentRef.agentCode || 'N/A',
+          agentRef: item.agentRef?.agentCode || 'N/A',
           id: item._id,
          
         }));
@@ -40,6 +40,7 @@ const Forex = () => {
         console.error('Error fetching forex forms:', error);
       });
   }, []);
+  console.log('rows:', rows); 
 
   const handleDownloadExcel = () => {
     const cleanData = rows.map((item) => {
