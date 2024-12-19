@@ -145,7 +145,7 @@ function GicView() {
                 </Flex>
                 <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
                   <Text fontSize="lg" fontWeight="bold" color={valueColor}>
-                    {docLink}
+                    <a href={docLink} target='_blank'>View 👁️</a>
                   </Text>
                 </Box>
               </VStack>

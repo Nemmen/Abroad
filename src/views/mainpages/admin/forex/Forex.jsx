@@ -4,6 +4,7 @@ import { Box, Button, Divider, Text } from '@chakra-ui/react';
 import DataTable from 'components/DataTable';
 import { Link } from 'react-router-dom';
 import * as XLSX from 'xlsx';
+import FileUpload from 'views/File';
 
 const columns = [
   { field: 'Agent', headerName: 'Agent', width: 120 },

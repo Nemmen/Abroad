@@ -20,7 +20,7 @@ const getCurrentMonth = () => format(new Date(), 'MMMM');
 
 function GicForm() {
   const [agents, setAgents] = useState([]);
-
+  const [view, setView] = useState('');
   const [formData, setFormData] = useState({
     Agents: '',
     studentName: '',
@@ -109,16 +109,11 @@ function GicForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (validateForm()) {
       const { documentFile, documentType, studentName } = formData;
       const fileExtension = documentFile.name.split('.').pop();
-      const renamedFile = new File(
-        [documentFile],
-        `${documentType}_${studentName}.${fileExtension}`,
-        { type: documentFile.type },
-      );
-
+  
       // Prepare form data for API submission
       const formDataToSend = {
         studentName: formData.studentName,
@@ -133,9 +128,46 @@ function GicForm() {
         studentEmail: formData.email,
         studentPhoneNo: formData.phoneNo,
         studentPassportNo: formData.passportNo,
+        studentDocuments: {}, // Initialize an empty object for documents
       };
-
+  
+      const filedata = new FormData();
+      filedata.append('files', documentFile);
+      filedata.append('type', documentType);
+      filedata.append('agentCode', formData.Agents);
+      filedata.append('folderId', '1WkdyWmBhKQAI6W_M4LNLbPylZoGZ7y6V');
+  
+      try {
+        const response = await fetch('http://localhost:4000/api/uploads/upload', {
+          method: 'POST',
+          body: filedata,
+          headers: {
+            Accept: 'application/json',
+          },
+        });
+  
+        const result = await response.json();
+        const viewLink = result.uploads[0].fileId; // Adjust based on your API response structure
+        console.log(viewLink)
+  
+        console.log('Server Response:', result);
+  
+        // Include the view link in the form data
+        formDataToSend.studentDocuments[documentType] = viewLink;
+      } catch (error) {
+        console.error('Error uploading files:', error);
+        toast({
+          title: 'File Upload Error',
+          description: 'An error occurred while uploading the file.',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        });
+        return; // Stop further execution if file upload fails
+      }
+  
       const apiUrl = 'http://localhost:4000/auth/addGicForm';
+      console.log('Form Data to Send:', formDataToSend);
 
       try {
         const response = await fetch(apiUrl, {
@@ -145,9 +177,9 @@ function GicForm() {
           },
           body: JSON.stringify(formDataToSend),
         });
-
+  
         const result = await response.json();
-
+  
         if (response.ok) {
           toast({
             title: 'Form Submitted',
@@ -180,6 +212,7 @@ function GicForm() {
       }
     }
   };
+  
 
   return (
     <Box
@@ -383,10 +416,10 @@ function GicForm() {
               h="50px"
               w="full"
             >
-              <option value="Adhaar">Adhaar</option>
-              <option value="Pan">Pan</option>
-              <option value="Offer letter">Offer Letter</option>
-              <option value="Passport">Passport</option>
+              <option value="aadhar">Adhaar</option>
+              <option value="pan">Pan</option>
+              <option value="ol">Offer Letter</option>
+              <option value="passport">Passport</option>
             </Select>
           </FormControl>
 

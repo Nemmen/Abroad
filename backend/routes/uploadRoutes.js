@@ -21,3 +21,17 @@
 // ]), uploadBlockedAccountDocuments);
 
 // export default router;
+
+// "folderId": "1WkdyWmBhKQAI6W_M4LNLbPylZoGZ7y6V" for gic
+
+
+import express from 'express';
+import {uploadFileController , createFolderController} from '../controllers/fileUplaod.js';
+
+const router = express.Router();
+
+
+router.post('/upload', uploadFileController);
+router.post('/folder', createFolderController);
+
+export default router;

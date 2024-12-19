@@ -208,6 +208,7 @@ const addGicForm = async (req, res) => {
       studentEmail,
       studentPhoneNo,
       studentPassportNo,
+      studentDocuments,
     } = req.body;
 
     if (
@@ -227,30 +228,9 @@ const addGicForm = async (req, res) => {
       });
     }
 
-    // Step 1: Create a folder for the student in Google Drive
-    const folderName = `${studentName}-GIC-Documents`;
-    const folderId = await createFolder(folderName);
 
-    // Step 2: Upload files if present
-    const uploadedFiles = {};
-    if (req.files) {
-      for (const key of Object.keys(req.files)) {
-        const file = req.files[key];
-        const fileId = await uploadFile(file.path, folderId);
-        uploadedFiles[key] = fileId;
 
-        // Remove the file from local storage
-        fs.unlinkSync(file.path);
-      }
-    }
 
-    // Step 3: Merge uploaded file IDs into studentDocuments
-    const studentDocuments = {
-      ...req.body.studentDocuments,
-      ...uploadedFiles,
-    };
-
-    // Step 4: Create the GIC entry
     const newGIC = new GICModel({
       studentName,
       commissionAmt,
