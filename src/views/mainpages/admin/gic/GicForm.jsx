@@ -22,7 +22,7 @@ import {
   Spinner,
 } from '@chakra-ui/react';
 import { format } from 'date-fns';
-import { Navigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const getCurrentDate = () => format(new Date(), 'yyyy-MM-dd');
 const getCurrentMonth = () => format(new Date(), 'MMMM');
@@ -30,6 +30,7 @@ const getCurrentMonth = () => format(new Date(), 'MMMM');
 function GicForm() {
   const [agents, setAgents] = useState([]);
   const [view, setView] = useState('');
+  const navigate = useNavigate();
   const [students, setStudents] = useState([]);
   const [newStudent, setNewStudent] = useState({ name: '', email: '' });
   const [loading, setLoading] = useState(false);
@@ -280,7 +281,7 @@ function GicForm() {
             isClosable: true,
           });
           console.log('Server Response:', result);
-          Navigate(`/admin/gic/${result.newGIC._id}`);
+          navigate(`/admin/gic/${result.newGIC._id}`);
           setLoading(false);
         } else {
           toast({
