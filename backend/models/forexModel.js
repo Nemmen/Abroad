@@ -13,7 +13,7 @@ const documentSchema = new mongoose.Schema({
       'Grand Father',
       'Grand Mother',
     ],
-    // required: true,
+    required: true,
   },
   documentType: {
     type: String,
@@ -24,69 +24,61 @@ const documentSchema = new mongoose.Schema({
       'Passbook Front',
       'Cheque Copy',
     ],
-    // required: true,
+    required: true,
   },
   documentFile: {
     type: String, // Store the file path or URL of the uploaded document
-    // required: true,
+    required: true,
   },
 });
 
 const forexSchema = new mongoose.Schema({
-  sNo: {
-    type: String,
-    // required: true,
-  },
   date: {
     type: Date,
     default: Date.now,
   },
-  studentName: {
-    type: String,
-    // required: true,
-  },
   country: {
     type: String,
-    // required: true,
+    required: true,
   },
   currencyBooked: {
     type: String,
-    // required: true,
+    required: true,
   },
   quotation: {
     type: String,
-    // required: true,
+    required: true,
   },
   studentPaid: {
     type: String,
-    // required: true,
+    required: true,
   },
   docsStatus: {
     type: String,
     enum: ['Pending', 'Submitted', 'Verified'],
-    // required: true,
+    default: 'Pending',
   },
   ttCopyStatus: {
     type: String,
     enum: ['Pending', 'Received', 'Verified'],
-    // required: true,
+    default: 'Pending',
   },
   agentCommission: {
     type: String,
-    // required: true,
+    required: true,
   },
   tds: {
     type: String,
-    // required: true,
+    required: true,
   },
   netPayable: {
     type: String,
-    // required: true,
+    required: true,
   },
   commissionStatus: {
     type: String,
     enum: ['Not Received', 'Paid', 'Under Processing'],
-    // required: true,
+    default: 'Not Received',
   },
   passportFile: {
     type: String, // Store the file path or URL for the passport
@@ -94,7 +86,9 @@ const forexSchema = new mongoose.Schema({
   offerLetterFile: {
     type: String, // Store the file path or URL for the offer letter
   },
-  documents: [documentSchema], // Array of documents related to guardians or self
+  documents: {
+    type: [documentSchema], // Array of documents related to guardians or self
+  },
   agentRef: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'users',
@@ -102,6 +96,7 @@ const forexSchema = new mongoose.Schema({
   studentRef: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'students',
+    required: true,
   },
 });
 

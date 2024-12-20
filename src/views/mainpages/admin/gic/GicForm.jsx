@@ -29,10 +29,14 @@ const getCurrentMonth = () => format(new Date(), 'MMMM');
 
 function GicForm() {
   const [agents, setAgents] = useState([]);
-  const [view, setView] = useState('');
+  // const [view, setView] = useState('')
   const navigate = useNavigate();
   const [students, setStudents] = useState([]);
-  const [newStudent, setNewStudent] = useState({ name: '', email: '' });
+  const [newStudent, setNewStudent] = useState({
+    name: '',
+    email: '',
+    agentRef: '',
+  });
   const [loading, setLoading] = useState(false);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -223,7 +227,7 @@ function GicForm() {
       const filedata = new FormData();
       filedata.append('files', documentFile);
       filedata.append('type', documentType);
-      filedata.append('agentCode', formData.Agents);
+      filedata.append('studentRef', formData.studentRef);
       filedata.append('folderId', '1WkdyWmBhKQAI6W_M4LNLbPylZoGZ7y6V');
 
       try {
@@ -255,6 +259,7 @@ function GicForm() {
           duration: 3000,
           isClosable: true,
         });
+        setLoading(false);
         return; // Stop further execution if file upload fails
       }
 
@@ -568,6 +573,25 @@ function GicForm() {
             <ModalHeader>Create New Student</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
+              <FormControl isRequired>
+                <FormLabel>Agents</FormLabel>
+                <Select
+                  name="agentRef"
+                  value={newStudent.agentRef}
+                  onChange={handleNewStudentChange}
+                  h="50px"
+                  w="full"
+                  mb={'15px'}
+                  placeholder="Select an agent"
+                >
+                  {agents.map((agents) => (
+                    <option key={agents._id} value={agents._id}>
+                      {agents.agentCode}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
+
               <FormControl isRequired>
                 <FormLabel>Name</FormLabel>
                 <Input

@@ -4,12 +4,11 @@ import { Box, Button, Divider, Text } from '@chakra-ui/react';
 import DataTable from 'components/DataTable';
 import { Link } from 'react-router-dom';
 import * as XLSX from 'xlsx';
-import FileUpload from 'views/File';
 
 const columns = [
-  { field: 'Agent', headerName: 'Agent', width: 120 },
+  { field: 'agentRef', headerName: 'Agent', width: 120 },
   { field: 'date', headerName: 'Date', width: 150 },
-  { field: 'studentName', headerName: 'Student Name', width: 200 },
+  { field: 'studentRef', headerName: 'Student Name', width: 200 },
   { field: 'country', headerName: 'Country', width: 150 },
   { field: 'currencyBooked', headerName: 'Currency Booked', width: 150 },
   { field: 'quotation', headerName: 'Quotation', width: 150 },
@@ -29,60 +28,60 @@ const Forex = () => {
     axios
       .get('http://localhost:4000/auth/viewAllForexForms')
       .then((response) => {
-        const fetchedData = response.data.forexForms.map((item, index) => ({
+        const fetchedData = response.data.forexForms.map((item) => ({
           ...item,
           agentRef: item.agentRef?.agentCode || 'N/A',
+          studentRef: item.studentRef?.name ||'N/A',
+          date: new Date(item.date).toLocaleDateString('en-US'),
           id: item._id,
-         
         }));
+
+     
         setRows(fetchedData);
       })
       .catch((error) => {
         console.error('Error fetching forex forms:', error);
       });
   }, []);
-  console.log('rows:', rows); 
 
   const handleDownloadExcel = () => {
     const cleanData = rows.map((item) => {
-      // Destructure to remove _id, __v, and id from root level
-      console.log('item:', item);
-      const { _id, __v, id,agentRef, ...cleanedItem } = item;
-      console.log('cleanedItem:', cleanedItem);
-  
-      // Format the date field if it exists
-      if (cleanedItem.date && cleanedItem.date) {
-        cleanedItem.date = new Date(cleanedItem.date).toLocaleDateString();
+      const { _id, __v, id, ...cleanedItem } = item;
+
+      // Format the date to MM/DD/YYYY
+      if (cleanedItem.date) {
+        cleanedItem.date = new Date(cleanedItem.date).toLocaleDateString(
+          'en-US',
+        ); // MM/DD/YYYY format
       }
-  
-      // Format documents if present
+
       if (cleanedItem.documents) {
         cleanedItem.documents = cleanedItem.documents.map((doc) => {
-          const { _id, ...docWithoutId } = doc; // Remove _id from nested documents
+          const { _id, ...docWithoutId } = doc;
           return docWithoutId;
         });
       }
-  
+
       return cleanedItem;
     });
-  
-    // Flatten nested documents array for export
+
     const flattenedData = cleanData.map((item) => ({
       ...item,
       documents: item.documents
-        ? item.documents.map((doc) => `${doc.documentOf}: ${doc.documentType} (${doc.documentFile})`).join(', ')
+        ? item.documents
+            .map(
+              (doc) =>
+                `${doc.documentOf}: ${doc.documentType} (${doc.documentFile})`,
+            )
+            .join(', ')
         : '',
     }));
-  
-    // Create worksheet and workbook
+
     const worksheet = XLSX.utils.json_to_sheet(flattenedData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Forex Data');
-    
-    // Export workbook as Excel file
     XLSX.writeFile(workbook, 'ForexData.xlsx');
   };
-  
 
   return (
     <Box width={'full'}>
@@ -94,7 +93,6 @@ const Forex = () => {
         alignItems={'center'}
       >
         <Text fontSize="34px">FOREX Registrations</Text>
-
         <div>
           <Button
             onClick={handleDownloadExcel}
@@ -112,7 +110,6 @@ const Forex = () => {
           >
             Download Excel
           </Button>
-
           <Link to={'/admin/forex/form'}>
             <Button
               width={'200px'}

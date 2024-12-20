@@ -6,6 +6,7 @@ import {
   Text,
   SimpleGrid,
   VStack,
+  Link,
   Icon,
   useColorModeValue,
 } from '@chakra-ui/react';
@@ -147,9 +148,14 @@ function GicView() {
                 </Flex>
                 <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
                   <Text fontSize="lg" fontWeight="bold" color={valueColor}>
-                    <a href={docLink} target="_blank">
-                      View 👁️
-                    </a>
+                  <Link
+                      href={docLink}
+                      color="blue.500"
+                      fontWeight="bold"
+                      isExternal
+                    >
+                      View File 👁️
+                    </Link>
                   </Text>
                 </Box>
               </VStack>

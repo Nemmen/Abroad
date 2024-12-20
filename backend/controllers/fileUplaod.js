@@ -2,6 +2,7 @@ import { createFolder, uploadFile , getOrCreateAgentFolder } from './googleDrive
 import multer from 'multer';
 import fs from 'fs';
 import path from 'path';
+import StudentModel from '../models/student.js';
 
 // Ensure 'uploads/' directory exists
 const uploadDirectory = 'uploads/';
@@ -24,12 +25,13 @@ const upload = multer({
   storage,
   limits: { fileSize: 10 * 1024 * 1024 }, // Limit file size to 10MB
   fileFilter: (req, file, cb) => {
+    console.log('File mimetype:', file.mimetype);
     const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf']; // Allowed file types
     if (!allowedTypes.includes(file.mimetype)) {
       return cb(new Error('File type is not allowed'), false); // Reject invalid file types
     }
     cb(null, true); // Accept valid files
-  },
+  }  
 });
 
 export const multipleFileUploadMiddleware = upload.array('files', 6); // Middleware to handle up to 4 files
@@ -42,31 +44,41 @@ export const uploadFileController = [
   multipleFileUploadMiddleware,
   async (req, res) => {
     try {
-      const { folderId, type, agentCode } = req.body;
+      const { folderId, type, studentRef } = req.body;
 
-      if (!folderId || !agentCode || !req.files || req.files.length === 0) {
+      if (!folderId || !studentRef || !req.files || req.files.length === 0) {
         return res.status(400).json({ message: 'Missing required parameters or files' });
       }
+      
 
-      const agentFolderId = await getOrCreateAgentFolder(folderId, agentCode);
+      const Student = await StudentModel.findOne({ _id: studentRef });
+
+
+      const agentFolderId = await getOrCreateAgentFolder(folderId, studentRef);
 
       const uploadResults = [];
       for (const file of req.files) {
         const { path: filePath, originalname } = file;
-
-        // Generate a custom file name
+        console.log('Processing file:', filePath);
+    
+        if (!fs.existsSync(filePath)) {
+            console.error('File not found:', filePath);
+            continue; // Skip processing if file doesn't exist
+        }
+    
         const timestamp = Date.now();
         const fileExtension = path.extname(originalname);
-        const fileName = `${agentCode}_${type}_${timestamp}${fileExtension}`;
-
-        // Upload file with the custom name
+        const fileName = `${Student.name}_${type}_${timestamp}${fileExtension}`;
+    
+        // Upload file to Google Drive
         const { fileId, webViewLink } = await uploadFileWithDetails(filePath, agentFolderId, fileName);
-
-        uploadResults.push({ agentCode, fileId, webViewLink });
-
-        // Delete the temporary file after upload
+    
+        uploadResults.push({ studentRef, fileId, webViewLink });
+    
+        // Delete the file after successful upload
         fs.unlinkSync(filePath);
-      }
+    }
+    
 
       res.status(201).json({
         message: 'Files uploaded successfully',
@@ -88,9 +100,8 @@ export const uploadFileController = [
 const uploadFileWithDetails = async (filePath, folderId, fileName) => {
   try {
     const fileId = await uploadFile(filePath, folderId, fileName); // Pass fileName here
-    const webViewLink = `https://drive.google.com/file/d/${fileId}/view`;
 
-    return { fileId, webViewLink };
+    return { fileId };
   } catch (error) {
     console.error('Error uploading file:', error);
     throw new Error('Failed to upload file');

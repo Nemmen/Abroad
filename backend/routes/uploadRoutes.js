@@ -23,6 +23,7 @@
 // export default router;
 
 // "folderId": "1WkdyWmBhKQAI6W_M4LNLbPylZoGZ7y6V" for gic
+// 1f8tN2sgd_UBOdxpDwyQ1CMsyVvi1R96f for forex
 
 
 import express from 'express';

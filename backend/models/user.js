@@ -48,7 +48,7 @@ const userSchema = new mongoose.Schema(
         state: { type: String, required: true },
         city: { type: String, required: true },
         // abroadReason: { type: String },
-        studentRef: [{ type: mongoose.Schema.Types.ObjectId, ref: "students" }],
+        students: [{ type: mongoose.Schema.Types.ObjectId, ref: "students" }],
         document1: { type: String },
         document2: { type: String },
         businessDivision: { type: String, required: true },

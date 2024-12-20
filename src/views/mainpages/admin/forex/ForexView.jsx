@@ -7,6 +7,7 @@ import {
   SimpleGrid,
   VStack,
   Icon,
+  Link,
   useColorModeValue,
 } from '@chakra-ui/react';
 import {
@@ -22,38 +23,6 @@ import {
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 
-// Sample data for display, including documents
-const sampleData = {
-  sNo: '1',
-  date: '2023-11-12',
-  studentName: 'John Doe',
-  country: 'India',
-  currencyBooked: 'INR',
-  quotation: '1000',
-  studentPaid: '900',
-  docsStatus: 'Complete',
-  ttCopyStatus: 'Received',
-  agentCommission: '50',
-  tds: '5',
-  netPayable: '945',
-  commissionStatus: 'Paid',
-  passportFile: 'passport_john.pdf',
-  offerLetterFile: 'offer_letter_john.pdf',
-  documents: [
-    {
-      documentOf: 'Father',
-      documentType: 'Adhar',
-      documentFile: 'adhar_john_doe.pdf',
-    },
-    {
-      documentOf: 'Mother',
-      documentType: 'Pan',
-      documentFile: 'pan_mary_doe.pdf',
-    },
-  ],
-};
-
-// Map of form fields to icons
 const fieldIcons = {
   sNo: FiFileText,
   date: FiFileText,
@@ -87,7 +56,6 @@ function ForexView() {
           );
           if (formData1) {
             setFormData(formData1);
-            
           } else {
             console.error('Form data not found for ID:', id);
           }
@@ -100,9 +68,8 @@ function ForexView() {
       });
   }, [id]);
 
-  // Define color mode values
   const labelColor = useColorModeValue('gray.500', 'gray.400');
-  const valueColor = useColorModeValue('gray.900', 'whibluepha.900');
+  const valueColor = useColorModeValue('gray.900', 'whiteAlpha.900');
   const bgColor = useColorModeValue('white', 'gray.800');
   const fieldBgColor = useColorModeValue('gray.50', 'gray.700');
 
@@ -128,14 +95,12 @@ function ForexView() {
         <SimpleGrid columns={{ base: 1, md: 2 }} spacing={10}>
           {Object.entries(formData).map(
             ([label, value], index) =>
-              // Render general fields, excluding 'documents'
-            label !== '__v' && label !=='_id' && label !== 'documents' && (
-                <VStack
-                  key={index}
-                  align="start"
-                  spacing={2}
-                  w="full"
-                >
+              label !== '__v' &&
+              label !== '_id' &&
+              label !== 'documents' &&
+              label !== 'agentRef' &&
+              label !== 'studentRef' && (
+                <VStack key={index} align="start" spacing={2} w="full">
                   <Flex align="center">
                     <Icon
                       as={fieldIcons[label] || FiFileText}
@@ -147,17 +112,77 @@ function ForexView() {
                     </Text>
                   </Flex>
                   <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
-                    <Text fontSize="lg" fontWeight="bold" color={valueColor}>
-                    {label === 'date'
-                      ? new Date(value).toLocaleDateString('en-GB') // Format as DD/MM/YYYY
-                      : value}
-                    </Text>
+                    {label.endsWith('File') ? (
+                      <Link
+                        href={value}
+                        color="blue.500"
+                        fontWeight="bold"
+                        isExternal
+                      >
+                        View File 👁️
+                      </Link>
+                    ) : (
+                      <Text fontSize="lg" fontWeight="bold" color={valueColor}>
+                        {label === 'date'
+                          ? new Date(value).toLocaleDateString('en-GB')
+                          : value}
+                      </Text>
+                    )}
                   </Box>
                 </VStack>
               ),
           )}
 
-          {/* Document section */}
+          {/* Agent Reference */}
+          {formData.agentRef && (
+            <VStack align="start" spacing={2} w="full">
+              <Flex align="center">
+                <Icon as={FiUser} color="blue.500" mr={2} />
+                <Text fontSize="sm" fontWeight="medium" color={labelColor}>
+                  Agent Code
+                </Text>
+              </Flex>
+              <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
+                <Text fontSize="lg" fontWeight="bold" color={valueColor}>
+                  {formData.agentRef.agentCode}
+                </Text>
+              </Box>
+            </VStack>
+          )}
+
+          {/* Student Reference */}
+          {formData.studentRef && (
+            <>
+              <VStack align="start" spacing={2} w="full">
+                <Flex align="center">
+                  <Icon as={FiUser} color="blue.500" mr={2} />
+                  <Text fontSize="sm" fontWeight="medium" color={labelColor}>
+                    Student Name
+                  </Text>
+                </Flex>
+                <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
+                  <Text fontSize="lg" fontWeight="bold" color={valueColor}>
+                    {formData.studentRef.name}
+                  </Text>
+                </Box>
+              </VStack>
+              <VStack align="start" spacing={2} w="full">
+                <Flex align="center">
+                  <Icon as={FiFileText} color="blue.500" mr={2} />
+                  <Text fontSize="sm" fontWeight="medium" color={labelColor}>
+                    Student Email
+                  </Text>
+                </Flex>
+                <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
+                  <Text fontSize="lg" fontWeight="bold" color={valueColor}>
+                    {formData.studentRef.email}
+                  </Text>
+                </Box>
+              </VStack>
+            </>
+          )}
+
+          {/* Document Section */}
           <Box gridColumn="span 2" mt={6}>
             <Flex align="center" mb={4}>
               <Icon as={FiFolder} color="blue.500" mr={2} />
@@ -216,9 +241,14 @@ function ForexView() {
                         File Name
                       </Text>
                     </Flex>
-                    <Text fontSize="md" fontWeight="bold" color={valueColor}>
-                      {doc.documentFile}
-                    </Text>
+                    <Link
+                      href={doc.documentFile}
+                      color="blue.500"
+                      fontWeight="bold"
+                      isExternal
+                    >
+                      View File 👁️
+                    </Link>
                   </VStack>
                 </SimpleGrid>
               </Box>
