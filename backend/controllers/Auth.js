@@ -1,4 +1,5 @@
 import UserModel from '../models/user.js';
+import StudentModel from '../models/student.js';
 import { createFolder, uploadFile } from './googleDrive.js';
 import jwt from 'jsonwebtoken';
 import bcryptjs from 'bcryptjs';
@@ -196,7 +197,7 @@ const getCurrentUser = async (req, res) => {
 const addGicForm = async (req, res) => {
   try {
     const {
-      studentName,
+      studentRef,
       commissionAmt,
       fundingMonth,
       tds,
@@ -212,7 +213,7 @@ const addGicForm = async (req, res) => {
     } = req.body;
 
     if (
-      !studentName ||
+      !studentRef ||
       !commissionAmt ||
       !tds ||
       !netPayable ||
@@ -220,7 +221,8 @@ const addGicForm = async (req, res) => {
       !agentRef ||
       !studentEmail ||
       !studentPhoneNo ||
-      !studentPassportNo
+      !studentPassportNo ||
+      !studentDocuments
     ) {
       return res.status(400).json({
         success: false,
@@ -232,7 +234,7 @@ const addGicForm = async (req, res) => {
 
 
     const newGIC = new GICModel({
-      studentName,
+      studentRef,
       commissionAmt,
       fundingMonth,
       tds,
@@ -264,7 +266,7 @@ const addGicForm = async (req, res) => {
 // view all gic form
 const viewAllGicForm = async (req, res) => {
   try {
-    const gicForms = await GICModel.find().populate('agentRef', 'agentCode');
+    const gicForms = await GICModel.find().populate('agentRef', 'agentCode').populate('studentRef', 'name email studentCode');;
     res.status(200).json({ success: true, gicForms });
   } catch (error) {
     console.error('View GIC Form Error:', error);
@@ -366,7 +368,7 @@ const addForexForm = async (req, res) => {
 // Controller to fetch all Forex account details
 const viewAllForexForms = async (req, res) => {
   try {
-    const forexForms = await ForexModel.find().populate('agentRef', 'agentCode');
+    const forexForms = await ForexModel.find().populate('agentRef', 'agentCode').populate('studentRef', 'name email studentCode');;
     res.status(200).json({ success: true, forexForms });
   } catch (error) {
     console.error('View Forex Forms Error:', error);
@@ -454,10 +456,39 @@ const getAllusers = async (req, res) => {
   }
 }
 
+
+
+const studentCreate = async (req, res) => {
+  try {
+    const { name, email } = req.body;
+    if (!name || !email) {
+      return res.status(400).json({ message: 'Name and email are required' });
+    }
+    if (await StudentModel.findOne({ email })) {
+      return res.status(400).json({ message: 'Student already exists' });
+    }
+    const newStudent = new StudentModel({ name, email });
+    await newStudent.save();
+    res.status(201).json({ message: 'Student created successfully', newStudent });
+  } catch (error) {
+    console.error('Create Student Error:', error);
+    res.status(500).json({ message: 'Failed to create student', error: error.message });
+  }
+};
+
+const getStudent = async (req, res) => {
+  try {
+    const students = await StudentModel.find();
+    res.status(200).json({ message: 'All students fetched successfully', students });
+  } catch (error) {
+    console.error('Get Students Error:', error);
+    res.status(500).json({ message: 'Failed to fetch students', error: error.message });
+  }
+}
   
 
 
 
 
-export { register, login, logout ,getAllusers , getCurrentUser, addGicForm, viewAllGicForm, addForexForm, viewAllForexForms, getAllBlockedData, createBlockedData};
+export { register, login, logout ,getAllusers,studentCreate , getCurrentUser, addGicForm, getStudent,viewAllGicForm, addForexForm, viewAllForexForms, getAllBlockedData, createBlockedData};
 

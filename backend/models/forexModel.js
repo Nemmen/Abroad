@@ -3,12 +3,27 @@ import mongoose from 'mongoose';
 const documentSchema = new mongoose.Schema({
   documentOf: {
     type: String,
-    enum: ['Self', 'Brother', 'Sister', 'Husband', 'Father', 'Mother', 'Grand Father', 'Grand Mother'],
+    enum: [
+      'Self',
+      'Brother',
+      'Sister',
+      'Husband',
+      'Father',
+      'Mother',
+      'Grand Father',
+      'Grand Mother',
+    ],
     // required: true,
   },
   documentType: {
     type: String,
-    enum: ['Aadhar', 'Pan', 'Account statement', 'Passbook Front', 'Cheque Copy'],
+    enum: [
+      'Aadhar',
+      'Pan',
+      'Account statement',
+      'Passbook Front',
+      'Cheque Copy',
+    ],
     // required: true,
   },
   documentFile: {
@@ -83,6 +98,10 @@ const forexSchema = new mongoose.Schema({
   agentRef: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'users',
+  },
+  studentRef: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'students',
   },
 });
 

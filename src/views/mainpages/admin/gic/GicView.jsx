@@ -111,6 +111,8 @@ function GicView() {
                       ? // Handle specific cases for nested objects
                         label === 'agentRef' && value.agentCode
                         ? value.agentCode // Render only the agentCode if the label is 'agentRef'
+                        : label === 'studentRef' && value.studentCode
+                        ? value.name // Render only the studentCode if the label is 'studentRef'
                         : Object.entries(value)
                             .map(([key, val]) => `${key}: ${val}`)
                             .join(', ') // Fallback: render key-value pairs for other objects
@@ -145,7 +147,9 @@ function GicView() {
                 </Flex>
                 <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
                   <Text fontSize="lg" fontWeight="bold" color={valueColor}>
-                    <a href={docLink} target='_blank'>View 👁️</a>
+                    <a href={docLink} target="_blank">
+                      View 👁️
+                    </a>
                   </Text>
                 </Box>
               </VStack>
