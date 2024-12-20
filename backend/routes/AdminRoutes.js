@@ -26,7 +26,7 @@ AdminRoutes.post('/adduser', isAdmin, addUser);
 AdminRoutes.put('/block/:id', blockUser);
 AdminRoutes.get('/getblockuser', isAdmin, getBlockUser);
 AdminRoutes.put('/unblock/:id', isAdmin, unblockUser);
-AdminRoutes.put('/approve/:id', isAdmin, approveUser);
+AdminRoutes.put('/approve/:id',  approveUser);
 AdminRoutes.put('/reject/:id', isAdmin, rejectUser);
 AdminRoutes.get('/getuser/:id', isAdmin, getUserById);
 

@@ -1,88 +1,92 @@
-import React from 'react';
-import { Box, Button, Card, Divider, Text } from '@chakra-ui/react';
+import React, { useEffect, useState, useMemo } from 'react';
+import { Box, Button, Divider, Text } from '@chakra-ui/react';
 import DataTable from 'components/DataTable';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
+import * as XLSX from 'xlsx';
 
 // Define the columns
 const columns = [
-  { field: 'sNo', headerName: 'SNo', width: 70 },
-  { field: 'accOpeningDate', headerName: 'Acc Opening Date', width: 150 },
+  { field: 'Agent', headerName: 'Agent', width: 140 },
+  { field: 'accOpeningMonth', headerName: 'Acc Opening Month', width: 150 },
   { field: 'studentName', headerName: 'Student Name', width: 150 },
   { field: 'passportNo', headerName: 'Passport No.', width: 130 },
+  { field: 'studentPhoneNo', headerName: 'Student Contact', width: 130 },
   { field: 'bankVendor', headerName: 'Bank Vendor', width: 150 },
-  { field: 'accOpeningMonth', headerName: 'Acc Opening Month', width: 160 },
   { field: 'accFundingMonth', headerName: 'Acc Funding Month', width: 160 },
-  {
-    field: 'commissionAmt',
-    headerName: 'Commission Amt',
-    width: 140,
-    valueFormatter: ({ value }) => `$${value}`,
-  },
-  {
-    field: 'tds',
-    headerName: 'TDS',
-    width: 100,
-    valueFormatter: ({ value }) => `$${value}`,
-  },
-  {
-    field: 'netPayable',
-    headerName: 'Net Payable',
-    width: 140,
-    valueFormatter: ({ value }) => `$${value}`,
-  },
+  { field: 'commissionAmt', headerName: 'Commission Amt', width: 140 },
+  { field: 'tds', headerName: 'TDS', width: 100 },
+  { field: 'netPayable', headerName: 'Net Payable', width: 140 },
   { field: 'commissionStatus', headerName: 'Commission Status', width: 160 },
 ];
 
-// Example rows data
-const rows = [
-  {
-    id: 1,
-    sNo: 1,
-    accOpeningDate: '2024-01-15',
-    studentName: 'Alice Johnson',
-    passportNo: 'A1234567',
-    bankVendor: 'Bank of America',
-    accOpeningMonth: 'January',
-    accFundingMonth: 'February',
-    commissionAmt: 500,
-    tds: 50,
-    netPayable: 450,
-    commissionStatus: 'Paid',
-  },
-  {
-    id: 2,
-    sNo: 2,
-    accOpeningDate: '2024-02-20',
-    studentName: 'Bob Smith',
-    passportNo: 'B7654321',
-    bankVendor: 'Chase Bank',
-    accOpeningMonth: 'February',
-    accFundingMonth: 'March',
-    commissionAmt: 700,
-    tds: 70,
-    netPayable: 630,
-    commissionStatus: 'Pending',
-  },
-  {
-    id: 3,
-    sNo: 3,
-    accOpeningDate: '2024-03-05',
-    studentName: 'Carol White',
-    passportNo: 'C8765432',
-    bankVendor: 'Wells Fargo',
-    accOpeningMonth: 'March',
-    accFundingMonth: 'April',
-    commissionAmt: 600,
-    tds: 60,
-    netPayable: 540,
-    commissionStatus: 'Paid',
-  },
-  // Add more rows as needed
-];
-
-export { columns, rows };
-
 const Gic = () => {
+  const [rows, setRows] = useState([]);
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get('http://localhost:4000/auth/viewAllGicForm');
+        if (response.data.success) {
+          setData(response.data.gicForms);
+          const gicForms = response.data.gicForms.map((form, index) => ({
+            id: form._id || index, // Ensure each row has a unique id
+            Agent: form.agentRef.agentCode || 'N/A',
+            accOpeningMonth: form.accOpeningMonth || 'N/A',
+            studentName: form.studentName || 'N/A',
+            passportNo: form.studentPassportNo || 'N/A',
+            studentPhoneNo: form.studentPhoneNo || 'N/A',
+            bankVendor: form.bankVendor || 'N/A',
+            accFundingMonth: form.fundingMonth || 'N/A',
+            commissionAmt: form.commissionAmt || 0,
+            tds: form.tds || '0',
+            netPayable: form.netPayable || 0,
+            commissionStatus: form.commissionStatus || 'N/A',
+          }));
+          setRows(gicForms);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const handleDownloadExcel = () => {
+    const cleanData = data.map((item) => {
+      // Remove _id, __v, id, and agentRef fields from root level
+      const { _id, __v, id, agentRef, ...cleanedItem } = item;
+  
+      // Format date if present
+      if (cleanedItem.date) {
+        cleanedItem.date = new Date(cleanedItem.date).toLocaleDateString();
+      }
+  
+      // Flatten studentDocuments into a single string
+      if (cleanedItem.studentDocuments) {
+        cleanedItem.studentDocuments = Object.entries(cleanedItem.studentDocuments)
+          .map(([key, value]) => `${key}: ${value}`)
+          .join(', ');
+      }
+  
+      return cleanedItem;
+    });
+  
+    // Create worksheet and workbook
+    const worksheet = XLSX.utils.json_to_sheet(cleanData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Gic Data');
+  
+    // Export workbook as Excel file
+    XLSX.writeFile(workbook, 'GicData.xlsx');
+  };
+  
+  // Memoize columns and rows to prevent re-renders
+  const memoizedColumns = useMemo(() => columns, []);
+  const memoizedRows = useMemo(() => rows, [rows]);
+
   return (
     <Box width={'full'}>
       <Box
@@ -93,26 +97,27 @@ const Gic = () => {
         alignItems={'center'}
       >
         <div>
-          <Text
-            href="#"
-            bg="inherit"
-            borderRadius="inherit"
-            fontWeight=""
-            fontSize="34px"
-            _active={{
-              bg: 'inherit',
-              transform: 'none',
-              borderColor: 'transparent',
-            }}
-            _focus={{
-              boxShadow: 'none',
-            }}
-          >
-            GIC Registrations
-          </Text>
+          <Text fontSize="34px">GIC Registrations</Text>
         </div>
 
         <div>
+          <Button
+            onClick={handleDownloadExcel}
+            width={'200px'}
+            variant="solid"
+            colorScheme="green"
+            borderRadius={'none'}
+            _hover={{
+              bg: 'green.500',
+              color: 'white',
+              borderColor: 'green.500',
+            }}
+            mr={4}
+            mb={1}
+          >
+            Download Excel
+          </Button>
+
           <Link to={'/admin/gic/form'}>
             <Button
               width={'200px'}
@@ -120,25 +125,21 @@ const Gic = () => {
               colorScheme="blue"
               borderRadius={'none'}
               _hover={{
-                bg: 'blue.500', // Fill color on hover
-                color: 'white', // Text color on hover
-                borderColor: 'blue.500', // Border color remains consistent
+                bg: 'blue.500',
+                color: 'white',
+                borderColor: 'blue.500',
               }}
+              mb={1}
             >
               Add New
             </Button>
           </Link>
         </div>
       </Box>
-      <Divider
-        orientation="vertical"
-        width={'96%'}
-        mx={'auto'}
-        mb={'20px'}
-        bgColor={'black'}
-        height={'0.5px'}
-      />
-      <DataTable columns={columns} rows={rows} />
+      <Divider width={'96%'} mx={'auto'} mb={'20px'} bgColor={'black'} height={'0.5px'} />
+      <Box maxHeight="1200px" overflowY="auto">
+        <DataTable columns={memoizedColumns} rows={memoizedRows} />
+      </Box>
     </Box>
   );
 };

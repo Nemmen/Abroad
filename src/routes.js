@@ -1,13 +1,14 @@
 import React from 'react';
 
 import { Icon } from '@chakra-ui/react';
-
+import { BsFillPiggyBankFill } from "react-icons/bs";
 import {
   MdPerson,
   MdHome,
   MdAttachMoney,
   MdSwapHoriz,
   MdBusiness,
+  MdVerifiedUser
 } from 'react-icons/md';
 
 import { SiAuthentik } from 'react-icons/si';
@@ -23,6 +24,8 @@ import GicPage from 'views/mainpages/agent/gic/GicPage';
 import Gic from 'views/mainpages/admin/gic/Gic';
 import Forex from 'views/mainpages/admin/forex/Forex';
 import AgentForex from './views/mainpages/agent/forex/AgentForex.jsx'
+import BlockedPage from 'views/mainpages/agent/blocked/BlockedPage';
+import StudentPage from 'views/mainpages/agent/students/StudentPage';
 
 const routes = [
   {
@@ -91,6 +94,20 @@ export const routeAjent = [
     icon: <Icon as={MdBusiness} width="20px" height="20px" color="inherit" />,
     component: '',
   },
+  {
+    name: 'Blocked',
+    layout: '/agent',
+    path: '/blocked',
+    icon: <Icon as={MdBusiness} width="20px" height="20px" color="inherit" />,
+    component: <BlockedPage/>,
+  },
+  {
+    name: 'Students',
+    layout: '/agent',
+    path: '/students',
+    icon: <Icon as={MdVerifiedUser} width="20px" height="20px" color="inherit" />,
+    component: <StudentPage/>,
+  },
 ];
 
 // for commiy
@@ -106,7 +123,7 @@ export const Auth = [
     name: 'Sign Up',
     layout: '/auth',
     path: '/signup',
-    icon: <Icon as={SiAuthentik} width="20px" height="20px" color="inherit" />,
+    icon: <Icon as={BsFillPiggyBankFill} width="20px" height="20px" color="inherit" />,
     component: <Signup />,
   },
 ];

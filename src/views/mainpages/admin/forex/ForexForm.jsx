@@ -12,16 +12,26 @@ import {
   useToast,
   Text,
   Flex,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  Spinner,
 } from '@chakra-ui/react';
 import { format } from 'date-fns';
 import axios from 'axios';
-
+import { useNavigate } from 'react-router-dom';
+import countries from './csvjson.json';
 const getCurrentDate = () => format(new Date(), 'yyyy-MM-dd');
 
 function ForexForm() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    sNo: '',
-    studentName: '',
+    agentRef: '',
+    studentRef: '',
     country: '',
     currencyBooked: '',
     quotation: '',
@@ -32,12 +42,111 @@ function ForexForm() {
     tds: '',
     netPayable: '',
     commissionStatus: '',
-	passportFile: null,
-    offerLetterFile: null,
   });
-  const [countries, setCountries] = useState([]);
+  const [passportFile, setPassportFile] = useState(null);
+  const [offerLetterFile, setOfferLetterFile] = useState(null);
+
+  const [students, setStudents] = useState([]);
+  const [newStudent, setNewStudent] = useState({
+    name: '',
+    email: '',
+    agentRef: '',
+  });
   const [documents, setDocuments] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
   const toast = useToast();
+  const [agents, setAgents] = useState([]);
+
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        const response = await fetch('http://localhost:4000/auth/getStudent');
+        const data = await response.json();
+        if (response.ok) setStudents(data.students);
+      } catch (error) {
+        console.error('Error fetching students:', error);
+      }
+    };
+    fetchStudents();
+  }, [isModalOpen]);
+
+  const handleNewStudentChange = (e) => {
+    const { name, value } = e.target;
+    setNewStudent({ ...newStudent, [name]: value });
+  };
+
+  const handleNewStudentSubmit = async () => {
+    setLoading(true);
+    if (!newStudent.name || !newStudent.email) {
+      toast({
+        title: 'Incomplete Details',
+        description: 'Please fill in both Name and Email.',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:4000/auth/studentCreate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newStudent),
+      });
+      const result = await response.json();
+
+      if (response.ok) {
+        setStudents([...students, result.newStudent]);
+        setFormData({ ...formData, studentRef: result.newStudent._id });
+        toast({
+          title: 'Student Created',
+          description: 'New student has been added.',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+        closeModal();
+        setLoading(false);
+      } else {
+        setLoading(false);
+        throw new Error(result.message || 'Failed to create student.');
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error.message,
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      setLoading(false);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    const fetchAgents = async () => {
+      const apiUrl = 'http://localhost:4000/auth/getAllusers';
+      try {
+        const response = await fetch(apiUrl);
+        const result = await response.json();
+        if (response.ok) {
+          setAgents(result.data);
+        } else {
+          console.error('Server Error:', result);
+        }
+      } catch (error) {
+        console.error('Network Error:', error);
+      }
+    };
+    fetchAgents();
+  }, []);
 
   const whoOptions = [
     'Self',
@@ -50,29 +159,12 @@ function ForexForm() {
     'Grand Mother',
   ];
   const documentOptions = [
-    'Adhar',
+    'Aadhar',
     'Pan',
     'Account statement',
     'Passbook Front',
     'Cheque Copy',
   ];
-
-  useEffect(() => {
-    // Fetch countries from API
-    axios
-      .get('https://restcountries.com/v3.1/all')
-      .then((response) => setCountries(response.data))
-      .catch((error) => {
-        console.error('Error fetching countries:', error);
-        toast({
-          title: 'Error',
-          description: 'Could not load country options.',
-          status: 'error',
-          duration: 3000,
-          isClosable: true,
-        });
-      });
-  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -87,26 +179,20 @@ function ForexForm() {
   };
 
   const handleFileChange = (index, fileType, file) => {
-
-	
-	
     const updatedDocuments = documents.map((doc, i) =>
       i === index ? { ...doc, [fileType]: file } : doc,
     );
     setDocuments(updatedDocuments);
-	
   };
 
-  const handlePassOfferFileChange = (e) => {
-    const { name, files } = e.target;
-    setFormData({ ...formData, [name]: files[0] });
+  const handleFileChangeoffpass = (e, setFile) => {
+    setFile(e.target.files[0]);
   };
-
 
   const validateForm = () => {
     const {
-      sNo,
-      studentName,
+      agentRef,
+      studentRef,
       country,
       currencyBooked,
       quotation,
@@ -119,8 +205,8 @@ function ForexForm() {
       commissionStatus,
     } = formData;
     if (
-      !sNo ||
-      !studentName ||
+      !agentRef ||
+      !studentRef ||
       !country ||
       !currencyBooked ||
       !quotation ||
@@ -144,18 +230,127 @@ function ForexForm() {
     return true;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    console.log('Form Data:', formData);
+    console.log('Passport File:', passportFile);
+    console.log('Offer Letter File:', offerLetterFile);
+    console.log('Documents:', documents);
+
     if (validateForm()) {
-      console.log('Form data:', formData);
-      console.log('Documents:', documents);
+      try {
+        const fileUploadFormData = new FormData();
+        fileUploadFormData.append(
+          'folderId',
+          '1f8tN2sgd_UBOdxpDwyQ1CMsyVvi1R96f',
+        ); // Pass dynamic folderId if available
+        fileUploadFormData.append('studentRef', formData.studentRef); // Pass agentCode
+        fileUploadFormData.append('type', 'forex-documents'); // Define the type of document
+
+        const files = [
+          passportFile,
+          offerLetterFile,
+          ...documents.map((doc) => doc.documentFile),
+        ].filter(Boolean);
+
+        files.forEach((file) => {
+          fileUploadFormData.append('files', file); // Attach files
+        });
+
+        const uploadResponse = await fetch(
+          'http://localhost:4000/api/uploads/upload',
+          {
+            method: 'POST',
+            body: fileUploadFormData,
+            headers: {
+              Accept: 'application/json',
+            },
+          },
+        );
+
+        const uploadResult = await uploadResponse.json();
+
+        if (!uploadResponse.ok) {
+          throw new Error(uploadResult.message || 'File upload failed');
+        }
+
+        const formdata1 = {
+          ...formData,
+          passportFile: uploadResult.uploads[0].fileId,
+          offerLetterFile: uploadResult.uploads[1].fileId,
+        };
+        console.log(documents[0].documentOf);
+        // Extract the uploaded file details
+        const uploadedFiles = uploadResult.uploads
+          .map((file, index) => {
+            if (index > 1) {
+              return {
+                documentOf: documents[index - 2].documentOf, // Adjust fields as needed
+                documentType: documents[index - 2].documentType, // Adjust fields as needed
+                documentFile: file.fileId, // Store the Google Drive file ID
+              };
+            }
+            return null; // Return null for indices 0 and 1
+          })
+          .filter(Boolean); // Filter out null values
+
+        // Step 2: Send form data and uploaded file details to the backend
+        const finalFormData = {
+          ...formdata1,
+          documents: uploadedFiles,
+        };
+
+        const response = await fetch(
+          'http://localhost:4000/auth/addForexForm',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(finalFormData),
+          },
+        );
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.message || 'Failed to submit the form');
+        }
+
+        // Show success toast
+        toast({
+          title: 'Form Submitted',
+          description: 'Your form has been submitted successfully!',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+        navigate(`/admin/forex/${result.data._id}`);
+      } catch (error) {
+        console.error('Error:', error.message);
+
+        // Show error toast
+        toast({
+          title: 'Submission Error',
+          description: `Failed to submit the form: ${error.message}`,
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        });
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      // Show error toast for incomplete form
       toast({
-        title: 'Form Submitted',
-        description: 'Your data has been submitted successfully.',
-        status: 'success',
+        title: 'Form Incomplete',
+        description: 'Please fill in all required fields.',
+        status: 'error',
         duration: 3000,
         isClosable: true,
       });
+      setLoading(false);
     }
   };
 
@@ -185,15 +380,21 @@ function ForexForm() {
       <form onSubmit={handleSubmit}>
         <SimpleGrid columns={2} spacing={4}>
           <FormControl isRequired>
-            <FormLabel>SNo</FormLabel>
-            <Input
-              type="text"
-              name="sNo"
-              value={formData.sNo}
+            <FormLabel>Agent</FormLabel>
+            <Select
+              name="agentRef"
+              value={formData.agentRef}
               onChange={handleChange}
               h="50px"
               w="full"
-            />
+              placeholder="Select an agent"
+            >
+              {agents.map((agent) => (
+                <option key={agent._id} value={agent._id}>
+                  {agent.agentCode}
+                </option>
+              ))}
+            </Select>
           </FormControl>
 
           <FormControl isReadOnly>
@@ -209,14 +410,27 @@ function ForexForm() {
 
           <FormControl isRequired>
             <FormLabel>Student Name</FormLabel>
-            <Input
-              type="text"
-              name="studentName"
-              value={formData.studentName}
-              onChange={handleChange}
+            <Select
+              name="studentRef"
+              value={formData.studentRef}
+              onChange={(e) => {
+                if (e.target.value === 'create') {
+                  openModal();
+                } else {
+                  handleChange(e);
+                }
+              }}
               h="50px"
               w="full"
-            />
+              placeholder="Select a student"
+            >
+              {students.map((student) => (
+                <option key={student?._id} value={student?._id}>
+                  {`${student?.studentCode} - ${student?.name} - ${student?.email}`}
+                </option>
+              ))}
+              <option value="create">Create New student</option>
+            </Select>
           </FormControl>
 
           <FormControl isRequired>
@@ -230,8 +444,8 @@ function ForexForm() {
               w="full"
             >
               {countries.map((country, index) => (
-                <option key={index} value={country.name.common}>
-                  {country.name.common}
+                <option key={index} value={country.Name}>
+                  {country.Name}
                 </option>
               ))}
             </Select>
@@ -255,6 +469,7 @@ function ForexForm() {
               <NumberInputField
                 name="quotation"
                 value={formData.quotation}
+                placeholder="Number is Accepted"
                 onChange={handleChange}
                 h="50px"
               />
@@ -275,26 +490,34 @@ function ForexForm() {
 
           <FormControl isRequired>
             <FormLabel>DOCs Status</FormLabel>
-            <Input
-              type="text"
+            <Select
               name="docsStatus"
               value={formData.docsStatus}
               onChange={handleChange}
               h="50px"
               w="full"
-            />
+            >
+              <option value="">Select an option</option>
+              <option value="Pending">Pending</option>
+              <option value="Received">Received</option>
+              <option value="Verified">Verified</option>
+            </Select>
           </FormControl>
 
           <FormControl isRequired>
             <FormLabel>TT Copy Status</FormLabel>
-            <Input
-              type="text"
+            <Select
               name="ttCopyStatus"
               value={formData.ttCopyStatus}
               onChange={handleChange}
               h="50px"
               w="full"
-            />
+            >
+              <option value="">Select an option</option>
+              <option value="Pending">Pending</option>
+              <option value="Received">Received</option>
+              <option value="Verified">Verified</option>
+            </Select>
           </FormControl>
 
           <FormControl isRequired>
@@ -358,16 +581,12 @@ function ForexForm() {
               >
                 Choose File
               </Button>
-              <Text>
-                {formData.passportFile
-                  ? formData.passportFile.name
-                  : 'No file chosen'}
-              </Text>
+              <Text>{passportFile ? passportFile.name : 'No file chosen'}</Text>
               <Input
                 type="file"
                 id="passportFile"
                 name="passportFile"
-                onChange={handlePassOfferFileChange}
+                onChange={(e) => handleFileChangeoffpass(e, setPassportFile)}
                 hidden
               />
             </Flex>
@@ -386,15 +605,13 @@ function ForexForm() {
                 Choose File
               </Button>
               <Text>
-                {formData.offerLetterFile
-                  ? formData.offerLetterFile.name
-                  : 'No file chosen'}
+                {offerLetterFile ? offerLetterFile.name : 'No file chosen'}
               </Text>
               <Input
                 type="file"
                 id="offerLetterFile"
                 name="offerLetterFile"
-                onChange={handlePassOfferFileChange}
+                onChange={(e) => handleFileChangeoffpass(e, setOfferLetterFile)}
                 hidden
               />
             </Flex>
@@ -484,9 +701,82 @@ function ForexForm() {
           </Button>
         </Box>
 
-        <Button type="submit" colorScheme="brand" width="full" mt={6} h="50px">
-          Submit
-        </Button>
+        <Modal isOpen={isModalOpen} onClose={closeModal}>
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>Create New Student</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              <FormControl isRequired>
+                <FormLabel>Agents</FormLabel>
+                <Select
+                  name="agentRef"
+                  value={newStudent.agentRef}
+                  onChange={handleNewStudentChange}
+                  h="50px"
+                  w="full"
+                  mb={'15px'}
+                  placeholder="Select an agent"
+                >
+                  {agents.map((agents) => (
+                    <option key={agents._id} value={agents._id}>
+                      {agents.agentCode}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
+
+              <FormControl isRequired>
+                <FormLabel>Name</FormLabel>
+                <Input
+                  name="name"
+                  value={newStudent.name}
+                  onChange={handleNewStudentChange}
+                  placeholder="Enter student name"
+                />
+              </FormControl>
+              <FormControl isRequired mt={4}>
+                <FormLabel>Email</FormLabel>
+                <Input
+                  name="email"
+                  value={newStudent.email}
+                  onChange={handleNewStudentChange}
+                  placeholder="Enter student email"
+                />
+              </FormControl>
+            </ModalBody>
+            <ModalFooter>
+              {loading ? (
+                <Spinner mr={5} />
+              ) : (
+                <Button
+                  colorScheme="blue"
+                  mr={3}
+                  onClick={handleNewStudentSubmit}
+                >
+                  Submit
+                </Button>
+              )}
+              <Button onClick={closeModal}>Cancel</Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+
+        {loading ? (
+          <Button colorScheme="brand" width="full" mt={6} h="50px">
+            <Spinner />
+          </Button>
+        ) : (
+          <Button
+            type="submit"
+            colorScheme="brand"
+            width="full"
+            mt={6}
+            h="50px"
+          >
+            Submit
+          </Button>
+        )}
       </form>
     </Box>
   );

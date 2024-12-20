@@ -44,7 +44,7 @@ export default function Index() {
  
   return (
     <ThemeProvider theme={muiTheme}>
-      <Box sx={{ mt: 10, width: '100%' }}>
+      <Box sx={{ mt: 3, width: '100%' }}>
 
         {/* Welcome Banner */}
         

@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
 
+// Define the columns
 const columns = [
   { field: 'sNo', headerName: 'SNo', width: 70 },
   { field: 'accOpeningMonth', headerName: 'Acc Opening Month', width: 150 },
@@ -19,18 +20,18 @@ const columns = [
   { field: 'commissionStatus', headerName: 'Commission Status', width: 160 },
 ];
 
-const GicPage = () => {
+const BlockedPage = () => {
   const [rows, setRows] = useState([]);
   const [data, setData] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:4000/auth/viewAllGicForm');
+        const response = await axios.get('http://localhost:4000/auth/getAllBlockedData');
         if (response.data.success) {
           setData(response.data.gicForms);
           const gicForms = response.data.gicForms.map((form, index) => ({
-            id: form._id || index,
+            id: form._id || index, // Ensure each row has a unique id
             sNo: index + 1,
             accOpeningMonth: form.accOpeningMonth || 'N/A',
             studentName: form.studentName || 'N/A',
@@ -143,4 +144,4 @@ const GicPage = () => {
   );
 };
 
-export default GicPage;
+export default BlockedPage;

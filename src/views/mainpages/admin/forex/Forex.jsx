@@ -1,12 +1,14 @@
-import React from 'react';
-import { Box, Button, Card, Divider, Text } from '@chakra-ui/react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import { Box, Button, Divider, Text } from '@chakra-ui/react';
 import DataTable from 'components/DataTable';
 import { Link } from 'react-router-dom';
+import * as XLSX from 'xlsx';
 
 const columns = [
-  { field: 'sNo', headerName: 'SNo', width: 80 },
+  { field: 'agentRef', headerName: 'Agent', width: 120 },
   { field: 'date', headerName: 'Date', width: 150 },
-  { field: 'studentName', headerName: 'Student Name', width: 200 },
+  { field: 'studentRef', headerName: 'Student Name', width: 200 },
   { field: 'country', headerName: 'Country', width: 150 },
   { field: 'currencyBooked', headerName: 'Currency Booked', width: 150 },
   { field: 'quotation', headerName: 'Quotation', width: 150 },
@@ -19,43 +21,68 @@ const columns = [
   { field: 'commissionStatus', headerName: 'Commission Status', width: 180 },
 ];
 
-const rows = [
-  {
-    id: 1,
-    sNo: 1,
-    date: '2024-11-01',
-    studentName: 'John Doe',
-    country: 'USA',
-    currencyBooked: 'USD',
-    quotation: '5000',
-    studentPaid: '4500',
-    docsStatus: 'Submitted',
-    ttCopyStatus: 'Received',
-    agentCommission: '500',
-    tds: '50',
-    netPayable: '450',
-    commissionStatus: 'Paid',
-  },
-  {
-    id: 2,
-    sNo: 2,
-    date: '2024-11-02',
-    studentName: 'Jane Smith',
-    country: 'Canada',
-    currencyBooked: 'CAD',
-    quotation: '7000',
-    studentPaid: '6500',
-    docsStatus: 'Pending',
-    ttCopyStatus: 'Not Received',
-    agentCommission: '600',
-    tds: '60',
-    netPayable: '540',
-    commissionStatus: 'Pending',
-  },
-  // Additional rows as needed
-];
-
 const Forex = () => {
+  const [rows, setRows] = useState([]);
+
+  useEffect(() => {
+    axios
+      .get('http://localhost:4000/auth/viewAllForexForms')
+      .then((response) => {
+        const fetchedData = response.data.forexForms.map((item) => ({
+          ...item,
+          agentRef: item.agentRef?.agentCode || 'N/A',
+          studentRef: item.studentRef?.name ||'N/A',
+          date: new Date(item.date).toLocaleDateString('en-US'),
+          id: item._id,
+        }));
+
+     
+        setRows(fetchedData);
+      })
+      .catch((error) => {
+        console.error('Error fetching forex forms:', error);
+      });
+  }, []);
+
+  const handleDownloadExcel = () => {
+    const cleanData = rows.map((item) => {
+      const { _id, __v, id, ...cleanedItem } = item;
+
+      // Format the date to MM/DD/YYYY
+      if (cleanedItem.date) {
+        cleanedItem.date = new Date(cleanedItem.date).toLocaleDateString(
+          'en-US',
+        ); // MM/DD/YYYY format
+      }
+
+      if (cleanedItem.documents) {
+        cleanedItem.documents = cleanedItem.documents.map((doc) => {
+          const { _id, ...docWithoutId } = doc;
+          return docWithoutId;
+        });
+      }
+
+      return cleanedItem;
+    });
+
+    const flattenedData = cleanData.map((item) => ({
+      ...item,
+      documents: item.documents
+        ? item.documents
+            .map(
+              (doc) =>
+                `${doc.documentOf}: ${doc.documentType} (${doc.documentFile})`,
+            )
+            .join(', ')
+        : '',
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(flattenedData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Forex Data');
+    XLSX.writeFile(workbook, 'ForexData.xlsx');
+  };
+
   return (
     <Box width={'full'}>
       <Box
@@ -65,27 +92,24 @@ const Forex = () => {
         justifyContent={'space-between'}
         alignItems={'center'}
       >
+        <Text fontSize="34px">FOREX Registrations</Text>
         <div>
-          <Text
-            href="#"
-            bg="inherit"
-            borderRadius="inherit"
-            fontWeight=""
-            fontSize="34px"
-            _active={{
-              bg: 'inherit',
-              transform: 'none',
-              borderColor: 'transparent',
+          <Button
+            onClick={handleDownloadExcel}
+            width={'200px'}
+            variant="solid"
+            colorScheme="green"
+            borderRadius={'none'}
+            _hover={{
+              bg: 'green.500',
+              color: 'white',
+              borderColor: 'green.500',
             }}
-            _focus={{
-              boxShadow: 'none',
-            }}
+            mr={4}
+            mb={1}
           >
-            FOREX Registrations
-          </Text>
-        </div>
-
-        <div>
+            Download Excel
+          </Button>
           <Link to={'/admin/forex/form'}>
             <Button
               width={'200px'}
@@ -93,10 +117,11 @@ const Forex = () => {
               colorScheme="blue"
               borderRadius={'none'}
               _hover={{
-                bg: 'blue.500', // Fill color on hover
-                color: 'white', // Text color on hover
-                borderColor: 'blue.500', // Border color remains consistent
+                bg: 'blue.500',
+                color: 'white',
+                borderColor: 'blue.500',
               }}
+              mb={1}
             >
               Add New
             </Button>

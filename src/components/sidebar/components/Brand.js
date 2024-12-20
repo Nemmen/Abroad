@@ -13,7 +13,7 @@ export function SidebarBrand() {
 
   return (
     <Flex align='center' direction='column'>
-        <Text mb={'5'} fontSize='3xl'>IMMFI . Com</Text>
+        <Text mb={'5'} fontSize='3xl'>GlobalEdFi.Com</Text>
       <HSeparator mb='20px' />
     </Flex>
   );

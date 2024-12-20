@@ -5,6 +5,7 @@ import cookieparser from 'cookie-parser'
 import DbCon from './utlis/db.js'
 import AuthRoutes from './routes/Auth.js'
 import AdminRoutes from './routes/AdminRoutes.js'
+
 import uploadRoutes from './routes/uploadRoutes.js';
 
 
@@ -17,7 +18,7 @@ DbCon()
 app.use(express.json())
 app.use(cookieparser())
 app.use(cors({
-    origin: 'http://localhost:3000', // or your front-end URL
+    origin: true, // or your front-end URL
     credentials: true, // Allow credentials (cookies, headers, etc.)
 }));
 
