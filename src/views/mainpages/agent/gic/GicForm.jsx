@@ -23,13 +23,17 @@ import {
 } from '@chakra-ui/react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 const getCurrentDate = () => format(new Date(), 'yyyy-MM-dd');
 const getCurrentMonth = () => format(new Date(), 'MMMM');
 
 function GicForm() {
   const [agents, setAgents] = useState([]);
+  const { user } = useSelector((state) => state.Auth);
+  const agent = agents?.find((agent) => agent._id === user._id);
   // const [view, setView] = useState('')
+
   const navigate = useNavigate();
   const [students, setStudents] = useState([]);
   const [newStudent, setNewStudent] = useState({
@@ -44,7 +48,7 @@ function GicForm() {
   const closeModal = () => setIsModalOpen(false);
 
   const [formData, setFormData] = useState({
-    Agents: '',
+    Agents: agent?._id,
     studentRef: '',
 
     passportNo: '',
@@ -66,13 +70,27 @@ function GicForm() {
       try {
         const response = await fetch('http://localhost:4000/auth/getStudent');
         const data = await response.json();
-        if (response.ok) setStudents(data.students);
+
+        if (response.ok) {
+          // If agent exists, filter students based on agent's associated student IDs
+          if (agent?.students) {
+            const filteredStudents = data.students.filter((student) =>
+              agent.students.includes(student._id),
+            );
+
+            setStudents(filteredStudents);
+          } else {
+            // If no agent or students are associated, set to an empty array
+            setStudents([]);
+          }
+        }
       } catch (error) {
         console.error('Error fetching students:', error);
       }
     };
+
     fetchStudents();
-  }, [isModalOpen]);
+  }, [isModalOpen, agents, user]);
 
   const handleNewStudentChange = (e) => {
     const { name, value } = e.target;
@@ -137,7 +155,9 @@ function GicForm() {
         const response = await fetch(apiUrl);
         const result = await response.json();
         if (response.ok) {
-          const filterResult = result.data.filter((data)=> data.userStatus === 'active')
+          const filterResult = result.data.filter(
+            (data) => data.userStatus === 'active',
+          );
           setAgents(filterResult);
         } else {
           console.error('Server Error:', result);
@@ -329,21 +349,18 @@ function GicForm() {
     >
       <form onSubmit={handleSubmit}>
         <SimpleGrid columns={2} spacing={4}>
-          <FormControl isRequired>
-            <FormLabel>Agents</FormLabel>
+          <FormControl isRequired _disabled={true}>
+            <FormLabel>Agent Id</FormLabel>
             <Select
               name="Agents"
               value={formData.Agents}
-              onChange={handleChange}
               h="50px"
               w="full"
-              placeholder="Select an agent"
+
             >
-              {agents.map((agents) => (
-                <option key={agents._id} value={agents._id}>
-                  {agents.agentCode}
-                </option>
-              ))}
+              <option key={agent?._id} value={agent?._id}>
+                {agent?.agentCode}
+              </option>
             </Select>
           </FormControl>
 
