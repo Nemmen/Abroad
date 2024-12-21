@@ -10,6 +10,7 @@ import {
   MdBusiness,
   MdVerifiedUser
 } from 'react-icons/md';
+import { CgProfile } from "react-icons/cg";
 
 import { SiAuthentik } from 'react-icons/si';
 
@@ -26,6 +27,7 @@ import Forex from 'views/mainpages/admin/forex/Forex';
 import AgentForex from './views/mainpages/agent/forex/AgentForex.jsx'
 import BlockedPage from 'views/mainpages/agent/blocked/BlockedPage';
 import StudentPage from 'views/mainpages/agent/students/StudentPage';
+import Profile from 'views/mainpages/agent/profile/Profile';
 
 const routes = [
   {
@@ -107,6 +109,13 @@ export const routeAjent = [
     path: '/students',
     icon: <Icon as={MdVerifiedUser} width="20px" height="20px" color="inherit" />,
     component: <StudentPage/>,
+  },
+  {
+    name: 'Profile',
+    layout: '/agent',
+    path: '/profile',
+    icon: <Icon as={CgProfile} width="20px" height="20px" color="inherit" />,
+    component: <Profile/>,
   },
 ];
 

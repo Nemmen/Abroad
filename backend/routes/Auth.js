@@ -1,6 +1,6 @@
 import express from 'express';
 import multer from 'multer';
-import {checkUser, login, logout,getAllusers, register, addGicForm, viewAllGicForm, addForexForm, viewAllForexForms, getAllBlockedData, createBlockedData } from '../controllers/Auth.js';
+import {checkUser, updateProfile, login, logout,getAllusers, register, addGicForm, viewAllGicForm, addForexForm, viewAllForexForms, getAllBlockedData, createBlockedData } from '../controllers/Auth.js';
 import { uploadFile } from '../controllers/googleDrive.js'; // Import Google Drive upload controller
 import { IsUser } from '../middleware/verifyToken.js';
 
@@ -40,6 +40,7 @@ AuthRoutes.post('/register', async (req, res) => {
 AuthRoutes.post('/login', login);
 AuthRoutes.post('/logout', logout);
 AuthRoutes.get('/checkUser', IsUser, checkUser);
+AuthRoutes.put('/updateProfile',IsUser, updateProfile);
 
 // Form Handling Routes
 AuthRoutes.post('/addGicForm', addGicForm);

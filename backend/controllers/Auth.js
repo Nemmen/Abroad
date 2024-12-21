@@ -88,6 +88,51 @@ const register = async (req, res) => {
 };
 
 
+
+export const updateProfile = async (req, res) => {
+  try {
+    // User is already attached to req.user by IsUser middleware
+    const user = req.user;
+
+    // Extract fields from the request body
+    const {
+      name,
+      email,
+      organization,
+      phoneNumber,
+      state,
+      city,
+      businessDivision,
+    } = req.body;
+
+    // Update only the provided fields
+    if (name) user.name = name;
+    if (email) user.email = email;
+    if (organization) user.organization = organization;
+    if (phoneNumber) user.phoneNumber = phoneNumber;
+    if (state) user.state = state;
+    if (city) user.city = city;
+    if (businessDivision) user.businessDivision = businessDivision;
+
+    // Save the updated user
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      user,
+    });
+  } catch (error) {
+    console.error("Error in updateProfile:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+
+
 // login if the user status is active then login, if pending then show the message that your account is pending, if block then show the message that your account is blocked
 const login = async (req, res) => {
   try {
