@@ -12,18 +12,41 @@ import {
   useToast,
   Flex,
   Text,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  Spinner,
 } from '@chakra-ui/react';
 import { format } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
 
 const getCurrentDate = () => format(new Date(), 'yyyy-MM-dd');
 const getCurrentMonth = () => format(new Date(), 'MMMM');
 
 function GicForm() {
   const [agents, setAgents] = useState([]);
+  // const [view, setView] = useState('')
+  const navigate = useNavigate();
+  const [students, setStudents] = useState([]);
+  const [newStudent, setNewStudent] = useState({
+    name: '',
+    email: '',
+    agentRef: '',
+  });
+  const [loading, setLoading] = useState(false);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
 
   const [formData, setFormData] = useState({
     Agents: '',
-    studentName: '',
+    studentRef: '',
+
     passportNo: '',
     email: '',
     phoneNo: '',
@@ -37,6 +60,75 @@ function GicForm() {
     documentFile: null,
   });
   const toast = useToast();
+
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        const response = await fetch('http://localhost:4000/auth/getStudent');
+        const data = await response.json();
+        if (response.ok) setStudents(data.students);
+      } catch (error) {
+        console.error('Error fetching students:', error);
+      }
+    };
+    fetchStudents();
+  }, [isModalOpen]);
+
+  const handleNewStudentChange = (e) => {
+    const { name, value } = e.target;
+    setNewStudent({ ...newStudent, [name]: value });
+  };
+
+  const handleNewStudentSubmit = async () => {
+    setLoading(true);
+    if (!newStudent.name || !newStudent.email) {
+      toast({
+        title: 'Incomplete Details',
+        description: 'Please fill in both Name and Email.',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:4000/auth/studentCreate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newStudent),
+      });
+      const result = await response.json();
+
+      if (response.ok) {
+        setStudents([...students, result.newStudent]);
+        setFormData({ ...formData, studentRef: result.newStudent._id });
+        toast({
+          title: 'Student Created',
+          description: 'New student has been added.',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+        closeModal();
+        setLoading(false);
+      } else {
+        setLoading(false);
+        throw new Error(result.message || 'Failed to create student.');
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error.message,
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      setLoading(false);
+    }
+    setLoading(false);
+  };
 
   useEffect(() => {
     const fetchAgents = async () => {
@@ -67,7 +159,7 @@ function GicForm() {
   const validateForm = () => {
     const {
       Agents,
-      studentName,
+      studentRef,
       passportNo,
       email,
       phoneNo,
@@ -82,7 +174,7 @@ function GicForm() {
     } = formData;
     if (
       !Agents ||
-      !studentName ||
+      !studentRef ||
       !passportNo ||
       !email ||
       !phoneNo ||
@@ -109,19 +201,15 @@ function GicForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     if (validateForm()) {
-      const { documentFile, documentType, studentName } = formData;
+      const { documentFile, documentType, studentRef } = formData;
       const fileExtension = documentFile.name.split('.').pop();
-      const renamedFile = new File(
-        [documentFile],
-        `${documentType}_${studentName}.${fileExtension}`,
-        { type: documentFile.type },
-      );
 
       // Prepare form data for API submission
       const formDataToSend = {
-        studentName: formData.studentName,
+        studentRef: formData.studentRef,
         commissionAmt: formData.commission,
         fundingMonth: formData.accFundingMonth,
         tds: formData.tds,
@@ -133,9 +221,50 @@ function GicForm() {
         studentEmail: formData.email,
         studentPhoneNo: formData.phoneNo,
         studentPassportNo: formData.passportNo,
+        studentDocuments: {}, // Initialize an empty object for documents
       };
 
+      const filedata = new FormData();
+      filedata.append('files', documentFile);
+      filedata.append('type', documentType);
+      filedata.append('studentRef', formData.studentRef);
+      filedata.append('folderId', '1WkdyWmBhKQAI6W_M4LNLbPylZoGZ7y6V');
+
+      try {
+        const response = await fetch(
+          'http://localhost:4000/api/uploads/upload',
+          {
+            method: 'POST',
+            body: filedata,
+            headers: {
+              Accept: 'application/json',
+            },
+          },
+        );
+
+        const result = await response.json();
+        const viewLink = result.uploads[0].fileId; // Adjust based on your API response structure
+        console.log(viewLink);
+
+        console.log('Server Response:', result);
+
+        // Include the view link in the form data
+        formDataToSend.studentDocuments[documentType] = viewLink;
+      } catch (error) {
+        console.error('Error uploading files:', error);
+        toast({
+          title: 'File Upload Error',
+          description: 'An error occurred while uploading the file.',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        });
+        setLoading(false);
+        return; // Stop further execution if file upload fails
+      }
+
       const apiUrl = 'http://localhost:4000/auth/addGicForm';
+      console.log('Form Data to Send:', formDataToSend);
 
       try {
         const response = await fetch(apiUrl, {
@@ -157,6 +286,8 @@ function GicForm() {
             isClosable: true,
           });
           console.log('Server Response:', result);
+          navigate(`/admin/gic/${result.newGIC._id}`);
+          setLoading(false);
         } else {
           toast({
             title: 'Submission Failed',
@@ -167,6 +298,7 @@ function GicForm() {
             isClosable: true,
           });
           console.error('Server Error:', result);
+          setLoading(false);
         }
       } catch (error) {
         toast({
@@ -178,7 +310,9 @@ function GicForm() {
         });
         console.error('Network Error:', error);
       }
+      setLoading(false);
     }
+    setLoading(false);
   };
 
   return (
@@ -204,11 +338,11 @@ function GicForm() {
               w="full"
               placeholder="Select an agent"
             >
-              {
-                agents.map((agents)=>(
-                  <option key={agents._id} value={agents._id}>{agents.agentCode}</option>
-                ))
-              }
+              {agents.map((agents) => (
+                <option key={agents._id} value={agents._id}>
+                  {agents.agentCode}
+                </option>
+              ))}
             </Select>
           </FormControl>
 
@@ -225,14 +359,27 @@ function GicForm() {
 
           <FormControl isRequired>
             <FormLabel>Student Name</FormLabel>
-            <Input
-              type="text"
-              name="studentName"
-              value={formData.studentName}
-              onChange={handleChange}
+            <Select
+              name="studentRef"
+              value={formData.studentRef}
+              onChange={(e) => {
+                if (e.target.value === 'create') {
+                  openModal();
+                } else {
+                  handleChange(e);
+                }
+              }}
               h="50px"
               w="full"
-            />
+              placeholder="Select a student"
+            >
+              {students.map((student) => (
+                <option key={student?._id} value={student?._id}>
+                  {`${student?.studentCode} - ${student?.name} - ${student?.email}`}
+                </option>
+              ))}
+              <option value="create">Create New student</option>
+            </Select>
           </FormControl>
 
           <FormControl isRequired>
@@ -383,10 +530,10 @@ function GicForm() {
               h="50px"
               w="full"
             >
-              <option value="Adhaar">Adhaar</option>
-              <option value="Pan">Pan</option>
-              <option value="Offer letter">Offer Letter</option>
-              <option value="Passport">Passport</option>
+              <option value="aadhar">Adhaar</option>
+              <option value="pan">Pan</option>
+              <option value="ol">Offer Letter</option>
+              <option value="passport">Passport</option>
             </Select>
           </FormControl>
 
@@ -420,10 +567,83 @@ function GicForm() {
             </FormControl>
           )}
         </SimpleGrid>
+        <Modal isOpen={isModalOpen} onClose={closeModal}>
+          <ModalOverlay />
+          <ModalContent>
+            <ModalHeader>Create New Student</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody>
+              <FormControl isRequired>
+                <FormLabel>Agents</FormLabel>
+                <Select
+                  name="agentRef"
+                  value={newStudent.agentRef}
+                  onChange={handleNewStudentChange}
+                  h="50px"
+                  w="full"
+                  mb={'15px'}
+                  placeholder="Select an agent"
+                >
+                  {agents.map((agents) => (
+                    <option key={agents._id} value={agents._id}>
+                      {agents.agentCode}
+                    </option>
+                  ))}
+                </Select>
+              </FormControl>
 
-        <Button type="submit" colorScheme="brand" width="full" mt={4} h="50px">
-          Submit
-        </Button>
+              <FormControl isRequired>
+                <FormLabel>Name</FormLabel>
+                <Input
+                  name="name"
+                  value={newStudent.name}
+                  onChange={handleNewStudentChange}
+                  placeholder="Enter student name"
+                />
+              </FormControl>
+              <FormControl isRequired mt={4}>
+                <FormLabel>Email</FormLabel>
+                <Input
+                  name="email"
+                  value={newStudent.email}
+                  onChange={handleNewStudentChange}
+                  placeholder="Enter student email"
+                />
+              </FormControl>
+            </ModalBody>
+            <ModalFooter>
+              {loading ? (
+                <Spinner mr={5} />
+              ) : (
+                <Button
+                  colorScheme="blue"
+                  mr={3}
+                  onClick={handleNewStudentSubmit}
+                >
+                  Submit
+                </Button>
+              )}
+              <Button onClick={closeModal}>Cancel</Button>
+            </ModalFooter>
+          </ModalContent>
+        </Modal>
+
+        {loading ? (
+          <Button colorScheme="brand" width="full" mt={4} h="50px">
+            <Spinner />
+          </Button>
+        ) : (
+          <Button
+            type="submit"
+            colorScheme="brand"
+            width="full"
+            mt={4}
+            h="50px"
+            disabled={loading}
+          >
+            Submit
+          </Button>
+        )}
       </form>
     </Box>
   );
