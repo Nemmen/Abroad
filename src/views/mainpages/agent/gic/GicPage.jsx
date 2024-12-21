@@ -5,8 +5,9 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
 
+// Define the columns
 const columns = [
-  { field: 'sNo', headerName: 'SNo', width: 70 },
+  { field: 'Agent', headerName: 'Agent', width: 140 },
   { field: 'accOpeningMonth', headerName: 'Acc Opening Month', width: 150 },
   { field: 'studentName', headerName: 'Student Name', width: 150 },
   { field: 'passportNo', headerName: 'Passport No.', width: 130 },
@@ -19,7 +20,7 @@ const columns = [
   { field: 'commissionStatus', headerName: 'Commission Status', width: 160 },
 ];
 
-const GicPage = () => {
+const Gic = () => {
   const [rows, setRows] = useState([]);
   const [data, setData] = useState([]);
 
@@ -30,8 +31,8 @@ const GicPage = () => {
         if (response.data.success) {
           setData(response.data.gicForms);
           const gicForms = response.data.gicForms.map((form, index) => ({
-            id: form._id || index,
-            sNo: index + 1,
+            id: form._id || index, // Ensure each row has a unique id
+            Agent: form.agentRef.agentCode || 'N/A',
             accOpeningMonth: form.accOpeningMonth || 'N/A',
             studentName: form.studentName || 'N/A',
             passportNo: form.studentPassportNo || 'N/A',
@@ -143,4 +144,4 @@ const GicPage = () => {
   );
 };
 
-export default GicPage;
+export default Gic;
