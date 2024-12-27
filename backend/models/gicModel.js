@@ -6,10 +6,6 @@ const gicSchema = new mongoose.Schema({
     type: Date,
      
   },
-  studentName: {
-    type: String,
-     
-  },
   passportNo: {
     type: String,
      
@@ -47,6 +43,10 @@ const gicSchema = new mongoose.Schema({
   agentRef:{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'users',
+  },
+  studentRef:{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'students',
   },
   studentEmail: {
     type: String,

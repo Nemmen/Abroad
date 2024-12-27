@@ -6,6 +6,7 @@ import {
   Text,
   SimpleGrid,
   VStack,
+  Link,
   Icon,
   useColorModeValue,
 } from '@chakra-ui/react';
@@ -111,6 +112,8 @@ function GicView() {
                       ? // Handle specific cases for nested objects
                         label === 'agentRef' && value.agentCode
                         ? value.agentCode // Render only the agentCode if the label is 'agentRef'
+                        : label === 'studentRef' && value.studentCode
+                        ? value.name // Render only the studentCode if the label is 'studentRef'
                         : Object.entries(value)
                             .map(([key, val]) => `${key}: ${val}`)
                             .join(', ') // Fallback: render key-value pairs for other objects
@@ -145,7 +148,14 @@ function GicView() {
                 </Flex>
                 <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
                   <Text fontSize="lg" fontWeight="bold" color={valueColor}>
-                    {docLink}
+                  <Link
+                      href={docLink}
+                      color="blue.500"
+                      fontWeight="bold"
+                      isExternal
+                    >
+                      View File 👁️
+                    </Link>
                   </Text>
                 </Box>
               </VStack>

@@ -1,4 +1,5 @@
 import UserModel from '../models/user.js';
+import StudentModel from '../models/student.js';
 import { createFolder, uploadFile } from './googleDrive.js';
 import jwt from 'jsonwebtoken';
 import bcryptjs from 'bcryptjs';
@@ -196,7 +197,7 @@ const getCurrentUser = async (req, res) => {
 const addGicForm = async (req, res) => {
   try {
     const {
-      studentName,
+      studentRef,
       commissionAmt,
       fundingMonth,
       tds,
@@ -208,10 +209,11 @@ const addGicForm = async (req, res) => {
       studentEmail,
       studentPhoneNo,
       studentPassportNo,
+      studentDocuments,
     } = req.body;
 
     if (
-      !studentName ||
+      !studentRef ||
       !commissionAmt ||
       !tds ||
       !netPayable ||
@@ -219,7 +221,8 @@ const addGicForm = async (req, res) => {
       !agentRef ||
       !studentEmail ||
       !studentPhoneNo ||
-      !studentPassportNo
+      !studentPassportNo ||
+      !studentDocuments
     ) {
       return res.status(400).json({
         success: false,
@@ -227,32 +230,11 @@ const addGicForm = async (req, res) => {
       });
     }
 
-    // Step 1: Create a folder for the student in Google Drive
-    const folderName = `${studentName}-GIC-Documents`;
-    const folderId = await createFolder(folderName);
 
-    // Step 2: Upload files if present
-    const uploadedFiles = {};
-    if (req.files) {
-      for (const key of Object.keys(req.files)) {
-        const file = req.files[key];
-        const fileId = await uploadFile(file.path, folderId);
-        uploadedFiles[key] = fileId;
 
-        // Remove the file from local storage
-        fs.unlinkSync(file.path);
-      }
-    }
 
-    // Step 3: Merge uploaded file IDs into studentDocuments
-    const studentDocuments = {
-      ...req.body.studentDocuments,
-      ...uploadedFiles,
-    };
-
-    // Step 4: Create the GIC entry
     const newGIC = new GICModel({
-      studentName,
+      studentRef,
       commissionAmt,
       fundingMonth,
       tds,
@@ -284,7 +266,7 @@ const addGicForm = async (req, res) => {
 // view all gic form
 const viewAllGicForm = async (req, res) => {
   try {
-    const gicForms = await GICModel.find().populate('agentRef', 'agentCode');
+    const gicForms = await GICModel.find().populate('agentRef', 'agentCode').populate('studentRef', 'name email studentCode');;
     res.status(200).json({ success: true, gicForms });
   } catch (error) {
     console.error('View GIC Form Error:', error);
@@ -292,69 +274,11 @@ const viewAllGicForm = async (req, res) => {
   }
 };
 
+
 const addForexForm = async (req, res) => {
   try {
     const {
-      studentName,
-      country,
-      currencyBooked,
-      quotation,
-      studentPaid,
-      docsStatus,
-      ttCopyStatus,
-      agentCommission,
-      tds,
-      netPayable,
-      commissionStatus,
-      agentRef,
-    } = req.body;
-
-    if (
-      !studentName ||
-      !country ||
-      !currencyBooked ||
-      !quotation ||
-      !studentPaid ||
-      !docsStatus ||
-      !ttCopyStatus ||
-      !agentCommission ||
-      !tds ||
-      !netPayable ||
-      !commissionStatus ||
-      !agentRef
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: 'All required fields must be provided',
-      });
-    }
-
-    // Step 1: Create a folder for the student in Google Drive
-    const folderName = `${studentName}-Forex-Documents`;
-    const folderId = await createFolder(folderName);
-
-    // Step 2: Upload files if present
-    const uploadedFiles = {};
-    if (req.files) {
-      for (const key of Object.keys(req.files)) {
-        const file = req.files[key];
-        const fileId = await uploadFile(file.path, folderId);
-        uploadedFiles[key] = fileId;
-
-        // Remove the file from local storage
-        fs.unlinkSync(file.path);
-      }
-    }
-
-    // Step 3: Merge uploaded file IDs into documents
-    const documents = {
-      ...req.body.documents,
-      ...uploadedFiles,
-    };
-
-    // Step 4: Create the Forex entry
-    const newForex = new ForexModel({
-      studentName,
+      studentRef,
       country,
       currencyBooked,
       quotation,
@@ -367,26 +291,66 @@ const addForexForm = async (req, res) => {
       commissionStatus,
       agentRef,
       documents,
+      passportFile, // Added passport file
+      offerLetterFile, // Added offer letter file
+    } = req.body;
+
+    // Validation checks
+    if (!studentRef || !country || !currencyBooked || !quotation || !studentPaid) {
+      return res.status(400).json({
+        success: false,
+        message: 'Required fields are missing.',
+      });
+    }
+
+    if (!documents || documents.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'At least one document must be provided.',
+      });
+    }
+
+    const newForex = new ForexModel({
+      studentRef,
+      agentRef,
+      country,
+      currencyBooked,
+      quotation,
+      studentPaid,
+      docsStatus: docsStatus || 'Pending',
+      ttCopyStatus: ttCopyStatus || 'Pending',
+      agentCommission,
+      tds,
+      netPayable,
+      commissionStatus: commissionStatus || 'Not Received',
+      agentRef,
+      documents,
+      passportFile, // Save passport file
+      offerLetterFile, // Save offer letter file
     });
 
     await newForex.save();
 
     res.status(200).json({
       success: true,
-      message: 'Forex form added successfully',
-      newForex,
+      message: 'Forex form added successfully.',
+      data: newForex,
     });
   } catch (error) {
     console.error('Add Forex Form Error:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error.',
+    });
   }
 };
+
 
 
 // Controller to fetch all Forex account details
 const viewAllForexForms = async (req, res) => {
   try {
-    const forexForms = await ForexModel.find().populate('agentRef', 'agentCode');
+    const forexForms = await ForexModel.find().populate('agentRef', 'agentCode').populate('studentRef', 'name email studentCode');;
     res.status(200).json({ success: true, forexForms });
   } catch (error) {
     console.error('View Forex Forms Error:', error);
@@ -395,57 +359,57 @@ const viewAllForexForms = async (req, res) => {
 };
 
 
-const createBlockedData = async (req, res) => {
-  try {
-    const { studentName } = req.body;
+// const createBlockedData = async (req, res) => {
+//   try {
+//     const { studentName } = req.body;
 
-    if (!studentName) {
-      return res.status(400).json({
-        success: false,
-        message: 'Student name is required',
-      });
-    }
+//     if (!studentName) {
+//       return res.status(400).json({
+//         success: false,
+//         message: 'Student name is required',
+//       });
+//     }
 
-    // Step 1: Create a folder for the student in Google Drive
-    const folderName = `${studentName}-Blocked-Data-Documents`;
-    const folderId = await createFolder(folderName);
+//     // Step 1: Create a folder for the student in Google Drive
+//     const folderName = `${studentName}-Blocked-Data-Documents`;
+//     const folderId = await createFolder(folderName);
 
-    // Step 2: Upload files if present
-    const uploadedFiles = {};
-    if (req.files) {
-      for (const key of Object.keys(req.files)) {
-        const file = req.files[key];
-        const fileId = await uploadFile(file.path, folderId);
-        uploadedFiles[key] = fileId;
+//     // Step 2: Upload files if present
+//     const uploadedFiles = {};
+//     if (req.files) {
+//       for (const key of Object.keys(req.files)) {
+//         const file = req.files[key];
+//         const fileId = await uploadFile(file.path, folderId);
+//         uploadedFiles[key] = fileId;
 
-        // Remove the file from local storage
-        fs.unlinkSync(file.path);
-      }
-    }
+//         // Remove the file from local storage
+//         fs.unlinkSync(file.path);
+//       }
+//     }
 
-    // Step 3: Merge uploaded file IDs into documents
-    const documents = {
-      ...req.body.documents,
-      ...uploadedFiles,
-    };
+//     // Step 3: Merge uploaded file IDs into documents
+//     const documents = {
+//       ...req.body.documents,
+//       ...uploadedFiles,
+//     };
 
-    // Step 4: Create the Blocked Data entry
-    const blockedData = new BLOCKEDModel({
-      ...req.body,
-      documents,
-    });
+//     // Step 4: Create the Blocked Data entry
+//     const blockedData = new BLOCKEDModel({
+//       ...req.body,
+//       documents,
+//     });
 
-    const savedBlockedData = await blockedData.save();
+//     const savedBlockedData = await blockedData.save();
 
-    res.status(201).json({
-      message: 'Blocked data created successfully',
-      data: savedBlockedData,
-    });
-  } catch (error) {
-    console.error('Error creating blocked data:', error);
-    res.status(500).json({ message: 'Error creating blocked data', error });
-  }
-};
+//     res.status(201).json({
+//       message: 'Blocked data created successfully',
+//       data: savedBlockedData,
+//     });
+//   } catch (error) {
+//     console.error('Error creating blocked data:', error);
+//     res.status(500).json({ message: 'Error creating blocked data', error });
+//   }
+// };
 
 
 // Get all blocked data
@@ -474,10 +438,44 @@ const getAllusers = async (req, res) => {
   }
 }
 
+
+
+const studentCreate = async (req, res) => {
+  try {
+    const { name, email , agentRef } = req.body;
+    if (!name || !email) {
+      return res.status(400).json({ message: 'Name and email are required' });
+    }
+    if (await StudentModel.findOne({ email })) {
+      return res.status(400).json({ message: 'Student already exists' });
+    }
+    const newStudent = new StudentModel({ name, email });
+    await newStudent.save();
+    const agent = await UserModel.findById(agentRef);
+    if (agent) {
+      agent.students.push(newStudent._id);
+      await agent.save();
+    }
+    res.status(201).json({ message: 'Student created successfully', newStudent });
+  } catch (error) {
+    console.error('Create Student Error:', error);
+    res.status(500).json({ message: 'Failed to create student', error: error.message });
+  }
+};
+
+const getStudent = async (req, res) => {
+  try {
+    const students = await StudentModel.find();
+    res.status(200).json({ message: 'All students fetched successfully', students });
+  } catch (error) {
+    console.error('Get Students Error:', error);
+    res.status(500).json({ message: 'Failed to fetch students', error: error.message });
+  }
+}
   
 
 
 
 
-export { register, login, logout ,getAllusers , getCurrentUser, addGicForm, viewAllGicForm, addForexForm, viewAllForexForms, getAllBlockedData, createBlockedData};
+export { register, login, logout ,getAllusers,studentCreate , getCurrentUser, addGicForm, getStudent,viewAllGicForm, addForexForm, viewAllForexForms, getAllBlockedData};
 

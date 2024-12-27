@@ -1,16 +1,26 @@
 import mongoose from "mongoose";
 
-// Function to generate unique IDs (same as before)
+// Function to generate unique IDs
 const generateUniqueId = async (prefix, suffix) => {
     try {
-        const counter = await CounterModel.findOneAndUpdate(
-            { key: prefix },
-            { $inc: { seq: 1 } },
-            { new: true, upsert: true } // Create the counter if it doesn't exist
-        );
+        // Find the highest studentCode in the collection
+        const lastStudent = await StudentModel.findOne()
+            .sort({ createdAt: -1 }) // Sort by latest created document
+            .select("studentCode");  // Only select studentCode field
 
-        const seqNumber = counter.seq.toString().padStart(4, "0"); // Format sequence as 4 digits
-        return `${prefix}${seqNumber}${suffix}`;
+        let seqNumber = 1; // Default sequence number if no documents exist
+
+        if (lastStudent && lastStudent.studentCode) {
+            // Extract the numeric part of the studentCode
+            const lastSeq = parseInt(lastStudent.studentCode.slice(prefix.length, -suffix.length), 10);
+            if (!isNaN(lastSeq)) {
+                seqNumber = lastSeq + 1;
+            }
+        }
+
+        // Format sequence as 4 digits
+        const formattedSeq = seqNumber.toString().padStart(4, "0");
+        return `${prefix}${formattedSeq}${suffix}`;
     } catch (error) {
         console.error("Error generating unique ID:", error);
         throw error;
@@ -20,35 +30,21 @@ const generateUniqueId = async (prefix, suffix) => {
 // Define the schema for students
 const studentSchema = new mongoose.Schema(
     {
-        name: { type: String, required: true },
-        studentCode: { type: String }, // Student code generated automatically
-        email: { type: String, required: true, unique: true },
-        userStatus: {
-            type: String,
-            enum: ["active", "pending", "block"],
-            default: "pending",
-        },
-        password: { type: String, required: true },
+        name: { type: String },
+        studentCode: { type: String, unique: true }, // Student code generated automatically
+        email: { type: String, unique: true },
         isDeleted: { type: Boolean, default: false },
-        phoneNumber: { type: String, required: true },
-        state: { type: String, required: true },
-        city: { type: String, required: true },
-        // documents: [{ type: String }],
-        program: { type: String, required: true },
         createdAt: { type: Date, default: Date.now },
-        approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
-        blockedBy: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
-        deletedBy: { type: mongoose.Schema.Types.ObjectId, ref: "users" },
     },
     { timestamps: true }
 );
 
-// Middleware to generate `studentCode` for students
+// Middleware to generate `studentCode`
 studentSchema.pre("save", async function (next) {
-    // Check if the role is "student" and the studentCode is not already set
-    if (this.role === "student" && !this.studentCode) {
+    if (!this.studentCode) {
         try {
-            this.studentCode = await generateUniqueId("STD", "ST"); // Generate ID with STD prefix and ST suffix
+            // Generate ID with STD prefix and ST suffix
+            this.studentCode = await generateUniqueId("STD", "AE");
         } catch (error) {
             return next(error); // Pass the error to the next middleware
         }
