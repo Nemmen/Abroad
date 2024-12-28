@@ -1,5 +1,5 @@
 import express from 'express';
-import {checkUser, login, logout,getAllusers,studentCreate, register, getStudent,addGicForm, viewAllGicForm, addForexForm, viewAllForexForms, getAllBlockedData, updateGicForm,  } from '../controllers/Auth.js';
+import {checkUser, login, logout,getAllusers,studentCreate, register, getStudent,addGicForm, viewAllGicForm, addForexForm, viewAllForexForms, getAllBlockedData, updateGicForm, updateForexForm,  } from '../controllers/Auth.js';
 import { uploadFile } from '../controllers/googleDrive.js'; // Import Google Drive upload controller
 import { IsUser } from '../middleware/verifyToken.js';
 
@@ -27,6 +27,7 @@ AuthRoutes.get('/getAllusers', getAllusers);
 AuthRoutes.get('/viewAllForexForms', viewAllForexForms);
 AuthRoutes.post('/studentCreate', studentCreate);
 AuthRoutes.get('/getStudent', getStudent);
+AuthRoutes.put('/updateForexForm/:id', updateForexForm);
 
 // Blocked Data Routes
 AuthRoutes.get('/getAllBlockedData', getAllBlockedData);

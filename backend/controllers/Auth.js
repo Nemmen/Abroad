@@ -412,6 +412,23 @@ const viewAllForexForms = async (req, res) => {
 };
 
 
+const updateForexForm = async (req, res) => {
+  try {
+    const updatedData = req.body;
+    const updatedForm = await ForexModel.findByIdAndUpdate(req.params.id, updatedData, { new: true });
+
+    if (updatedForm) {
+      res.status(200).json({ success: true, message: 'Forex form updated successfully.', data: updatedForm });
+    } else {
+      res.status(404).json({ success: false, message: 'Forex form not found.' });
+    }
+  } catch (error) {
+    console.error('Update Forex Form Error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error.' });
+  }
+};
+
+
 // const createBlockedData = async (req, res) => {
 //   try {
 //     const { studentName } = req.body;
@@ -530,5 +547,5 @@ const getStudent = async (req, res) => {
 
 
 
-export { register, login, logout ,getAllusers,studentCreate , getCurrentUser, addGicForm, getStudent,viewAllGicForm,updateGicForm, addForexForm, viewAllForexForms,getAllBlockedData};
+export { register, login, logout ,getAllusers,studentCreate , getCurrentUser, addGicForm, getStudent,viewAllGicForm,updateGicForm, addForexForm, viewAllForexForms,updateForexForm,getAllBlockedData};
 
