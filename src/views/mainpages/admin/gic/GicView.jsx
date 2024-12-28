@@ -9,6 +9,9 @@ import {
   Link,
   Icon,
   useColorModeValue,
+  Input,
+  Button,
+  Select,
 } from '@chakra-ui/react';
 import {
   FiFileText,
@@ -21,7 +24,6 @@ import {
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 
-// Map of form fields to icons
 const fieldIcons = {
   sNo: FiFileText,
   studentName: FiUser,
@@ -35,27 +37,35 @@ const fieldIcons = {
   tds: FiDollarSign,
   netPayable: FiDollarSign,
   commissionStatus: FiBriefcase,
-  aadhar: FiFileText,
-  pan: FiFileText,
-  ol: FiFileText,
-  passport: FiFileText,
 };
 
 function GicView() {
   const { id } = useParams();
   const [formData, setFormData] = useState({});
+  const [editableData, setEditableData] = useState({});
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          'http://localhost:4000/auth/viewAllGicForm',
+          'http://localhost:4000/auth/viewAllGicForm'
         );
         if (response.data.success) {
           const formData1 = response.data.gicForms.find(
-            (form) => form._id === id,
+            (form) => form._id === id
           );
           setFormData(formData1);
+          setEditableData({
+            studentPhoneNo: formData1?.studentPhoneNo,
+            studentPassportNo: formData1?.studentPassportNo,
+            bankVendor: formData1?.bankVendor,
+            fundingMonth: formData1?.fundingMonth,
+            commissionAmt: formData1?.commissionAmt,
+            tds: formData1?.tds,
+            netPayable: formData1?.netPayable,
+            commissionStatus: formData1?.commissionStatus || 'Not Received',
+          });
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -64,6 +74,25 @@ function GicView() {
 
     fetchData();
   }, [id]);
+
+  const handleChange = (field, value) => {
+    setEditableData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSave = async () => {
+    try {
+      const response = await axios.put(
+        `http://localhost:4000/auth/updateGicForm/${id}`,
+        editableData
+      );
+      if (response.data.success) {
+        setFormData((prev) => ({ ...prev, ...editableData }));
+        setIsEditing(false);
+      }
+    } catch (error) {
+      console.error('Error updating GIC form:', error);
+    }
+  };
 
   const labelColor = useColorModeValue('gray.500', 'gray.400');
   const valueColor = useColorModeValue('gray.900', 'white');
@@ -81,19 +110,45 @@ function GicView() {
       borderRadius="xl"
       boxShadow="2xl"
     >
-      <Flex align="center" mb={8}>
-        <Icon as={FiFileText} w={8} h={8} color="blue.500" mr={4} />
+      <Flex justify="space-between" mb={8}>
         <Heading as="h3" fontSize="3xl" color="blue.600">
           GIC Details
         </Heading>
+        {isEditing ? (
+          <Flex>
+            <Button colorScheme="green" onClick={handleSave} mr={4}>
+              Save
+            </Button>
+            <Button
+              colorScheme="red"
+              onClick={() => setIsEditing(false)}
+            >
+              Cancel
+            </Button>
+          </Flex>
+        ) : (
+          <Button colorScheme="blue" onClick={() => setIsEditing(true)}>
+            Edit
+          </Button>
+        )}
       </Flex>
 
       <SimpleGrid columns={{ base: 1, md: 2 }} spacing={10}>
-        {Object.entries(formData).map(
-          ([label, value], index) =>
+        {Object.entries(formData).map(([label, value], index) => {
+          const isEditable = [
+            'studentPhoneNo',
+            'studentPassportNo',
+            'bankVendor',
+            'fundingMonth',
+            'commissionAmt',
+            'tds',
+            'netPayable',
+            'commissionStatus',
+          ].includes(label);
+
+          return (
             label !== '__v' &&
-            label !== '_id' &&
-            label !== 'studentDocuments' && (
+            label !== '_id' && (
               <VStack key={index} align="start" spacing={2} w="full">
                 <Flex align="center">
                   <Icon
@@ -102,65 +157,96 @@ function GicView() {
                     mr={2}
                   />
                   <Text fontSize="sm" fontWeight="medium" color={labelColor}>
-                    {label.replace(/([A-Z])/g, ' $1')}{' '}
-                    {/* Format label names */}
+                    {label.replace(/([A-Z])/g, ' $1')}
                   </Text>
                 </Flex>
                 <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
-                  <Text fontSize="lg" fontWeight="bold" color={valueColor}>
-                    {typeof value === 'object' && value !== null
-                      ? // Handle specific cases for nested objects
-                        label === 'agentRef' && value.agentCode
-                        ? value.agentCode // Render only the agentCode if the label is 'agentRef'
-                        : label === 'studentRef' && value.studentCode
-                        ? value.name // Render only the studentCode if the label is 'studentRef'
-                        : Object.entries(value)
-                            .map(([key, val]) => `${key}: ${val}`)
-                            .join(', ') // Fallback: render key-value pairs for other objects
-                      : value}{' '}
-                    {/* Render simple values */}
-                  </Text>
+                  {isEditing && isEditable ? (
+                    label === 'commissionStatus' ? (
+                      <Select
+                        value={editableData[label]}
+                        onChange={(e) => handleChange(label, e.target.value)}
+                      >
+                        <option value="Not Received">Not Received</option>
+                        <option value="Paid">Paid</option>
+                        <option value="Under Processing">Under Processing</option>
+                      </Select>
+                    ) : (
+                      <Input
+                        value={editableData[label] || ''}
+                        onChange={(e) => handleChange(label, e.target.value)}
+                      />
+                    )
+                  ) : label === 'agentRef' ? (
+                    <Text fontSize="lg" fontWeight="bold" color={valueColor}>
+                      {value.agentCode}
+                    </Text>
+                  ) : label === 'studentRef' ? (
+                    <VStack align="start" spacing={3}>
+                      <Text fontSize="lg" fontWeight="bold" color={valueColor}>
+                        {value.name}
+                      </Text>
+                      {value.documents && (
+                        value.documents.map((doc, docIndex) => (
+                          <Flex
+                            key={docIndex}
+                            justify="space-between"
+                            align="center"
+                            w="full"
+                          >
+                            <Text fontSize="md" fontWeight="medium" color={valueColor}>
+                              {doc.name}
+                            </Text>
+                            <Link
+                              href={doc.url}
+                              isExternal
+                              color="blue.500"
+                              textDecoration="underline"
+                              display="flex"
+                              alignItems="center"
+                            >
+                              View File 👁️
+                            </Link>
+                          </Flex>
+                        ))
+                      )}
+                    </VStack>
+                  ) : typeof value === 'object' ? (
+                    <Text fontSize="lg" fontWeight="bold" color={valueColor}>
+                      {JSON.stringify(value)}
+                    </Text>
+                  ) : (
+                    <Text fontSize="lg" fontWeight="bold" color={valueColor}>
+                      {value}
+                    </Text>
+                  )}
                 </Box>
               </VStack>
-            ),
-        )}
+            )
+          );
+        })}
+      </SimpleGrid>
 
-        {/* Render each student document as a separate field */}
-        {formData.studentDocuments &&
-          Object.entries(formData.studentDocuments).map(
-            ([docLabel, docLink]) => (
-              <VStack
-                key={docLabel}
-                gridColumn={docLabel === 'passport' ? 'span 2' : 'span 1'}
-                align="start"
-                spacing={2}
-                w="full"
+      <SimpleGrid columns={1} spacing={10}>
+        {editableData?.pan && (
+          <VStack align="start" spacing={2} w="full">
+            <Text fontSize="sm" fontWeight="medium" color={labelColor}>
+              PAN
+            </Text>
+            <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
+              <Link
+                href={editableData.pan}
+                isExternal
+                color="blue.500"
+                textDecoration="underline"
+                display="flex"
+                alignItems="center"
               >
-                <Flex align="center">
-                  <Icon
-                    as={fieldIcons[docLabel] || FiFileText}
-                    color="blue.500"
-                    mr={2}
-                  />
-                  <Text fontSize="sm" fontWeight="medium" color={labelColor}>
-                    {docLabel.toUpperCase()}
-                  </Text>
-                </Flex>
-                <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
-                  <Text fontSize="lg" fontWeight="bold" color={valueColor}>
-                  <Link
-                      href={docLink}
-                      color="blue.500"
-                      fontWeight="bold"
-                      isExternal
-                    >
-                      View File 👁️
-                    </Link>
-                  </Text>
-                </Box>
-              </VStack>
-            ),
-          )}
+                View PAN File 👁️
+              </Link>
+            </Box>
+          </VStack>
+        )}
       </SimpleGrid>
     </Box>
   );

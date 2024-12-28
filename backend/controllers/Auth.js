@@ -275,6 +275,59 @@ const viewAllGicForm = async (req, res) => {
 };
 
 
+
+// Update GIC Form
+const updateGicForm = async (req, res) => {
+  try {
+    const { id } = req.params; // Get the GIC form ID from params
+    const {
+      studentPhoneNo,
+      studentPassportNo,
+      bankVendor,
+      fundingMonth,
+      commissionAmt,
+      tds,
+      netPayable,
+      commissionStatus,
+    } = req.body; // Get editable fields from request body
+
+    const updatedFields = {
+      studentPhoneNo,
+      studentPassportNo,
+      bankVendor,
+      fundingMonth,
+      commissionAmt,
+      tds,
+      netPayable,
+      commissionStatus,
+    };
+
+    // Update the GIC form in the database
+    const updatedGIC = await GICModel.findByIdAndUpdate(
+      id,
+      { $set: updatedFields },
+      { new: true } // Return the updated document
+    );
+
+    if (!updatedGIC) {
+      return res.status(404).json({
+        success: false,
+        message: 'GIC form not found',
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'GIC form updated successfully',
+      updatedGIC,
+    });
+  } catch (error) {
+    console.error('Update GIC Form Error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
+
 const addForexForm = async (req, res) => {
   try {
     const {
@@ -477,5 +530,5 @@ const getStudent = async (req, res) => {
 
 
 
-export { register, login, logout ,getAllusers,studentCreate , getCurrentUser, addGicForm, getStudent,viewAllGicForm, addForexForm, viewAllForexForms, getAllBlockedData};
+export { register, login, logout ,getAllusers,studentCreate , getCurrentUser, addGicForm, getStudent,viewAllGicForm,updateGicForm, addForexForm, viewAllForexForms,getAllBlockedData};
 
