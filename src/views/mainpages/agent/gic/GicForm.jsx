@@ -82,7 +82,7 @@ function GicForm() {
   const toast = useToast();
   // const handleNewStudentSubmit = async () => {
   //   try {
-  //     const response = await fetch('http://localhost:4000/auth/studentCreate', {
+  //     const response = await fetch('https://abroad-backend-ten.vercel.app/auth/studentCreate', {
   //       method: 'POST',
   //       headers: { 'Content-Type': 'application/json' },
   //       body: JSON.stringify(newStudent),
@@ -120,7 +120,7 @@ function GicForm() {
 
   // useEffect(() => {
   //   const fetchAgents = async () => {
-  //     const apiUrl = 'http://localhost:4000/auth/getAllusers';
+  //     const apiUrl = 'https://abroad-backend-ten.vercel.app/auth/getAllusers';
   //     try {
   //       const response = await fetch(apiUrl);
   //       const result = await response.json();
@@ -205,7 +205,7 @@ function GicForm() {
 
       try {
         const response = await fetch(
-          'http://localhost:4000/auth/studentCreate',
+          'https://abroad-backend-ten.vercel.app/auth/studentCreate',
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -268,7 +268,7 @@ function GicForm() {
 
         try {
           const response = await fetch(
-            'http://localhost:4000/api/uploads/upload',
+            'https://abroad-backend-ten.vercel.app/api/uploads/upload',
             {
               method: 'POST',
               body: filedata,
@@ -300,7 +300,7 @@ function GicForm() {
           return; // Stop further execution if file upload fails
         }
 
-        const apiUrl = 'http://localhost:4000/auth/addGicForm';
+        const apiUrl = 'https://abroad-backend-ten.vercel.app/auth/addGicForm';
         console.log('Form Data to Send:', formDataToSend);
 
         try {

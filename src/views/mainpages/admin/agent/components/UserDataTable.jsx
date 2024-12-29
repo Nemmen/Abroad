@@ -216,7 +216,7 @@ export default function UserDataTable(props) {
     try {
       if (currentStatus === 'isdeleted') {
         // Send PUT request to mark the user as deleted
-        const url = `http://localhost:4000/admin/delete/${userId}`;
+        const url = `https://abroad-backend-ten.vercel.app/admin/delete/${userId}`;
         await axios.put(url, {}, { withCredentials: true });
   
         // Remove the deleted user from the state
@@ -230,9 +230,9 @@ export default function UserDataTable(props) {
       let newStatus = currentStatus === 'active' ? 'block' : 'active';
   
       if (currentStatus === 'active') {
-        url = `http://localhost:4000/admin/block/${userId}`;
+        url = `https://abroad-backend-ten.vercel.app/admin/block/${userId}`;
       } else if (currentStatus === 'block') {
-        url = `http://localhost:4000/admin/unblock/${userId}`;
+        url = `https://abroad-backend-ten.vercel.app/admin/unblock/${userId}`;
       }
   
       await axios.put(url, {}, { withCredentials: true });

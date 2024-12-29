@@ -22,7 +22,7 @@ const FileUpload = () => {
     formData.append('folderId', folderId);
 
     try {
-      const response = await fetch('http://localhost:4000/api/uploads/upload', {
+      const response = await fetch('https://abroad-backend-ten.vercel.app/api/uploads/upload', {
         method: 'POST',
         body: formData,
       });

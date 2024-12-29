@@ -46,7 +46,7 @@ const Gic = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          'http://localhost:4000/auth/viewAllGicForm',
+          'https://abroad-backend-ten.vercel.app/auth/viewAllGicForm',
         );
         if (response.data.success) {
           setData(response.data.gicForms);

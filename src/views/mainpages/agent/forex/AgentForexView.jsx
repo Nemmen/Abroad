@@ -47,7 +47,7 @@ function ForexView() {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:4000/auth/viewAllForexForms`)
+      .get(`https://abroad-backend-ten.vercel.app/auth/viewAllForexForms`)
       .then((response) => {
         console.log('Response received:', response.data);
         if (response.data.success) {

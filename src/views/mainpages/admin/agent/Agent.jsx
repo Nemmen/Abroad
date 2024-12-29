@@ -45,7 +45,7 @@ export default function Agent() {
     const fetchUsers = async () => {
       try {
         const usersResponse = await axios.get(
-          'http://localhost:4000/admin/getuser',
+          'https://abroad-backend-ten.vercel.app/admin/getuser',
           { withCredentials: true },
         );
         setUsers(usersResponse.data.users);

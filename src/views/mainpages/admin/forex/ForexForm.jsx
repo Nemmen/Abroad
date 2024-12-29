@@ -59,7 +59,7 @@ function ForexForm() {
   // useEffect(() => {
   //   const fetchStudents = async () => {
   //     try {
-  //       const response = await fetch('http://localhost:4000/auth/getStudent');
+  //       const response = await fetch('https://abroad-backend-ten.vercel.app/auth/getStudent');
   //       const data = await response.json();
   //       if (response.ok) setStudents(data.students);
   //     } catch (error) {
@@ -72,7 +72,7 @@ function ForexForm() {
   // const handleNewStudentSubmit = async () => {
   //   setLoading(true);
   //   try {
-  //     const response = await fetch('http://localhost:4000/auth/studentCreate', {
+  //     const response = await fetch('https://abroad-backend-ten.vercel.app/auth/studentCreate', {
   //       method: 'POST',
   //       headers: { 'Content-Type': 'application/json' },
   //       body: JSON.stringify(newStudent),
@@ -110,7 +110,7 @@ function ForexForm() {
 
   useEffect(() => {
     const fetchAgents = async () => {
-      const apiUrl = 'http://localhost:4000/auth/getAllusers';
+      const apiUrl = 'https://abroad-backend-ten.vercel.app/auth/getAllusers';
       try {
         const response = await fetch(apiUrl);
         const result = await response.json();
@@ -242,7 +242,7 @@ function ForexForm() {
       };
 
       const createStudentResponse = await fetch(
-        'http://localhost:4000/auth/studentCreate',
+        'https://abroad-backend-ten.vercel.app/auth/studentCreate',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -288,7 +288,7 @@ function ForexForm() {
 
       // Upload files
       const uploadResponse = await fetch(
-        'http://localhost:4000/api/uploads/upload',
+        'https://abroad-backend-ten.vercel.app/api/uploads/upload',
         {
           method: 'POST',
           body: fileUploadFormData,
@@ -335,7 +335,7 @@ function ForexForm() {
       console.log('Final Form Data:', finalFormData);
 
       const submitFormResponse = await fetch(
-        'http://localhost:4000/auth/addForexForm',
+        'https://abroad-backend-ten.vercel.app/auth/addForexForm',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
