@@ -1,12 +1,27 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Box, Button, Divider, Text } from '@chakra-ui/react';
+import {
+  Box,
+  Button,
+  Divider,
+  Text,
+  Checkbox,
+  VStack,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  ModalFooter,
+} from '@chakra-ui/react';
 import DataTable from 'components/DataTable';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
 
-const columns = [
-  { field: 'sNo', headerName: 'SNo', width: 70 },
+// Define the columns
+const allColumns = [
+  { field: 'Agent', headerName: 'Agent Name', width: 140 },
   { field: 'accOpeningMonth', headerName: 'Acc Opening Month', width: 150 },
   { field: 'studentName', headerName: 'Student Name', width: 150 },
   { field: 'passportNo', headerName: 'Passport No.', width: 130 },
@@ -19,19 +34,25 @@ const columns = [
   { field: 'commissionStatus', headerName: 'Commission Status', width: 160 },
 ];
 
-const GicPage = () => {
+const Gic = () => {
   const [rows, setRows] = useState([]);
   const [data, setData] = useState([]);
+  const [selectedColumns, setSelectedColumns] = useState(
+    allColumns.map((col) => col.field),
+  );
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:4000/auth/viewAllGicForm');
+        const response = await axios.get(
+          'http://localhost:4000/auth/viewAllGicForm',
+        );
         if (response.data.success) {
           setData(response.data.gicForms);
           const gicForms = response.data.gicForms.map((form, index) => ({
             id: form._id || index,
-            sNo: index + 1,
+            Agent: form.agentRef.name.toUpperCase() || 'N/A',
             accOpeningMonth: form.accOpeningMonth || 'N/A',
             studentName: form.studentName || 'N/A',
             passportNo: form.studentPassportNo || 'N/A',
@@ -46,7 +67,7 @@ const GicPage = () => {
           setRows(gicForms);
         }
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error('Error fetching data:', error);
       }
     };
 
@@ -54,36 +75,52 @@ const GicPage = () => {
   }, []);
 
   const handleDownloadExcel = () => {
+    // Clean and prepare data
     const cleanData = data.map((item) => {
-      // Remove _id, __v, id, and agentRef fields from root level
-      const { _id, __v, id, agentRef, ...cleanedItem } = item;
-  
-      // Format date if present
-      if (cleanedItem.date) {
-        cleanedItem.date = new Date(cleanedItem.date).toLocaleDateString();
-      }
-  
-      // Flatten studentDocuments into a single string
-      if (cleanedItem.studentDocuments) {
-        cleanedItem.studentDocuments = Object.entries(cleanedItem.studentDocuments)
-          .map(([key, value]) => `${key}: ${value}`)
-          .join(', ');
-      }
-  
+      // Retain only relevant fields and rename keys to match column names
+      const cleanedItem = {
+        Agent: item.agentRef?.name?.toUpperCase() || 'N/A',
+        accOpeningMonth: item.accOpeningMonth || 'N/A',
+        studentName: item.studentName || 'N/A',
+        passportNo: item.studentPassportNo || 'N/A', // Correct key for Passport No
+        studentPhoneNo: item.studentPhoneNo || 'N/A',
+        bankVendor: item.bankVendor || 'N/A',
+        accFundingMonth: item.fundingMonth || 'N/A',
+        commissionAmt: item.commissionAmt || 0,
+        tds: item.tds || '0',
+        netPayable: item.netPayable || 0,
+        commissionStatus: item.commissionStatus || 'N/A',
+      };
       return cleanedItem;
     });
   
-    // Create worksheet and workbook
-    const worksheet = XLSX.utils.json_to_sheet(cleanData);
+    // Filter columns based on selection
+    const filteredData = cleanData.map((item) =>
+      selectedColumns.reduce((acc, field) => {
+        acc[field] = item[field] || 'N/A'; // Ensure fallback for missing fields
+        return acc;
+      }, {}),
+    );
+  
+    // Generate Excel file
+    const worksheet = XLSX.utils.json_to_sheet(filteredData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Gic Data');
-  
-    // Export workbook as Excel file
     XLSX.writeFile(workbook, 'GicData.xlsx');
   };
   
-  // Memoize columns and rows to prevent re-renders
-  const memoizedColumns = useMemo(() => columns, []);
+  const handleColumnSelection = (field) => {
+    setSelectedColumns((prev) =>
+      prev.includes(field)
+        ? prev.filter((col) => col !== field)
+        : [...prev, field],
+    );
+  };
+
+  const memoizedColumns = useMemo(
+    () => allColumns.filter((col) => selectedColumns.includes(col.field)),
+    [selectedColumns],
+  );
   const memoizedRows = useMemo(() => rows, [rows]);
 
   return (
@@ -98,36 +135,35 @@ const GicPage = () => {
         <div>
           <Text fontSize="34px">GIC Registrations</Text>
         </div>
-
         <div>
+          <Button
+            onClick={() => setIsModalOpen(true)}
+            width={'200px'}
+            variant="solid"
+            colorScheme="teal"
+            borderRadius={'none'}
+            mr={4}
+            mb={1}
+          >
+            Filter Columns
+          </Button>
           <Button
             onClick={handleDownloadExcel}
             width={'200px'}
             variant="solid"
             colorScheme="green"
             borderRadius={'none'}
-            _hover={{
-              bg: 'green.500',
-              color: 'white',
-              borderColor: 'green.500',
-            }}
             mr={4}
             mb={1}
           >
             Download Excel
           </Button>
-
           <Link to={'/agent/gic/form'}>
             <Button
               width={'200px'}
               variant="outline"
               colorScheme="blue"
               borderRadius={'none'}
-              _hover={{
-                bg: 'blue.500',
-                color: 'white',
-                borderColor: 'blue.500',
-              }}
               mb={1}
             >
               Add New
@@ -135,12 +171,45 @@ const GicPage = () => {
           </Link>
         </div>
       </Box>
-      <Divider width={'96%'} mx={'auto'} mb={'20px'} bgColor={'black'} height={'0.5px'} />
+      <Divider
+        width={'96%'}
+        mx={'auto'}
+        mb={'20px'}
+        bgColor={'black'}
+        height={'0.5px'}
+      />
       <Box maxHeight="1200px" overflowY="auto">
         <DataTable columns={memoizedColumns} rows={memoizedRows} />
       </Box>
+
+      {/* Modal for Column Filtering */}
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Select Columns</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <VStack align="start">
+              {allColumns.map((col) => (
+                <Checkbox
+                  key={col.field}
+                  isChecked={selectedColumns.includes(col.field)}
+                  onChange={() => handleColumnSelection(col.field)}
+                >
+                  {col.headerName}
+                </Checkbox>
+              ))}
+            </VStack>
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="blue" onClick={() => setIsModalOpen(false)}>
+              Apply
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Box>
   );
 };
 
-export default GicPage;
+export default Gic;

@@ -1,3 +1,5 @@
+import { useNavigate } from 'react-router-dom';
+
 // Chakra Imports
 import {
   Avatar,
@@ -26,10 +28,15 @@ import { MdNotificationsNone, MdInfoOutline } from 'react-icons/md';
 import { IoMdMoon, IoMdSunny } from 'react-icons/io';
 import { FaEthereum } from 'react-icons/fa';
 import routes from 'routes';
+import {routeAjent} from 'routes';
+import { useLocation } from 'react-router-dom';
+
 export default function HeaderLinks(props) {
   const { secondary } = props;
   const { colorMode, toggleColorMode } = useColorMode();
-  // Chakra Color Mode
+  const navigate = useNavigate(); // Initialize navigate here
+  const location = useLocation(); // Initialize location here
+  const isAdmin = location.pathname.includes('/admin'); // Check if the user is an admin
   const navbarIcon = useColorModeValue('gray.400', 'white');
   let menuBg = useColorModeValue('white', 'navy.800');
   const textColor = useColorModeValue('secondaryGray.900', 'white');
@@ -43,6 +50,17 @@ export default function HeaderLinks(props) {
     '14px 17px 40px 4px rgba(112, 144, 176, 0.06)',
   );
   const borderButton = useColorModeValue('secondaryGray.500', 'whiteAlpha.200');
+
+  const handleLogout = () => {
+    // Clear any stored authentication tokens or session data
+    localStorage.removeItem('token_auth');
+    localStorage.removeItem('user_role');
+  
+    // Redirect to the login page
+    navigate('/auth/login', { replace: true });
+  };
+  
+
   return (
     <Flex
       w={{ sm: '100%', md: 'auto' }}
@@ -65,7 +83,7 @@ export default function HeaderLinks(props) {
         borderRadius="30px"
       />
     
-      <SidebarResponsive routes={routes} />
+      <SidebarResponsive routes={isAdmin ? routes : routeAjent} />
       <Menu>
         <MenuButton p="0px">
           <Icon
@@ -170,6 +188,7 @@ export default function HeaderLinks(props) {
               color="red.400"
               borderRadius="8px"
               px="14px"
+              onClick={handleLogout} // Attach logout handler
             >
               <Text fontSize="sm">Log out</Text>
             </MenuItem>

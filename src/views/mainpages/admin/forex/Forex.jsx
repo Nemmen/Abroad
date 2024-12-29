@@ -1,11 +1,25 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Box, Button, Divider, Text } from '@chakra-ui/react';
+import React, { useEffect, useState, useMemo } from 'react';
+import {
+  Box,
+  Button,
+  Divider,
+  Text,
+  VStack,
+  Checkbox,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  ModalFooter,
+} from '@chakra-ui/react';
 import DataTable from 'components/DataTable';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 import * as XLSX from 'xlsx';
 
-const columns = [
+const allColumns = [
   { field: 'agentRef', headerName: 'Agent', width: 120 },
   { field: 'date', headerName: 'Date', width: 150 },
   { field: 'studentRef', headerName: 'Student Name', width: 200 },
@@ -23,65 +37,91 @@ const columns = [
 
 const Forex = () => {
   const [rows, setRows] = useState([]);
+  const [data, setData] = useState([]);
+  const [selectedColumns, setSelectedColumns] = useState(
+    allColumns.map((col) => col.field),
+  );
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    axios
-      .get('http://localhost:4000/auth/viewAllForexForms')
-      .then((response) => {
-        const fetchedData = response.data.forexForms.map((item) => ({
-          ...item,
-          agentRef: item.agentRef?.agentCode || 'N/A',
-          studentRef: item.studentRef?.name ||'N/A',
-          date: new Date(item.date).toLocaleDateString('en-US'),
-          id: item._id,
-        }));
-
-     
-        setRows(fetchedData);
-      })
-      .catch((error) => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          'http://localhost:4000/auth/viewAllForexForms',
+        );
+        if (response.data.forexForms) {
+          const forexForms = response.data.forexForms.map((item) => ({
+            id: item._id,
+            agentRef: item.agentRef?.name.toUpperCase() || 'N/A',
+            studentRef: item.studentRef?.name || 'N/A',
+            date: new Date(item.date).toLocaleDateString('en-US'),
+            country: item.country || 'N/A',
+            currencyBooked: item.currencyBooked || 'N/A',
+            quotation: item.quotation || 'N/A',
+            studentPaid: item.studentPaid || 'N/A',
+            docsStatus: item.docsStatus || 'N/A',
+            ttCopyStatus: item.ttCopyStatus || 'N/A',
+            agentCommission: item.agentCommission || 0,
+            tds: item.tds || 0,
+            netPayable: item.netPayable || 0,
+            commissionStatus: item.commissionStatus || 'N/A',
+          }));
+          setRows(forexForms);
+          setData(response.data.forexForms);
+        }
+      } catch (error) {
         console.error('Error fetching forex forms:', error);
-      });
+      }
+    };
+
+    fetchData();
   }, []);
 
   const handleDownloadExcel = () => {
-    const cleanData = rows.map((item) => {
-      const { _id, __v, id, ...cleanedItem } = item;
-
-      // Format the date to MM/DD/YYYY
-      if (cleanedItem.date) {
-        cleanedItem.date = new Date(cleanedItem.date).toLocaleDateString(
-          'en-US',
-        ); // MM/DD/YYYY format
-      }
-
-      if (cleanedItem.documents) {
-        cleanedItem.documents = cleanedItem.documents.map((doc) => {
-          const { _id, ...docWithoutId } = doc;
-          return docWithoutId;
-        });
-      }
-
-      return cleanedItem;
+    const cleanData = data.map((item) => {
+      return {
+        agentRef: item.agentRef?.name || 'N/A',
+        studentRef: item.studentRef?.name || 'N/A',
+        date: new Date(item.date).toLocaleDateString('en-US'),
+        country: item.country || 'N/A',
+        currencyBooked: item.currencyBooked || 'N/A',
+        quotation: item.quotation || 'N/A',
+        studentPaid: item.studentPaid || 'N/A',
+        docsStatus: item.docsStatus || 'N/A',
+        ttCopyStatus: item.ttCopyStatus || 'N/A',
+        agentCommission: item.agentCommission || 0,
+        tds: item.tds || 0,
+        netPayable: item.netPayable || 0,
+        commissionStatus: item.commissionStatus || 'N/A',
+      };
     });
 
-    const flattenedData = cleanData.map((item) => ({
-      ...item,
-      documents: item.documents
-        ? item.documents
-            .map(
-              (doc) =>
-                `${doc.documentOf}: ${doc.documentType} (${doc.documentFile})`,
-            )
-            .join(', ')
-        : '',
-    }));
+    const filteredData = cleanData.map((item) =>
+      selectedColumns.reduce((acc, field) => {
+        acc[field] = item[field] || 'N/A';
+        return acc;
+      }, {}),
+    );
 
-    const worksheet = XLSX.utils.json_to_sheet(flattenedData);
+    const worksheet = XLSX.utils.json_to_sheet(filteredData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Forex Data');
     XLSX.writeFile(workbook, 'ForexData.xlsx');
   };
+
+  const handleColumnSelection = (field) => {
+    setSelectedColumns((prev) =>
+      prev.includes(field)
+        ? prev.filter((col) => col !== field)
+        : [...prev, field],
+    );
+  };
+
+  const memoizedColumns = useMemo(
+    () => allColumns.filter((col) => selectedColumns.includes(col.field)),
+    [selectedColumns],
+  );
+  const memoizedRows = useMemo(() => rows, [rows]);
 
   return (
     <Box width={'full'}>
@@ -95,16 +135,22 @@ const Forex = () => {
         <Text fontSize="34px">FOREX Registrations</Text>
         <div>
           <Button
+            onClick={() => setIsModalOpen(true)}
+            width={'200px'}
+            variant="solid"
+            colorScheme="teal"
+            borderRadius={'none'}
+            mr={4}
+            mb={1}
+          >
+            Filter Columns
+          </Button>
+          <Button
             onClick={handleDownloadExcel}
             width={'200px'}
             variant="solid"
             colorScheme="green"
             borderRadius={'none'}
-            _hover={{
-              bg: 'green.500',
-              color: 'white',
-              borderColor: 'green.500',
-            }}
             mr={4}
             mb={1}
           >
@@ -116,11 +162,6 @@ const Forex = () => {
               variant="outline"
               colorScheme="blue"
               borderRadius={'none'}
-              _hover={{
-                bg: 'blue.500',
-                color: 'white',
-                borderColor: 'blue.500',
-              }}
               mb={1}
             >
               Add New
@@ -129,14 +170,42 @@ const Forex = () => {
         </div>
       </Box>
       <Divider
-        orientation="vertical"
         width={'96%'}
         mx={'auto'}
         mb={'20px'}
         bgColor={'black'}
         height={'0.5px'}
       />
-      <DataTable columns={columns} rows={rows} />
+      <Box maxHeight="1200px" overflowY="auto">
+        <DataTable columns={memoizedColumns} rows={memoizedRows} />
+      </Box>
+
+      {/* Modal for Column Filtering */}
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Select Columns</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <VStack align="start">
+              {allColumns.map((col) => (
+                <Checkbox
+                  key={col.field}
+                  isChecked={selectedColumns.includes(col.field)}
+                  onChange={() => handleColumnSelection(col.field)}
+                >
+                  {col.headerName}
+                </Checkbox>
+              ))}
+            </VStack>
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="blue" onClick={() => setIsModalOpen(false)}>
+              Apply
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Box>
   );
 };

@@ -8,8 +8,7 @@ import dotenv from 'dotenv';
 import { sendRegistrationEmail } from '../services/emailService.js';
 import ForexModel from '../models/forexModel.js';
 import GICModel from '../models/gicModel.js';
-dotenv.config()
-
+dotenv.config();
 
 const register = async (req, res) => {
   try {
@@ -27,11 +26,18 @@ const register = async (req, res) => {
 
     // Validate required fields, including files
     if (
-      !name || !email || !password || !organization ||
-      !phoneNumber || !state || !city || !businessDivision) {
+      !name ||
+      !email ||
+      !password ||
+      !organization ||
+      !phoneNumber ||
+      !state ||
+      !city ||
+      !businessDivision
+    ) {
       return res.status(400).json({
         success: false,
-        message: 'All fields, including both documents, are required.'
+        message: 'All fields, including both documents, are required.',
       });
     }
 
@@ -40,7 +46,7 @@ const register = async (req, res) => {
     if (existUser) {
       return res.status(401).json({
         success: false,
-        message: 'User already exists'
+        message: 'User already exists',
       });
     }
 
@@ -88,7 +94,6 @@ const register = async (req, res) => {
   }
 };
 
-
 // login if the user status is active then login, if pending then show the message that your account is pending, if block then show the message that your account is blocked
 const login = async (req, res) => {
   try {
@@ -123,32 +128,46 @@ const login = async (req, res) => {
       });
     }
 
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
-
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      expiresIn: '1h',
+    });
 
     res.cookie('token', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       maxAge: 3600000, // 1 hour
     });
-    res.status(200).json({ success: true, message: 'Login successfully', user: { ...user._doc, password: undefined }, token }); // Hide password
+    res
+      .status(200)
+      .json({
+        success: true,
+        message: 'Login successfully',
+        user: { ...user._doc, password: undefined },
+        token,
+      }); // Hide password
   } catch (error) {
     console.error('Login Error:', error); // Log the error
-    res.status(500).json({ success: false, message: 'Internal server error', error: error.message }); // Include error message in response
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: 'Internal server error',
+        error: error.message,
+      }); // Include error message in response
   }
 };
-
 
 const logout = async (req, res) => {
   try {
     res.clearCookie('token');
-    res.status(200).json({ success: true, message: 'User logged out successfully' });
+    res
+      .status(200)
+      .json({ success: true, message: 'User logged out successfully' });
   } catch (error) {
     console.error('Logout Error:', error);
     return res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      message: 'Internal server error',
     });
   }
 };
@@ -159,32 +178,35 @@ export const checkUser = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'User not found'
+        message: 'User not found',
       });
     }
     return res.status(200).json({
       success: true,
-      user: { ...user._doc, password: undefined }
+      user: { ...user._doc, password: undefined },
     });
   } catch (error) {
     console.error('Check User Error:', error);
     return res.status(500).json({
       success: false,
-      message: 'Internal server error'
+      message: 'Internal server error',
     });
   }
 };
-
 
 // get current user
 const getCurrentUser = async (req, res) => {
   try {
     const user = req.user; // Assuming middleware populates req.user
     if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: 'User not found' });
     }
 
-    res.status(200).json({ success: true, user: { ...user._doc, password: undefined } }); // Hide password
+    res
+      .status(200)
+      .json({ success: true, user: { ...user._doc, password: undefined } }); // Hide password
   } catch (error) {
     console.error('Get Current User Error:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
@@ -192,7 +214,6 @@ const getCurrentUser = async (req, res) => {
 };
 
 // user adding data in the form of gic form
-
 
 const addGicForm = async (req, res) => {
   try {
@@ -203,6 +224,7 @@ const addGicForm = async (req, res) => {
       tds,
       netPayable,
       commissionStatus,
+      accOpeningDate,
       agentRef,
       accOpeningMonth,
       bankVendor,
@@ -214,10 +236,6 @@ const addGicForm = async (req, res) => {
 
     if (
       !studentRef ||
-      !commissionAmt ||
-      !tds ||
-      !netPayable ||
-      !commissionStatus ||
       !agentRef ||
       !studentEmail ||
       !studentPhoneNo ||
@@ -230,9 +248,6 @@ const addGicForm = async (req, res) => {
       });
     }
 
-
-
-
     const newGIC = new GICModel({
       studentRef,
       commissionAmt,
@@ -242,6 +257,7 @@ const addGicForm = async (req, res) => {
       commissionStatus,
       agentRef,
       accOpeningMonth,
+      accOpeningDate,
       bankVendor,
       studentEmail,
       studentPhoneNo,
@@ -262,14 +278,68 @@ const addGicForm = async (req, res) => {
   }
 };
 
-
 // view all gic form
 const viewAllGicForm = async (req, res) => {
   try {
-    const gicForms = await GICModel.find().populate('agentRef', 'agentCode').populate('studentRef', 'name email studentCode');;
+    const gicForms = await GICModel.find()
+      .populate('agentRef', 'agentCode name')
+      .populate('studentRef', 'name email studentCode');
     res.status(200).json({ success: true, gicForms });
   } catch (error) {
     console.error('View GIC Form Error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
+
+
+// Update GIC Form
+const updateGicForm = async (req, res) => {
+  try {
+    const { id } = req.params; // Get the GIC form ID from params
+    const {
+      studentPhoneNo,
+      studentPassportNo,
+      bankVendor,
+      fundingMonth,
+      commissionAmt,
+      tds,
+      netPayable,
+      commissionStatus,
+    } = req.body; // Get editable fields from request body
+
+    const updatedFields = {
+      studentPhoneNo,
+      studentPassportNo,
+      bankVendor,
+      fundingMonth,
+      commissionAmt,
+      tds,
+      netPayable,
+      commissionStatus,
+    };
+
+    // Update the GIC form in the database
+    const updatedGIC = await GICModel.findByIdAndUpdate(
+      id,
+      { $set: updatedFields },
+      { new: true } // Return the updated document
+    );
+
+    if (!updatedGIC) {
+      return res.status(404).json({
+        success: false,
+        message: 'GIC form not found',
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'GIC form updated successfully',
+      updatedGIC,
+    });
+  } catch (error) {
+    console.error('Update GIC Form Error:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
@@ -296,7 +366,13 @@ const addForexForm = async (req, res) => {
     } = req.body;
 
     // Validation checks
-    if (!studentRef || !country || !currencyBooked || !quotation || !studentPaid) {
+    if (
+      !studentRef ||
+      !country ||
+      !currencyBooked ||
+      !quotation ||
+      !studentPaid
+    ) {
       return res.status(400).json({
         success: false,
         message: 'Required fields are missing.',
@@ -345,16 +421,33 @@ const addForexForm = async (req, res) => {
   }
 };
 
-
-
 // Controller to fetch all Forex account details
 const viewAllForexForms = async (req, res) => {
   try {
-    const forexForms = await ForexModel.find().populate('agentRef', 'agentCode').populate('studentRef', 'name email studentCode');;
+    const forexForms = await ForexModel.find()
+      .populate('agentRef', 'agentCode name')
+      .populate('studentRef', 'name email studentCode');
     res.status(200).json({ success: true, forexForms });
   } catch (error) {
     console.error('View Forex Forms Error:', error);
     res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
+
+const updateForexForm = async (req, res) => {
+  try {
+    const updatedData = req.body;
+    const updatedForm = await ForexModel.findByIdAndUpdate(req.params.id, updatedData, { new: true });
+
+    if (updatedForm) {
+      res.status(200).json({ success: true, message: 'Forex form updated successfully.', data: updatedForm });
+    } else {
+      res.status(404).json({ success: false, message: 'Forex form not found.' });
+    }
+  } catch (error) {
+    console.error('Update Forex Form Error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error.' });
   }
 };
 
@@ -411,71 +504,94 @@ const viewAllForexForms = async (req, res) => {
 //   }
 // };
 
-
 // Get all blocked data
 const getAllBlockedData = async (req, res) => {
   try {
-    const blockedData = await BLOCKEDModel.find().populate("agentRef");
+    const blockedData = await BLOCKEDModel.find().populate('agentRef');
     res.status(200).json({
-      message: "Blocked data fetched successfully",
+      message: 'Blocked data fetched successfully',
       data: blockedData,
     });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching blocked data", error });
+    res.status(500).json({ message: 'Error fetching blocked data', error });
   }
 };
-
 
 const getAllusers = async (req, res) => {
   try {
     const users = await UserModel.find();
     res.status(200).json({
-      message: "All users fetched successfully",
+      message: 'All users fetched successfully',
       data: users,
     });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching users", error });
+    res.status(500).json({ message: 'Error fetching users', error });
   }
-}
-
-
+};
 
 const studentCreate = async (req, res) => {
   try {
-    const { name, email , agentRef } = req.body;
+    const { name, email, agentRef } = req.body;
     if (!name || !email) {
       return res.status(400).json({ message: 'Name and email are required' });
     }
-    if (await StudentModel.findOne({ email })) {
-      return res.status(400).json({ message: 'Student already exists' });
+    const student = await StudentModel.findOne({ email });
+    if (student) {
+      if (student.name === name && String(student.agentCode) === String(agentRef)) {
+        return res
+          .status(200)
+          .json({ message: 'student fetched', newStudent: student });
+      } else {
+        return res
+          .status(400)
+          .json({ message: 'Student with this email already exists in other AGENT or please type name properly' });
+      }
     }
-    const newStudent = new StudentModel({ name, email });
+    const newStudent = new StudentModel({ name, email, agentCode: agentRef });
     await newStudent.save();
     const agent = await UserModel.findById(agentRef);
     if (agent) {
       agent.students.push(newStudent._id);
       await agent.save();
+    } else {
+      res.status(400).json({ message: 'Agent not found' });
     }
-    res.status(201).json({ message: 'Student created successfully', newStudent });
+    res
+      .status(201)
+      .json({ message: 'Student created successfully', newStudent });
   } catch (error) {
     console.error('Create Student Error:', error);
-    res.status(500).json({ message: 'Failed to create student', error: error.message });
+    res
+      .status(500)
+      .json({ message: 'Failed to create student', error: error.message });
   }
 };
 
 const getStudent = async (req, res) => {
   try {
     const students = await StudentModel.find();
-    res.status(200).json({ message: 'All students fetched successfully', students });
+    res
+      .status(200)
+      .json({ message: 'All students fetched successfully', students });
   } catch (error) {
     console.error('Get Students Error:', error);
-    res.status(500).json({ message: 'Failed to fetch students', error: error.message });
+    res
+      .status(500)
+      .json({ message: 'Failed to fetch students', error: error.message });
   }
-}
-  
+};
 
-
-
-
-export { register, login, logout ,getAllusers,studentCreate , getCurrentUser, addGicForm, getStudent,viewAllGicForm, addForexForm, viewAllForexForms, getAllBlockedData};
-
+export {
+  register,
+  login,
+  logout,
+  getAllusers,
+  studentCreate,
+  getCurrentUser,
+  addGicForm,
+  getStudent,
+  viewAllGicForm,updateGicForm,
+  addForexForm,
+  viewAllForexForms,
+ updateForexForm,getAllBlockedData,
+};

@@ -25,7 +25,10 @@ const getCurrentMonth = () => format(new Date(), 'MMMM');
 function GicForm() {
   const dispatch = useDispatch();
   // const { gic, error } = useSelector((state) => state.Gic);
-  const [agents, setAgents] = useState([]);
+
+  const { user } = useSelector((state) => state.Auth);
+  
+
   const [documents, setDocuments] = useState([]);
   const navigate = useNavigate();
 
@@ -64,17 +67,17 @@ function GicForm() {
   }, [dispatch]);
 
   const [formData, setFormData] = useState({
-    Agents: '',
+    Agents: user?._id,
     studentRef: '',
     passportNo: '',
     email: '',
     phoneNo: '',
     bankVendor: '',
-    accFundingMonth: '',
+    accFundingMonth: 'Not Funded Yet',
     commission: '',
     tds: '',
     netPayable: '',
-    commissionStatus: '',
+    commissionStatus: 'Under Processing',
   });
   const toast = useToast();
   // const handleNewStudentSubmit = async () => {
@@ -115,26 +118,27 @@ function GicForm() {
   //   setLoading(false);
   // };
 
-  useEffect(() => {
-    const fetchAgents = async () => {
-      const apiUrl = 'http://localhost:4000/auth/getAllusers';
-      try {
-        const response = await fetch(apiUrl);
-        const result = await response.json();
-        if (response.ok) {
-          const filterResult = result.data.filter(
-            (data) => data.userStatus === 'active',
-          );
-          setAgents(filterResult);
-        } else {
-          console.error('Server Error:', result);
-        }
-      } catch (error) {
-        console.error('Network Error:', error);
-      }
-    };
-    fetchAgents();
-  }, []);
+  // useEffect(() => {
+  //   const fetchAgents = async () => {
+  //     const apiUrl = 'http://localhost:4000/auth/getAllusers';
+  //     try {
+  //       const response = await fetch(apiUrl);
+  //       const result = await response.json();
+  //       if (response.ok) {
+  //         const filterResult = result.data.filter(
+  //           (data) => data.userStatus === 'active',
+  //         );
+  //         setAgents(filterResult);
+  //         console.log('ewwer', filterResult);
+  //       } else {
+  //         console.error('Server Error:', result);
+  //       }
+  //     } catch (error) {
+  //       console.error('Network Error:', error);
+  //     }
+  //   };
+  //   fetchAgents();
+  // }, []);
 
   // useEffect(() => {
   //   const GIC = gic && gic.length > 0 ? gic.find((gic) => gic.studentPassportNo === formData.passportNo) : null;
@@ -163,11 +167,6 @@ function GicForm() {
       email,
       phoneNo,
       bankVendor,
-      accFundingMonth,
-      commission,
-      tds,
-      netPayable,
-      commissionStatus,
     } = formData;
     if (
       !Agents ||
@@ -175,12 +174,7 @@ function GicForm() {
       !passportNo ||
       !email ||
       !phoneNo ||
-      !bankVendor ||
-      !accFundingMonth ||
-      !commission ||
-      !tds ||
-      !netPayable ||
-      !commissionStatus
+      !bankVendor
     ) {
       toast({
         title: 'Form Incomplete',
@@ -198,6 +192,7 @@ function GicForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    console.log("form",formData)
 
     if (validateForm()) {
       // const { documentFile, documentType } = formData;
@@ -328,7 +323,7 @@ function GicForm() {
               isClosable: true,
             });
             console.log('Server Response:', result);
-            navigate(`/admin/gic/${result.newGIC._id}`);
+            navigate(`/agent/gic/${result.newGIC._id}`);
             setLoading(false);
           } else {
             toast({
@@ -379,22 +374,15 @@ function GicForm() {
     >
       <form onSubmit={handleSubmit}>
         <SimpleGrid columns={2} spacing={4}>
-          <FormControl isRequired>
+        <FormControl isReadOnly>
             <FormLabel>Agent Name</FormLabel>
-            <Select
-              name="Agents"
-              value={formData.Agents}
-              onChange={handleChange}
+            <Input
+              type="text"
+              value={user?.name.toUpperCase()}
+              readOnly
               h="50px"
               w="full"
-              placeholder="Select an agent"
-            >
-              {agents.map((agents) => (
-                <option key={agents._id} value={agents._id}>
-                  {agents.name.toUpperCase()}
-                </option>
-              ))}
-            </Select>
+            />
           </FormControl>
 
           <FormControl isReadOnly>
@@ -496,7 +484,7 @@ function GicForm() {
             />
           </FormControl>
 
-          <FormControl isRequired>
+          <FormControl isRequired isDisabled>
             <FormLabel>Acc Funding Month</FormLabel>
             <Select
               name="accFundingMonth"
@@ -514,7 +502,7 @@ function GicForm() {
               <option value={'Not Funded Yet'}>Not Funded Yet</option>
             </Select>
           </FormControl>
-
+{/* 
           <FormControl isRequired>
             <FormLabel>Commission</FormLabel>
             <NumberInput min={0} h="50px" w="full">
@@ -565,7 +553,7 @@ function GicForm() {
               <option value="Paid">Paid</option>
               <option value="Under Processing">Under Processing</option>
             </Select>
-          </FormControl>
+          </FormControl> */}
 
           {/* <FormControl
             isRequired
