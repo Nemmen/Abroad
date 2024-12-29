@@ -28,12 +28,15 @@ import { MdNotificationsNone, MdInfoOutline } from 'react-icons/md';
 import { IoMdMoon, IoMdSunny } from 'react-icons/io';
 import { FaEthereum } from 'react-icons/fa';
 import routes from 'routes';
+import {routeAjent} from 'routes';
+import { useLocation } from 'react-router-dom';
 
 export default function HeaderLinks(props) {
   const { secondary } = props;
   const { colorMode, toggleColorMode } = useColorMode();
   const navigate = useNavigate(); // Initialize navigate here
-
+  const location = useLocation(); // Initialize location here
+  const isAdmin = location.pathname.includes('/admin'); // Check if the user is an admin
   const navbarIcon = useColorModeValue('gray.400', 'white');
   let menuBg = useColorModeValue('white', 'navy.800');
   const textColor = useColorModeValue('secondaryGray.900', 'white');
@@ -80,7 +83,7 @@ export default function HeaderLinks(props) {
         borderRadius="30px"
       />
     
-      <SidebarResponsive routes={routes} />
+      <SidebarResponsive routes={isAdmin ? routes : routeAjent} />
       <Menu>
         <MenuButton p="0px">
           <Icon
