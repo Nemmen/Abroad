@@ -69,11 +69,11 @@ function GicView() {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          'http://localhost:4000/auth/viewAllGicForm'
+          'http://localhost:4000/auth/viewAllGicForm',
         );
         if (response.data.success) {
           const formData1 = response.data.gicForms.find(
-            (form) => form._id === id
+            (form) => form._id === id,
           );
           setFormData(formatGICData(formData1));
           setEditableData({
@@ -103,7 +103,7 @@ function GicView() {
     try {
       const response = await axios.put(
         `http://localhost:4000/auth/updateGicForm/${id}`,
-        editableData
+        editableData,
       );
       if (response.data.success) {
         setFormData((prev) => ({ ...prev, ...editableData }));
@@ -139,10 +139,7 @@ function GicView() {
             <Button colorScheme="green" onClick={handleSave} mr={4}>
               Save
             </Button>
-            <Button
-              colorScheme="red"
-              onClick={() => setIsEditing(false)}
-            >
+            <Button colorScheme="red" onClick={() => setIsEditing(false)}>
               Cancel
             </Button>
           </Flex>
@@ -170,7 +167,13 @@ function GicView() {
             label !== '__v' &&
             label !== '_id' &&
             label !== 'studentDocuments' && (
-              <VStack key={index} align="start" spacing={2} gridColumn={label === 'commissionStatus' ? 'span 2':''} w="full">
+              <VStack
+                key={index}
+                align="start"
+                spacing={2}
+                gridColumn={label === 'commissionStatus' ? 'span 2' : ''}
+                w="full"
+              >
                 <Flex align="center">
                   <Icon
                     as={fieldIcons[label] || FiFileText}
@@ -196,7 +199,9 @@ function GicView() {
                       >
                         <option value="Not Received">Not Received</option>
                         <option value="Paid">Paid</option>
-                        <option value="Under Processing">Under Processing</option>
+                        <option value="Under Processing">
+                          Under Processing
+                        </option>
                       </Select>
                     ) : (
                       <Input
@@ -213,30 +218,6 @@ function GicView() {
                       <Text fontSize="lg" fontWeight="bold" color={valueColor}>
                         {value.name}
                       </Text>
-                      {value.documents && (
-                        value.documents.map((doc, docIndex) => (
-                          <Flex
-                            key={docIndex}
-                            justify="space-between"
-                            align="center"
-                            w="full"
-                          >
-                            <Text fontSize="md" fontWeight="medium" color={valueColor}>
-                              {doc.name}
-                            </Text>
-                            <Link
-                              href={doc.url}
-                              isExternal
-                              color="blue.500"
-                              textDecoration="underline"
-                              display="flex"
-                              alignItems="center"
-                            >
-                              View File 👁️
-                            </Link>
-                          </Flex>
-                        ))
-                      )}
                     </VStack>
                   ) : typeof value === 'object' ? (
                     <Text fontSize="lg" fontWeight="bold" color={valueColor}>
@@ -252,28 +233,45 @@ function GicView() {
             )
           );
         })}
-      </SimpleGrid>
 
-      <SimpleGrid columns={1} spacing={10}>
-        {editableData?.pan && (
-          <VStack align="start" spacing={2} w="full">
-            <Text fontSize="sm" fontWeight="medium" color={labelColor}>
-              PAN
-            </Text>
-            <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
-              <Link
-                href={editableData.pan}
-                isExternal
-                color="blue.500"
-                textDecoration="underline"
-                display="flex"
-                alignItems="center"
-              >
-                View PAN File 👁️
-              </Link>
-            </Box>
-          </VStack>
-        )}
+        {/* Render each student document as a separate field */}
+        {formData.studentDocuments &&
+          Object.entries(formData.studentDocuments).map(([docLabel, doc]) => (
+            <VStack
+              key={docLabel}
+              align="start"
+              gridColumn={'span 2'}
+              spacing={2}
+              w="full"
+            >
+              <Flex align="center">
+                <Icon
+                  as={fieldIcons[docLabel] || FiFileText}
+                  color="blue.500"
+                  mr={2}
+                />
+                <Text fontSize="sm" fontWeight="medium" color={labelColor}>
+                  {docLabel.toUpperCase()}
+                </Text>
+              </Flex>
+              <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
+                {doc.documentFile ? (
+                  <Link
+                    href={doc.documentFile}
+                    color="blue.500"
+                    fontWeight="bold"
+                    isExternal
+                  >
+                    View File 👁️
+                  </Link>
+                ) : (
+                  <Text fontSize="lg" fontWeight="bold" color={valueColor}>
+                    Not Provided
+                  </Text>
+                )}
+              </Box>
+            </VStack>
+          ))}
       </SimpleGrid>
     </Box>
   );

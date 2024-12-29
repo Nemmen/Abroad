@@ -236,10 +236,6 @@ const addGicForm = async (req, res) => {
 
     if (
       !studentRef ||
-      !commissionAmt ||
-      !tds ||
-      !netPayable ||
-      !commissionStatus ||
       !agentRef ||
       !studentEmail ||
       !studentPhoneNo ||

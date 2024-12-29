@@ -56,11 +56,11 @@ function ForexView() {
       .then((response) => {
         if (response.data.success) {
           const formData1 = response.data.forexForms.find(
-            (form) => form._id === id
+            (form) => form._id === id,
           );
           if (formData1) {
             setFormData(formData1);
-            console.log(formData)
+            console.log(formData);
             setEditableData({ ...formData1 });
           } else {
             console.error('Form data not found for ID:', id);
@@ -82,7 +82,7 @@ function ForexView() {
     try {
       const response = await axios.put(
         `http://localhost:4000/auth/updateForexForm/${id}`,
-        editableData
+        editableData,
       );
       if (response.data.success) {
         setFormData(editableData);
@@ -114,7 +114,11 @@ function ForexView() {
         <Heading as="h3" fontSize="3xl" color="blue.600">
           Forex Details
         </Heading>
-        <Button ml={4} colorScheme="blue" onClick={() => setIsEditing(!isEditing)}>
+        <Button
+          ml={4}
+          colorScheme="blue"
+          onClick={() => setIsEditing(!isEditing)}
+        >
           {isEditing ? 'Cancel' : 'Edit'}
         </Button>
         {isEditing && (
@@ -123,93 +127,121 @@ function ForexView() {
           </Button>
         )}
       </Flex>
-      
 
       {Object.keys(formData).length > 0 && (
         <SimpleGrid columns={{ base: 1, md: 2 }} spacing={10}>
-         {Object.entries(formData).map(([label, value], index) => {
-  const isEditable =
-    label !== 'passportFile' && label !== 'offerLetterFile';
-
-  const renderSelectOptions = (field) => {
-    switch (field) {
-      case 'ttCopyStatus':
-      case 'docsStatus':
-        return (
-          <Select
-            value={editableData[label]}
-            onChange={(e) => handleChange(label, e.target.value)}
-          >
-            <option value="Pending">Pending</option>
-            <option value="Received">Received</option>
-            <option value="Verified">Verified</option>
-          </Select>
-        );
-      case 'commissionStatus':
-        return (
-          <Select
-            value={editableData[label]}
-            onChange={(e) => handleChange(label, e.target.value)}
-          >
-            <option value="Not Received">Not Received</option>
-            <option value="Paid">Paid</option>
-            <option value="Under Processing">Under Processing</option>
-          </Select>
-        );
-      default:
-        return null;
-    }
-  };
-
-  return (
-    label !== '__v' &&
-    label !== '_id' &&
-    label !== 'documents' &&
-    label !== 'agentRef' &&
-    label !== 'studentRef' && (
-      <VStack key={index} align="start" spacing={2} w="full">
-        <Flex align="center">
-          <Icon
-            as={fieldIcons[label] || FiFileText}
-            color="blue.500"
-            mr={2}
-          />
-          <Text fontSize="sm" fontWeight="medium" color={labelColor}>
-            {label.replace(/([A-Z])/g, ' $1')}
-          </Text>
-        </Flex>
-        <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
-          {isEditing && isEditable ? (
-            renderSelectOptions(label) || (
-              <Input
-                value={editableData[label]}
-                onChange={(e) => handleChange(label, e.target.value)}
-              />
-            )
-          ) : label.endsWith('File') &&
-            (label === 'passportFile' ||
-              label === 'offerLetterFile') ? (
-            <Link
-              href={value}
-              color="blue.500"
-              fontWeight="bold"
-              isExternal
-            >
-              View File 👁️
-            </Link>
-          ) : (
-            <Text fontSize="lg" fontWeight="bold" color={valueColor}>
-              {label === 'date'
-                ? new Date(value).toLocaleDateString('en-GB')
-                : value}
-            </Text>
+          {formData.agentRef && (
+            <VStack align="start" spacing={2} w="full">
+              <Flex align="center">
+                <Icon as={FiUser} color="blue.500" mr={2} />
+                <Text fontSize="sm" fontWeight="medium" color={labelColor}>
+                  Agent Name
+                </Text>
+              </Flex>
+              <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
+                <Text fontSize="lg" fontWeight="bold" color={valueColor}>
+                  {formData.agentRef.name.toUpperCase()}
+                </Text>
+              </Box>
+            </VStack>
           )}
-        </Box>
-      </VStack>
-    )
-  );
-})}
+          {formData.agentRef && (
+            <VStack align="start" spacing={2} w="full">
+              <Flex align="center">
+                <Icon as={FiUser} color="blue.500" mr={2} />
+                <Text fontSize="sm" fontWeight="medium" color={labelColor}>
+                  Studnet Name
+                </Text>
+              </Flex>
+              <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
+                <Text fontSize="lg" fontWeight="bold" color={valueColor}>
+                  {formData.studentRef.name.toUpperCase()}
+                </Text>
+              </Box>
+            </VStack>
+          )}
+          {Object.entries(formData).map(([label, value], index) => {
+            const isEditable =
+              label !== 'passportFile' && label !== 'offerLetterFile';
 
+            const renderSelectOptions = (field) => {
+              switch (field) {
+                case 'ttCopyStatus':
+                case 'docsStatus':
+                  return (
+                    <Select
+                      value={editableData[label]}
+                      onChange={(e) => handleChange(label, e.target.value)}
+                    >
+                      <option value="Pending">Pending</option>
+                      <option value="Received">Received</option>
+                      <option value="Verified">Verified</option>
+                    </Select>
+                  );
+                case 'commissionStatus':
+                  return (
+                    <Select
+                      value={editableData[label]}
+                      onChange={(e) => handleChange(label, e.target.value)}
+                    >
+                      <option value="Not Received">Not Received</option>
+                      <option value="Paid">Paid</option>
+                      <option value="Under Processing">Under Processing</option>
+                    </Select>
+                  );
+                default:
+                  return null;
+              }
+            };
+
+            return (
+              label !== '__v' &&
+              label !== '_id' &&
+              label !== 'documents' &&
+              label !== 'agentRef' &&
+              label !== 'studentRef' && (
+                <VStack key={index} align="start" spacing={2} gridColumn={label === 'date' ? 'span 2':''} w="full">
+                  <Flex align="center">
+                    <Icon
+                      as={fieldIcons[label] || FiFileText}
+                      color="blue.500"
+                      mr={2}
+                    />
+                    <Text fontSize="sm" fontWeight="medium" color={labelColor}>
+                      {label.replace(/([A-Z])/g, ' $1')}
+                    </Text>
+                  </Flex>
+                  <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
+                    {isEditing && isEditable ? (
+                      renderSelectOptions(label) || (
+                        <Input
+                          value={editableData[label]}
+                          onChange={(e) => handleChange(label, e.target.value)}
+                        />
+                      )
+                    ) : label.endsWith('File') &&
+                      (label === 'passportFile' ||
+                        label === 'offerLetterFile') ? (
+                      <Link
+                        href={value.documentFile}
+                        color="blue.500"
+                        fontWeight="bold"
+                        isExternal
+                      >
+                        View File 👁️
+                      </Link>
+                    ) : (
+                      <Text fontSize="lg" fontWeight="bold" color={valueColor}>
+                        {label === 'date'
+                          ? new Date(value).toLocaleDateString('en-GB')
+                          : value}
+                      </Text>
+                    )}
+                  </Box>
+                </VStack>
+              )
+            );
+          })}
 
           {/* Documents Section */}
           <Box gridColumn="span 2" mt={6}>
