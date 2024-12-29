@@ -259,6 +259,13 @@ function ForexForm() {
       }
 
       const studentId = createStudentResult.newStudent._id;
+      const types = documents.map((doc) => doc.documentType);
+      const allTypes = [
+        'Passport',
+        'Offer Letter',
+        ...types
+      ]
+
 
       // Update formData with the new student ID
 
@@ -269,7 +276,7 @@ function ForexForm() {
         '1f8tN2sgd_UBOdxpDwyQ1CMsyVvi1R96f',
       );
       fileUploadFormData.append('studentRef', studentId);
-      fileUploadFormData.append('type', 'forex-documents');
+      fileUploadFormData.append('type', allTypes);
 
       const files = [
         passportFile,

@@ -114,7 +114,7 @@ function GicView() {
             label !== '__v' &&
             label !== '_id' &&
             label !== 'studentDocuments' && (
-              <VStack key={index} align="start" spacing={2} w="full">
+              <VStack key={index} align="start" spacing={2} gridColumn={label === 'commissionStatus' ? 'span 2':''} w="full">
                 <Flex align="center">
                   <Icon
                     as={fieldIcons[label] || FiFileText}
@@ -154,40 +154,32 @@ function GicView() {
 
         {/* Render each student document as a separate field */}
         {formData.studentDocuments &&
-          Object.entries(formData.studentDocuments).map(
-            ([docLabel, docLink]) => (
-              <VStack
-                key={docLabel}
-                gridColumn={docLabel === 'passport' ? 'span 2' : 'span 1'}
-                align="start"
-                spacing={2}
-                w="full"
-              >
-                <Flex align="center">
-                  <Icon
-                    as={fieldIcons[docLabel] || FiFileText}
+          Object.entries(formData.studentDocuments).map(([docLabel, doc]) => (
+            <VStack key={docLabel} align="start" gridColumn={'span 2'} spacing={2} w="full">
+              <Flex align="center">
+                <Icon as={fieldIcons[docLabel] || FiFileText} color="blue.500" mr={2} />
+                <Text fontSize="sm" fontWeight="medium" color={labelColor}>
+                  {docLabel.toUpperCase()}
+                </Text>
+              </Flex>
+              <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
+                {doc.documentFile ? (
+                  <Link
+                    href={doc.documentFile}
                     color="blue.500"
-                    mr={2}
-                  />
-                  <Text fontSize="sm" fontWeight="medium" color={labelColor}>
-                    {docLabel.toUpperCase()}
-                  </Text>
-                </Flex>
-                <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
+                    fontWeight="bold"
+                    isExternal
+                  >
+                    View File 👁️
+                  </Link>
+                ) : (
                   <Text fontSize="lg" fontWeight="bold" color={valueColor}>
-                    <Link
-                      href={docLink}
-                      color="blue.500"
-                      fontWeight="bold"
-                      isExternal
-                    >
-                      View File 👁️
-                    </Link>
+                    Not Provided
                   </Text>
-                </Box>
-              </VStack>
-            ),
-          )}
+                )}
+              </Box>
+            </VStack>
+          ))}
       </SimpleGrid>
     </Box>
   );

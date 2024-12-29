@@ -65,56 +65,60 @@ export const uploadFileController = [
     try {
       const { folderId, type, studentRef } = req.body;
 
+      // Validate required parameters
+      console.log(req.files,'body -',req.body)
       if (!folderId || !studentRef || !req.files || req.files.length === 0) {
         return res
           .status(400)
           .json({ message: 'Missing required parameters or files' });
       }
 
+      // Validate studentRef as a valid MongoDB ObjectId
       if (!mongoose.isValidObjectId(studentRef)) {
         return res.status(400).json({ message: 'Invalid studentRef provided' });
       }
 
+      // Retrieve student data
       const student = await StudentModel.findById(studentRef);
-      console.log('student', student);
-
       if (!student) {
         return res.status(404).json({ message: 'Student not found' });
       }
 
+      // Get or create folder structure
       const agentFolderId = await getOrCreateAgentFolder(folderId, student.agentCode);
-      console.log('agentFoldetr',agentFolderId)
       const studentFolderId = await getOrCreateStudentFolder(agentFolderId, student.studentCode);
-      console.log('studentFolderId',studentFolderId)
-
+      const types = type.split(',')
+      // Process file uploads
       const uploadResults = [];
-      for (const file of req.files) {
+      for (const [index, file] of req.files.entries()) {
         const { path: filePath, originalname } = file;
-
         const timestamp = Date.now();
         const fileExtension = path.extname(originalname);
-        const fileName = `${student.name}_${type}_${timestamp}${fileExtension}`;
+        const fileName = `${student.name}_${types[index]}_${timestamp}${fileExtension}`;
 
         try {
           // Upload file to Google Drive
           const { fileId, viewLink } = await uploadFileWithDetails(
             filePath,
             studentFolderId,
-            fileName,
+            fileName
           );
 
           uploadResults.push({ fileId, viewLink });
         } catch (error) {
           console.error(`Error uploading file ${originalname}:`, error.message);
         } finally {
-          // deleteFile(filePath); // Cleanup file whether upload succeeds or fails
+          // Optionally delete local file after upload
+          deleteFile(filePath);
         }
       }
 
+      // Check if any files were uploaded successfully
       if (uploadResults.length === 0) {
         return res.status(500).json({ message: 'No files were successfully uploaded' });
       }
 
+      // Respond with upload details
       res.status(201).json({
         message: 'Files uploaded successfully',
         studentFolderId,
@@ -122,9 +126,7 @@ export const uploadFileController = [
       });
     } catch (error) {
       console.error('Error uploading files:', error);
-      res
-        .status(500)
-        .json({ message: 'Failed to upload files', error: error.message });
+      res.status(500).json({ message: 'Failed to upload files', error: error.message });
     }
   },
 ];

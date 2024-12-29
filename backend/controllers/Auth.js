@@ -476,7 +476,7 @@ const studentCreate = async (req, res) => {
       } else {
         return res
           .status(400)
-          .json({ message: 'Student with this email already exists' });
+          .json({ message: 'Student with this email already exists in other AGENT or please type name properly' });
       }
     }
     const newStudent = new StudentModel({ name, email, agentCode: agentRef });

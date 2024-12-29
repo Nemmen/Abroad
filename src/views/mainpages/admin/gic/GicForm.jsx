@@ -41,7 +41,6 @@ function GicForm() {
     ]);
   };
 
-  
 
   const removeDocument = (index) => {
     const updatedDocuments = documents.filter((_, i) => i !== index);
@@ -76,8 +75,6 @@ function GicForm() {
     tds: '',
     netPayable: '',
     commissionStatus: '',
-    // documentType: '',
-    // documentFile: null,
   });
   const toast = useToast();
   // const handleNewStudentSubmit = async () => {
@@ -141,12 +138,12 @@ function GicForm() {
 
   // useEffect(() => {
   //   const GIC = gic && gic.length > 0 ? gic.find((gic) => gic.studentPassportNo === formData.passportNo) : null;
-  //   console.log('GIC:', GIC);
+
   //   if (GIC) {
   //     setFormData({
 
   //     });
-  //     console.log('formdata:', formData);
+
   //   }
   // }, [formData.passportNo]);
 
@@ -171,8 +168,6 @@ function GicForm() {
       tds,
       netPayable,
       commissionStatus,
-      documentType,
-      documentFile,
     } = formData;
     if (
       !Agents ||
@@ -185,9 +180,7 @@ function GicForm() {
       !commission ||
       !tds ||
       !netPayable ||
-      !commissionStatus ||
-      !documentType ||
-      !documentFile
+      !commissionStatus
     ) {
       toast({
         title: 'Form Incomplete',
@@ -200,14 +193,14 @@ function GicForm() {
     }
     return true;
   };
-  // console.log('formdaqqqta:', formData);
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     if (validateForm()) {
-      const { documentFile, documentType } = formData;
+      // const { documentFile, documentType } = formData;
 
       const newStudent = {
         name: formData.studentRef,
@@ -247,14 +240,36 @@ function GicForm() {
           studentEmail: formData.email,
           studentPhoneNo: formData.phoneNo,
           studentPassportNo: formData.passportNo,
-          studentDocuments: {}, // Initialize an empty object for documents
+          studentDocuments: {
+            aadhar: {
+              fileId: '',
+              documentFile: '',
+            },
+            pan: {
+              fileId: '',
+              documentFile: '',
+            },
+            ol: {
+              fileId: '',
+              documentFile: '',
+            },
+            passport: {
+              fileId: '',
+              documentFile: '',
+            },
+          },
         };
+      
+        const types = [...documents.map((doc) => doc.documentType)];
 
         const filedata = new FormData();
-        filedata.append('files', documentFile);
-        filedata.append('type', documentType);
+        filedata.append('type', types);
         filedata.append('studentRef', result.newStudent._id);
         filedata.append('folderId', '1WkdyWmBhKQAI6W_M4LNLbPylZoGZ7y6V');
+        const files = [...documents.map((doc) => doc.documentFile)].filter(
+          Boolean,
+        );
+        files.forEach((file) => filedata.append('files', file));
 
         try {
           const response = await fetch(
@@ -268,13 +283,15 @@ function GicForm() {
             },
           );
           const result = await response.json();
-          const viewLink = result.uploads[0].fileId; // Adjust based on your API response structure
-          console.log(viewLink);
+          const respo = result.uploads; // Adjust based on your API response structure
+          console.log(respo);
 
-          console.log('Server Response:', result);
-
-          // Include the view link in the form data
-          formDataToSend.studentDocuments[documentType] = viewLink;
+          for (let i = 0; i < types.length; i++) {
+            formDataToSend.studentDocuments[types[i]] = {
+              fileId: respo[i].fileId,
+              documentFile: respo[i].viewLink,
+            };
+          }
         } catch (error) {
           console.error('Error uploading files:', error);
           toast({
@@ -374,7 +391,7 @@ function GicForm() {
             >
               {agents.map((agents) => (
                 <option key={agents._id} value={agents._id}>
-                  {agents.name}
+                  {agents.name.toUpperCase()}
                 </option>
               ))}
             </Select>
@@ -614,6 +631,7 @@ function GicForm() {
                     h="50px"
                     w="full"
                   >
+                    <option value={''}> -- Select Type --</option>
                     {documentTypeOptions.map((type) => (
                       <option key={type} value={type}>
                         {type}
