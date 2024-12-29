@@ -56,6 +56,7 @@ function ForexView() {
           );
           if (formData1) {
             setFormData(formData1);
+            console.log(formData)
           } else {
             console.error('Form data not found for ID:', id);
           }
@@ -90,61 +91,22 @@ function ForexView() {
           Forex Details
         </Heading>
       </Flex>
+      
 
       {Object.keys(formData).length > 0 && (
         <SimpleGrid columns={{ base: 1, md: 2 }} spacing={10}>
-          {Object.entries(formData).map(
-            ([label, value], index) =>
-              label !== '__v' &&
-              label !== '_id' &&
-              label !== 'documents' &&
-              label !== 'agentRef' &&
-              label !== 'studentRef' && (
-                <VStack key={index} align="start" spacing={2} w="full">
-                  <Flex align="center">
-                    <Icon
-                      as={fieldIcons[label] || FiFileText}
-                      color="blue.500"
-                      mr={2}
-                    />
-                    <Text fontSize="sm" fontWeight="medium" color={labelColor}>
-                      {label.replace(/([A-Z])/g, ' $1')}
-                    </Text>
-                  </Flex>
-                  <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
-                    {label.endsWith('File') ? (
-                      <Link
-                        href={value}
-                        color="blue.500"
-                        fontWeight="bold"
-                        isExternal
-                      >
-                        View File 👁️
-                      </Link>
-                    ) : (
-                      <Text fontSize="lg" fontWeight="bold" color={valueColor}>
-                        {label === 'date'
-                          ? new Date(value).toLocaleDateString('en-GB')
-                          : value}
-                      </Text>
-                    )}
-                  </Box>
-                </VStack>
-              ),
-          )}
-
-          {/* Agent Reference */}
-          {formData.agentRef && (
+           {/* Agent Reference */}
+           {formData.agentRef && (
             <VStack align="start" spacing={2} w="full">
               <Flex align="center">
                 <Icon as={FiUser} color="blue.500" mr={2} />
                 <Text fontSize="sm" fontWeight="medium" color={labelColor}>
-                  Agent Code
+                  Agent Name
                 </Text>
               </Flex>
               <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
                 <Text fontSize="lg" fontWeight="bold" color={valueColor}>
-                  {formData.agentRef.agentCode}
+                  {formData.agentRef.name.toUpperCase()}
                 </Text>
               </Box>
             </VStack>
@@ -181,6 +143,47 @@ function ForexView() {
               </VStack>
             </>
           )}
+          {Object.entries(formData).map(
+            ([label, value], index) =>
+              label !== '__v' &&
+              label !== '_id' &&
+              label !== 'documents' &&
+              label !== 'agentRef' &&
+              label !== 'studentRef' && (
+                <VStack key={index} align="start" spacing={2} w="full">
+                  <Flex align="center">
+                    <Icon
+                      as={fieldIcons[label] || FiFileText}
+                      color="blue.500"
+                      mr={2}
+                    />
+                    <Text fontSize="sm" fontWeight="medium" color={labelColor}>
+                      {label.replace(/([A-Z])/g, ' $1')}
+                    </Text>
+                  </Flex>
+                  <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
+                    {label.endsWith('File') ? (
+                      <Link
+                        href={value.documentFile}
+                        color="blue.500"
+                        fontWeight="bold"
+                        isExternal
+                      >
+                        View File 👁️
+                      </Link>
+                    ) : (
+                      <Text fontSize="lg" fontWeight="bold" color={valueColor}>
+                        {label === 'date'
+                          ? new Date(value).toLocaleDateString('en-GB')
+                          : value}
+                      </Text>
+                    )}
+                  </Box>
+                </VStack>
+              ),
+          )}
+
+         
 
           {/* Document Section */}
           <Box gridColumn="span 2" mt={6}>

@@ -32,6 +32,10 @@ const studentSchema = new mongoose.Schema(
     {
         name: { type: String },
         studentCode: { type: String, unique: true }, // Student code generated automatically
+        agentCode: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "users",
+        },
         email: { type: String, unique: true },
         isDeleted: { type: Boolean, default: false },
         createdAt: { type: Date, default: Date.now },

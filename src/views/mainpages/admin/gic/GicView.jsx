@@ -21,6 +21,26 @@ import {
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 
+const formatGICData = (data) => {
+  // Function to format the date to a readable format (YYYY-MM-DD)
+  const formatDate = (date) => {
+    if (!date) return '';
+    const d = new Date(date);
+    return `${d.getFullYear()}-${(d.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`;
+  };
+
+  const data1 = {
+    AgentName: data.agentRef?.name || '', // Extract agent name
+    studentName: data.studentRef?.name || '', // Extract student name
+    ...data,
+    accOpeningDate: formatDate(data.accOpeningDate), // Format the date
+  };
+
+  const { agentRef, studentRef, ...rest } = data1;
+  return rest;
+};
 // Map of form fields to icons
 const fieldIcons = {
   sNo: FiFileText,
@@ -55,7 +75,7 @@ function GicView() {
           const formData1 = response.data.gicForms.find(
             (form) => form._id === id,
           );
-          setFormData(formData1);
+          setFormData(formatGICData(formData1));
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -102,21 +122,28 @@ function GicView() {
                     mr={2}
                   />
                   <Text fontSize="sm" fontWeight="medium" color={labelColor}>
-                    {label.replace(/([A-Z])/g, ' $1')}{' '}
-                    {/* Format label names */}
+                    {label === 'accOpeningDate'
+                      ? 'Account Opening Date'
+                      : `${label
+                          .replace(/([A-Z])/g, ' $1')
+                          .replace(/\b\w/g, (char) =>
+                            char.toUpperCase(),
+                          )}${' '}`}
                   </Text>
                 </Flex>
                 <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
                   <Text fontSize="lg" fontWeight="bold" color={valueColor}>
                     {typeof value === 'object' && value !== null
                       ? // Handle specific cases for nested objects
-                        label === 'agentRef' && value.agentCode
+                        label === 'agentRef' && value.name
                         ? value.agentCode // Render only the agentCode if the label is 'agentRef'
-                        : label === 'studentRef' && value.studentCode
+                        : label === 'studentRef' && value.name
                         ? value.name // Render only the studentCode if the label is 'studentRef'
                         : Object.entries(value)
                             .map(([key, val]) => `${key}: ${val}`)
                             .join(', ') // Fallback: render key-value pairs for other objects
+                      : label === 'AgentName'
+                      ? value.toUpperCase()
                       : value}{' '}
                     {/* Render simple values */}
                   </Text>
@@ -148,7 +175,7 @@ function GicView() {
                 </Flex>
                 <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
                   <Text fontSize="lg" fontWeight="bold" color={valueColor}>
-                  <Link
+                    <Link
                       href={docLink}
                       color="blue.500"
                       fontWeight="bold"
