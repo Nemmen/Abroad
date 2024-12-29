@@ -295,6 +295,60 @@ const viewAllGicForm = async (req, res) => {
   }
 };
 
+
+
+// Update GIC Form
+const updateGicForm = async (req, res) => {
+  try {
+    const { id } = req.params; // Get the GIC form ID from params
+    const {
+      studentPhoneNo,
+      studentPassportNo,
+      bankVendor,
+      fundingMonth,
+      commissionAmt,
+      tds,
+      netPayable,
+      commissionStatus,
+    } = req.body; // Get editable fields from request body
+
+    const updatedFields = {
+      studentPhoneNo,
+      studentPassportNo,
+      bankVendor,
+      fundingMonth,
+      commissionAmt,
+      tds,
+      netPayable,
+      commissionStatus,
+    };
+
+    // Update the GIC form in the database
+    const updatedGIC = await GICModel.findByIdAndUpdate(
+      id,
+      { $set: updatedFields },
+      { new: true } // Return the updated document
+    );
+
+    if (!updatedGIC) {
+      return res.status(404).json({
+        success: false,
+        message: 'GIC form not found',
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'GIC form updated successfully',
+      updatedGIC,
+    });
+  } catch (error) {
+    console.error('Update GIC Form Error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
+
 const addForexForm = async (req, res) => {
   try {
     const {
@@ -383,6 +437,24 @@ const viewAllForexForms = async (req, res) => {
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 };
+
+
+const updateForexForm = async (req, res) => {
+  try {
+    const updatedData = req.body;
+    const updatedForm = await ForexModel.findByIdAndUpdate(req.params.id, updatedData, { new: true });
+
+    if (updatedForm) {
+      res.status(200).json({ success: true, message: 'Forex form updated successfully.', data: updatedForm });
+    } else {
+      res.status(404).json({ success: false, message: 'Forex form not found.' });
+    }
+  } catch (error) {
+    console.error('Update Forex Form Error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error.' });
+  }
+};
+
 
 // const createBlockedData = async (req, res) => {
 //   try {
@@ -522,8 +594,8 @@ export {
   getCurrentUser,
   addGicForm,
   getStudent,
-  viewAllGicForm,
+  viewAllGicForm,updateGicForm,
   addForexForm,
   viewAllForexForms,
-  getAllBlockedData,
+ updateForexForm,getAllBlockedData,
 };
