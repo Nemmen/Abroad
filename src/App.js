@@ -7,6 +7,7 @@ import { ChakraProvider } from '@chakra-ui/react';
 import initialTheme from './theme/theme';
 import { useState, useEffect } from 'react';
 
+
 export default function Main() {
   const [currentTheme, setCurrentTheme] = useState(initialTheme);
 
@@ -51,19 +52,28 @@ export default function Main() {
   return (
     <ChakraProvider theme={currentTheme}>
       <Routes>
+        <Route path="/" element={<Navigate to="/auth/login" replace />} />
         <Route path="auth/*" element={<AuthLayout />} />
 
         {/* Protected Routes */}
         <Route
           path="admin/*"
           element={
-            <ProtectedRoute adminChildren={<AdminLayout theme={currentTheme} setTheme={setCurrentTheme} />} />
+            <ProtectedRoute
+              adminChildren={
+                <AdminLayout theme={currentTheme} setTheme={setCurrentTheme} />
+              }
+            />
           }
         />
         <Route
           path="agent/*"
           element={
-            <ProtectedRoute agentChildren={<AgentLayout theme={currentTheme} setTheme={setCurrentTheme} />} />
+            <ProtectedRoute
+              agentChildren={
+                <AgentLayout theme={currentTheme} setTheme={setCurrentTheme} />
+              }
+            />
           }
         />
 
