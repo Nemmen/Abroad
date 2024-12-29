@@ -51,19 +51,28 @@ export default function Main() {
   return (
     <ChakraProvider theme={currentTheme}>
       <Routes>
+        <Route exact path="/" render={() => <Redirect to="/auth/login" />} />
         <Route path="auth/*" element={<AuthLayout />} />
 
         {/* Protected Routes */}
         <Route
           path="admin/*"
           element={
-            <ProtectedRoute adminChildren={<AdminLayout theme={currentTheme} setTheme={setCurrentTheme} />} />
+            <ProtectedRoute
+              adminChildren={
+                <AdminLayout theme={currentTheme} setTheme={setCurrentTheme} />
+              }
+            />
           }
         />
         <Route
           path="agent/*"
           element={
-            <ProtectedRoute agentChildren={<AgentLayout theme={currentTheme} setTheme={setCurrentTheme} />} />
+            <ProtectedRoute
+              agentChildren={
+                <AgentLayout theme={currentTheme} setTheme={setCurrentTheme} />
+              }
+            />
           }
         />
 
