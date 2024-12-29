@@ -7,6 +7,7 @@ import { ChakraProvider } from '@chakra-ui/react';
 import initialTheme from './theme/theme';
 import { useState, useEffect } from 'react';
 
+
 export default function Main() {
   const [currentTheme, setCurrentTheme] = useState(initialTheme);
 
@@ -51,7 +52,7 @@ export default function Main() {
   return (
     <ChakraProvider theme={currentTheme}>
       <Routes>
-        <Route exact path="/" render={() => <Redirect to="/auth/login" />} />
+        <Route path="/" element={<Navigate to="/auth/login" replace />} />
         <Route path="auth/*" element={<AuthLayout />} />
 
         {/* Protected Routes */}
