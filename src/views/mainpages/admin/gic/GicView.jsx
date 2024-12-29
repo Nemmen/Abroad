@@ -99,6 +99,14 @@ function GicView() {
   const bgColor = useColorModeValue('white', 'gray.800');
   const fieldBgColor = useColorModeValue('gray.50', 'gray.700');
 
+
+  const months = [
+    'January', 'February', 'March', 'April', 'May', 'June', 
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
+  
+  const bankVendors = ['ICICI', 'RBC', 'CIBC', 'BOM', 'TD'];
+  
   return (
     <Box
       width="full"
@@ -161,66 +169,98 @@ function GicView() {
                   </Text>
                 </Flex>
                 <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
-                  {isEditing && isEditable ? (
-                    label === 'commissionStatus' ? (
-                      <Select
-                        value={editableData[label]}
-                        onChange={(e) => handleChange(label, e.target.value)}
-                      >
-                        <option value="Not Received">Not Received</option>
-                        <option value="Paid">Paid</option>
-                        <option value="Under Processing">Under Processing</option>
-                      </Select>
-                    ) : (
-                      <Input
-                        value={editableData[label] || ''}
-                        onChange={(e) => handleChange(label, e.target.value)}
-                      />
-                    )
-                  ) : label === 'agentRef' ? (
-                    <Text fontSize="lg" fontWeight="bold" color={valueColor}>
-                      {value.agentCode}
-                    </Text>
-                  ) : label === 'studentRef' ? (
-                    <VStack align="start" spacing={3}>
-                      <Text fontSize="lg" fontWeight="bold" color={valueColor}>
-                        {value.name}
-                      </Text>
-                      {value.documents && (
-                        value.documents.map((doc, docIndex) => (
-                          <Flex
-                            key={docIndex}
-                            justify="space-between"
-                            align="center"
-                            w="full"
-                          >
-                            <Text fontSize="md" fontWeight="medium" color={valueColor}>
-                              {doc.name}
-                            </Text>
-                            <Link
-                              href={doc.url}
-                              isExternal
-                              color="blue.500"
-                              textDecoration="underline"
-                              display="flex"
-                              alignItems="center"
-                            >
-                              View File 👁️
-                            </Link>
-                          </Flex>
-                        ))
-                      )}
-                    </VStack>
-                  ) : typeof value === 'object' ? (
-                    <Text fontSize="lg" fontWeight="bold" color={valueColor}>
-                      {JSON.stringify(value)}
-                    </Text>
-                  ) : (
-                    <Text fontSize="lg" fontWeight="bold" color={valueColor}>
-                      {value}
-                    </Text>
-                  )}
-                </Box>
+  {isEditing && isEditable ? (
+    label === 'commissionStatus' ? (
+      <Select
+        value={editableData[label]}
+        onChange={(e) => handleChange(label, e.target.value)}
+      >
+        <option value="Not Received">Not Received</option>
+        <option value="Paid">Paid</option>
+        <option value="Under Processing">Under Processing</option>
+      </Select>
+    ) : label === 'fundingMonth' ? (
+      <Select
+        value={editableData[label]}
+        onChange={(e) => handleChange(label, e.target.value)}
+      >
+        {months.map((month, index) => (
+          <option key={index} value={month}>
+            {month}
+          </option>
+        ))}
+      </Select>
+    ) : label === 'bankVendor' ? (
+      <Select
+        value={editableData[label]}
+        onChange={(e) => handleChange(label, e.target.value)}
+      >
+        {bankVendors.map((vendor, index) => (
+          <option key={index} value={vendor}>
+            {vendor}
+          </option>
+        ))}
+      </Select>
+    ) : (
+      <Input
+        value={editableData[label] || ''}
+        onChange={(e) => handleChange(label, e.target.value)}
+      />
+    )
+  ) : label === 'agentRef' ? (
+    <Text fontSize="lg" fontWeight="bold" color={valueColor}>
+      {value.agentCode}
+    </Text>
+  ) : label === 'studentRef' ? (
+    value ? (
+      <VStack align="start" spacing={3}>
+        <Text fontSize="lg" fontWeight="bold" color={valueColor}>
+          {value.name || 'N/A'}
+        </Text>
+        {value.documents?.length > 0 ? (
+          value.documents.map((doc, docIndex) => (
+            <Flex
+              key={docIndex}
+              justify="space-between"
+              align="center"
+              w="full"
+            >
+              <Text fontSize="md" fontWeight="medium" color={valueColor}>
+                {doc.name || 'Unnamed Document'}
+              </Text>
+              <Link
+                href={doc.url}
+                isExternal
+                color="blue.500"
+                textDecoration="underline"
+                display="flex"
+                alignItems="center"
+              >
+                View File 👁️
+              </Link>
+            </Flex>
+          ))
+        ) : (
+          <Text fontSize="md" fontWeight="medium" color={labelColor}>
+            No Documents Available
+          </Text>
+        )}
+      </VStack>
+    ) : (
+      <Text fontSize="md" fontWeight="medium" color={labelColor}>
+        No Student Reference Available
+      </Text>
+    )
+  ) : typeof value === 'object' ? (
+    <Text fontSize="lg" fontWeight="bold" color={valueColor}>
+      {JSON.stringify(value)}
+    </Text>
+  ) : (
+    <Text fontSize="lg" fontWeight="bold" color={valueColor}>
+      {value}
+    </Text>
+  )}
+</Box>
               </VStack>
             )
           );
