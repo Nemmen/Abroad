@@ -36,7 +36,7 @@ export default function TopUserTable() {
     // Fetch data from backend
     const fetchPendingUsers = async () => {
       try {
-        const response = await axios.get('http://localhost:4000/admin/getuser', {
+        const response = await axios.get('https://abroad-backend-ten.vercel.app/admin/getuser', {
           withCredentials: true,
         });
         const users = response.data.users.filter((user) => user.userStatus === 'pending');

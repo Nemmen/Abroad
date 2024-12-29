@@ -12,7 +12,7 @@ const NotificationBar = () => {
       try {
 
         const usersResponse = await axios.get(
-          'http://localhost:4000/admin/getuser',
+          'https://abroad-backend-ten.vercel.app/admin/getuser',
           { withCredentials: true },
         );
         const filteredNotifications = usersResponse.data.users
