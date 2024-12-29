@@ -62,11 +62,13 @@ const deleteFile = (filePath) => {
 export const uploadFileController = [
   multipleFileUploadMiddleware,
   async (req, res) => {
+    const uploadedFilePaths = []; // Array to store file paths for deletion
+
     try {
       const { folderId, type, studentRef } = req.body;
 
       // Validate required parameters
-      console.log(req.files,'body -',req.body)
+      console.log(req.files, 'body -', req.body);
       if (!folderId || !studentRef || !req.files || req.files.length === 0) {
         return res
           .status(400)
@@ -85,13 +87,23 @@ export const uploadFileController = [
       }
 
       // Get or create folder structure
-      const agentFolderId = await getOrCreateAgentFolder(folderId, student.agentCode);
-      const studentFolderId = await getOrCreateStudentFolder(agentFolderId, student.studentCode);
-      const types = type.split(',')
+      const agentFolderId = await getOrCreateAgentFolder(
+        folderId,
+        student.agentCode,
+      );
+      const studentFolderId = await getOrCreateStudentFolder(
+        agentFolderId,
+        student.studentCode,
+      );
+
+      const types = type.split(',');
+      const uploadResults = []; // Array to store successful upload results
+
       // Process file uploads
-      const uploadResults = [];
       for (const [index, file] of req.files.entries()) {
         const { path: filePath, originalname } = file;
+        uploadedFilePaths.push(filePath); // Collect file paths for deletion
+
         const timestamp = Date.now();
         const fileExtension = path.extname(originalname);
         const fileName = `${student.name}_${types[index]}_${timestamp}${fileExtension}`;
@@ -101,21 +113,19 @@ export const uploadFileController = [
           const { fileId, viewLink } = await uploadFileWithDetails(
             filePath,
             studentFolderId,
-            fileName
+            fileName,
           );
-
           uploadResults.push({ fileId, viewLink });
         } catch (error) {
-          console.error(`Error uploading file ${originalname}:`, error.message);
-        } finally {
-          // Optionally delete local file after upload
-          deleteFile(filePath);
+          console.error(`Error uploading file ${fileName}:`, error.message);
         }
       }
 
       // Check if any files were uploaded successfully
       if (uploadResults.length === 0) {
-        return res.status(500).json({ message: 'No files were successfully uploaded' });
+        return res
+          .status(500)
+          .json({ message: 'No files were successfully uploaded' });
       }
 
       // Respond with upload details
@@ -126,7 +136,18 @@ export const uploadFileController = [
       });
     } catch (error) {
       console.error('Error uploading files:', error);
-      res.status(500).json({ message: 'Failed to upload files', error: error.message });
+      res
+        .status(500)
+        .json({ message: 'Failed to upload files', error: error.message });
+    } finally {
+      // Delete all files at the end, regardless of success or failure
+      for (const filePath of uploadedFilePaths) {
+        try {
+          await deleteFile(filePath);
+        } catch (error) {
+          console.error(`Error deleting file ${filePath}:`, error.message);
+        }
+      }
     }
   },
 ];
