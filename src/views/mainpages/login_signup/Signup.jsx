@@ -168,7 +168,7 @@ export default function Register() {
           />
         </div>
         <div className="p-10 flex flex-col justify-center w-[450px] overflow-y-auto pt-[650px]">
-          <h2 className="text-2xl font-semibold text-gray-800">Sign Up</h2>
+          <h2 className="text-2xl font-semibold text-gray-800 mt-[100px]">Sign Up</h2>
           <p className="text-sm text-gray-600 mb-6">Create your account.</p>
 
           <form onSubmit={handleSubmit}>
@@ -178,7 +178,7 @@ export default function Register() {
                 htmlFor="username"
                 className="block text-gray-700 font-semibold"
               >
-                Name
+                Name <span className='text-orange-500'>*</span>
               </label>
               <input
                 type="text"
@@ -194,7 +194,7 @@ export default function Register() {
                 htmlFor="email"
                 className="block text-gray-700 font-semibold"
               >
-                Email
+                Email<span className='text-orange-500'>*</span>
               </label>
               <input
                 type="email"
@@ -210,7 +210,7 @@ export default function Register() {
                 htmlFor="organization"
                 className="block text-gray-700 font-semibold"
               >
-                Organization
+                Organization<span className='text-orange-500'>*</span>
               </label>
               <input
                 type="text"
@@ -226,7 +226,7 @@ export default function Register() {
                 htmlFor="phoneNumber"
                 className="block text-gray-700 font-semibold"
               >
-                Phone Number
+                Phone Number<span className='text-orange-500'>*</span>
               </label>
               <input
                 type="tel"
@@ -247,7 +247,7 @@ export default function Register() {
                 htmlFor="state"
                 className="block text-gray-700 font-semibold"
               >
-                State
+                State<span className='text-orange-500'>*</span>
               </label>
               <select
                 id="state"
@@ -268,7 +268,7 @@ export default function Register() {
                 htmlFor="city"
                 className="block text-gray-700 font-semibold"
               >
-                City
+                City<span className='text-orange-500'>*</span>
               </label>
               <input
                 type="text"
@@ -284,7 +284,7 @@ export default function Register() {
                 htmlFor="password"
                 className="block text-gray-700 font-semibold"
               >
-                Password
+                Password<span className='text-orange-500'>*</span>
               </label>
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -306,7 +306,7 @@ export default function Register() {
                 htmlFor="confirmPassword"
                 className="block text-gray-700 font-semibold"
               >
-                Confirm Password
+                Confirm Password<span className='text-orange-500'>*</span>
               </label>
               <input
                 type={showConfirmPassword ? 'text' : 'password'}
@@ -347,7 +347,7 @@ export default function Register() {
                 htmlFor="document1"
                 className="block text-gray-700 font-semibold"
               >
-                Document 1 (Document Verified?)
+                Business registration
               </label>
               <input
                 type="file"
@@ -375,7 +375,7 @@ export default function Register() {
                 htmlFor="document2"
                 className="block text-gray-700 font-semibold"
               >
-                Document 2 (Document Verified?)
+                GST certificate OF company
               </label>
               <input
                 type="file"
@@ -394,6 +394,61 @@ export default function Register() {
                     });
                   }
                 }}
+                className="w-full px-4 py-2 border rounded-lg mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div className="mb-4">
+              <label
+                htmlFor="document4"
+                className="block text-gray-700 font-semibold"
+              >
+                Bank Account details 
+              </label>
+              <input
+                type="file"
+                id="document3"
+                // onChange={(e) => {
+                //   const file = e.target.files[0];
+                //   if (file) {
+                //     setDocument2(file);
+                //     toast({
+                //       title: 'File Selected',
+                //       description: `Selected file: ${file.name}`,
+                //       status: 'info',
+                //       duration: 2000,
+                //       isClosable: true,
+                //       position: 'bottom-right',
+                //     });
+                //   }
+                // }}
+                className="w-full px-4 py-2 border rounded-lg mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div className="mb-4">
+              <label
+                htmlFor="document4"
+                className="block text-gray-700 font-semibold"
+              >
+                PAN CARD of company
+              </label>
+              <input
+                type="file"
+                id="document4"
+                // onChange={(e) => {
+                //   const file = e.target.files[0];
+                //   if (file) {
+                //     setDocument2(file);
+                //     toast({
+                //       title: 'File Selected',
+                //       description: `Selected file: ${file.name}`,
+                //       status: 'info',
+                //       duration: 2000,
+                //       isClosable: true,
+                //       position: 'bottom-right',
+                //     });
+                //   }
+                // }}
                 className="w-full px-4 py-2 border rounded-lg mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
