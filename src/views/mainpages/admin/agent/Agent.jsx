@@ -48,7 +48,10 @@ export default function Agent() {
           'https://abroad-backend-ten.vercel.app/admin/getuser',
           { withCredentials: true },
         );
-        setUsers(usersResponse.data.users);
+        const filteredUsers = usersResponse.data.users.filter(
+          (user) => user.role === 'user',
+        );
+        setUsers(filteredUsers);
       } catch (error) {
         console.error('Error fetching users:', error);
       }
