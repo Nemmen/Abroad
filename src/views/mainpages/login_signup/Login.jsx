@@ -28,7 +28,11 @@ export default function Login() {
       const request = await post('https://abroad-backend-ten.vercel.app/auth/login', {
         email,
         password,
-      });
+      },
+      {
+        Credentials: 'include',
+      }
+    );
       const response = request.data;
 
       if (request.status === 200) {
