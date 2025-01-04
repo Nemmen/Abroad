@@ -23,6 +23,7 @@ const AddUserModal = () => {
     name: '',
     email: '',
     password: '',
+    confirmPassword: '', // Added confirm password field
     role: 'user',
     organization: '',
     phoneNumber: '',
@@ -41,7 +42,40 @@ const AddUserModal = () => {
     }));
   };
 
+  const validateForm = () => {
+    const { name, email, password, confirmPassword } = formData;
+
+    // Check mandatory fields
+    if (!name || !email || !password || !confirmPassword) {
+      toast({
+        title: 'Validation Error',
+        description:
+          'Name, email, password, and confirm password are required.',
+        status: 'warning',
+        duration: 3000,
+        isClosable: true,
+      });
+      return false;
+    }
+
+    // Check if passwords match
+    if (password !== confirmPassword) {
+      toast({
+        title: 'Validation Error',
+        description: 'Passwords do not match.',
+        status: 'warning',
+        duration: 3000,
+        isClosable: true,
+      });
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async () => {
+    if (!validateForm()) return; // Ensure the form is validated
+
     setIsLoading(true); // Show loader
     try {
       const response = await fetch(
@@ -53,7 +87,7 @@ const AddUserModal = () => {
           },
           body: JSON.stringify(formData),
           credentials: 'include',
-        }
+        },
       );
 
       if (response.ok) {
@@ -69,6 +103,7 @@ const AddUserModal = () => {
           name: '',
           email: '',
           password: '',
+          confirmPassword: '',
           organization: '',
           phoneNumber: '',
           state: '',
@@ -77,9 +112,11 @@ const AddUserModal = () => {
         });
         onClose();
       } else {
+        // Parse and display the error message from the backend if available
+        const errorData = await response.json();
         toast({
           title: 'Error',
-          description: 'Failed to add user.',
+          description: errorData.message || 'Failed to add user.',
           status: 'error',
           duration: 3000,
           isClosable: true,
@@ -89,7 +126,7 @@ const AddUserModal = () => {
       console.error('Error adding user:', error);
       toast({
         title: 'Error',
-        description: 'An unexpected error occurred.',
+        description: 'An unexpected error occurred. Please try again later.',
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -138,6 +175,15 @@ const AddUserModal = () => {
                   onChange={handleChange}
                 />
               </FormControl>
+              <FormControl id="confirmPassword" isRequired>
+                <FormLabel>Confirm Password</FormLabel>
+                <Input
+                  type="password"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                />
+              </FormControl>
               <FormControl id="organization">
                 <FormLabel>Organization</FormLabel>
                 <Input
@@ -174,7 +220,7 @@ const AddUserModal = () => {
                   onChange={handleChange}
                 />
               </FormControl>
-              <FormControl id="businessDivision">
+              <FormControl id="businessDivision" gridColumn={'span 2'}>
                 <FormLabel>Business Division</FormLabel>
                 <select
                   name="businessDivision"

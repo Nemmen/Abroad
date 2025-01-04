@@ -146,7 +146,7 @@ export default function Register() {
     } catch (error) {
       toast({
         title: 'Registration Failed',
-        description: 'An error occurred while registering. Please try again.',
+        description: error.response?.data?.message,
         status: 'error',
         duration: 2000,
         isClosable: true,
