@@ -23,6 +23,7 @@ import {
 import axios from 'axios';
 import { IconButton } from '@chakra-ui/react';
 import { DeleteIcon } from '@chakra-ui/icons';
+import AddUserModal from './AddUserModel';
 
 const columnHelper = createColumnHelper();
 
@@ -34,6 +35,7 @@ export default function UserDataTable(props) {
   const textColor = useColorModeValue('secondaryGray.900', 'white');
   const textColorSecondary = useColorModeValue('secondaryGray.600', 'white');
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
+  
 
   useEffect(() => {
     // Update the data state when tableData prop changes
@@ -268,6 +270,7 @@ export default function UserDataTable(props) {
         <Text color={textColor} fontSize="2xl" fontWeight="600">
           User Registrations
         </Text>
+        <AddUserModal />
       </Flex>
       <Box height="300px" overflowY="auto">
         <Table variant="simple" color="gray.500" mt="12px">
