@@ -23,9 +23,6 @@ const gicSchema = new mongoose.Schema({
   accOpeningDate: {
     type: Date,
   },
-  passportNo: {
-    type: String,
-  },
   bankVendor: {
     type: String,
     enum: ['ICICI', 'RBC', 'CIBC', 'BOM', 'TD'],
