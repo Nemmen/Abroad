@@ -28,6 +28,7 @@ function GicForm() {
   const [agents, setAgents] = useState([]);
   const [documents, setDocuments] = useState([]);
   const navigate = useNavigate();
+  const [accOpeningDate1, setAccOpeningDate1] = useState(getCurrentDate());
 
   const documentTypeOptions = ['aadhar', 'pan', 'ol', 'passport'];
 
@@ -40,7 +41,6 @@ function GicForm() {
       },
     ]);
   };
-
 
   const removeDocument = (index) => {
     const updatedDocuments = documents.filter((_, i) => i !== index);
@@ -194,7 +194,6 @@ function GicForm() {
     return true;
   };
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -235,7 +234,7 @@ function GicForm() {
           commissionStatus: formData.commissionStatus,
           agentRef: formData.Agents,
           accOpeningMonth: getCurrentMonth(),
-          accOpeningDate: getCurrentDate(),
+          accOpeningDate: accOpeningDate1,
           bankVendor: formData.bankVendor,
           studentEmail: formData.email,
           studentPhoneNo: formData.phoneNo,
@@ -259,7 +258,7 @@ function GicForm() {
             },
           },
         };
-      
+
         const types = [...documents.map((doc) => doc.documentType)];
 
         const filedata = new FormData();
@@ -478,8 +477,9 @@ function GicForm() {
             <FormLabel>Acc Opening Date</FormLabel>
             <Input
               type="date"
-              value={getCurrentDate()}
-              readOnly
+              value={accOpeningDate1}
+              onChange={(e) => setAccOpeningDate1(e.target.value)}
+              max={getCurrentDate()} // Restrict future dates
               h="50px"
               w="full"
             />
@@ -634,7 +634,7 @@ function GicForm() {
                     <option value={''}> -- Select Type --</option>
                     {documentTypeOptions.map((type) => (
                       <option key={type} value={type}>
-                        {type}
+                        {type === 'ol' ? 'Offer Letter' : type.toUpperCase()}
                       </option>
                     ))}
                   </Select>

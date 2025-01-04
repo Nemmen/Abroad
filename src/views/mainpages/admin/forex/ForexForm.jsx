@@ -22,13 +22,13 @@ import {
   Spinner,
 } from '@chakra-ui/react';
 import { format } from 'date-fns';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import countries from './csvjson.json';
 const getCurrentDate = () => format(new Date(), 'yyyy-MM-dd');
 
 function ForexForm() {
   const navigate = useNavigate();
+  const [accOpeningDate1, setAccOpeningDate1] = useState(getCurrentDate());
   const [formData, setFormData] = useState({
     agentRef: '',
     studentRef: '',
@@ -50,9 +50,9 @@ function ForexForm() {
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
+  // const [isModalOpen, setIsModalOpen] = useState(false);
+  // const openModal = () => setIsModalOpen(true);
+  // const closeModal = () => setIsModalOpen(false);
   const toast = useToast();
   const [agents, setAgents] = useState([]);
 
@@ -260,12 +260,7 @@ function ForexForm() {
 
       const studentId = createStudentResult.newStudent._id;
       const types = documents.map((doc) => doc.documentType);
-      const allTypes = [
-        'Passport',
-        'Offer Letter',
-        ...types
-      ]
-
+      const allTypes = ['Passport', 'Offer Letter', ...types];
 
       // Update formData with the new student ID
 
@@ -320,6 +315,7 @@ function ForexForm() {
       // Step 3: Submit the final form data
       const finalFormData = {
         ...formData,
+        date : accOpeningDate1,
         studentRef: studentId,
         passportFile: {
           fileId: uploadResult.uploads[0]?.fileId,
@@ -420,12 +416,13 @@ function ForexForm() {
             </Select>
           </FormControl>
 
-          <FormControl isReadOnly>
+          <FormControl isRequired>
             <FormLabel>Date</FormLabel>
             <Input
-              type="text"
-              value={getCurrentDate()}
-              readOnly
+              type="date"
+              value={accOpeningDate1}
+              onChange={(e) => setAccOpeningDate1(e.target.value)}
+              max={getCurrentDate()} // Restrict future dates
               h="50px"
               w="full"
             />

@@ -358,6 +358,7 @@ const addForexForm = async (req, res) => {
       agentCommission,
       tds,
       netPayable,
+      date,
       commissionStatus,
       agentRef,
       documents,
@@ -387,6 +388,7 @@ const addForexForm = async (req, res) => {
     }
 
     const newForex = new ForexModel({
+      date,
       studentRef,
       agentRef,
       country,
