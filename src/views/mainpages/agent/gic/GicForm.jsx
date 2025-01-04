@@ -622,7 +622,7 @@ function GicForm() {
                     <option value={''}> -- Select Type --</option>
                     {documentTypeOptions.map((type) => (
                       <option key={type} value={type}>
-                        {type}
+                       {type === 'ol' ? 'Offer Letter' : type.toUpperCase()}
                       </option>
                     ))}
                   </Select>
