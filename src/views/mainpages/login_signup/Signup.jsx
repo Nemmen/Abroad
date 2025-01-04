@@ -342,7 +342,7 @@ export default function Register() {
               />
             </div> */}
 
-            <div className="mb-4">
+            {/* <div className="mb-4">
               <label
                 htmlFor="document1"
                 className="block text-gray-700 font-semibold"
@@ -470,7 +470,7 @@ export default function Register() {
                 <option value="GIC">GIC</option>
                 <option value="FOREX">FOREX</option>
               </select>
-            </div>
+            </div> */}
 
             {loading ? (
              <div className='text-center'>
