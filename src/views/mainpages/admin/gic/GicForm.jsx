@@ -64,6 +64,7 @@ function GicForm() {
   }, [dispatch]);
 
   const [formData, setFormData] = useState({
+    type: '',
     Agents: '',
     studentRef: '',
     passportNo: '',
@@ -157,6 +158,7 @@ function GicForm() {
 
   const validateForm = () => {
     const {
+      type,
       Agents,
       studentRef,
       passportNo,
@@ -170,6 +172,7 @@ function GicForm() {
       commissionStatus,
     } = formData;
     if (
+      !type ||
       !Agents ||
       !studentRef ||
       !passportNo ||
@@ -226,6 +229,7 @@ function GicForm() {
         }
 
         const formDataToSend = {
+          type: formData.type,
           studentRef: result.newStudent._id,
           commissionAmt: formData.commission,
           fundingMonth: formData.accFundingMonth,
@@ -379,6 +383,21 @@ function GicForm() {
       <form onSubmit={handleSubmit}>
         <SimpleGrid columns={2} spacing={4}>
           <FormControl isRequired>
+            <FormLabel>Type Of Service</FormLabel>
+            <Select
+              name="type"
+              placeholder="Select Type of Service"
+              value={formData.type}
+              onChange={handleChange}
+              h="50px"
+              w="full"
+            >
+              <option value="GIC">GIC</option>
+              <option value="BLOCKED ACCOUNT">BLOCKED ACCOUNT</option>
+            </Select>
+          </FormControl>
+
+          <FormControl isRequired>
             <FormLabel>Agent Name</FormLabel>
             <Select
               name="Agents"
@@ -394,17 +413,6 @@ function GicForm() {
                 </option>
               ))}
             </Select>
-          </FormControl>
-
-          <FormControl isReadOnly>
-            <FormLabel>Acc Opening Date</FormLabel>
-            <Input
-              type="text"
-              value={getCurrentDate()}
-              readOnly
-              h="50px"
-              w="full"
-            />
           </FormControl>
 
           <FormControl isRequired>
@@ -469,6 +477,8 @@ function GicForm() {
               <option value="RBC">RBC</option>
               <option value="CIBC">CIBC</option>
               <option value="BOM">BOM</option>
+              <option value="Expatrio">Expatrio</option>
+              <option value="Fintiba">Fintiba</option>
               <option value="TD">TD</option>
             </Select>
           </FormControl>
