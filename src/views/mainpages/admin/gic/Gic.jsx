@@ -22,6 +22,7 @@ import * as XLSX from 'xlsx';
 // Define the columns
 const allColumns = [
   { field: 'Agent', headerName: 'Agent Name', width: 140 },
+  { field: 'type' , headerName: 'Type', width: 100 },
   { field: 'accOpeningMonth', headerName: 'Acc Opening Month', width: 150 },
   { field: 'studentName', headerName: 'Student Name', width: 150 },
   { field: 'passportNo', headerName: 'Passport No.', width: 130 },
@@ -52,6 +53,7 @@ const Gic = () => {
           setData(response.data.gicForms);
           const gicForms = response.data.gicForms.map((form, index) => ({
             id: form._id || index,
+            type: form.type || 'N/A',
             Agent: form.agentRef.name.toUpperCase() || 'N/A',
             accOpeningMonth: form.accOpeningMonth || 'N/A',
             studentName: form.studentName || 'N/A',
@@ -79,6 +81,7 @@ const Gic = () => {
     const cleanData = data.map((item) => {
       // Retain only relevant fields and rename keys to match column names
       const cleanedItem = {
+        type: item.type || 'N/A',
         Agent: item.agentRef?.name?.toUpperCase() || 'N/A',
         accOpeningMonth: item.accOpeningMonth || 'N/A',
         studentName: item.studentName || 'N/A',
@@ -133,7 +136,7 @@ const Gic = () => {
         alignItems={'center'}
       >
         <div>
-          <Text fontSize="34px">GIC Registrations</Text>
+          <Text fontSize="34px">GIC / Blocked Account Registrations</Text>
         </div>
         <div>
           <Button

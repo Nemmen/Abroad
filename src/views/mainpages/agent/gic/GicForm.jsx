@@ -27,7 +27,6 @@ function GicForm() {
   // const { gic, error } = useSelector((state) => state.Gic);
 
   const { user } = useSelector((state) => state.Auth);
-  
 
   const [documents, setDocuments] = useState([]);
   const navigate = useNavigate();
@@ -43,7 +42,6 @@ function GicForm() {
       },
     ]);
   };
-
 
   const removeDocument = (index) => {
     const updatedDocuments = documents.filter((_, i) => i !== index);
@@ -67,6 +65,7 @@ function GicForm() {
   }, [dispatch]);
 
   const [formData, setFormData] = useState({
+    type: '',
     Agents: user?._id,
     studentRef: '',
     passportNo: '',
@@ -160,15 +159,10 @@ function GicForm() {
   };
 
   const validateForm = () => {
-    const {
-      Agents,
-      studentRef,
-      passportNo,
-      email,
-      phoneNo,
-      bankVendor,
-    } = formData;
+    const { type , Agents, studentRef, passportNo, email, phoneNo, bankVendor } =
+      formData;
     if (
+      !type ||
       !Agents ||
       !studentRef ||
       !passportNo ||
@@ -188,11 +182,10 @@ function GicForm() {
     return true;
   };
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    console.log("form",formData)
+    console.log('form', formData);
 
     if (validateForm()) {
       // const { documentFile, documentType } = formData;
@@ -222,6 +215,7 @@ function GicForm() {
         }
 
         const formDataToSend = {
+          type:formData.type,
           studentRef: result.newStudent._id,
           commissionAmt: formData.commission,
           fundingMonth: formData.accFundingMonth,
@@ -254,7 +248,7 @@ function GicForm() {
             },
           },
         };
-      
+
         const types = [...documents.map((doc) => doc.documentType)];
 
         const filedata = new FormData();
@@ -374,22 +368,26 @@ function GicForm() {
     >
       <form onSubmit={handleSubmit}>
         <SimpleGrid columns={2} spacing={4}>
-        <FormControl isReadOnly>
+          <FormControl isRequired>
+            <FormLabel>Type Of Service</FormLabel>
+            <Select
+              name="type"
+              placeholder="Select Type of Service"
+              value={formData.type}
+              onChange={handleChange}
+              h="50px"
+              w="full"
+            >
+              <option value="GIC">GIC</option>
+              <option value="BLOCKED ACCOUNT">BLOCKED ACCOUNT</option>
+            </Select>
+          </FormControl>
+
+          <FormControl isReadOnly>
             <FormLabel>Agent Name</FormLabel>
             <Input
               type="text"
               value={user?.name.toUpperCase()}
-              readOnly
-              h="50px"
-              w="full"
-            />
-          </FormControl>
-
-          <FormControl isReadOnly>
-            <FormLabel>Acc Opening Date</FormLabel>
-            <Input
-              type="text"
-              value={getCurrentDate()}
               readOnly
               h="50px"
               w="full"
@@ -458,6 +456,8 @@ function GicForm() {
               <option value="RBC">RBC</option>
               <option value="CIBC">CIBC</option>
               <option value="BOM">BOM</option>
+              <option value="Expatrio">Expatrio</option>
+              <option value="Fintiba">Fintiba</option>
               <option value="TD">TD</option>
             </Select>
           </FormControl>
@@ -502,7 +502,7 @@ function GicForm() {
               <option value={'Not Funded Yet'}>Not Funded Yet</option>
             </Select>
           </FormControl>
-{/* 
+          {/* 
           <FormControl isRequired>
             <FormLabel>Commission</FormLabel>
             <NumberInput min={0} h="50px" w="full">
@@ -622,7 +622,7 @@ function GicForm() {
                     <option value={''}> -- Select Type --</option>
                     {documentTypeOptions.map((type) => (
                       <option key={type} value={type}>
-                       {type === 'ol' ? 'Offer Letter' : type.toUpperCase()}
+                        {type === 'ol' ? 'Offer Letter' : type.toUpperCase()}
                       </option>
                     ))}
                   </Select>

@@ -76,6 +76,7 @@ function GicView() {
             (form) => form._id === id,
           );
           setFormData(formatGICData(formData1));
+       
           setEditableData({
             studentPhoneNo: formData1?.studentPhoneNo,
             studentPassportNo: formData1?.studentPassportNo,
@@ -132,7 +133,7 @@ function GicView() {
     >
       <Flex justify="space-between" mb={8}>
         <Heading as="h3" fontSize="3xl" color="blue.600">
-          GIC Details
+          {formData?.type ? formData?.type : 'GIC'} Details
         </Heading>
         {isEditing ? (
           <Flex>

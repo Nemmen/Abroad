@@ -132,7 +132,7 @@ function GicView() {
     >
       <Flex justify="space-between" mb={8}>
         <Heading as="h3" fontSize="3xl" color="blue.600">
-          GIC Details
+        {formData?.type ? formData?.type : 'GIC'} Details
         </Heading>
         {isEditing ? (
           <Flex>
