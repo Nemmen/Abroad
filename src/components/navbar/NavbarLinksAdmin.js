@@ -7,7 +7,6 @@ import {
   Flex,
   Icon,
   Image,
-  Link,
   Menu,
   MenuButton,
   MenuItem,
@@ -29,7 +28,7 @@ import { IoMdMoon, IoMdSunny } from 'react-icons/io';
 import { FaEthereum } from 'react-icons/fa';
 import routes from 'routes';
 import {routeAjent} from 'routes';
-import { useLocation } from 'react-router-dom';
+import { useLocation , Link } from 'react-router-dom';
 
 export default function HeaderLinks(props) {
   const { secondary } = props;
@@ -162,7 +161,7 @@ export default function HeaderLinks(props) {
               fontWeight="700"
               color={textColor}
             >
-              👋&nbsp; Hey, Agent
+              👋&nbsp; Hii, Agent
             </Text>
           </Flex>
           <Flex flexDirection="column" p="10px">
@@ -172,7 +171,7 @@ export default function HeaderLinks(props) {
               borderRadius="8px"
               px="14px"
             >
-              <Text fontSize="sm">Profile Settings</Text>
+              <Text fontSize="sm"><Link to={`${location.pathname}/profile`}>Profile Settings</Link></Text>
             </MenuItem>
             <MenuItem
               _hover={{ bg: 'none' }}
