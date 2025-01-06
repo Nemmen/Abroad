@@ -18,6 +18,7 @@ import DataTable from 'components/DataTable';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
+import { useSelector } from 'react-redux';
 
 const allColumns = [
   { field: 'agentRef', headerName: 'Agent', width: 120 },
@@ -42,6 +43,7 @@ const Forex = () => {
     allColumns.map((col) => col.field),
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
+ const { user } = useSelector((state) => state.Auth);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -50,7 +52,13 @@ const Forex = () => {
           'https://abroad-backend-ten.vercel.app/auth/viewAllForexForms',
         );
         if (response.data.forexForms) {
-          const forexForms = response.data.forexForms.map((item) => ({
+
+          const userForexForms = response.data.forexForms.filter(
+            (form) => form.agentRef._id === user._id, // Replace with the correct field for user matching
+          );
+
+
+          const forexForms = userForexForms.map((item) => ({
             id: item._id,
             agentRef: item.agentRef?.name.toUpperCase() || 'N/A',
             studentRef: item.studentRef?.name || 'N/A',
@@ -67,7 +75,7 @@ const Forex = () => {
             commissionStatus: item.commissionStatus || 'N/A',
           }));
           setRows(forexForms);
-          setData(response.data.forexForms);
+          setData(userForexForms);
         }
       } catch (error) {
         console.error('Error fetching forex forms:', error);

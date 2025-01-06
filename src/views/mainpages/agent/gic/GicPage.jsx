@@ -18,11 +18,12 @@ import DataTable from 'components/DataTable';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
+import { useSelector } from 'react-redux';
 
 // Define the columns
 const allColumns = [
   { field: 'Agent', headerName: 'Agent Name', width: 140 },
-  { field: 'type' , headerName: 'Type', width: 100 },
+  { field: 'type', headerName: 'Type', width: 100 },
   { field: 'accOpeningMonth', headerName: 'Acc Opening Month', width: 150 },
   { field: 'studentName', headerName: 'Student Name', width: 150 },
   { field: 'passportNo', headerName: 'Passport No.', width: 130 },
@@ -41,6 +42,7 @@ const Gic = () => {
   const [selectedColumns, setSelectedColumns] = useState(
     allColumns.map((col) => col.field),
   );
+  const { user } = useSelector((state) => state.Auth);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
@@ -50,8 +52,11 @@ const Gic = () => {
           'https://abroad-backend-ten.vercel.app/auth/viewAllGicForm',
         );
         if (response.data.success) {
-          setData(response.data.gicForms);
-          const gicForms = response.data.gicForms.map((form, index) => ({
+          const userGicForms = response.data.gicForms.filter(
+            (form) => form.agentRef._id === user._id, // Replace with the correct field for user matching
+          );
+          setData(userGicForms);
+          const gicForms = userGicForms.map((form, index) => ({
             id: form._id || index,
             type: form.type || 'N/A',
             Agent: form.agentRef.name.toUpperCase() || 'N/A',
@@ -96,7 +101,7 @@ const Gic = () => {
       };
       return cleanedItem;
     });
-  
+
     // Filter columns based on selection
     const filteredData = cleanData.map((item) =>
       selectedColumns.reduce((acc, field) => {
@@ -104,14 +109,14 @@ const Gic = () => {
         return acc;
       }, {}),
     );
-  
+
     // Generate Excel file
     const worksheet = XLSX.utils.json_to_sheet(filteredData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Gic Data');
     XLSX.writeFile(workbook, 'GicData.xlsx');
   };
-  
+
   const handleColumnSelection = (field) => {
     setSelectedColumns((prev) =>
       prev.includes(field)
