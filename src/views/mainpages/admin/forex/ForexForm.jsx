@@ -260,7 +260,7 @@ function ForexForm() {
 
       const studentId = createStudentResult.newStudent._id;
       const types = documents.map((doc) => doc.documentType);
-      const allTypes = ['Passport', 'Offer Letter', ...types];
+      const allTypes = ['Passport', 'Offer_Letter', ...types];
 
       // Update formData with the new student ID
 
