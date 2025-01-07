@@ -23,7 +23,7 @@ const ForgotPassword = () => {
         } catch (error) {
             toast({
                 title: 'Error',
-               
+                description: error.response.data.message,
                 status: 'error',
                 duration: 3000,
                 isClosable: true,

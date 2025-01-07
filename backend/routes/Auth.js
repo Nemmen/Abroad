@@ -16,8 +16,8 @@ AuthRoutes.post('/register', async (req, res) => {
 AuthRoutes.post('/login', login);
 AuthRoutes.post('/logout', logout);
 AuthRoutes.get('/checkUser', IsUser, checkUser);
-AuthRoutes.post('/forgot-password', forgotPassword);
-AuthRoutes.post('/reset-password', resetPassword);
+AuthRoutes.post('/auth/forgot-password', forgotPassword);
+AuthRoutes.post('/auth/reset-password', resetPassword);
 
 
 
