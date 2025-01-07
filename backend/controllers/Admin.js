@@ -1,5 +1,5 @@
 import UserModel from '../models/user.js';
-import RecordModel from '../models/record.js';
+// import RecordModel from '../models/record.js';
 import {
   sendApprovalEmail,
   sendRejectionEmail,
@@ -48,7 +48,7 @@ const addUser = async (req, res) => {
       phoneNumber,
       state,
       city,
-      abroadReason,
+      // abroadReason,
       businessDivision,
     } = req.body;
     const user = await UserModel.create({
@@ -61,7 +61,7 @@ const addUser = async (req, res) => {
       state,
       city,
       userStatus: 'active',
-      abroadReason,
+      // abroadReason,
       businessDivision,
     });
     res.status(200).json({ message: 'user added successfully', user });

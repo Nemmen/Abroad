@@ -74,6 +74,9 @@ export const sendApprovalEmail = async (userEmail) => {
                     .title { color: #28a745; font-size: 24px; margin-top: 10px; }
                     .body { margin-top: 20px; font-size: 16px; line-height: 1.6; color: #333; }
                     .footer { margin-top: 20px; padding-top: 10px; border-top: 1px solid #dddddd; color: #666; font-size: 14px; text-align: center; }
+                    .button-container { text-align: center; margin-top: 20px; }
+                    .button { background-color: #28a745; color: #ffffff; padding: 10px 20px; text-decoration: none; font-size: 16px; border-radius: 5px; display: inline-block; }
+                    .button:hover { background-color: #218838; }
                 </style>
             </head>
             <body>
@@ -84,10 +87,15 @@ export const sendApprovalEmail = async (userEmail) => {
                     </div>
                     <div class="body">
                         <p>Hello,</p>
-                        <p>Your registration has been approved! You can now log in and start using our services.</p>
+                        <p>We are excited to let you know that your registration has been approved! You can now log in and start using our services.</p>
+                        <div class="button-container">
+                            <a href="http://localhost:3000/auth/login" class="button">Login to Your Account</a>
+                        </div>
+                        <p>If you have any questions or need support, feel free to contact our team.</p>
                     </div>
                     <div class="footer">
                         <p>&copy; 2024 Your Company Name. All rights reserved.</p>
+                        <p><a href="http://yourcompany.com" style="color: #28a745; text-decoration: none;">Visit our website</a></p>
                     </div>
                 </div>
             </body>
@@ -102,6 +110,7 @@ export const sendApprovalEmail = async (userEmail) => {
         console.error('Error sending approval email:', error);
     }
 };
+
 
 // Rejection Email
 export const sendRejectionEmail = async (userEmail) => {

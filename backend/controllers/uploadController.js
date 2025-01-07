@@ -1,14 +1,14 @@
 import cloudinary from '../config/cloudinaryConfig.js';
 
-// Helper function to upload a single file to Cloudinary
-const uploadFileToCloudinary = async (file, folder) => {
+export const uploadFileToCloudinary = async (filePath, folder) => {
     try {
-        const result = await cloudinary.uploader.upload_stream({ folder });
-        return result.secure_url;
+      const result = await cloudinary.uploader.upload(filePath, { folder });
+      return result.secure_url;
     } catch (error) {
-        throw new Error('Error uploading to Cloudinary');
+    //   throw new Error('Error uploading to Cloudinary');
+      console.error('Error uploading to Cloudinary:', error);
     }
-};
+  };
 
 // Controller for uploading GIC documents
 export const uploadGICDocuments = async (req, res) => {

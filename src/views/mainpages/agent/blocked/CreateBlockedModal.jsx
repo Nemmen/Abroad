@@ -12,7 +12,7 @@ import {
   Text,
 } from '@chakra-ui/react';
 
-function GicForm() {
+function CreateBlockedModal() {
   const [formData, setFormData] = useState({
     studentName: '',
     passportNo: '',
@@ -135,4 +135,4 @@ function GicForm() {
   );
 }
 
-export default GicForm;
+export default CreateBlockedModal;

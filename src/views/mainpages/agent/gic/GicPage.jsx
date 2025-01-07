@@ -1,88 +1,136 @@
-import React from 'react';
-import { Box, Button, Card, Divider, Text } from '@chakra-ui/react';
+import React, { useEffect, useState, useMemo } from 'react';
+import {
+  Box,
+  Button,
+  Divider,
+  Text,
+  Checkbox,
+  VStack,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  ModalFooter,
+} from '@chakra-ui/react';
 import DataTable from 'components/DataTable';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
+import * as XLSX from 'xlsx';
+import { useSelector } from 'react-redux';
 
 // Define the columns
-const columns = [
-  { field: 'sNo', headerName: 'SNo', width: 70 },
-  { field: 'accOpeningDate', headerName: 'Acc Opening Date', width: 150 },
+const allColumns = [
+  { field: 'Agent', headerName: 'Agent Name', width: 140 },
+  { field: 'type', headerName: 'Type', width: 100 },
+  { field: 'accOpeningMonth', headerName: 'Acc Opening Month', width: 150 },
   { field: 'studentName', headerName: 'Student Name', width: 150 },
   { field: 'passportNo', headerName: 'Passport No.', width: 130 },
+  { field: 'studentPhoneNo', headerName: 'Student Contact', width: 130 },
   { field: 'bankVendor', headerName: 'Bank Vendor', width: 150 },
-  { field: 'accOpeningMonth', headerName: 'Acc Opening Month', width: 160 },
   { field: 'accFundingMonth', headerName: 'Acc Funding Month', width: 160 },
-  {
-    field: 'commissionAmt',
-    headerName: 'Commission Amt',
-    width: 140,
-    valueFormatter: ({ value }) => `$${value}`,
-  },
-  {
-    field: 'tds',
-    headerName: 'TDS',
-    width: 100,
-    valueFormatter: ({ value }) => `$${value}`,
-  },
-  {
-    field: 'netPayable',
-    headerName: 'Net Payable',
-    width: 140,
-    valueFormatter: ({ value }) => `$${value}`,
-  },
+  { field: 'commissionAmt', headerName: 'Commission Amt', width: 140 },
+  { field: 'tds', headerName: 'TDS', width: 100 },
+  { field: 'netPayable', headerName: 'Net Payable', width: 140 },
   { field: 'commissionStatus', headerName: 'Commission Status', width: 160 },
 ];
 
-// Example rows data
-const rows = [
-  {
-    id: 1,
-    sNo: 1,
-    accOpeningDate: '2024-01-15',
-    studentName: 'Alice Johnson',
-    passportNo: 'A1234567',
-    bankVendor: 'Bank of America',
-    accOpeningMonth: 'January',
-    accFundingMonth: 'February',
-    commissionAmt: 500,
-    tds: 50,
-    netPayable: 450,
-    commissionStatus: 'Paid',
-  },
-  {
-    id: 2,
-    sNo: 2,
-    accOpeningDate: '2024-02-20',
-    studentName: 'Bob Smith',
-    passportNo: 'B7654321',
-    bankVendor: 'Chase Bank',
-    accOpeningMonth: 'February',
-    accFundingMonth: 'March',
-    commissionAmt: 700,
-    tds: 70,
-    netPayable: 630,
-    commissionStatus: 'Pending',
-  },
-  {
-    id: 3,
-    sNo: 3,
-    accOpeningDate: '2024-03-05',
-    studentName: 'Carol White',
-    passportNo: 'C8765432',
-    bankVendor: 'Wells Fargo',
-    accOpeningMonth: 'March',
-    accFundingMonth: 'April',
-    commissionAmt: 600,
-    tds: 60,
-    netPayable: 540,
-    commissionStatus: 'Paid',
-  },
-  // Add more rows as needed
-];
+const Gic = () => {
+  const [rows, setRows] = useState([]);
+  const [data, setData] = useState([]);
+  const [selectedColumns, setSelectedColumns] = useState(
+    allColumns.map((col) => col.field),
+  );
+  const { user } = useSelector((state) => state.Auth);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-export { columns, rows };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          'https://abroad-backend-ten.vercel.app/auth/viewAllGicForm',
+        );
+        if (response.data.success) {
+          const userGicForms = response.data.gicForms.filter(
+            (form) => form.agentRef._id === user._id, // Replace with the correct field for user matching
+          );
+          setData(userGicForms);
+          const gicForms = userGicForms.map((form, index) => ({
+            id: form._id || index,
+            type: form.type || 'N/A',
+            Agent: form.agentRef.name.toUpperCase() || 'N/A',
+            accOpeningMonth: form.accOpeningMonth || 'N/A',
+            studentName: form.studentName || 'N/A',
+            passportNo: form.studentPassportNo || 'N/A',
+            studentPhoneNo: form.studentPhoneNo || 'N/A',
+            bankVendor: form.bankVendor || 'N/A',
+            accFundingMonth: form.fundingMonth || 'N/A',
+            commissionAmt: form.commissionAmt || 0,
+            tds: form.tds || '0',
+            netPayable: form.netPayable || 0,
+            commissionStatus: form.commissionStatus || 'N/A',
+          }));
+          setRows(gicForms);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
 
-const GicPage = () => {
+    fetchData();
+  }, []);
+
+  const handleDownloadExcel = () => {
+    // Clean and prepare data
+    const cleanData = data.map((item) => {
+      // Retain only relevant fields and rename keys to match column names
+      const cleanedItem = {
+        type: item.type || 'N/A',
+        Agent: item.agentRef?.name?.toUpperCase() || 'N/A',
+        accOpeningMonth: item.accOpeningMonth || 'N/A',
+        studentName: item.studentName || 'N/A',
+        passportNo: item.studentPassportNo || 'N/A', // Correct key for Passport No
+        studentPhoneNo: item.studentPhoneNo || 'N/A',
+        bankVendor: item.bankVendor || 'N/A',
+        accFundingMonth: item.fundingMonth || 'N/A',
+        commissionAmt: item.commissionAmt || 0,
+        tds: item.tds || '0',
+        netPayable: item.netPayable || 0,
+        commissionStatus: item.commissionStatus || 'N/A',
+      };
+      return cleanedItem;
+    });
+
+    // Filter columns based on selection
+    const filteredData = cleanData.map((item) =>
+      selectedColumns.reduce((acc, field) => {
+        acc[field] = item[field] || 'N/A'; // Ensure fallback for missing fields
+        return acc;
+      }, {}),
+    );
+
+    // Generate Excel file
+    const worksheet = XLSX.utils.json_to_sheet(filteredData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Gic Data');
+    XLSX.writeFile(workbook, 'GicData.xlsx');
+  };
+
+  const handleColumnSelection = (field) => {
+    setSelectedColumns((prev) =>
+      prev.includes(field)
+        ? prev.filter((col) => col !== field)
+        : [...prev, field],
+    );
+  };
+
+  const memoizedColumns = useMemo(
+    () => allColumns.filter((col) => selectedColumns.includes(col.field)),
+    [selectedColumns],
+  );
+  const memoizedRows = useMemo(() => rows, [rows]);
+
   return (
     <Box width={'full'}>
       <Box
@@ -92,38 +140,39 @@ const GicPage = () => {
         justifyContent={'space-between'}
         alignItems={'center'}
       >
-        <div className='pt-32'>
-          <Text
-            href="#"
-            bg="inherit"
-            borderRadius="inherit"
-            fontWeight=""
-            fontSize="34px"
-            _active={{
-              bg: 'inherit',
-              transform: 'none',
-              borderColor: 'transparent',
-            }}
-            _focus={{
-              boxShadow: 'none',
-            }}
-          >
-            GIC Registrations
-          </Text>
-        </div>
-
         <div>
-          <Link to={'/agent/gic/modal'}>
+          <Text fontSize="34px">GIC / Blocked Account Registrations</Text>
+        </div>
+        <div>
+          <Button
+            onClick={() => setIsModalOpen(true)}
+            width={'200px'}
+            variant="solid"
+            colorScheme="teal"
+            borderRadius={'none'}
+            mr={4}
+            mb={1}
+          >
+            Filter Columns
+          </Button>
+          <Button
+            onClick={handleDownloadExcel}
+            width={'200px'}
+            variant="solid"
+            colorScheme="green"
+            borderRadius={'none'}
+            mr={4}
+            mb={1}
+          >
+            Download Excel
+          </Button>
+          <Link to={'/agent/gic/form'}>
             <Button
               width={'200px'}
               variant="outline"
               colorScheme="blue"
               borderRadius={'none'}
-              _hover={{
-                bg: 'blue.500', // Fill color on hover
-                color: 'white', // Text color on hover
-                borderColor: 'blue.500', // Border color remains consistent
-              }}
+              mb={1}
             >
               Add New
             </Button>
@@ -131,16 +180,44 @@ const GicPage = () => {
         </div>
       </Box>
       <Divider
-        orientation="vertical"
         width={'96%'}
         mx={'auto'}
         mb={'20px'}
         bgColor={'black'}
         height={'0.5px'}
       />
-      <DataTable columns={columns} rows={rows} />
+      <Box maxHeight="1200px" overflowY="auto">
+        <DataTable columns={memoizedColumns} rows={memoizedRows} />
+      </Box>
+
+      {/* Modal for Column Filtering */}
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Select Columns</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <VStack align="start">
+              {allColumns.map((col) => (
+                <Checkbox
+                  key={col.field}
+                  isChecked={selectedColumns.includes(col.field)}
+                  onChange={() => handleColumnSelection(col.field)}
+                >
+                  {col.headerName}
+                </Checkbox>
+              ))}
+            </VStack>
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="blue" onClick={() => setIsModalOpen(false)}>
+              Apply
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Box>
   );
 };
 
-export default GicPage;
+export default Gic;
