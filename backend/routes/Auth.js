@@ -1,5 +1,5 @@
 import express from 'express';
-import {checkUser, login, logout,getAllusers,studentCreate, register, getStudent,addGicForm, viewAllGicForm, addForexForm, viewAllForexForms, getAllBlockedData, updateGicForm, updateForexForm,  } from '../controllers/Auth.js';
+import {checkUser, login, logout,getAllusers,studentCreate, register, getStudent,addGicForm, viewAllGicForm, addForexForm, viewAllForexForms, getAllBlockedData, updateGicForm, updateForexForm, forgotPassword, resetPassword  } from '../controllers/Auth.js';
 import { IsUser } from '../middleware/verifyToken.js';
 
 const AuthRoutes = express.Router();
@@ -16,6 +16,10 @@ AuthRoutes.post('/register', async (req, res) => {
 AuthRoutes.post('/login', login);
 AuthRoutes.post('/logout', logout);
 AuthRoutes.get('/checkUser', IsUser, checkUser);
+AuthRoutes.post('/forgot-password', forgotPassword);
+AuthRoutes.post('/reset-password', resetPassword);
+
+
 
 // Form Handling Routes
 AuthRoutes.post('/addGicForm', addGicForm);

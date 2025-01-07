@@ -89,13 +89,13 @@ export const sendApprovalEmail = async (userEmail) => {
                         <p>Hello,</p>
                         <p>We are excited to let you know that your registration has been approved! You can now log in and start using our services.</p>
                         <div class="button-container">
-                            <a href="http://localhost:3000/auth/login" class="button">Login to Your Account</a>
+                            <a href="https://localhost:3000/auth/login" class="button">Login to Your Account</a>
                         </div>
                         <p>If you have any questions or need support, feel free to contact our team.</p>
                     </div>
                     <div class="footer">
                         <p>&copy; 2024 Your Company Name. All rights reserved.</p>
-                        <p><a href="http://yourcompany.com" style="color: #28a745; text-decoration: none;">Visit our website</a></p>
+                        <p><a href="https://yourcompany.com" style="color: #28a745; text-decoration: none;">Visit our website</a></p>
                     </div>
                 </div>
             </body>

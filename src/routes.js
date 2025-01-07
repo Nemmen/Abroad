@@ -26,6 +26,7 @@ import Forex from 'views/mainpages/admin/forex/Forex';
 import AgentForex from './views/mainpages/agent/forex/AgentForex.jsx'
 import BlockedPage from 'views/mainpages/agent/blocked/BlockedPage';
 import StudentPage from 'views/mainpages/agent/students/StudentPage';
+import ForgotPassword from 'views/mainpages/login_signup/ForgotPassword';
 
 const routes = [
   {
@@ -125,6 +126,13 @@ export const Auth = [
     path: '/signup',
     icon: <Icon as={BsFillPiggyBankFill} width="20px" height="20px" color="inherit" />,
     component: <Signup />,
+  },
+  {
+    name: 'Forgot Password',
+    layout: '/auth',
+    path: '/forgot-password',
+    icon: <Icon as={BsFillPiggyBankFill} width="20px" height="20px" color="inherit" />,
+    component: <ForgotPassword/>
   },
 ];
 

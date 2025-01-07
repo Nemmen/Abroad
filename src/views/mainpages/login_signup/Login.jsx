@@ -8,7 +8,6 @@ import loginimg from '../../../assets/img/auth/login.png';
 import { HiEye, HiEyeOff } from 'react-icons/hi'; // Import eye icons from react-icons
 import { Spinner } from '@chakra-ui/react';
 
-
 export default function Login() {
   const user = useSelector((state) => state.Auth);
   const dispatch = useDispatch();
@@ -25,14 +24,16 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-      const request = await post('https://abroad-backend-ten.vercel.app/auth/login', {
-        email,
-        password,
-      },
-      {
-        Credentials: 'include',
-      }
-    );
+      const request = await post(
+        'https://abroad-backend-ten.vercel.app/auth/login',
+        {
+          email,
+          password,
+        },
+        {
+          Credentials: 'include',
+        },
+      );
       const response = request.data;
 
       if (request.status === 200) {
@@ -154,9 +155,9 @@ export default function Login() {
               </span>
             </div>
             {loading ? (
-             <div className='text-center'>
-               <Spinner size="lg" color="blue.500" />
-             </div>
+              <div className="text-center">
+                <Spinner size="lg" color="blue.500" />
+              </div>
             ) : (
               <button
                 type="submit"
@@ -174,6 +175,15 @@ export default function Login() {
             >
               {' '}
               Sign up
+            </Link>
+          </p>
+          <p className="text-center text-slate-500 text-[16px] mx-auto flex pt-3">
+            Forgot your password?{' '}
+            <Link
+              to="/auth/forgot-password"
+              className="block text-center text-blue-600 hover:underline ml-2"
+            >
+              Reset it here
             </Link>
           </p>
         </div>

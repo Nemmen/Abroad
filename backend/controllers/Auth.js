@@ -4,6 +4,7 @@ import { createFolder, uploadFile } from './googleDrive.js';
 import jwt from 'jsonwebtoken';
 import bcryptjs from 'bcryptjs';
 import dotenv from 'dotenv';
+import transporter from '../config/emailConfig.js';
 // import {uploadFileToCloudinary} from './uploadController.js'
 import { sendRegistrationEmail } from '../services/emailService.js';
 import ForexModel from '../models/forexModel.js';
@@ -156,6 +157,63 @@ const login = async (req, res) => {
       }); // Include error message in response
   }
 };
+
+
+const forgotPassword = async (req, res) => {
+  try {
+      const { email } = req.body;
+      const user = await UserModel.findOne({ email });
+
+      if (!user) {
+          return res.status(404).json({ message: 'User not found' });
+      }
+
+      const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '15m' });
+
+      const resetLink = `${process.env.FRONTEND_URL}/auth/reset-password/${token}`;
+
+      // Send email
+      const mailOptions = {
+          from: process.env.EMAIL_USER,
+          to: user.email,
+          subject: 'Password Reset Request',
+          html: `
+              <p>Hello,</p>
+              <p>You requested a password reset. Click the link below to reset your password:</p>
+              <a href="${resetLink}">Reset Password</a>
+              <p>If you did not request this, please ignore this email.</p>
+          `,
+      };
+
+      await transporter.sendMail(mailOptions);
+
+      res.status(200).json({ message: 'Password reset link sent to your email' });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// Reset Password Handler
+const resetPassword = async (req, res) => {
+  try {
+      const { token, newPassword } = req.body;
+
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+      const hashedPassword = await bcryptjs.hash(newPassword, 10);
+
+      await UserModel.findByIdAndUpdate(decoded.userId, { password: hashedPassword });
+
+      res.status(200).json({ message: 'Password reset successful' });
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Invalid or expired token' });
+  }
+};
+
+
+
 
 const logout = async (req, res) => {
   try {
@@ -596,4 +654,6 @@ export {
   addForexForm,
   viewAllForexForms,
  updateForexForm,getAllBlockedData,
+ forgotPassword,
+ resetPassword,
 };
