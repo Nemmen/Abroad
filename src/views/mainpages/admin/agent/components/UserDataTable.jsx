@@ -25,7 +25,7 @@ import axios from 'axios';
 import { IconButton } from '@chakra-ui/react';
 import { DeleteIcon } from '@chakra-ui/icons';
 import AddUserModal from './AddUserModel';
-
+import EditUserModal from './EditUserModal';
 const columnHelper = createColumnHelper();
 
 export default function UserDataTable(props) {
@@ -179,12 +179,13 @@ export default function UserDataTable(props) {
               </Button>
             )}
             <IconButton
-              icon={<DeleteIcon />}
+              icon={loadingButtonId === userId ? <Spinner color="black" /> : <DeleteIcon />}
               colorScheme="red"
               aria-label="Delete"
               onClick={() => handleStatusChange(userId, 'isdeleted')}
               variant="outline"
             />
+            <EditUserModal userId={userId} />
           </Box>
         );
       },
