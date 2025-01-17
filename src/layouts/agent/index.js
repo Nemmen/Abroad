@@ -11,6 +11,8 @@ import { routeAjent as routes } from 'routes.js';
 import CreateGICModal from '../../views/mainpages/agent/gic/GicForm';
 import GicView from '../../views/mainpages/agent/gic/GicView';
 import AgentForexView from '../../views/mainpages/agent/forex/AgentForexView';
+import AgentProfilePage from 'views/mainpages/agent/profile/app_agent-profile_page';
+import { useSelector } from 'react-redux';
 
 export default function Dashboard(props) {
   const { ...rest } = props;
@@ -18,7 +20,8 @@ export default function Dashboard(props) {
   // States and functions
   const [toggleSidebar, setToggleSidebar] = useState(false);
   const location = useLocation();
-
+  const { user } = useSelector((state) => state.Auth);
+console.log(user)
   // Re-render on route changes
   useEffect(() => {}, [location]);
 
@@ -107,6 +110,7 @@ export default function Dashboard(props) {
             <Routes>
               {getRoutes(routes)}
               <Route path="/" element={<Navigate to="/agent/default" replace />} />
+              <Route path="/default/profile" element={<AgentProfilePage agentData={user}/>} />
               <Route path="/gic/form" element={<CreateGICModal />} />
               <Route path="/gic/:id" element={<GicView />} />
               <Route path="/forex/:id" element={<AgentForexView />} />
