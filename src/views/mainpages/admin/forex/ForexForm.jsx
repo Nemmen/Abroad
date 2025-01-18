@@ -261,69 +261,73 @@ function ForexForm() {
       const studentId = createStudentResult.newStudent._id;
       const types = documents.map((doc) => doc.documentType);
       const allTypes = ['Passport', 'Offer_Letter', ...types];
+      let uploadedFiles = [];
+      let uploadResult = null;
 
-      // Update formData with the new student ID
+      if (passportFile || offerLetterFile || documents.length > 0) {
+        // Update formData with the new student ID
 
-      // Step 2: Prepare file upload form data
-      const fileUploadFormData = new FormData();
-      fileUploadFormData.append(
-        'folderId',
-        '1f8tN2sgd_UBOdxpDwyQ1CMsyVvi1R96f',
-      );
-      fileUploadFormData.append('studentRef', studentId);
-      fileUploadFormData.append('type', allTypes);
+        // Step 2: Prepare file upload form data
+        const fileUploadFormData = new FormData();
+        fileUploadFormData.append(
+          'folderId',
+          '1f8tN2sgd_UBOdxpDwyQ1CMsyVvi1R96f',
+        );
+        fileUploadFormData.append('studentRef', studentId);
+        fileUploadFormData.append('type', allTypes);
 
-      const files = [
-        passportFile,
-        offerLetterFile,
-        ...documents.map((doc) => doc.documentFile),
-      ].filter(Boolean);
+        const files = [
+          passportFile,
+          offerLetterFile,
+          ...documents.map((doc) => doc.documentFile),
+        ].filter(Boolean);
 
-      files.forEach((file) => fileUploadFormData.append('files', file));
+        files.forEach((file) => fileUploadFormData.append('files', file));
 
-      // Upload files
-      const uploadResponse = await fetch(
-        'https://abroad-backend-ten.vercel.app/api/uploads/upload',
-        {
-          method: 'POST',
-          body: fileUploadFormData,
-          headers: { Accept: 'application/json' },
-        },
-      );
+        // Upload files
+        const uploadResponse = await fetch(
+          'https://abroad-backend-ten.vercel.app/api/uploads/upload',
+          {
+            method: 'POST',
+            body: fileUploadFormData,
+            headers: { Accept: 'application/json' },
+          },
+        );
 
-      const uploadResult = await uploadResponse.json();
+        uploadResult = await uploadResponse.json();
 
-      if (!uploadResponse.ok) {
-        throw new Error(uploadResult.message || 'File upload failed.');
+        if (!uploadResponse.ok) {
+          throw new Error(uploadResult.message || 'File upload failed.');
+        }
+
+        // Extract uploaded file details and map them to documents
+        uploadedFiles = uploadResult.uploads
+          .map((file, index) => {
+            if (index > 1) {
+              return {
+                documentOf: documents[index - 2]?.documentOf,
+                documentType: documents[index - 2]?.documentType,
+                fileId: file.fileId,
+                documentFile: file.viewLink,
+              };
+            }
+            return null;
+          })
+          .filter(Boolean);
       }
-
-      // Extract uploaded file details and map them to documents
-      const uploadedFiles = uploadResult.uploads
-        .map((file, index) => {
-          if (index > 1) {
-            return {
-              documentOf: documents[index - 2]?.documentOf,
-              documentType: documents[index - 2]?.documentType,
-              fileId: file.fileId,
-              documentFile: file.viewLink,
-            };
-          }
-          return null;
-        })
-        .filter(Boolean);
 
       // Step 3: Submit the final form data
       const finalFormData = {
         ...formData,
-        date : accOpeningDate1,
+        date: accOpeningDate1,
         studentRef: studentId,
         passportFile: {
-          fileId: uploadResult.uploads[0]?.fileId,
-          documentFile: uploadResult.uploads[0]?.viewLink,
+          fileId: uploadResult?.uploads[0]?.fileId,
+          documentFile: uploadResult?.uploads[0]?.viewLink,
         },
         offerLetterFile: {
-          fileId: uploadResult.uploads[1]?.fileId,
-          documentFile: uploadResult.uploads[1]?.viewLink,
+          fileId: uploadResult?.uploads[1]?.fileId,
+          documentFile: uploadResult?.uploads[1]?.viewLink,
         },
         documents: uploadedFiles,
       };
