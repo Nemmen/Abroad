@@ -25,10 +25,14 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-      const request = await post('http://localhost:4000/auth/login', {
+      const request = await post('https://abroad-backend-ten.vercel.app/auth/login', {
         email,
         password,
-      });
+      },
+      {
+        Credentials: 'include',
+      }
+    );
       const response = request.data;
 
       if (request.status === 200) {

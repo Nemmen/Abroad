@@ -26,6 +26,9 @@ const documentSchema = new mongoose.Schema({
     ],
     required: true,
   },
+  fileId: {
+    type: String,
+  },
   documentFile: {
     type: String, // Store the file path or URL of the uploaded document
     required: true,
@@ -55,7 +58,7 @@ const forexSchema = new mongoose.Schema({
   },
   docsStatus: {
     type: String,
-    enum: ['Pending', 'Submitted', 'Verified'],
+    enum: ['Pending', 'Received', 'Verified'],
     default: 'Pending',
   },
   ttCopyStatus: {
@@ -81,10 +84,20 @@ const forexSchema = new mongoose.Schema({
     default: 'Not Received',
   },
   passportFile: {
-    type: String, // Store the file path or URL for the passport
+    fileId: {
+      type: String,
+    },
+    documentFile: {
+      type: String, // Store the file path or URL for the passport
+    },
   },
   offerLetterFile: {
-    type: String, // Store the file path or URL for the offer letter
+    fileId: {
+      type: String,
+    },
+    documentFile: {
+      type: String, // Store the file path or URL for the passport
+    },
   },
   documents: {
     type: [documentSchema], // Array of documents related to guardians or self

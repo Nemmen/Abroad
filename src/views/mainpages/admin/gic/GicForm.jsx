@@ -12,41 +12,61 @@ import {
   useToast,
   Flex,
   Text,
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
   Spinner,
 } from '@chakra-ui/react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { Gic } from 'views/mainpages/redux/GicSlice';
 
 const getCurrentDate = () => format(new Date(), 'yyyy-MM-dd');
 const getCurrentMonth = () => format(new Date(), 'MMMM');
 
 function GicForm() {
+  const dispatch = useDispatch();
+  // const { gic, error } = useSelector((state) => state.Gic);
   const [agents, setAgents] = useState([]);
-  // const [view, setView] = useState('')
+  const [documents, setDocuments] = useState([]);
   const navigate = useNavigate();
-  const [students, setStudents] = useState([]);
-  const [newStudent, setNewStudent] = useState({
-    name: '',
-    email: '',
-    agentRef: '',
-  });
+  const [accOpeningDate1, setAccOpeningDate1] = useState(getCurrentDate());
+
+  const documentTypeOptions = ['aadhar', 'pan', 'ol', 'passport'];
+
+  const addDocuments = () => {
+    setDocuments([
+      ...documents,
+      {
+        documentType: '',
+        documentFile: null,
+      },
+    ]);
+  };
+
+  const removeDocument = (index) => {
+    const updatedDocuments = documents.filter((_, i) => i !== index);
+    setDocuments(updatedDocuments);
+  };
+
+  const handleChangeDocument = (e, index) => {
+    const { name, value, files } = e.target;
+    const updatedDocuments = [...documents];
+    updatedDocuments[index] = {
+      ...updatedDocuments[index],
+      [name]: files ? files[0] : value,
+    };
+    setDocuments(updatedDocuments);
+  };
+
   const [loading, setLoading] = useState(false);
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
+  useEffect(() => {
+    dispatch(Gic()); // Dispatch the async thunk to fetch data
+  }, [dispatch]);
 
   const [formData, setFormData] = useState({
+    type: '',
     Agents: '',
     studentRef: '',
-
     passportNo: '',
     email: '',
     phoneNo: '',
@@ -56,88 +76,56 @@ function GicForm() {
     tds: '',
     netPayable: '',
     commissionStatus: '',
-    documentType: '',
-    documentFile: null,
   });
   const toast = useToast();
+  // const handleNewStudentSubmit = async () => {
+  //   try {
+  //     const response = await fetch('https://abroad-backend-ten.vercel.app/auth/studentCreate', {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify(newStudent),
+  //     });
+  //     const result = await response.json();
 
-  useEffect(() => {
-    const fetchStudents = async () => {
-      try {
-        const response = await fetch('http://localhost:4000/auth/getStudent');
-        const data = await response.json();
-        if (response.ok) setStudents(data.students);
-      } catch (error) {
-        console.error('Error fetching students:', error);
-      }
-    };
-    fetchStudents();
-  }, [isModalOpen]);
+  //     if (response.ok) {
+  //       setStudents([...students, result.newStudent]);
+  //       setFormData({ ...formData, studentRef: result.newStudent._id });
+  //       toast({
+  //         title: 'Student Created',
+  //         description: 'New student has been added.',
+  //         status: 'success',
+  //         duration: 3000,
+  //         isClosable: true,
+  //       });
 
-  const handleNewStudentChange = (e) => {
-    const { name, value } = e.target;
-    setNewStudent({ ...newStudent, [name]: value });
-  };
-
-  const handleNewStudentSubmit = async () => {
-    setLoading(true);
-    if (!newStudent.name || !newStudent.email) {
-      toast({
-        title: 'Incomplete Details',
-        description: 'Please fill in both Name and Email.',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const response = await fetch('http://localhost:4000/auth/studentCreate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newStudent),
-      });
-      const result = await response.json();
-
-      if (response.ok) {
-        setStudents([...students, result.newStudent]);
-        setFormData({ ...formData, studentRef: result.newStudent._id });
-        toast({
-          title: 'Student Created',
-          description: 'New student has been added.',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        });
-        closeModal();
-        setLoading(false);
-      } else {
-        setLoading(false);
-        throw new Error(result.message || 'Failed to create student.');
-      }
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: error.message,
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
-      setLoading(false);
-    }
-    setLoading(false);
-  };
+  //       setLoading(false);
+  //     } else {
+  //       setLoading(false);
+  //       throw new Error(result.message || 'Failed to create student.');
+  //     }
+  //   } catch (error) {
+  //     toast({
+  //       title: 'Error',
+  //       description: error.message,
+  //       status: 'error',
+  //       duration: 3000,
+  //       isClosable: true,
+  //     });
+  //     setLoading(false);
+  //   }
+  //   setLoading(false);
+  // };
 
   useEffect(() => {
     const fetchAgents = async () => {
-      const apiUrl = 'http://localhost:4000/auth/getAllusers';
+      const apiUrl = 'https://abroad-backend-ten.vercel.app/auth/getAllusers';
       try {
         const response = await fetch(apiUrl);
         const result = await response.json();
         if (response.ok) {
-          const filterResult = result.data.filter((data)=> data.userStatus === 'active')
+          const filterResult = result.data.filter(
+            (data) => data.userStatus === 'active',
+          );
           setAgents(filterResult);
         } else {
           console.error('Server Error:', result);
@@ -149,6 +137,17 @@ function GicForm() {
     fetchAgents();
   }, []);
 
+  // useEffect(() => {
+  //   const GIC = gic && gic.length > 0 ? gic.find((gic) => gic.studentPassportNo === formData.passportNo) : null;
+
+  //   if (GIC) {
+  //     setFormData({
+
+  //     });
+
+  //   }
+  // }, [formData.passportNo]);
+
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     setFormData({
@@ -159,6 +158,7 @@ function GicForm() {
 
   const validateForm = () => {
     const {
+      type,
       Agents,
       studentRef,
       passportNo,
@@ -170,10 +170,9 @@ function GicForm() {
       tds,
       netPayable,
       commissionStatus,
-      documentType,
-      documentFile,
     } = formData;
     if (
+      !type ||
       !Agents ||
       !studentRef ||
       !passportNo ||
@@ -184,9 +183,7 @@ function GicForm() {
       !commission ||
       !tds ||
       !netPayable ||
-      !commissionStatus ||
-      !documentType ||
-      !documentFile
+      !commissionStatus
     ) {
       toast({
         title: 'Form Incomplete',
@@ -205,113 +202,169 @@ function GicForm() {
     setLoading(true);
 
     if (validateForm()) {
-      const { documentFile, documentType, studentRef } = formData;
-      const fileExtension = documentFile.name.split('.').pop();
+      // const { documentFile, documentType } = formData;
 
-      // Prepare form data for API submission
-      const formDataToSend = {
-        studentRef: formData.studentRef,
-        commissionAmt: formData.commission,
-        fundingMonth: formData.accFundingMonth,
-        tds: formData.tds,
-        netPayable: formData.netPayable,
-        commissionStatus: formData.commissionStatus,
+      const newStudent = {
+        name: formData.studentRef,
+        email: formData.email,
         agentRef: formData.Agents,
-        accOpeningMonth: getCurrentMonth(),
-        bankVendor: formData.bankVendor,
-        studentEmail: formData.email,
-        studentPhoneNo: formData.phoneNo,
-        studentPassportNo: formData.passportNo,
-        studentDocuments: {}, // Initialize an empty object for documents
       };
-
-      const filedata = new FormData();
-      filedata.append('files', documentFile);
-      filedata.append('type', documentType);
-      filedata.append('studentRef', formData.studentRef);
-      filedata.append('folderId', '1WkdyWmBhKQAI6W_M4LNLbPylZoGZ7y6V');
 
       try {
         const response = await fetch(
-          'http://localhost:4000/api/uploads/upload',
+          'https://abroad-backend-ten.vercel.app/auth/studentCreate',
           {
             method: 'POST',
-            body: filedata,
-            headers: {
-              Accept: 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newStudent),
           },
         );
-
         const result = await response.json();
-        const viewLink = result.uploads[0].fileId; // Adjust based on your API response structure
-        console.log(viewLink);
 
-        console.log('Server Response:', result);
+        if (response.ok) {
+          // setStudents([...students, result.newStudent]);
+        } else {
+          setLoading(false);
+          throw new Error(result.message || 'Failed to create student.');
+        }
 
-        // Include the view link in the form data
-        formDataToSend.studentDocuments[documentType] = viewLink;
+        const formDataToSend = {
+          type: formData.type,
+          studentRef: result.newStudent._id,
+          commissionAmt: formData.commission,
+          fundingMonth: formData.accFundingMonth,
+          tds: formData.tds,
+          netPayable: formData.netPayable,
+          commissionStatus: formData.commissionStatus,
+          agentRef: formData.Agents,
+          accOpeningMonth: getCurrentMonth(),
+          accOpeningDate: accOpeningDate1,
+          bankVendor: formData.bankVendor,
+          studentEmail: formData.email,
+          studentPhoneNo: formData.phoneNo,
+          studentPassportNo: formData.passportNo,
+          studentDocuments: {
+            aadhar: {
+              fileId: '',
+              documentFile: '',
+            },
+            pan: {
+              fileId: '',
+              documentFile: '',
+            },
+            ol: {
+              fileId: '',
+              documentFile: '',
+            },
+            passport: {
+              fileId: '',
+              documentFile: '',
+            },
+          },
+        };
+
+        const types = [...documents.map((doc) => doc.documentType)];
+
+        const filedata = new FormData();
+        filedata.append('type', types);
+        filedata.append('studentRef', result.newStudent._id);
+        filedata.append('folderId', '1WkdyWmBhKQAI6W_M4LNLbPylZoGZ7y6V');
+        const files = [...documents.map((doc) => doc.documentFile)].filter(
+          Boolean,
+        );
+        files.forEach((file) => filedata.append('files', file));
+
+        try {
+          const response = await fetch(
+            'https://abroad-backend-ten.vercel.app/api/uploads/upload',
+            {
+              method: 'POST',
+              body: filedata,
+              headers: {
+                Accept: 'application/json',
+              },
+            },
+          );
+          const result = await response.json();
+          const respo = result.uploads; // Adjust based on your API response structure
+          console.log(respo);
+
+          for (let i = 0; i < types.length; i++) {
+            formDataToSend.studentDocuments[types[i]] = {
+              fileId: respo[i].fileId,
+              documentFile: respo[i].viewLink,
+            };
+          }
+        } catch (error) {
+          console.error('Error uploading files:', error);
+          toast({
+            title: 'File Upload Error',
+            description: 'An error occurred while uploading the file.',
+            status: 'error',
+            duration: 3000,
+            isClosable: true,
+          });
+          setLoading(false);
+          return; // Stop further execution if file upload fails
+        }
+
+        const apiUrl = 'https://abroad-backend-ten.vercel.app/auth/addGicForm';
+        console.log('Form Data to Send:', formDataToSend);
+
+        try {
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formDataToSend),
+          });
+
+          const result = await response.json();
+
+          if (response.ok) {
+            toast({
+              title: 'Form Submitted',
+              description: 'Your data has been submitted successfully.',
+              status: 'success',
+              duration: 3000,
+              isClosable: true,
+            });
+            console.log('Server Response:', result);
+            navigate(`/admin/gic/${result.newGIC._id}`);
+            setLoading(false);
+          } else {
+            toast({
+              title: 'Submission Failed',
+              description:
+                result.message || 'An error occurred during submission.',
+              status: 'error',
+              duration: 3000,
+              isClosable: true,
+            });
+            console.error('Server Error:', result);
+            setLoading(false);
+          }
+        } catch (error) {
+          toast({
+            title: 'Error',
+            description: 'Unable to submit form. Please try again later.',
+            status: 'error',
+            duration: 3000,
+            isClosable: true,
+          });
+          console.error('Network Error:', error);
+        }
       } catch (error) {
-        console.error('Error uploading files:', error);
         toast({
-          title: 'File Upload Error',
-          description: 'An error occurred while uploading the file.',
+          title: 'Error',
+          description: error.message,
           status: 'error',
           duration: 3000,
           isClosable: true,
         });
         setLoading(false);
-        return; // Stop further execution if file upload fails
       }
-
-      const apiUrl = 'http://localhost:4000/auth/addGicForm';
-      console.log('Form Data to Send:', formDataToSend);
-
-      try {
-        const response = await fetch(apiUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formDataToSend),
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-          toast({
-            title: 'Form Submitted',
-            description: 'Your data has been submitted successfully.',
-            status: 'success',
-            duration: 3000,
-            isClosable: true,
-          });
-          console.log('Server Response:', result);
-          navigate(`/admin/gic/${result.newGIC._id}`);
-          setLoading(false);
-        } else {
-          toast({
-            title: 'Submission Failed',
-            description:
-              result.message || 'An error occurred during submission.',
-            status: 'error',
-            duration: 3000,
-            isClosable: true,
-          });
-          console.error('Server Error:', result);
-          setLoading(false);
-        }
-      } catch (error) {
-        toast({
-          title: 'Error',
-          description: 'Unable to submit form. Please try again later.',
-          status: 'error',
-          duration: 3000,
-          isClosable: true,
-        });
-        console.error('Network Error:', error);
-      }
-      setLoading(false);
     }
     setLoading(false);
   };
@@ -330,7 +383,22 @@ function GicForm() {
       <form onSubmit={handleSubmit}>
         <SimpleGrid columns={2} spacing={4}>
           <FormControl isRequired>
-            <FormLabel>Agents</FormLabel>
+            <FormLabel>Type Of Service</FormLabel>
+            <Select
+              name="type"
+              placeholder="Select Type of Service"
+              value={formData.type}
+              onChange={handleChange}
+              h="50px"
+              w="full"
+            >
+              <option value="GIC">GIC</option>
+              <option value="BLOCKED ACCOUNT">BLOCKED ACCOUNT</option>
+            </Select>
+          </FormControl>
+
+          <FormControl isRequired>
+            <FormLabel>Agent Name</FormLabel>
             <Select
               name="Agents"
               value={formData.Agents}
@@ -341,45 +409,9 @@ function GicForm() {
             >
               {agents.map((agents) => (
                 <option key={agents._id} value={agents._id}>
-                  {agents.agentCode}
+                  {agents.name.toUpperCase()}
                 </option>
               ))}
-            </Select>
-          </FormControl>
-
-          <FormControl isReadOnly>
-            <FormLabel>Acc Opening Date</FormLabel>
-            <Input
-              type="text"
-              value={getCurrentDate()}
-              readOnly
-              h="50px"
-              w="full"
-            />
-          </FormControl>
-
-          <FormControl isRequired>
-            <FormLabel>Student Name</FormLabel>
-            <Select
-              name="studentRef"
-              value={formData.studentRef}
-              onChange={(e) => {
-                if (e.target.value === 'create') {
-                  openModal();
-                } else {
-                  handleChange(e);
-                }
-              }}
-              h="50px"
-              w="full"
-              placeholder="Select a student"
-            >
-              {students.map((student) => (
-                <option key={student?._id} value={student?._id}>
-                  {`${student?.studentCode} - ${student?.name} - ${student?.email}`}
-                </option>
-              ))}
-              <option value="create">Create New student</option>
             </Select>
           </FormControl>
 
@@ -392,6 +424,18 @@ function GicForm() {
               onChange={handleChange}
               h="50px"
               w="full"
+            />
+          </FormControl>
+
+          <FormControl isRequired>
+            <FormLabel>Student Name</FormLabel>
+            <Input
+              name="studentRef"
+              value={formData.studentRef}
+              onChange={handleChange}
+              h="50px"
+              w="full"
+              placeholder="Enter student name"
             />
           </FormControl>
 
@@ -433,8 +477,22 @@ function GicForm() {
               <option value="RBC">RBC</option>
               <option value="CIBC">CIBC</option>
               <option value="BOM">BOM</option>
+              <option value="Expatrio">Expatrio</option>
+              <option value="Fintiba">Fintiba</option>
               <option value="TD">TD</option>
             </Select>
+          </FormControl>
+
+          <FormControl isRequired>
+            <FormLabel>Acc Opening Date</FormLabel>
+            <Input
+              type="date"
+              value={accOpeningDate1}
+              onChange={(e) => setAccOpeningDate1(e.target.value)}
+              max={getCurrentDate()} // Restrict future dates
+              h="50px"
+              w="full"
+            />
           </FormControl>
 
           <FormControl isReadOnly>
@@ -463,6 +521,7 @@ function GicForm() {
                   {format(new Date(0, i), 'MMMM')}
                 </option>
               ))}
+              <option value={'Not Funded Yet'}>Not Funded Yet</option>
             </Select>
           </FormControl>
 
@@ -518,7 +577,7 @@ function GicForm() {
             </Select>
           </FormControl>
 
-          <FormControl
+          {/* <FormControl
             isRequired
             gridColumn={formData.documentType ? 'span 1' : 'span 2'}
           >
@@ -566,68 +625,79 @@ function GicForm() {
                 />
               </Flex>
             </FormControl>
-          )}
+          )} */}
         </SimpleGrid>
-        <Modal isOpen={isModalOpen} onClose={closeModal}>
-          <ModalOverlay />
-          <ModalContent>
-            <ModalHeader>Create New Student</ModalHeader>
-            <ModalCloseButton />
-            <ModalBody>
-              <FormControl isRequired>
-                <FormLabel>Agents</FormLabel>
-                <Select
-                  name="agentRef"
-                  value={newStudent.agentRef}
-                  onChange={handleNewStudentChange}
-                  h="50px"
-                  w="full"
-                  mb={'15px'}
-                  placeholder="Select an agent"
-                >
-                  {agents.map((agents) => (
-                    <option key={agents._id} value={agents._id}>
-                      {agents.agentCode}
-                    </option>
-                  ))}
-                </Select>
-              </FormControl>
 
-              <FormControl isRequired>
-                <FormLabel>Name</FormLabel>
-                <Input
-                  name="name"
-                  value={newStudent.name}
-                  onChange={handleNewStudentChange}
-                  placeholder="Enter student name"
-                />
-              </FormControl>
-              <FormControl isRequired mt={4}>
-                <FormLabel>Email</FormLabel>
-                <Input
-                  name="email"
-                  value={newStudent.email}
-                  onChange={handleNewStudentChange}
-                  placeholder="Enter student email"
-                />
-              </FormControl>
-            </ModalBody>
-            <ModalFooter>
-              {loading ? (
-                <Spinner mr={5} />
-              ) : (
+        <Box mt={4}>
+          {Array.isArray(documents) &&
+            documents.map((doc, index) => (
+              <Flex key={index} direction="column" mb={4}>
+                <FormControl isRequired>
+                  <FormLabel>Document Type</FormLabel>
+                  <Select
+                    name="documentType"
+                    value={doc.documentType}
+                    onChange={(e) => handleChangeDocument(e, index)}
+                    h="50px"
+                    w="full"
+                  >
+                    <option value={''}> -- Select Type --</option>
+                    {documentTypeOptions.map((type) => (
+                      <option key={type} value={type}>
+                        {type === 'ol' ? 'Offer Letter' : type.toUpperCase()}
+                      </option>
+                    ))}
+                  </Select>
+                </FormControl>
+                <FormControl isRequired mt={5}>
+                  <FormLabel>Upload Document</FormLabel>
+                  <Flex align="center">
+                    <Button
+                      colorScheme="blue"
+                      onClick={() =>
+                        document.getElementById(`documentFile-${index}`).click()
+                      }
+                      mr={2}
+                    >
+                      Choose File
+                    </Button>
+                    <Text>
+                      {doc.documentFile
+                        ? doc.documentFile.name
+                        : 'No file chosen'}
+                    </Text>
+                    <Input
+                      type="file"
+                      name="documentFile"
+                      id={`documentFile-${index}`}
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      onChange={(e) => handleChangeDocument(e, index)}
+                      hidden
+                    />
+                  </Flex>
+                </FormControl>
                 <Button
-                  colorScheme="blue"
-                  mr={3}
-                  onClick={handleNewStudentSubmit}
+                  colorScheme="red"
+                  mt={2}
+                  width={32}
+                  onClick={() => removeDocument(index)}
                 >
-                  Submit
+                  Remove
                 </Button>
-              )}
-              <Button onClick={closeModal}>Cancel</Button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
+              </Flex>
+            ))}
+
+          {documents.length < 4 && (
+            <Button
+              colorScheme="blue"
+              onClick={addDocuments}
+              mt={4}
+              width={'100%'}
+            >
+              Add Document
+            </Button>
+          )}
+        </Box>
 
         {loading ? (
           <Button colorScheme="brand" width="full" mt={4} h="50px">

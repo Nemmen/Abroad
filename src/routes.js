@@ -46,7 +46,7 @@ const routes = [
     secondary: true,
   },
   {
-    name: 'GIC',
+    name: 'GIC / Blocked Account',
     layout: '/admin',
     path: '/gic',
     icon: (
@@ -73,7 +73,7 @@ export const routeAjent = [
     component: <Agent />,
   },
   {
-    name: 'GIC',
+    name: 'GIC / Blocked Account',
     layout: '/agent',
     path: '/gic',
     icon: (

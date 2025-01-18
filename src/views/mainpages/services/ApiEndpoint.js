@@ -36,7 +36,7 @@ instance.interceptors.request.use(
 
 instance.interceptors.response.use(
   function (response) {
-    console.log('Interceptor response:', response);
+    // console.log('Interceptor response:', response);
     return response;
   },
   function (error) {

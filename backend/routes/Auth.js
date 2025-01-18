@@ -1,6 +1,5 @@
 import express from 'express';
-import {checkUser, updateProfile, login, logout,getAllusers,studentCreate, register, getStudent,addGicForm, viewAllGicForm, addForexForm, viewAllForexForms, getAllBlockedData,  } from '../controllers/Auth.js';
-import { uploadFile } from '../controllers/googleDrive.js'; // Import Google Drive upload controller
+import {checkUser, login, logout,getAllusers,studentCreate, register, getStudent,addGicForm, viewAllGicForm, addForexForm, viewAllForexForms, getAllBlockedData, updateGicForm, updateForexForm,  } from '../controllers/Auth.js';
 import { IsUser } from '../middleware/verifyToken.js';
 
 const AuthRoutes = express.Router();
@@ -22,11 +21,13 @@ AuthRoutes.put('/updateProfile',IsUser, updateProfile);
 // Form Handling Routes
 AuthRoutes.post('/addGicForm', addGicForm);
 AuthRoutes.get('/viewAllGicForm', viewAllGicForm);
+AuthRoutes.put('/updateGicForm/:id', updateGicForm);
 AuthRoutes.post('/addForexForm', addForexForm);
 AuthRoutes.get('/getAllusers', getAllusers);
 AuthRoutes.get('/viewAllForexForms', viewAllForexForms);
 AuthRoutes.post('/studentCreate', studentCreate);
 AuthRoutes.get('/getStudent', getStudent);
+AuthRoutes.put('/updateForexForm/:id', updateForexForm);
 
 // Blocked Data Routes
 AuthRoutes.get('/getAllBlockedData', getAllBlockedData);
@@ -34,5 +35,6 @@ AuthRoutes.get('/getAllBlockedData', getAllBlockedData);
 
 // // File Upload to Google Drive
 // AuthRoutes.post('/upload',uploadFile); // Limit to 5 files per request
+
 
 export default AuthRoutes;

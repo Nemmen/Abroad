@@ -1,81 +1,87 @@
 // import { type } from '@testing-library/user-event/dist/types/utility';
 import mongoose from 'mongoose';
 
+
 const gicSchema = new mongoose.Schema({
-  accOpeningDate: {
-    type: Date,
-     
-  },
-  passportNo: {
-    type: String,
-     
-  },
-  bankVendor: {
-    type: String,
-    enum: ["ICICI", "RBC", "CIBC", "BOM", "TD"],
-     
-  },
-  accOpeningMonth: {
-    type: String,
-     
-  },
-  fundingMonth: {
-    type: String,
-     
-  },
-  commissionAmt: {
-    type: String,
-     
-  },
-  tds: {
-    type: String,
-     
-  },
-  netPayable: {
-    type: String,
-     
-  },
-  commissionStatus: {
-    type: String,
-    enum: ["Not Received", "Paid", "Under Processing"],
-     
-  },
-  agentRef:{
+  agentRef: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'users',
   },
-  studentRef:{
+  studentRef: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'students',
   },
   studentEmail: {
     type: String,
-     
   },
   studentPhoneNo: {
     type: String,
-     
   },
   studentPassportNo: {
     type: String,
-     
   },
+  accOpeningDate: {
+    type: Date,
+  },
+  bankVendor: {
+    type: String,
+    enum: ['ICICI', 'RBC', 'CIBC', 'BOM', 'TD'],
+  },
+  accOpeningMonth: {
+    type: String,
+  },
+  fundingMonth: {
+    type: String,
+    default: 'Not Funded Yet',
+  },
+  commissionAmt: {
+    type: String,
+  },
+  tds: {
+    type: String,
+  },
+  netPayable: {
+    type: String,
+  },
+  commissionStatus: {
+    type: String,
+    enum: ['Not Received', 'Paid', 'Under Processing'],
+  },
+
   studentDocuments: {
     aadhar: {
-      type: String,
-       
+      fileId: {
+        type: String,
+      },
+      documentFile: {
+        type: String, // Store the file path or URL of the uploaded document
+      },
     },
     pan: {
-      type: String,
-       
+      fileId: {
+        type: String,
+      },
+      documentFile: {
+        type: String, // Store the file path or URL of the uploaded document
+        
+      },
     },
     ol: {
-      type: String,
+      fileId: {
+        type: String,
+      },
+      documentFile: {
+        type: String, // Store the file path or URL of the uploaded document
        
+      },
     },
-    passport: {
-      type: String,
-       
+    passport: { 
+      fileId: {
+        type: String,
+      },
+      documentFile: {
+        type: String, // Store the file path or URL of the uploaded document
+      },
     },
   },
 });
