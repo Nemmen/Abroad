@@ -45,7 +45,7 @@ function ForexForm() {
   });
   const [passportFile, setPassportFile] = useState(null);
   const [offerLetterFile, setOfferLetterFile] = useState(null);
-  const [emaill, setEmail] = useState('');
+  // const [emaill, setEmail] = useState('');
   // const [students, setStudents] = useState([]);
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -235,30 +235,29 @@ function ForexForm() {
       }
 
       // Step 1: Create a new student
-      const newStudent = {
-        name: formData.studentRef,
-        email: emaill,
-        agentRef: formData.agentRef,
-      };
+      // const newStudent = {
+      //   name: formData.studentRef,
+      //   agentRef: formData.agentRef,
+      // };
 
-      const createStudentResponse = await fetch(
-        'https://abroad-backend-ten.vercel.app/auth/studentCreate',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newStudent),
-        },
-      );
+      // const createStudentResponse = await fetch(
+      //   'https://abroad-backend-ten.vercel.app/auth/studentCreate',
+      //   {
+      //     method: 'POST',
+      //     headers: { 'Content-Type': 'application/json' },
+      //     body: JSON.stringify(newStudent),
+      //   },
+      // );
 
-      const createStudentResult = await createStudentResponse.json();
+      // const createStudentResult = await createStudentResponse.json();
 
-      if (!createStudentResponse.ok) {
-        throw new Error(
-          createStudentResult.message || 'Failed to create student.',
-        );
-      }
+      // if (!createStudentResponse.ok) {
+      //   throw new Error(
+      //     createStudentResult.message || 'Failed to create student.',
+      //   );
+      // }
 
-      const studentId = createStudentResult.newStudent._id;
+      // const studentId = createStudentResult.newStudent._id;
       const types = documents.map((doc) => doc.documentType);
       const allTypes = ['Passport', 'Offer_Letter', ...types];
       let uploadedFiles = [];
@@ -273,7 +272,7 @@ function ForexForm() {
           'folderId',
           '1f8tN2sgd_UBOdxpDwyQ1CMsyVvi1R96f',
         );
-        fileUploadFormData.append('studentRef', studentId);
+        fileUploadFormData.append('studentRef', '6770f8f171c4d7435685d65e');
         fileUploadFormData.append('type', allTypes);
 
         const files = [
@@ -320,7 +319,8 @@ function ForexForm() {
       const finalFormData = {
         ...formData,
         date: accOpeningDate1,
-        studentRef: studentId,
+        // studentRef: studentId,
+        studentName : formData.studentRef,
         passportFile: {
           fileId: uploadResult?.uploads[0]?.fileId,
           documentFile: uploadResult?.uploads[0]?.viewLink,
@@ -444,7 +444,7 @@ function ForexForm() {
             />
           </FormControl>
 
-          <FormControl isRequired>
+          {/* <FormControl isRequired>
             <FormLabel>Email</FormLabel>
             <Input
               type="email"
@@ -454,7 +454,7 @@ function ForexForm() {
               h="50px"
               w="full"
             />
-          </FormControl>
+          </FormControl> */}
 
           <FormControl isRequired>
             <FormLabel>Country</FormLabel>

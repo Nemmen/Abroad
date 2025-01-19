@@ -155,7 +155,7 @@ function ForexView() {
               </Flex>
               <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
                 <Text fontSize="lg" fontWeight="bold" color={valueColor}>
-                  {formData.studentRef.name.toUpperCase()}
+                  {formData.studentName}
                 </Text>
               </Box>
             </VStack>
