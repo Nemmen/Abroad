@@ -291,7 +291,7 @@ function GicForm() {
               description: 'An error occurred while uploading the file.',
               status: 'error',
               duration: 3000,
-              isClosable: true,
+              isClosable: true, 
             });
             setLoading(false);
             return; // Stop further execution if file upload fails
