@@ -29,6 +29,7 @@ function GicForm() {
   const [documents, setDocuments] = useState([]);
   const navigate = useNavigate();
   const [accOpeningDate1, setAccOpeningDate1] = useState(getCurrentDate());
+  const [accOpeningMonth, setAccOpeningMonth] = useState(getCurrentMonth());
 
   const documentTypeOptions = ['aadhar', 'pan', 'ol', 'passport'];
 
@@ -171,20 +172,7 @@ function GicForm() {
       netPayable,
       commissionStatus,
     } = formData;
-    if (
-      !type ||
-      !Agents ||
-      !studentRef ||
-      !passportNo ||
-      !email ||
-      !phoneNo ||
-      !bankVendor ||
-      !accFundingMonth ||
-      !commission ||
-      !tds ||
-      !netPayable ||
-      !commissionStatus
-    ) {
+    if (!type || !Agents || !studentRef || !passportNo || !email) {
       toast({
         title: 'Form Incomplete',
         description: 'Please fill in all fields, including document upload.',
@@ -237,7 +225,7 @@ function GicForm() {
           netPayable: formData.netPayable,
           commissionStatus: formData.commissionStatus,
           agentRef: formData.Agents,
-          accOpeningMonth: getCurrentMonth(),
+          accOpeningMonth: accOpeningMonth,
           accOpeningDate: accOpeningDate1,
           bankVendor: formData.bankVendor,
           studentEmail: formData.email,
@@ -264,7 +252,6 @@ function GicForm() {
         };
 
         const types = [...documents.map((doc) => doc.documentType)];
-
         const filedata = new FormData();
         filedata.append('type', types);
         filedata.append('studentRef', result.newStudent._id);
@@ -273,39 +260,42 @@ function GicForm() {
           Boolean,
         );
         files.forEach((file) => filedata.append('files', file));
+        
 
-        try {
-          const response = await fetch(
-            'https://abroad-backend-ten.vercel.app/api/uploads/upload',
-            {
-              method: 'POST',
-              body: filedata,
-              headers: {
-                Accept: 'application/json',
+        if (documents.length > 0) {
+          try {
+            const response = await fetch(
+              'https://abroad-backend-ten.vercel.app/api/uploads/upload',
+              {
+                method: 'POST',
+                body: filedata,
+                headers: {
+                  Accept: 'application/json',
+                },
               },
-            },
-          );
-          const result = await response.json();
-          const respo = result.uploads; // Adjust based on your API response structure
-          console.log(respo);
+            );
+            const result = await response.json();
+            const respo = result.uploads; // Adjust based on your API response structure
+            console.log(respo);
 
-          for (let i = 0; i < types.length; i++) {
-            formDataToSend.studentDocuments[types[i]] = {
-              fileId: respo[i].fileId,
-              documentFile: respo[i].viewLink,
-            };
+            for (let i = 0; i < types.length; i++) {
+              formDataToSend.studentDocuments[types[i]] = {
+                fileId: respo[i].fileId,
+                documentFile: respo[i].viewLink,
+              };
+            }
+          } catch (error) {
+            console.error('Error uploading files:', error);
+            toast({
+              title: 'File Upload Error',
+              description: 'An error occurred while uploading the file.',
+              status: 'error',
+              duration: 3000,
+              isClosable: true,
+            });
+            setLoading(false);
+            return; // Stop further execution if file upload fails
           }
-        } catch (error) {
-          console.error('Error uploading files:', error);
-          toast({
-            title: 'File Upload Error',
-            description: 'An error occurred while uploading the file.',
-            status: 'error',
-            duration: 3000,
-            isClosable: true,
-          });
-          setLoading(false);
-          return; // Stop further execution if file upload fails
         }
 
         const apiUrl = 'https://abroad-backend-ten.vercel.app/auth/addGicForm';
@@ -497,13 +487,20 @@ function GicForm() {
 
           <FormControl isReadOnly>
             <FormLabel>Acc Opening Month</FormLabel>
-            <Input
-              type="text"
-              value={getCurrentMonth()}
-              readOnly
+            <Select
+              name="accOpeningMonth"
+              placeholder="Select Month"
+              value={accOpeningMonth}
+              onChange={(e) => setAccOpeningMonth(e.target.value)}
               h="50px"
               w="full"
-            />
+            >
+              {Array.from({ length: 12 }, (_, i) => (
+                <option key={i} value={format(new Date(0, i), 'MMMM')}>
+                  {format(new Date(0, i), 'MMMM')}
+                </option>
+              ))}
+            </Select>
           </FormControl>
 
           <FormControl isRequired>
@@ -525,7 +522,7 @@ function GicForm() {
             </Select>
           </FormControl>
 
-          <FormControl isRequired>
+          <FormControl>
             <FormLabel>Commission</FormLabel>
             <NumberInput min={0} h="50px" w="full">
               <NumberInputField
@@ -537,7 +534,7 @@ function GicForm() {
             </NumberInput>
           </FormControl>
 
-          <FormControl isRequired>
+          <FormControl>
             <FormLabel>TDS</FormLabel>
             <NumberInput min={0} h="50px" w="full">
               <NumberInputField
@@ -549,7 +546,7 @@ function GicForm() {
             </NumberInput>
           </FormControl>
 
-          <FormControl isRequired>
+          <FormControl>
             <FormLabel>Net Payable</FormLabel>
             <NumberInput min={0} h="50px" w="full">
               <NumberInputField
@@ -561,7 +558,7 @@ function GicForm() {
             </NumberInput>
           </FormControl>
 
-          <FormControl isRequired>
+          <FormControl>
             <FormLabel>Commission Status</FormLabel>
             <Select
               name="commissionStatus"
