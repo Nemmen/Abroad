@@ -40,6 +40,7 @@ function handleUserRowClick(userData) {
 export default function Agent() {
   // Chakra Color Mode
   const [users, setUsers] = React.useState([]);
+  const [searchValue, setSearchValue] = React.useState('');
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -89,7 +90,7 @@ export default function Agent() {
       {/* Delete Product */}
       <Box width={'full'}>
         <Card px="0px" mb="20px">
-          <UserDataTable tableData={users} onRowClick={handleUserRowClick} />
+          <UserDataTable tableData={users} searchValue={searchValue} setSearchValue={setSearchValue} onRowClick={handleUserRowClick} />
         </Card>
       </Box>
     </Box>
