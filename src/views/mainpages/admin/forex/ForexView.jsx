@@ -199,7 +199,7 @@ function ForexView() {
               label !== '_id' &&
               label !== 'documents' &&
               label !== 'agentRef' &&
-              label !== 'studentRef' && (
+              label !== 'studentName' && (
                 <VStack key={index} align="start" spacing={2} gridColumn={label === 'date' ? 'span 2':''} w="full">
                   <Flex align="center">
                     <Icon
