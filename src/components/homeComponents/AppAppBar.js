@@ -53,7 +53,7 @@ export default function AppAppBar() {
         mt: 'calc(var(--template-frame-height, 0px) + 28px)',
       }}
     >
-      <Container maxWidth="lg">
+      <Container maxWidth="xl">
         <StyledToolbar variant="dense" disableGutters>
           <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', px: 0 }}>
             {/* <Sitemark /><h4 className="font-bold text-black uppercase hover:cursor-pointer" href="#home">Abrocare</h4> */}
