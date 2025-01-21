@@ -208,7 +208,7 @@ function ForexView() {
                       mr={2}
                     />
                     <Text fontSize="sm" fontWeight="medium" color={labelColor}>
-                      {label.replace(/([A-Z])/g, ' $1')}
+                      {label === 'country' ? 'Currency' : label.replace(/([A-Z])/g, ' $1')}
                     </Text>
                   </Flex>
                   <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">

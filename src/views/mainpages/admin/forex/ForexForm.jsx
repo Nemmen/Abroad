@@ -330,6 +330,7 @@ function ForexForm() {
           documentFile: uploadResult?.uploads[1]?.viewLink,
         },
         documents: uploadedFiles,
+
       };
 
       console.log('Final Form Data:', finalFormData);
@@ -467,8 +468,8 @@ function ForexForm() {
               w="full"
             >
               {countries.map((country, index) => (
-                <option key={index} value={country.Name}>
-                  {country.Name}
+                <option key={index} value={country}>
+                  {country}
                 </option>
               ))}
             </Select>
