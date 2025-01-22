@@ -11,15 +11,16 @@ import Typography from '@mui/material/Typography';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import InstagramIcon from '@mui/icons-material/Instagram';
 import LinkedInIcon from '@mui/icons-material/LinkedIn';
-import TwitterIcon from '@mui/icons-material/X';
 
+// Removed invalid import of SitemarkIcon
+// If you want an icon here, replace it with a valid one from @mui/icons-material
 
 function Copyright() {
   return (
     <Typography variant="body2" sx={{ color: 'text.secondary', mt: 1 }}>
       {'Copyright © '}
       <Link color="text.secondary" href="https://abrocare">
-       AbroCare
+        AbroCare
       </Link>
       &nbsp;
       {new Date().getFullYear()}
@@ -56,7 +57,7 @@ export default function Footer() {
           }}
         >
           <Box sx={{ width: { xs: '100%', sm: '60%' } }}>
-            <SitemarkIcon />
+           
             <Typography variant="body2" gutterBottom sx={{ fontWeight: 600, mt: 2 }}>
               Join the newsletter
             </Typography>
@@ -176,7 +177,7 @@ export default function Footer() {
           <Link color="text.secondary" variant="body2" href="#">
             Privacy Policy
           </Link>
-        
+
           <Copyright />
         </div>
         <Stack
