@@ -42,6 +42,7 @@ function ForexForm() {
     tds: '',
     netPayable: '',
     commissionStatus: '',
+    aecommission:'',
   });
   const [passportFile, setPassportFile] = useState(null);
   const [offerLetterFile, setOfferLetterFile] = useState(null);
@@ -481,6 +482,18 @@ function ForexForm() {
               type="text"
               name="currencyBooked"
               value={formData.currencyBooked}
+              onChange={handleChange}
+              h="50px"
+              w="full"
+            />
+          </FormControl>
+
+          <FormControl>
+            <FormLabel>AE Commission</FormLabel>
+            <Input
+              type="text"
+              name="aecommission"
+              value={formData.aecommission}
               onChange={handleChange}
               h="50px"
               w="full"
