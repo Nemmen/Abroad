@@ -113,7 +113,7 @@ function ForexView() {
           )}
 
           {/* Student Reference */}
-          {formData.studentRef && (
+          {formData.studentName && (
             <>
               <VStack align="start" spacing={2} w="full">
                 <Flex align="center">
@@ -124,20 +124,7 @@ function ForexView() {
                 </Flex>
                 <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
                   <Text fontSize="lg" fontWeight="bold" color={valueColor}>
-                    {formData.studentRef.name}
-                  </Text>
-                </Box>
-              </VStack>
-              <VStack align="start" spacing={2} w="full">
-                <Flex align="center">
-                  <Icon as={FiFileText} color="blue.500" mr={2} />
-                  <Text fontSize="sm" fontWeight="medium" color={labelColor}>
-                    Student Email
-                  </Text>
-                </Flex>
-                <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
-                  <Text fontSize="lg" fontWeight="bold" color={valueColor}>
-                    {formData.studentRef.email}
+                    {formData.studentName}
                   </Text>
                 </Box>
               </VStack>
@@ -149,7 +136,8 @@ function ForexView() {
               label !== '_id' &&
               label !== 'documents' &&
               label !== 'agentRef' &&
-              label !== 'studentRef' && (
+              label !== 'aecommission' &&
+              label !== 'studentName' && (
                 <VStack key={index} align="start" spacing={2} w="full">
                   <Flex align="center">
                     <Icon

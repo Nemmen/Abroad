@@ -171,7 +171,7 @@ export default function HeaderLinks(props) {
               borderRadius="8px"
               px="14px"
             >
-              <Text fontSize="sm"><Link to={`${location.pathname}/profile`}>Profile Settings</Link></Text>
+              <Text fontSize="sm"><Link to={`/default/profile`}>Profile Settings</Link></Text>
             </MenuItem>
             <MenuItem
               _hover={{ bg: 'none' }}
