@@ -11,29 +11,25 @@ const theme = createTheme({
   },
 });
 
-export default function ForexCurrentMonth() {
+export function ForexYearStatus() {
   const [graphData, setGraphData] = useState({ xAxis: [], series: [] });
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const response = await axios.get('http://127.0.0.1:4000/admin/getCurrentMonthForex');
-        const { month, totalEntries } = response.data;
+        const response = await axios.get('http://127.0.0.1:4000/admin/getYearlyForexData');
+        const { xAxis, series } = response.data;
 
-        // Prepare data for the graph
-        const currentDate = new Date();
-        const daysInMonth = Math.min(
-          new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate(),
-          31
-        );
-        const xAxis = Array.from({ length: daysInMonth }, (_, i) => i + 1); // Days of the month
-        const series = Array(daysInMonth).fill(0);
-        series[0] = totalEntries; // Map total entries to the first day (example adjustment)
+        // Map xAxis from "YYYY-MM" to month names
+        const mappedXAxis = xAxis.map(date => {
+          const [year, month] = date.split('-');
+          return new Date(year, month - 1).toLocaleString('default', { month: 'long' });
+        });
 
-        setGraphData({ xAxis, series });
-        // console.log('Graph data:', { xAxis, series });
+        setGraphData({ xAxis: mappedXAxis, series });
+        // console.log('Yearly graph data:', { xAxis: mappedXAxis, series });
       } catch (error) {
-        console.error('Error fetching graph data:', error);
+        console.error('Error fetching yearly graph data:', error);
       }
     }
     fetchData();
@@ -73,40 +69,54 @@ export default function ForexCurrentMonth() {
               fontSize: '20px',
             }}
           >
-            Forex Current Month Snapshot
+            Forex Yearly Status
           </Typography>
         </Box>
 
         {/* Line Chart Section */}
         <Box
           sx={{
-            width: '100%',
-            maxWidth: '800px',
             overflowX: 'scroll',
             scrollbarWidth: 'thin',
+            width: '100%',
+            maxWidth: '800px',
             p: 3,
             bgcolor: '#ffffff',
             borderRadius: '8px',
             boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
           }}
         >
-          <LineChart
-            xAxis={[
-              {
-                data: graphData.xAxis, // Days of the month
-                label: 'Days of the Month',
-              },
-            ]}
-            series={[
-              {
-                data: graphData.series, // Number of forex transactions
-                label: 'Number of Forex Transactions',
-                color: '#3f51b5',
-              },
-            ]}
-            width={600}
-            height={300}
-          />
+          {graphData.xAxis.length > 0 && graphData.series.length > 0 ? (
+            <LineChart
+              xAxis={[
+                {
+                  data: graphData.xAxis, // Months of the year
+                  label: 'Months',
+                  scaleType: 'point',
+                  labelStyle: { angle: 0, anchor: 'end' }, // Rotate labels for better readability
+                },
+              ]}
+              series={[
+                {
+                  data: graphData.series, // Number of forex transactions per month
+                  label: 'Past 12 months Forex Entries',
+                  color: '#3f51b5',
+                },
+              ]}
+              width={600}
+              height={300}
+            />
+          ) : (
+            <Typography
+              sx={{
+                color: '#999',
+                textAlign: 'center',
+                fontSize: '16px',
+              }}
+            >
+              No data available to display.
+            </Typography>
+          )}
         </Box>
       </Box>
     </ThemeProvider>

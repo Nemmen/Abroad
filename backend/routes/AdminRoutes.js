@@ -9,8 +9,12 @@ import {
   unblockUser,
   approveUser,
   rejectUser,
-  getUserById
-  
+  getUserById,
+  getCurrentMonthForexData,
+  getYearlyForexData,
+  getCurrentMonthGICs,
+  getYearlyGICData,
+  getForexAndGicData
 
 
 } from '../controllers/Admin.js';
@@ -29,6 +33,12 @@ AdminRoutes.put('/unblock/:id', isAdmin, unblockUser);
 AdminRoutes.put('/approve/:id',  approveUser);
 AdminRoutes.put('/reject/:id', isAdmin, rejectUser);
 AdminRoutes.get('/getuser/:id', isAdmin, getUserById);
+AdminRoutes.get('/getCurrentMonthForex', getCurrentMonthForexData);
+AdminRoutes.get('/getYearlyForexData', getYearlyForexData);
+AdminRoutes.get('/getCurrentMonthGICs', getCurrentMonthGICs);
+AdminRoutes.get('/getYearlyGICData', getYearlyGICData);
+AdminRoutes.get('/getForexAndGicData', getForexAndGicData);
+
 
 
 export default AdminRoutes;

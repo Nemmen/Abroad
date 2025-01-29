@@ -65,6 +65,7 @@ export default function Index() {
           </Typography>
         </Box>
       </Box>
+      
     </ThemeProvider>
   );
 }

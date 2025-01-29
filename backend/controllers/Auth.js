@@ -5,11 +5,46 @@ import jwt from 'jsonwebtoken';
 import bcryptjs from 'bcryptjs';
 import dotenv from 'dotenv';
 // import {uploadFileToCloudinary} from './uploadController.js'
-import { sendRegistrationEmail } from '../services/emailService.js';
+import { sendRegistrationEmail,sendOtpEmail, verifyOtp } from '../services/emailService.js';
 import ForexModel from '../models/forexModel.js';
 import GICModel from '../models/gicModel.js';
 dotenv.config();
 
+export const sendResetOtp = async (req, res) => {
+  const { email } = req.body;
+  try {
+      await sendOtpEmail(email);
+      res.status(200).json({ message: 'OTP sent to your email' });
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+};
+
+// Verify OTP and reset password
+export const resetPassword = async (req, res) => {
+  const { email, otp, newPassword } = req.body;
+
+  try {
+    // Verify OTP
+    verifyOtp(email, otp); // Ensure this function throws an error for invalid OTP.
+
+    // Update password in the database
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    user.password = hashedPassword;
+    await user.save();
+
+    res.status(200).json({ message: 'Password reset successfully' });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
 const register = async (req, res) => {
   try {
     const {
@@ -516,6 +551,26 @@ const getAllBlockedData = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: 'Error fetching blocked data', error });
+  }
+};
+
+export const getAllGICForex = async (req, res) => {
+  try {
+    const agentId = req.user.id; // Assuming you have middleware that sets req.user with logged-in agent info
+
+    // Fetch blocked data
+    const GicData = await BLOCKEDModel.find().populate("agentRef");
+
+    // Count forex transactions linked to the logged-in agent
+    const forexCount = await FOREXModel.countDocuments({ agentRef: agentId });
+
+    res.status(200).json({
+      message: "Blocked data fetched successfully",
+      GicData,
+      forexCount, // Return the count
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching data", error });
   }
 };
 
