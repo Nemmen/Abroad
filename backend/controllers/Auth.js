@@ -8,41 +8,54 @@ import dotenv from 'dotenv';
 import { sendRegistrationEmail,sendOtpEmail, verifyOtp } from '../services/emailService.js';
 import ForexModel from '../models/forexModel.js';
 import GICModel from '../models/gicModel.js';
+// import BLOCKEDModel from '../models/blockedModel.js';
 dotenv.config();
 
-export const sendResetOtp = async (req, res) => {
-  const { email } = req.body;
+export const sendOtp = async (req, res) => {
   try {
+      const { email } = req.body;
+
+      // Check if the user exists
+      const user = await UserModel.findOne({ email });
+      if (!user) {
+          return res.status(404).json({ message: 'User not found' });
+      }
+
+      // Send OTP email
       await sendOtpEmail(email);
-      res.status(200).json({ message: 'OTP sent to your email' });
+
+      res.status(200).json({ message: 'OTP sent successfully' });
   } catch (error) {
-      res.status(500).json({ error: error.message });
+      console.error('Error sending OTP:', error);
+      res.status(500).json({ message: 'Internal server error' });
   }
 };
 
 // Verify OTP and reset password
-export const resetPassword = async (req, res) => {
-  const { email, otp, newPassword } = req.body;
-
+export const verifyAndResetPassword = async (req, res) => {
   try {
-    // Verify OTP
-    verifyOtp(email, otp); // Ensure this function throws an error for invalid OTP.
+      const { email, otp, newPassword } = req.body;
 
-    // Update password in the database
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
+      // Verify OTP
+      const isOtpValid = verifyOtp(email, otp);
+      if (!isOtpValid) {
+          return res.status(400).json({ message: 'Invalid OTP' });
+      }
 
-    // Hash the new password
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+      // Hash the new password
+      const hashedPassword = await bcryptjs.hash(newPassword, 10);
 
-    user.password = hashedPassword;
-    await user.save();
+      // Update the user's password in the database
+      await UserModel.findOneAndUpdate(
+          { email },
+          { password: hashedPassword },
+          { new: true }
+      );
 
-    res.status(200).json({ message: 'Password reset successfully' });
+      res.status(200).json({ message: 'Password reset successfully' });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+      console.error('Error resetting password:', error);
+      res.status(500).json({ message: 'Internal server error' });
   }
 };
 const register = async (req, res) => {
@@ -554,23 +567,27 @@ const getAllBlockedData = async (req, res) => {
   }
 };
 
-export const getAllGICForex = async (req, res) => {
+export const getAgentStats = async (req, res) => {
   try {
-    const agentId = req.user.id; // Assuming you have middleware that sets req.user with logged-in agent info
+    const agentId = req.user.id; // Extracted from middleware
 
-    // Fetch blocked data
-    const GicData = await BLOCKEDModel.find().populate("agentRef");
+    // Count GIC transactions for the logged-in agent
+    const gicCount = await GICModel.countDocuments({ agentRef: agentId });
 
-    // Count forex transactions linked to the logged-in agent
-    const forexCount = await FOREXModel.countDocuments({ agentRef: agentId });
+    // Count forex transactions for the logged-in agent
+    const forexCount = await ForexModel.countDocuments({ agentRef: agentId });
+
+    // Count blocked transactions for the logged-in agent
+    // const blockedCount = await BLOCKEDModel.countDocuments({ agentRef: agentId });
 
     res.status(200).json({
-      message: "Blocked data fetched successfully",
-      GicData,
-      forexCount, // Return the count
+      message: "Agent stats fetched successfully",
+      gicCount,
+      forexCount,
+      // blockedCount,
     });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching data", error });
+    res.status(500).json({ message: "Error fetching agent stats", error });
   }
 };
 

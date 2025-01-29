@@ -25,7 +25,7 @@ const NotificationBar = () => {
         console.error('Error fetching notifications:', error);
       }
     };
-    console.log(notifications);
+    // console.log(notifications);
     fetchNotifications();
   }, []);
 

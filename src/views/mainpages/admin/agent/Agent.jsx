@@ -33,7 +33,7 @@ import axios from 'axios';
 // ];
 
 function handleUserRowClick(userData) {
-  console.log('Clicked user:', userData);
+  // console.log('Clicked user:', userData);
   // Perform actions like opening a modal or navigating to a detail page
 }
 

@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Box, Typography, ThemeProvider, createTheme } from '@mui/material';
 import { useColorMode } from '@chakra-ui/react'; // Import Chakra's color mode hook
+import AgentStats from './AgentStats';
 
 export default function Index() {
   // Use Chakra's color mode to determine if it's light or dark
@@ -65,7 +66,9 @@ export default function Index() {
           </Typography>
         </Box>
       </Box>
-      
+      <div>
+        <AgentStats/>
+      </div>
     </ThemeProvider>
   );
 }

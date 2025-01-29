@@ -1,5 +1,5 @@
 import express from 'express';
-import {checkUser,sendResetOtp, resetPassword, login, getAllGICForex, logout,getAllusers,studentCreate, register, getStudent,addGicForm, viewAllGicForm, addForexForm, viewAllForexForms, getAllBlockedData, updateGicForm, updateForexForm,  } from '../controllers/Auth.js';
+import {checkUser, verifyAndResetPassword, login, logout,getAllusers,studentCreate, register, getStudent,addGicForm, viewAllGicForm, addForexForm, viewAllForexForms, getAllBlockedData, updateGicForm, updateForexForm,getAgentStats, sendOtp  } from '../controllers/Auth.js';
 import { IsUser } from '../middleware/verifyToken.js';
 
 const AuthRoutes = express.Router();
@@ -28,9 +28,13 @@ AuthRoutes.get('/viewAllForexForms', viewAllForexForms);
 AuthRoutes.post('/studentCreate', studentCreate);
 AuthRoutes.get('/getStudent', getStudent);
 AuthRoutes.put('/updateForexForm/:id', updateForexForm);
-AuthRoutes.post('/sendResetOtp', sendResetOtp);
-AuthRoutes.post('/resetPassword', resetPassword);
-AuthRoutes.get('/getAllGICForex', getAllGICForex);
+AuthRoutes.post('/send-otp', sendOtp);
+AuthRoutes.post('/reset-password', verifyAndResetPassword);
+
+AuthRoutes.get("/agent/stats", IsUser, getAgentStats);
+
+
+
 
 // Blocked Data Routes
 AuthRoutes.get('/getAllBlockedData', getAllBlockedData);

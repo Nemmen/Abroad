@@ -29,6 +29,9 @@ import BlockedPage from 'views/mainpages/agent/blocked/BlockedPage';
 import StudentPage from 'views/mainpages/agent/students/StudentPage';
 import Profile from 'views/mainpages/agent/profile/Profile';
 
+import ForgotPassword from "views/mainpages/login_signup/ForgotPassword";
+import ResetPassword from "views/mainpages/login_signup/ResetPassword";
+
 const routes = [
   {
     name: 'Main Dashboard',
@@ -120,21 +123,37 @@ export const routeAjent = [
 ];
 
 // for commiy
+
+
+
 export const Auth = [
   {
-    name: 'Login',
-    layout: '/auth',
-    path: '/login',
+    name: "Login",
+    layout: "/auth",
+    path: "/login",
     icon: <Icon as={SiAuthentik} width="20px" height="20px" color="inherit" />,
     component: <Login />,
   },
   {
-    name: 'Sign Up',
-    layout: '/auth',
-    path: '/signup',
+    name: "Sign Up",
+    layout: "/auth",
+    path: "/signup",
     icon: <Icon as={BsFillPiggyBankFill} width="20px" height="20px" color="inherit" />,
     component: <Signup />,
   },
+  {
+    name: "Forgot Password",
+    layout: "/auth",
+    path: "/forgot-password",
+    
+    component: <ForgotPassword />,
+  },
+  {
+    name: "Reset Password",
+    layout: "/auth",
+    path: "/reset-password",
+    
+    component: <ResetPassword />,
+  },
 ];
-
 export default routes;
