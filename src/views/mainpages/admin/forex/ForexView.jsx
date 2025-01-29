@@ -150,7 +150,7 @@ function ForexView() {
               <Flex align="center">
                 <Icon as={FiUser} color="blue.500" mr={2} />
                 <Text fontSize="sm" fontWeight="medium" color={labelColor}>
-                  Studnet Name
+                  Student Name
                 </Text>
               </Flex>
               <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
