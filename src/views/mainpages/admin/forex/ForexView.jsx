@@ -155,7 +155,7 @@ function ForexView() {
               </Flex>
               <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
                 <Text fontSize="lg" fontWeight="bold" color={valueColor}>
-                  {formData.studentRef.name.toUpperCase()}
+                  {formData.studentName}
                 </Text>
               </Box>
             </VStack>
@@ -199,7 +199,7 @@ function ForexView() {
               label !== '_id' &&
               label !== 'documents' &&
               label !== 'agentRef' &&
-              label !== 'studentRef' && (
+              label !== 'studentName' && (
                 <VStack key={index} align="start" spacing={2} gridColumn={label === 'date' ? 'span 2':''} w="full">
                   <Flex align="center">
                     <Icon
@@ -208,7 +208,7 @@ function ForexView() {
                       mr={2}
                     />
                     <Text fontSize="sm" fontWeight="medium" color={labelColor}>
-                      {label.replace(/([A-Z])/g, ' $1')}
+                      {label === 'country' ? 'Currency' : label.replace(/([A-Z])/g, ' $1')}
                     </Text>
                   </Flex>
                   <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">

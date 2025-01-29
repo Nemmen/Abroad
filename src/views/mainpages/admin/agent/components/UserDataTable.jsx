@@ -13,6 +13,7 @@ import {
   Button,
   Spinner,
   Center,
+  Input 
 } from '@chakra-ui/react';
 import {
   createColumnHelper,
@@ -29,13 +30,13 @@ import EditUserModal from './EditUserModal';
 const columnHelper = createColumnHelper();
 
 export default function UserDataTable(props) {
-  const { tableData, onRowClick } = props;
+  const { tableData, onRowClick, searchValue, setSearchValue } = props;
   const [sorting, setSorting] = React.useState([]);
   const [data, setData] = React.useState([]);
   const [loading, setLoading] = React.useState(true); // Add loading state
   const [loadingButtonId, setLoadingButtonId] = React.useState(null); // Add this state
   const textColor = useColorModeValue('secondaryGray.900', 'white');
-  const textColorSecondary = useColorModeValue('secondaryGray.600', 'white');
+  // const textColorSecondary = useColorModeValue('secondaryGray.600', 'white');
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
 
   useEffect(() => {
@@ -48,11 +49,22 @@ export default function UserDataTable(props) {
     }
   }, [tableData]);
 
+  useEffect(() => {
+    const filteredData = tableData
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .filter((user) => user.name.toLowerCase().includes(searchValue.toLowerCase()));
+    setData([...filteredData]);
+  },[searchValue]);
+
   const columns = [
     columnHelper.accessor('name', {
       id: 'name',
       header: () => (
-        <Text fontSize={{ sm: '10px', lg: '13px' }} color="black" fontWeight="500">
+        <Text
+          fontSize={{ sm: '10px', lg: '13px' }}
+          color="black"
+          fontWeight="500"
+        >
           NAME
         </Text>
       ),
@@ -65,7 +77,11 @@ export default function UserDataTable(props) {
     columnHelper.accessor('email', {
       id: 'email',
       header: () => (
-        <Text fontSize={{ sm: '10px', lg: '13px' }} color="black" fontWeight="500">
+        <Text
+          fontSize={{ sm: '10px', lg: '13px' }}
+          color="black"
+          fontWeight="500"
+        >
           EMAIL
         </Text>
       ),
@@ -78,7 +94,11 @@ export default function UserDataTable(props) {
     columnHelper.accessor('userStatus', {
       id: 'userStatus',
       header: () => (
-        <Text fontSize={{ sm: '10px', lg: '13px' }} color="black" fontWeight="500">
+        <Text
+          fontSize={{ sm: '10px', lg: '13px' }}
+          color="black"
+          fontWeight="500"
+        >
           STATUS
         </Text>
       ),
@@ -91,7 +111,11 @@ export default function UserDataTable(props) {
     columnHelper.accessor('organization', {
       id: 'organization',
       header: () => (
-        <Text fontSize={{ sm: '10px', lg: '13px' }} color="black" fontWeight="500">
+        <Text
+          fontSize={{ sm: '10px', lg: '13px' }}
+          color="black"
+          fontWeight="500"
+        >
           ORGANIZATION
         </Text>
       ),
@@ -104,7 +128,11 @@ export default function UserDataTable(props) {
     columnHelper.accessor('phoneNumber', {
       id: 'phoneNumber',
       header: () => (
-        <Text fontSize={{ sm: '10px', lg: '13px' }} color="black" fontWeight="500">
+        <Text
+          fontSize={{ sm: '10px', lg: '13px' }}
+          color="black"
+          fontWeight="500"
+        >
           PHONE NUMBER
         </Text>
       ),
@@ -117,7 +145,11 @@ export default function UserDataTable(props) {
     columnHelper.accessor('state', {
       id: 'state',
       header: () => (
-        <Text fontSize={{ sm: '10px', lg: '13px' }} color="black" fontWeight="500">
+        <Text
+          fontSize={{ sm: '10px', lg: '13px' }}
+          color="black"
+          fontWeight="500"
+        >
           STATE
         </Text>
       ),
@@ -130,7 +162,11 @@ export default function UserDataTable(props) {
     columnHelper.accessor('createdAt', {
       id: 'createdAt',
       header: () => (
-        <Text fontSize={{ sm: '10px', lg: '13px' }} color="black" fontWeight="500">
+        <Text
+          fontSize={{ sm: '10px', lg: '13px' }}
+          color="black"
+          fontWeight="500"
+        >
           CREATED ON
         </Text>
       ),
@@ -143,7 +179,11 @@ export default function UserDataTable(props) {
     columnHelper.display({
       id: 'actions',
       header: () => (
-        <Text fontSize={{ sm: '10px', lg: '13px' }} color="black" fontWeight="500">
+        <Text
+          fontSize={{ sm: '10px', lg: '13px' }}
+          color="black"
+          fontWeight="500"
+        >
           ACTIONS
         </Text>
       ),
@@ -162,7 +202,11 @@ export default function UserDataTable(props) {
                 onClick={() => handleStatusChange(userId, 'active')}
                 disabled={loadingButtonId === userId}
               >
-                {loadingButtonId === userId ? <Spinner color="white" /> : 'Block'}
+                {loadingButtonId === userId ? (
+                  <Spinner color="white" />
+                ) : (
+                  'Block'
+                )}
               </Button>
             )}
             {userStatus === 'block' && (
@@ -175,11 +219,21 @@ export default function UserDataTable(props) {
                 onClick={() => handleStatusChange(userId, 'block')}
                 disabled={loadingButtonId === userId}
               >
-                {loadingButtonId === userId ? <Spinner color="white" /> : 'Unblock'}
+                {loadingButtonId === userId ? (
+                  <Spinner color="white" />
+                ) : (
+                  'Unblock'
+                )}
               </Button>
             )}
             <IconButton
-              icon={loadingButtonId === userId ? <Spinner color="black" /> : <DeleteIcon />}
+              icon={
+                loadingButtonId === userId ? (
+                  <Spinner color="black" />
+                ) : (
+                  <DeleteIcon />
+                )
+              }
               colorScheme="red"
               aria-label="Delete"
               onClick={() => handleStatusChange(userId, 'isdeleted')}
@@ -222,7 +276,7 @@ export default function UserDataTable(props) {
           : `https://abroad-backend-ten.vercel.app/admin/unblock/${userId}`;
       await axios.put(url, {}, { withCredentials: true });
       const updatedData = data.map((user) =>
-        user._id === userId ? { ...user, userStatus: newStatus } : user
+        user._id === userId ? { ...user, userStatus: newStatus } : user,
       );
       setData(updatedData);
     } catch (error) {
@@ -233,7 +287,11 @@ export default function UserDataTable(props) {
   };
 
   return (
-    <Flex direction="column" w="100%" overflowX={{ sm: 'scroll', lg: 'hidden' }}>
+    <Flex
+      direction="column"
+      w="100%"
+      overflowX={{ sm: 'scroll', lg: 'hidden' }}
+    >
       <Flex
         align={{ sm: 'flex-start', lg: 'center' }}
         justify="space-between"
@@ -246,7 +304,15 @@ export default function UserDataTable(props) {
         <Text color={textColor} fontSize="2xl" fontWeight="600">
           User Registrations
         </Text>
+        <Box display="flex" gap={2}>
+          <Input
+            placeholder="Search by name"
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            mr="10px"
+          />
         <AddUserModal />
+        </Box>
       </Flex>
       {loading ? (
         <Center h="300px">
@@ -278,9 +344,10 @@ export default function UserDataTable(props) {
                       >
                         {flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )}
-                        {{ asc: '', desc: '' }[header.column.getIsSorted()] ?? null}
+                        {{ asc: '', desc: '' }[header.column.getIsSorted()] ??
+                          null}
                       </Flex>
                     </Th>
                   ))}
@@ -289,10 +356,21 @@ export default function UserDataTable(props) {
             </Thead>
             <Tbody>
               {table.getRowModel().rows.map((row) => (
-                <Tr key={row.original._id} onClick={() => handleRowClick(row)} cursor="pointer">
+                <Tr
+                  key={row.original._id}
+                  onClick={() => handleRowClick(row)}
+                  cursor="pointer"
+                >
                   {row.getVisibleCells().map((cell) => (
-                    <Td key={cell.id} fontSize={{ sm: '14px' }} borderColor={borderColor}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    <Td
+                      key={cell.id}
+                      fontSize={{ sm: '14px' }}
+                      borderColor={borderColor}
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
                     </Td>
                   ))}
                 </Tr>
