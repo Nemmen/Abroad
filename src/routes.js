@@ -113,13 +113,7 @@ export const routeAjent = [
     icon: <Icon as={MdVerifiedUser} width="20px" height="20px" color="inherit" />,
     component: <StudentPage/>,
   },
-  {
-    name: 'Profile',
-    layout: '/agent',
-    path: '/profile',
-    icon: <Icon as={CgProfile} width="20px" height="20px" color="inherit" />,
-    component: <Profile/>,
-  },
+  
 ];
 
 // for commiy
