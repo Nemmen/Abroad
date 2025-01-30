@@ -66,7 +66,7 @@ export default function Register() {
     { name: 'Lakshadweep (UT)' },
     { name: 'Puducherry (UT)' },
   ];
-  console.log('doc', document1);
+  // console.log('doc', document1);
   // Form submission handler
   const handleSubmit = async (e) => {
     e.preventDefault();

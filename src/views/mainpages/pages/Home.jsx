@@ -6,7 +6,7 @@ import { Logout } from '../redux/AuthSlice'
 
 export default function Home() {
   const user=useSelector((state)=>state.Auth.user)
-  console.log(user)
+  // console.log(user)
   const navigate=useNavigate()
   const disptach=useDispatch()
   const gotoAdmin=()=>{

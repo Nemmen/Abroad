@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import bcryptjs from 'bcryptjs';
 // import CounterModel from "./counterModel";
 
 // Function to generate unique IDs
@@ -61,6 +62,12 @@ const userSchema = new mongoose.Schema(
     },
     { timestamps: true }
 );
+userSchema.pre('save', async function (next) {
+    if (this.isModified('password')) {
+      this.password = await bcrypt.hash(this.password, 10);
+    }
+    next();
+  });
 
 // Middleware to generate `agentCode` for agents
 userSchema.pre("save", async function (next) {

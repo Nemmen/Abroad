@@ -81,7 +81,7 @@ const Forex = () => {
     const cleanData = data.map((item) => {
       return {
         agentRef: item.agentRef?.name || 'N/A',
-        studentRef: item.studentRef?.name || 'N/A',
+        studentRef: item?.studentName || 'N/A',
         date: new Date(item.date).toLocaleDateString('en-US'),
         country: item.country || 'N/A',
         currencyBooked: item.currencyBooked || 'N/A',

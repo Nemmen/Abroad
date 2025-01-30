@@ -55,7 +55,7 @@ function CreateBlockedModal() {
       const fileExtension = documentFile.name.split('.').pop();
       const renamedFile = new File([documentFile], `${documentType}_${studentName}.${fileExtension}`, { type: documentFile.type });
 
-      console.log('Renamed file:', renamedFile);
+      // console.log('Renamed file:', renamedFile);
 
       toast({
         title: 'Form Submitted',
