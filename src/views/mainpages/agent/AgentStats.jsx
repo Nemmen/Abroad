@@ -11,7 +11,7 @@ const AgentStats = () => {
       try {
         const token = localStorage.getItem("token_auth"); // Fetch token from local storage
         
-        const response = await axios.get("http://127.0.0.1:4000/auth/agent/stats", {
+        const response = await axios.get("https://abroad-backend-ten.vercel.app/auth/agent/stats", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
