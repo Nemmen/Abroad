@@ -501,6 +501,30 @@ const updateForexForm = async (req, res) => {
   }
 };
 
+// get agentCommission from all forex and gic forms
+export const getAgentCommission = async (req, res) => {
+  try {
+    const agentId = req.user.id; // Extracted from middleware
+
+    // Get agent's GIC forms
+    const gicForms = await GICModel.find({ agentRef: agentId });
+    const gicCommission = gicForms.reduce((total, form) => total + parseFloat(form.commissionAmt || 0), 0);
+
+    // Get agent's Forex forms
+    const forexForms = await ForexModel.find({ agentRef: agentId });
+    const forexCommission = forexForms.reduce((total, form) => total + parseFloat(form.agentCommission || 0), 0);
+
+    res.status(200).json({
+      message: "Agent commission fetched successfully",
+      gicCommission: gicCommission.toFixed(2), // Ensure it's formatted properly
+      forexCommission: forexCommission.toFixed(2),
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching agent commission", error });
+  }
+};
+
+
 
 // const createBlockedData = async (req, res) => {
 //   try {

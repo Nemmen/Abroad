@@ -1,5 +1,5 @@
 import express from 'express';
-import {checkUser, verifyAndResetPassword, login, logout,getAllusers,studentCreate, register, getStudent,addGicForm, viewAllGicForm, addForexForm, viewAllForexForms, getAllBlockedData, updateGicForm, updateForexForm,getAgentStats, sendOtp  } from '../controllers/Auth.js';
+import {checkUser, verifyAndResetPassword, getAgentCommission, login, logout,getAllusers,studentCreate, register, getStudent,addGicForm, viewAllGicForm, addForexForm, viewAllForexForms, getAllBlockedData, updateGicForm, updateForexForm,getAgentStats, sendOtp  } from '../controllers/Auth.js';
 import { IsUser } from '../middleware/verifyToken.js';
 
 const AuthRoutes = express.Router();
@@ -30,6 +30,7 @@ AuthRoutes.get('/getStudent', getStudent);
 AuthRoutes.put('/updateForexForm/:id', updateForexForm);
 AuthRoutes.post('/send-otp', sendOtp);
 AuthRoutes.post('/reset-password', verifyAndResetPassword);
+AuthRoutes.get("/getAgentCommission", IsUser, getAgentCommission);
 
 AuthRoutes.get("/agent/stats", IsUser, getAgentStats);
 
