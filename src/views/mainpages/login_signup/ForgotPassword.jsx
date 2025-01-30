@@ -14,7 +14,7 @@ export default function ForgotPassword() {
     setLoading(true);
 
     try {
-      const response = await post("http://127.0.0.1:4000/auth/send-otp", { email });
+      const response = await post("https://abroad-backend-ten.vercel.app/auth/send-otp", { email });
 
       if (response.status === 200) {
         toast({

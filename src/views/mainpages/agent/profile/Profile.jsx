@@ -56,7 +56,7 @@ const Profile = () => {
       const { joinedAt, ...updatedUser } = user;
 
       // Send updated data to server
-      const response = await axios.put("http://127.0.0.1:4000/auth/updateProfile", updatedUser);
+      const response = await axios.put("https://abroad-backend-ten.vercel.app/auth/updateProfile", updatedUser);
       if (response.status === 200) {
         alert("Profile updated successfully!");
         setOriginalUser(user); // Update original data
