@@ -92,13 +92,7 @@ export const routeAjent = [
     path: '/forex',
     component: <AgentForex/>,
   },
-  {
-    name: 'IMM',
-    layout: '/agent',
-    path: '/imm',
-    icon: <Icon as={MdBusiness} width="20px" height="20px" color="inherit" />,
-    component: '',
-  },
+
   {
     name: 'Blocked',
     layout: '/agent',
