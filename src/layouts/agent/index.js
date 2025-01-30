@@ -110,7 +110,7 @@ console.log(user)
             <Routes>
               {getRoutes(routes)}
               <Route path="/" element={<Navigate to="/agent/default" replace />} />
-              <Route path="/profile" element={<AgentProfilePage agentData={user}/>} />
+              <Route path= "/profile" element={<AgentProfilePage agentData={user}/>} />
               <Route path="/gic/form" element={<CreateGICModal />} />
               <Route path="/gic/:id" element={<GicView />} />
               <Route path="/forex/:id" element={<AgentForexView />} />

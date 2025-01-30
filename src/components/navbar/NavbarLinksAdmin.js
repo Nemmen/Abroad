@@ -50,6 +50,8 @@ export default function HeaderLinks(props) {
   );
   const borderButton = useColorModeValue('secondaryGray.500', 'whiteAlpha.200');
 
+  const basePath = location.pathname.match(/^\/(admin|agent)/)?.[0] || ''; 
+
   const handleLogout = () => {
     // Clear any stored authentication tokens or session data
     localStorage.removeItem('token_auth');
@@ -171,7 +173,8 @@ export default function HeaderLinks(props) {
               borderRadius="8px"
               px="14px"
             >
-              <Text fontSize="sm"><Link to={`/default/profile`}>Profile Settings</Link></Text>
+              <Text fontSize="sm">
+              <Link to={`${basePath}/profile`}>Profile Settings</Link></Text>
             </MenuItem>
             <MenuItem
               _hover={{ bg: 'none' }}
