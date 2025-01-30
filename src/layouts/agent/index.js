@@ -21,7 +21,7 @@ export default function Dashboard(props) {
   const [toggleSidebar, setToggleSidebar] = useState(false);
   const location = useLocation();
   const { user } = useSelector((state) => state.Auth);
-console.log(user)
+// console.log(user)
   // Re-render on route changes
   useEffect(() => {}, [location]);
 

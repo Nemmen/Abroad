@@ -263,3 +263,83 @@ export const sendBlockNotification = async (userEmail, userName) => {
         console.error('Error sending block notification email:', error);
     }
 };
+
+// Password Reset Email
+
+const otpStore = {}; // Temporary store for OTPs (can be replaced with a database for production)
+
+export const sendOtpEmail = async (userEmail) => {
+    const otp = Math.floor(1000 + Math.random() * 9000); // Generate a 4-digit OTP
+
+    otpStore[userEmail] = {
+        otp,
+        expiresAt: Date.now() + 10 * 60 * 1000 // OTP valid for 10 minutes
+    };
+
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: userEmail,
+        subject: 'Reset Password OTP',
+        html: `
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Reset Password OTP</title>
+                <style>
+                    .container { max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif; color: #333; background-color: #ffffff; border: 1px solid #dddddd; }
+                    .header { text-align: center; padding-bottom: 20px; border-bottom: 2px solid #333333; }
+                    .title { color: #333; font-size: 24px; margin-top: 10px; }
+                    .body { margin-top: 20px; font-size: 16px; line-height: 1.6; color: #333; }
+                    .footer { margin-top: 20px; padding-top: 10px; border-top: 1px solid #dddddd; color: #666; font-size: 14px; text-align: center; }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="header">
+                        <h1 class="title">Reset Password OTP</h1>
+                    </div>
+                    <div class="body">
+                        <p>Hello,</p>
+                        <p>Your OTP for resetting your password is:</p>
+                        <h2 style="text-align: center;">${otp}</h2>
+                        <p>This OTP is valid for 10 minutes. If you didn't request a password reset, please ignore this email.</p>
+                    </div>
+                    <div class="footer">
+                        <p>&copy; 2024 Your Company Name. All rights reserved.</p>
+                    </div>
+                </div>
+            </body>
+            </html>
+        `
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log('OTP email sent successfully');
+    } catch (error) {
+        console.error('Error sending OTP email:', error);
+        throw new Error('Failed to send OTP email');
+    }
+};
+
+export const verifyOtp = (userEmail, userOtp) => {
+    const otpData = otpStore[userEmail];
+    if (!otpData) {
+        throw new Error('OTP not found or expired');
+    }
+
+    const { otp, expiresAt } = otpData;
+    if (Date.now() > expiresAt) {
+        delete otpStore[userEmail]; // Clean up expired OTP
+        throw new Error('OTP expired');
+    }
+
+    if (otp !== parseInt(userOtp, 10)) {
+        throw new Error('Invalid OTP');
+    }
+
+    delete otpStore[userEmail]; // Clean up OTP after successful verification
+    return true;
+};

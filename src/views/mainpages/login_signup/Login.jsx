@@ -1,38 +1,30 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { post } from '../services/ApiEndpoint';
-import { Button, useToast } from '@chakra-ui/react'; // Import useToast from Chakra UI
+import { Button, useToast, Spinner } from '@chakra-ui/react';
 import { useDispatch, useSelector } from 'react-redux';
 import { SetUser } from '../redux/AuthSlice';
 import loginimg from '../../../assets/img/auth/login.png';
-import { HiEye, HiEyeOff } from 'react-icons/hi'; // Import eye icons from react-icons
-import { Spinner } from '@chakra-ui/react';
-
+import { HiEye, HiEyeOff } from 'react-icons/hi';
 
 export default function Login() {
-  const user = useSelector((state) => state.Auth);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false); // State for password visibility
-  const navigate = useNavigate();
-
-  // Initialize the toast
+  const [showPassword, setShowPassword] = useState(false);
   const toast = useToast();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const request = await post('https://abroad-backend-ten.vercel.app/auth/login', {
-        email,
-        password,
-      },
-      {
-        Credentials: 'include',
-      }
-    );
+      const request = await post(
+        'http://127.0.0.1:4000/auth/login',
+        { email, password },
+        { credentials: 'include' },
+      );
       const response = request.data;
 
       if (request.status === 200) {
@@ -40,14 +32,12 @@ export default function Login() {
         localStorage.setItem('user_role', response.user.role);
         setLoading(false);
 
-        // Navigate based on user role
         if (response.user.role === 'admin') {
           navigate('/admin');
         } else if (response.user.role === 'user') {
           navigate('/agent');
         }
 
-        // Show success toast
         toast({
           title: 'Login Successful',
           description: 'Welcome back!',
@@ -55,45 +45,22 @@ export default function Login() {
           duration: 1000,
           isClosable: true,
           position: 'bottom-right',
-          containerStyle: {
-            width: '400px',
-          },
+          containerStyle: { width: '400px' },
         });
-        if (response.status === 401) {
-          toast({
-            title: 'Login Failed',
-            description: response.user.message,
-            status: 'error',
-            duration: 1000,
-            isClosable: true,
-            position: 'bottom-right',
-            containerStyle: {
-              width: '400px',
-            },
-          });
-          setLoading(false);
-        }
 
         dispatch(SetUser(response.user));
       }
     } catch (error) {
-      // Show error toast
       setLoading(false);
       toast({
         title: 'Login Failed',
-        description: error.response.data.message,
-        status:
-          error.response.data.message == 'Invalid credentials'
-            ? 'error'
-            : 'warning',
+        description: error.response?.data?.message || 'Something went wrong',
+        status: 'error',
         duration: 1000,
         isClosable: true,
         position: 'bottom-right',
-        containerStyle: {
-          width: '400px',
-        },
+        containerStyle: { width: '400px' },
       });
-      console.log(error);
     }
   };
 
@@ -107,11 +74,11 @@ export default function Login() {
             className="w-[40vw] h-auto"
           />
         </div>
-        <div className="p-12 flex flex-col justify-center w-[450px]">
+        <div className="p-10 flex flex-col justify-center w-[450px]">
           <h2 className="text-2xl font-semibold text-gray-800">Sign In</h2>
           <p className="text-sm text-gray-600 mb-6">Unlock your world.</p>
           <form onSubmit={handleSubmit}>
-            <div className="mb-4">
+            <div className="mb-3">
               <label
                 htmlFor="email"
                 className="block text-sm font-semibold text-gray-800"
@@ -127,7 +94,7 @@ export default function Login() {
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 mt-1"
               />
             </div>
-            <div className="mb-6 relative">
+            <div className="mb-5 relative">
               <label
                 htmlFor="password"
                 className="block text-sm font-semibold text-gray-800"
@@ -135,7 +102,7 @@ export default function Login() {
                 Password
               </label>
               <input
-                type={showPassword ? 'text' : 'password'} // Toggle input type based on state
+                type={showPassword ? 'text' : 'password'}
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -143,7 +110,7 @@ export default function Login() {
                 className="w-full px-4 py-2 rounded-lg border border-gray-300 mt-1"
               />
               <span
-                onClick={() => setShowPassword(!showPassword)} // Toggle password visibility
+                onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-9 cursor-pointer"
               >
                 {showPassword ? (
@@ -153,10 +120,13 @@ export default function Login() {
                 )}
               </span>
             </div>
+            <p className="text-end text-blue-600 hover:underline mb-3">
+              <Link to="/auth/forgot-password">Forgot Password?</Link>
+            </p>
             {loading ? (
-             <div className='text-center'>
-               <Spinner size="lg" color="blue.500" />
-             </div>
+              <div className="text-center">
+                <Spinner size="lg" color="blue.500" />
+              </div>
             ) : (
               <button
                 type="submit"
@@ -167,12 +137,11 @@ export default function Login() {
             )}
           </form>
           <p className="text-center text-slate-500 text-[16px] mx-auto flex pt-3">
-            Don't have an account ?{' '}
+            Don't have an account?{' '}
             <Link
               to="/auth/signup"
-              className="block text-center text-blue-600 hover:underline ml-2 "
+              className="block text-center text-blue-600 hover:underline ml-2"
             >
-              {' '}
               Sign up
             </Link>
           </p>

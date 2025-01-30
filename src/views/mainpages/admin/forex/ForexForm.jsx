@@ -217,10 +217,10 @@ function ForexForm() {
     setLoading(true);
 
     try {
-      console.log('Form Data:', formData);
-      console.log('Passport File:', passportFile);
-      console.log('Offer Letter File:', offerLetterFile);
-      console.log('Documents:', documents);
+      // console.log('Form Data:', formData);
+      // console.log('Passport File:', passportFile);
+      // console.log('Offer Letter File:', offerLetterFile);
+      // console.log('Documents:', documents);
 
       if (!validateForm()) {
         // Show error toast for incomplete form

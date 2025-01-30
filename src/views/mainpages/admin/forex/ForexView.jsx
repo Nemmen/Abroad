@@ -60,7 +60,7 @@ function ForexView() {
           );
           if (formData1) {
             setFormData(formData1);
-            console.log(formData);
+            // console.log(formData);
             setEditableData({ ...formData1 });
           } else {
             console.error('Form data not found for ID:', id);

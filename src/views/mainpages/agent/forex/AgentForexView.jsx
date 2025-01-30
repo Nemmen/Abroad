@@ -49,14 +49,14 @@ function ForexView() {
     axios
       .get(`https://abroad-backend-ten.vercel.app/auth/viewAllForexForms`)
       .then((response) => {
-        console.log('Response received:', response.data);
+        // console.log('Response received:', response.data);
         if (response.data.success) {
           const formData1 = response.data.forexForms.find(
             (form) => form._id === id,
           );
           if (formData1) {
             setFormData(formData1);
-            console.log(formData)
+            // console.log(formData)
           } else {
             console.error('Form data not found for ID:', id);
           }

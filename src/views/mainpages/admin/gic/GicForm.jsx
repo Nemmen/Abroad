@@ -276,7 +276,7 @@ function GicForm() {
             );
             const result = await response.json();
             const respo = result.uploads; // Adjust based on your API response structure
-            console.log(respo);
+            // console.log(respo);
 
             for (let i = 0; i < types.length; i++) {
               formDataToSend.studentDocuments[types[i]] = {
@@ -299,7 +299,7 @@ function GicForm() {
         }
 
         const apiUrl = 'https://abroad-backend-ten.vercel.app/auth/addGicForm';
-        console.log('Form Data to Send:', formDataToSend);
+        // console.log('Form Data to Send:', formDataToSend);
 
         try {
           const response = await fetch(apiUrl, {
@@ -320,7 +320,7 @@ function GicForm() {
               duration: 3000,
               isClosable: true,
             });
-            console.log('Server Response:', result);
+            // console.log('Server Response:', result);
             navigate(`/admin/gic/${result.newGIC._id}`);
             setLoading(false);
           } else {
