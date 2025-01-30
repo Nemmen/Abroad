@@ -73,7 +73,7 @@ export default function HeaderLinks(props) {
       borderRadius="30px"
       boxShadow={shadow}
     >
-      <SearchBar
+      {/* <SearchBar
         mb={() => {
           if (secondary) {
             return { base: '10px', md: 'unset' };
@@ -82,10 +82,10 @@ export default function HeaderLinks(props) {
         }}
         me="10px"
         borderRadius="30px"
-      />
+      /> */}
     
       <SidebarResponsive routes={isAdmin ? routes : routeAjent} />
-      <Menu>
+      {/* <Menu>
         <MenuButton p="0px">
           <Icon
             mt="6px"
@@ -97,8 +97,8 @@ export default function HeaderLinks(props) {
           />
         </MenuButton>
       
-      </Menu>
-
+      </Menu> */}
+{/* 
       <Menu>
         <MenuButton p="0px">
           <Icon
@@ -111,7 +111,7 @@ export default function HeaderLinks(props) {
           />
         </MenuButton>
       
-      </Menu>
+      </Menu> */}
 
       <Button
         variant="no-hover"
