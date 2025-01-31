@@ -28,7 +28,7 @@ export default function Admin() {
             const response=request.data
             if (request.status===200) {
               toast.success(response.message)
-              console.log(response)
+              // console.log(response)
             }
        } catch (error) {
           if (error.response) {

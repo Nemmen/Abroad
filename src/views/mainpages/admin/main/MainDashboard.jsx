@@ -10,10 +10,12 @@ import Banner from 'views/admin/marketplace/components/Banner';
 import Card from 'components/card/Card.js';
 
 import NotificationBar from './components/NotificationBar';
-import DynamicLineChart1 from './components/GicChart';
-import DynamicLineChart from './components/Chart';
 import ForexcurrentMonth from './components/ForexcurrentMonth';
 import GICcurrentMonth from './components/GicCurrent';
+import { ForexYearStatus } from './components/ForexYearStatus';
+import GICYearlyStatus from './components/GICYearlyStatus';
+// import PieChartAll from './components/GICForexStatus';
+import GICForexStatus from './components/GICForexStatus';
 
 export default function MainDashboard() {
   // Chakra Color Mode
@@ -43,14 +45,16 @@ export default function MainDashboard() {
         </Flex>
       </Grid>
       {/* Delete Product */}
-
-      <div className='flex justify-around'>
-        <ForexcurrentMonth />
-        <DynamicLineChart />
+      <div>
+        <GICForexStatus/>
       </div>
-      <div className='flex justify-around'>
+      <div className='grid lg:grid-cols-2 md:grid-cols-1 grid-cols-1 gap-4'>
+        <ForexcurrentMonth />
+        <ForexYearStatus/>
+      </div>
+      <div className='grid lg:grid-cols-2 md:grid-cols-1 grid-cols-1 gap-4'>
         <GICcurrentMonth />
-        <DynamicLineChart1 />
+        <GICYearlyStatus/>
       </div>
       {/* <UserDetailPage /> */}
     </Box>

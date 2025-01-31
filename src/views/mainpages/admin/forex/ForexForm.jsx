@@ -42,10 +42,11 @@ function ForexForm() {
     tds: '',
     netPayable: '',
     commissionStatus: '',
+    aecommission:'',
   });
   const [passportFile, setPassportFile] = useState(null);
   const [offerLetterFile, setOfferLetterFile] = useState(null);
-  const [emaill, setEmail] = useState('');
+  // const [emaill, setEmail] = useState('');
   // const [students, setStudents] = useState([]);
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -216,10 +217,10 @@ function ForexForm() {
     setLoading(true);
 
     try {
-      console.log('Form Data:', formData);
-      console.log('Passport File:', passportFile);
-      console.log('Offer Letter File:', offerLetterFile);
-      console.log('Documents:', documents);
+      // console.log('Form Data:', formData);
+      // console.log('Passport File:', passportFile);
+      // console.log('Offer Letter File:', offerLetterFile);
+      // console.log('Documents:', documents);
 
       if (!validateForm()) {
         // Show error toast for incomplete form
@@ -235,97 +236,102 @@ function ForexForm() {
       }
 
       // Step 1: Create a new student
-      const newStudent = {
-        name: formData.studentRef,
-        email: emaill,
-        agentRef: formData.agentRef,
-      };
+      // const newStudent = {
+      //   name: formData.studentRef,
+      //   agentRef: formData.agentRef,
+      // };
 
-      const createStudentResponse = await fetch(
-        'https://abroad-backend-ten.vercel.app/auth/studentCreate',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newStudent),
-        },
-      );
+      // const createStudentResponse = await fetch(
+      //   'https://abroad-backend-ten.vercel.app/auth/studentCreate',
+      //   {
+      //     method: 'POST',
+      //     headers: { 'Content-Type': 'application/json' },
+      //     body: JSON.stringify(newStudent),
+      //   },
+      // );
 
-      const createStudentResult = await createStudentResponse.json();
+      // const createStudentResult = await createStudentResponse.json();
 
-      if (!createStudentResponse.ok) {
-        throw new Error(
-          createStudentResult.message || 'Failed to create student.',
-        );
-      }
+      // if (!createStudentResponse.ok) {
+      //   throw new Error(
+      //     createStudentResult.message || 'Failed to create student.',
+      //   );
+      // }
 
-      const studentId = createStudentResult.newStudent._id;
+      // const studentId = createStudentResult.newStudent._id;
       const types = documents.map((doc) => doc.documentType);
       const allTypes = ['Passport', 'Offer_Letter', ...types];
+      let uploadedFiles = [];
+      let uploadResult = null;
 
-      // Update formData with the new student ID
+      if (passportFile || offerLetterFile || documents.length > 0) {
+        // Update formData with the new student ID
 
-      // Step 2: Prepare file upload form data
-      const fileUploadFormData = new FormData();
-      fileUploadFormData.append(
-        'folderId',
-        '1f8tN2sgd_UBOdxpDwyQ1CMsyVvi1R96f',
-      );
-      fileUploadFormData.append('studentRef', studentId);
-      fileUploadFormData.append('type', allTypes);
+        // Step 2: Prepare file upload form data
+        const fileUploadFormData = new FormData();
+        fileUploadFormData.append(
+          'folderId',
+          '1f8tN2sgd_UBOdxpDwyQ1CMsyVvi1R96f',
+        );
+        fileUploadFormData.append('studentRef', '6770f8f171c4d7435685d65e');
+        fileUploadFormData.append('type', allTypes);
 
-      const files = [
-        passportFile,
-        offerLetterFile,
-        ...documents.map((doc) => doc.documentFile),
-      ].filter(Boolean);
+        const files = [
+          passportFile,
+          offerLetterFile,
+          ...documents.map((doc) => doc.documentFile),
+        ].filter(Boolean);
 
-      files.forEach((file) => fileUploadFormData.append('files', file));
+        files.forEach((file) => fileUploadFormData.append('files', file));
 
-      // Upload files
-      const uploadResponse = await fetch(
-        'https://abroad-backend-ten.vercel.app/api/uploads/upload',
-        {
-          method: 'POST',
-          body: fileUploadFormData,
-          headers: { Accept: 'application/json' },
-        },
-      );
+        // Upload files
+        const uploadResponse = await fetch(
+          'https://abroad-backend-ten.vercel.app/api/uploads/upload',
+          {
+            method: 'POST',
+            body: fileUploadFormData,
+            headers: { Accept: 'application/json' },
+          },
+        );
 
-      const uploadResult = await uploadResponse.json();
+        uploadResult = await uploadResponse.json();
 
-      if (!uploadResponse.ok) {
-        throw new Error(uploadResult.message || 'File upload failed.');
+        if (!uploadResponse.ok) {
+          throw new Error(uploadResult.message || 'File upload failed.');
+        }
+
+        // Extract uploaded file details and map them to documents
+        uploadedFiles = uploadResult.uploads
+          .map((file, index) => {
+            if (index > 1) {
+              return {
+                documentOf: documents[index - 2]?.documentOf,
+                documentType: documents[index - 2]?.documentType,
+                fileId: file.fileId,
+                documentFile: file.viewLink,
+              };
+            }
+            return null;
+          })
+          .filter(Boolean);
       }
-
-      // Extract uploaded file details and map them to documents
-      const uploadedFiles = uploadResult.uploads
-        .map((file, index) => {
-          if (index > 1) {
-            return {
-              documentOf: documents[index - 2]?.documentOf,
-              documentType: documents[index - 2]?.documentType,
-              fileId: file.fileId,
-              documentFile: file.viewLink,
-            };
-          }
-          return null;
-        })
-        .filter(Boolean);
 
       // Step 3: Submit the final form data
       const finalFormData = {
         ...formData,
-        date : accOpeningDate1,
-        studentRef: studentId,
+        date: accOpeningDate1,
+        // studentRef: studentId,
+        studentName : formData.studentRef,
         passportFile: {
-          fileId: uploadResult.uploads[0]?.fileId,
-          documentFile: uploadResult.uploads[0]?.viewLink,
+          fileId: uploadResult?.uploads[0]?.fileId,
+          documentFile: uploadResult?.uploads[0]?.viewLink,
         },
         offerLetterFile: {
-          fileId: uploadResult.uploads[1]?.fileId,
-          documentFile: uploadResult.uploads[1]?.viewLink,
+          fileId: uploadResult?.uploads[1]?.fileId,
+          documentFile: uploadResult?.uploads[1]?.viewLink,
         },
         documents: uploadedFiles,
+
       };
 
       console.log('Final Form Data:', finalFormData);
@@ -440,7 +446,7 @@ function ForexForm() {
             />
           </FormControl>
 
-          <FormControl isRequired>
+          {/* <FormControl isRequired>
             <FormLabel>Email</FormLabel>
             <Input
               type="email"
@@ -450,7 +456,7 @@ function ForexForm() {
               h="50px"
               w="full"
             />
-          </FormControl>
+          </FormControl> */}
 
           <FormControl isRequired>
             <FormLabel>Country</FormLabel>
@@ -463,8 +469,8 @@ function ForexForm() {
               w="full"
             >
               {countries.map((country, index) => (
-                <option key={index} value={country.Name}>
-                  {country.Name}
+                <option key={index} value={country}>
+                  {country}
                 </option>
               ))}
             </Select>
@@ -476,6 +482,18 @@ function ForexForm() {
               type="text"
               name="currencyBooked"
               value={formData.currencyBooked}
+              onChange={handleChange}
+              h="50px"
+              w="full"
+            />
+          </FormControl>
+
+          <FormControl>
+            <FormLabel>AE Commission</FormLabel>
+            <Input
+              type="text"
+              name="aecommission"
+              value={formData.aecommission}
               onChange={handleChange}
               h="50px"
               w="full"

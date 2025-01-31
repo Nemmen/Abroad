@@ -5,11 +5,59 @@ import jwt from 'jsonwebtoken';
 import bcryptjs from 'bcryptjs';
 import dotenv from 'dotenv';
 // import {uploadFileToCloudinary} from './uploadController.js'
-import { sendRegistrationEmail } from '../services/emailService.js';
+import { sendRegistrationEmail,sendOtpEmail, verifyOtp } from '../services/emailService.js';
 import ForexModel from '../models/forexModel.js';
 import GICModel from '../models/gicModel.js';
+// import BLOCKEDModel from '../models/blockedModel.js';
 dotenv.config();
 
+export const sendOtp = async (req, res) => {
+  try {
+      const { email } = req.body;
+
+      // Check if the user exists
+      const user = await UserModel.findOne({ email });
+      if (!user) {
+          return res.status(404).json({ message: 'User not found' });
+      }
+
+      // Send OTP email
+      await sendOtpEmail(email);
+
+      res.status(200).json({ message: 'OTP sent successfully' });
+  } catch (error) {
+      console.error('Error sending OTP:', error);
+      res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+// Verify OTP and reset password
+export const verifyAndResetPassword = async (req, res) => {
+  try {
+      const { email, otp, newPassword } = req.body;
+
+      // Verify OTP
+      const isOtpValid = verifyOtp(email, otp);
+      if (!isOtpValid) {
+          return res.status(400).json({ message: 'Invalid OTP' });
+      }
+
+      // Hash the new password
+      const hashedPassword = await bcryptjs.hash(newPassword, 10);
+
+      // Update the user's password in the database
+      await UserModel.findOneAndUpdate(
+          { email },
+          { password: hashedPassword },
+          { new: true }
+      );
+
+      res.status(200).json({ message: 'Password reset successfully' });
+  } catch (error) {
+      console.error('Error resetting password:', error);
+      res.status(500).json({ message: 'Internal server error' });
+  }
+};
 const register = async (req, res) => {
   try {
     const {
@@ -453,6 +501,30 @@ const updateForexForm = async (req, res) => {
   }
 };
 
+// get agentCommission from all forex and gic forms
+export const getAgentCommission = async (req, res) => {
+  try {
+    const agentId = req.user.id; // Extracted from middleware
+
+    // Get agent's GIC forms
+    const gicForms = await GICModel.find({ agentRef: agentId });
+    const gicCommission = gicForms.reduce((total, form) => total + parseFloat(form.commissionAmt || 0), 0);
+
+    // Get agent's Forex forms
+    const forexForms = await ForexModel.find({ agentRef: agentId });
+    const forexCommission = forexForms.reduce((total, form) => total + parseFloat(form.agentCommission || 0), 0);
+
+    res.status(200).json({
+      message: "Agent commission fetched successfully",
+      gicCommission: gicCommission.toFixed(2), // Ensure it's formatted properly
+      forexCommission: forexCommission.toFixed(2),
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching agent commission", error });
+  }
+};
+
+
 
 // const createBlockedData = async (req, res) => {
 //   try {
@@ -516,6 +588,30 @@ const getAllBlockedData = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: 'Error fetching blocked data', error });
+  }
+};
+
+export const getAgentStats = async (req, res) => {
+  try {
+    const agentId = req.user.id; // Extracted from middleware
+
+    // Count GIC transactions for the logged-in agent
+    const gicCount = await GICModel.countDocuments({ agentRef: agentId });
+
+    // Count forex transactions for the logged-in agent
+    const forexCount = await ForexModel.countDocuments({ agentRef: agentId });
+
+    // Count blocked transactions for the logged-in agent
+    // const blockedCount = await BLOCKEDModel.countDocuments({ agentRef: agentId });
+
+    res.status(200).json({
+      message: "Agent stats fetched successfully",
+      gicCount,
+      forexCount,
+      // blockedCount,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching agent stats", error });
   }
 };
 

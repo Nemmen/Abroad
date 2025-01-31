@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import { LineChart } from '@mui/x-charts/LineChart';
-import { MenuItem, TextField, Box, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
 const theme = createTheme({
@@ -33,17 +34,23 @@ const theme = createTheme({
 });
 
 export default function GICcurrentMonth() {
+  const [graphData, setGraphData] = useState({ xAxis: [], series: [] });
 
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await axios.get('https://abroad-backend-ten.vercel.app/admin/getCurrentMonthGICs');
+        const { xAxis, series } = response.data;
 
+        // Update the graph data state
+        setGraphData({ xAxis, series });
+      } catch (error) {
+        console.error('Error fetching GIC data:', error);
+      }
+    }
 
-  const data = {
-  
-    
-      xAxis: [1, 2, 3, 4, 5],
-      series: [2, 6, 4, 8, 5]
-  };
-
-
+    fetchData();
+  }, []);
 
   return (
     <ThemeProvider theme={theme}>
@@ -51,11 +58,9 @@ export default function GICcurrentMonth() {
         sx={{
           display: 'flex',
           flexDirection: 'column',
-       
-          minHeight: '',
           p: 2,
         }}
-      >
+        >
         {/* Header Section */}
         <Box
           sx={{
@@ -64,28 +69,30 @@ export default function GICcurrentMonth() {
             alignItems: 'center',
             width: '100%',
             maxWidth: '800px',
-			height: '90px',
+            height: '90px',
             mb: 2,
             p: 2,
             bgcolor: '#ffffff',
             borderRadius: '0px',
             boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
           }}
-        >
+          >
           <Typography
             sx={{
               color: '#000',
               fontWeight: 'bold',
               fontSize: '20px',
             }}
-          >
-            GIC Current Month snapshot
+            >
+            GIC Current Month Snapshot
           </Typography>
         </Box>
 
         {/* Line Chart Section */}
         <Box
           sx={{
+            overflowX: 'scroll',
+            scrollbarWidth: 'thin',
             width: '100%',
             maxWidth: '800px',
             p: 3,
@@ -95,8 +102,8 @@ export default function GICcurrentMonth() {
           }}
         >
           <LineChart
-            xAxis={[{ data: data.xAxis }]}
-            series={[{ data: data.series }]}
+            xAxis={[{ data: graphData.xAxis, label: 'Days of the Month' }]}
+            series={[{ data: graphData.series, label: 'GIC Transactions', color: '#3f51b5' }]}
             width={600}
             height={300}
           />

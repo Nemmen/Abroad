@@ -50,6 +50,8 @@ export default function HeaderLinks(props) {
   );
   const borderButton = useColorModeValue('secondaryGray.500', 'whiteAlpha.200');
 
+  const basePath = location.pathname.match(/^\/(admin|agent)/)?.[0] || ''; 
+
   const handleLogout = () => {
     // Clear any stored authentication tokens or session data
     localStorage.removeItem('token_auth');
@@ -71,7 +73,7 @@ export default function HeaderLinks(props) {
       borderRadius="30px"
       boxShadow={shadow}
     >
-      <SearchBar
+      {/* <SearchBar
         mb={() => {
           if (secondary) {
             return { base: '10px', md: 'unset' };
@@ -80,10 +82,10 @@ export default function HeaderLinks(props) {
         }}
         me="10px"
         borderRadius="30px"
-      />
+      /> */}
     
       <SidebarResponsive routes={isAdmin ? routes : routeAjent} />
-      <Menu>
+      {/* <Menu>
         <MenuButton p="0px">
           <Icon
             mt="6px"
@@ -95,8 +97,8 @@ export default function HeaderLinks(props) {
           />
         </MenuButton>
       
-      </Menu>
-
+      </Menu> */}
+{/* 
       <Menu>
         <MenuButton p="0px">
           <Icon
@@ -109,7 +111,7 @@ export default function HeaderLinks(props) {
           />
         </MenuButton>
       
-      </Menu>
+      </Menu> */}
 
       <Button
         variant="no-hover"
@@ -171,16 +173,17 @@ export default function HeaderLinks(props) {
               borderRadius="8px"
               px="14px"
             >
-              <Text fontSize="sm"><Link to={`${location.pathname}/profile`}>Profile Settings</Link></Text>
+              <Text fontSize="sm">
+              <Link to={`${basePath}/profile`}>Profile Settings</Link></Text>
             </MenuItem>
-            <MenuItem
+            {/* <MenuItem
               _hover={{ bg: 'none' }}
               _focus={{ bg: 'none' }}
               borderRadius="8px"
               px="14px"
             >
               <Text fontSize="sm">Settings</Text>
-            </MenuItem>
+            </MenuItem> */}
             <MenuItem
               _hover={{ bg: 'none' }}
               _focus={{ bg: 'none' }}

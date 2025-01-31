@@ -33,13 +33,14 @@ import axios from 'axios';
 // ];
 
 function handleUserRowClick(userData) {
-  console.log('Clicked user:', userData);
+  // console.log('Clicked user:', userData);
   // Perform actions like opening a modal or navigating to a detail page
 }
 
 export default function Agent() {
   // Chakra Color Mode
   const [users, setUsers] = React.useState([]);
+  const [searchValue, setSearchValue] = React.useState('');
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -89,7 +90,7 @@ export default function Agent() {
       {/* Delete Product */}
       <Box width={'full'}>
         <Card px="0px" mb="20px">
-          <UserDataTable tableData={users} onRowClick={handleUserRowClick} />
+          <UserDataTable tableData={users} searchValue={searchValue} setSearchValue={setSearchValue} onRowClick={handleUserRowClick} />
         </Card>
       </Box>
     </Box>

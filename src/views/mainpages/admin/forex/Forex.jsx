@@ -53,7 +53,7 @@ const Forex = () => {
           const forexForms = response.data.forexForms.map((item) => ({
             id: item._id,
             agentRef: item.agentRef?.name.toUpperCase() || 'N/A',
-            studentRef: item.studentRef?.name || 'N/A',
+            studentRef: item?.studentName || 'N/A',
             date: new Date(item.date).toLocaleDateString('en-US'),
             country: item.country || 'N/A',
             currencyBooked: item.currencyBooked || 'N/A',
@@ -81,7 +81,7 @@ const Forex = () => {
     const cleanData = data.map((item) => {
       return {
         agentRef: item.agentRef?.name || 'N/A',
-        studentRef: item.studentRef?.name || 'N/A',
+        studentRef: item?.studentName || 'N/A',
         date: new Date(item.date).toLocaleDateString('en-US'),
         country: item.country || 'N/A',
         currencyBooked: item.currencyBooked || 'N/A',

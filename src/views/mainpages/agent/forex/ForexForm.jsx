@@ -234,10 +234,10 @@ function ForexForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    console.log('Form Data:', formData);
-    console.log('Passport File:', passportFile);
-    console.log('Offer Letter File:', offerLetterFile);
-    console.log('Documents:', documents);
+    // console.log('Form Data:', formData);
+    // console.log('Passport File:', passportFile);
+    // console.log('Offer Letter File:', offerLetterFile);
+    // console.log('Documents:', documents);
 
     if (validateForm()) {
       try {
@@ -281,7 +281,7 @@ function ForexForm() {
           passportFile: uploadResult.uploads[0].fileId,
           offerLetterFile: uploadResult.uploads[1].fileId,
         };
-        console.log(documents[0].documentOf);
+        // console.log(documents[0].documentOf);
         // Extract the uploaded file details
         const uploadedFiles = uploadResult.uploads
           .map((file, index) => {

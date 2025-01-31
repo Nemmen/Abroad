@@ -29,11 +29,11 @@ export function Badge({ children, variant = "default", className, ...props }) {
 
 export function AgentProfile({ agent }) {
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen  py-8">
       <div className="container mx-auto px-4 space-y-8">
         <header className="bg-white p-6 rounded-lg shadow-sm">
           <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
-            <div className="w-24 h-24 md:w-32 md:h-32 bg-gray-200 rounded-full flex items-center justify-center text-4xl font-bold text-gray-600">
+            <div className="w-24 h-24 md:w-32 md:h-32 bg-gray-100 rounded-full flex items-center justify-center text-4xl font-bold text-[#f68c00]">
               {agent.name.charAt(0).toUpperCase()}
             </div>
             <div className="text-center md:text-left">
@@ -50,15 +50,15 @@ export function AgentProfile({ agent }) {
         </header>
 
         <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <SectionCard title="Personal Information" icon={<User className="w-6 h-6" />}>
+          <SectionCard title="Personal Information" icon={<User className="w-6 text-[#f68c00] h-6" />}>
             <PersonalInfo agent={agent} />
           </SectionCard>
-          <SectionCard title="Professional Information" icon={<Briefcase className="w-6 h-6" />}>
+          <SectionCard title="Professional Information" icon={<Briefcase className="w-6 text-[#f68c00] h-6" />}>
             <ProfessionalInfo agent={agent} />
           </SectionCard>
         </section>
 
-        <SectionCard title="Students" icon={<GraduationCap className="w-6 h-6" />}>
+        <SectionCard title="Students" icon={<GraduationCap className="w-6 text-[#f68c00] h-6" />}>
           <StudentList students={agent.students} />
         </SectionCard>
       </div>

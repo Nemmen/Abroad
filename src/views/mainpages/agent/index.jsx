@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { Box, Typography, ThemeProvider, createTheme } from '@mui/material';
 import { useColorMode } from '@chakra-ui/react'; // Import Chakra's color mode hook
+import AgentStats from './AgentStats';
+import AgentEarnings from './AgentEarnings';
 
 export default function Index() {
   // Use Chakra's color mode to determine if it's light or dark
@@ -35,36 +37,55 @@ export default function Index() {
           },
         },
       }),
-    [colorMode] // Recompute the theme when the color mode changes
+    [colorMode], // Recompute the theme when the color mode changes
   );
 
-  // Pagination settings
-  const paginationModel = { page: 0, pageSize: 5 };
-
- 
   return (
     <ThemeProvider theme={muiTheme}>
-      <Box sx={{ mt: 3, width: '100%' }}>
-
-        {/* Welcome Banner */}
+      <div>
         
-        <Box 
-          sx={{
-            backgroundColor: '#11047A', // Updated banner background color
-            color: colorMode === 'light' ? '#ffffff' : '#ffffff', // Keep the text white for good contrast
-            padding: '96px', 
-            borderRadius: '8px',
-            mb: 3
-          }}
-        >
-          <Typography variant="h3" component="h1" align="center" fontWeight="bold">
-            Welcome to Your Dashboard!
-          </Typography>
-          <Typography variant="body1" align="center">
-            Manage your data with ease. Here’s a quick overview of your records.
-          </Typography>
-        </Box>
-      </Box>
+      </div>
+      <Box sx={{ mt: 3, width: "100%" }}>
+  {/* Welcome Banner */}
+  <Box
+    sx={{
+      backgroundColor: "#11047A",
+      color: "#ffffff",
+      px: { xs: 3, sm: 6, md: 12 }, // Responsive padding (Left/Right)
+      py: { xs: 6, sm: 8, md: 10 }, // Responsive padding (Top/Bottom)
+      borderRadius: "8px",
+      mb: 3,
+      textAlign: "center", // Ensures center alignment
+    }}
+  >
+    <Typography
+      variant="h3"
+      sx={{
+        fontSize: { xs: "1.75rem", sm: "2.5rem", md: "3rem" }, // Responsive font sizes
+        fontWeight: "bold",
+      }}
+    >
+      Welcome to Your Dashboard!
+    </Typography>
+
+    <Typography
+      variant="body1"
+      sx={{
+        fontSize: { xs: "0.9rem", sm: "1rem", md: "1.2rem" }, // Adjusts for readability
+        mt: { xs: 1, sm: 2 }, // Adds spacing on smaller screens
+      }}
+    >
+      Manage your data with ease. Here's a quick overview of your records.
+    </Typography>
+  </Box>
+</Box>
+
+      <div>
+        <AgentStats />
+      </div>
+      <div>
+        <AgentEarnings />
+      </div>
     </ThemeProvider>
   );
 }
