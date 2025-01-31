@@ -127,20 +127,19 @@ export default function AppAppBar() {
                   </IconButton>
                 </Box>
 
-                <MenuItem>Features</MenuItem>
-                <MenuItem>Testimonials</MenuItem>
-                <MenuItem>Highlights</MenuItem>
-                <MenuItem>Pricing</MenuItem>
-                <MenuItem>FAQ</MenuItem>
-                <MenuItem>Blog</MenuItem>
+                <MenuItem href="#GIC">GIC</MenuItem>
+                <MenuItem href="#BlockAccount"> Blocked Account</MenuItem>
+                <MenuItem href="#forex">Forex</MenuItem>
+                <MenuItem href="https://abroadeducares.com/">Immigration</MenuItem>
+                <MenuItem href="#FAQ">FAQ</MenuItem>
                 <Divider sx={{ my: 3 }} />
                 <MenuItem>
-                  <Button color="primary" variant="contained" fullWidth>
+                  <Button color="primary" variant="contained" fullWidth onClick={()=>( navigate("/auth/login"))} replace>
                     Sign up
                   </Button>
                 </MenuItem>
                 <MenuItem>
-                  <Button color="primary" variant="outlined" fullWidth>
+                  <Button color="primary" variant="outlined" fullWidth onClick={()=>( navigate("/auth/signup"))} replace>
                     Sign in
                   </Button>
                 </MenuItem>
