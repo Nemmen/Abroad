@@ -126,21 +126,32 @@ export default function AppAppBar() {
                     <CloseRoundedIcon />
                   </IconButton>
                 </Box>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+  <Button variant="text" color="info" size="small" href="#GIC">
+    GIC
+  </Button>
+  <Button variant="text" color="info" size="small" href="#BlockAccount">
+    Blocked Account
+  </Button>
+  <Button variant="text" color="info" size="small" href="#forex">
+    Forex
+  </Button>
+  <Button variant="text" color="info" size="small" href="https://abroadeducares.com/">
+    Immigration
+  </Button>
+  <Button variant="text" color="info" size="small" sx={{ minWidth: 0 }} href="#FAQ">
+    FAQ
+  </Button>
+</Box>
 
-                <MenuItem>Features</MenuItem>
-                <MenuItem>Testimonials</MenuItem>
-                <MenuItem>Highlights</MenuItem>
-                <MenuItem>Pricing</MenuItem>
-                <MenuItem>FAQ</MenuItem>
-                <MenuItem>Blog</MenuItem>
                 <Divider sx={{ my: 3 }} />
                 <MenuItem>
-                  <Button color="primary" variant="contained" fullWidth>
+                  <Button color="primary" variant="contained" fullWidth onClick={()=>( navigate("/auth/login"))} replace>
                     Sign up
                   </Button>
                 </MenuItem>
                 <MenuItem>
-                  <Button color="primary" variant="outlined" fullWidth>
+                  <Button color="primary" variant="outlined" fullWidth onClick={()=>( navigate("/auth/signup"))} replace>
                     Sign in
                   </Button>
                 </MenuItem>

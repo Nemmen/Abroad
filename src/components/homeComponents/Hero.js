@@ -63,32 +63,41 @@ export default function Hero() {
         <Stack
           spacing={2}
           useFlexGap
-          sx={{ alignItems: 'center', width: { xs: '100%', sm: '70%' } }}
+          sx={{ alignItems: 'center', width: { xs: '100%', sm: '100%' } }}
         >
           <Typography
-            variant="h1"
-            sx={{
-              display: 'flex',
-              flexDirection: { xs: 'column', sm: 'row' },
-              alignItems: 'center',
-              fontSize: 'clamp(3rem, 10vw, 3.5rem)',
-            }}
-          >
-           Your&nbsp;
-            <Typography
-              component="span"
-              variant="h1"
-              sx={(theme) => ({
-                fontSize: 'inherit',
-                color: 'primary.main',
-                ...theme.applyStyles('dark', {
-                  color: 'primary.light',
-                }),
-              })}
-            >
-            Global Exposure Partner!
-            </Typography>
-          </Typography>
+  variant="h1"
+  sx={{
+    display: 'flex',
+    flexDirection: { xs: 'column', sm: 'row' },
+    alignItems: 'center',
+    textAlign: 'center',
+    fontSize: { xs: '2.5rem', sm: '3rem', md: '3.5rem', lg: '3.5rem' }, // Adjusts size for each breakpoint
+    lineHeight: 1.2, // Ensures proper spacing
+  }}
+>
+  Your&nbsp;
+  <Typography
+    component="span"
+    variant="h1"
+    sx={(theme) => ({
+      fontSize: 'inherit', // Inherits from the parent Typography
+      color: theme.palette.primary.main,
+      [theme.breakpoints.down('sm')]: {
+        fontSize: '2rem', // Smaller font size for mobile
+      },
+      [theme.breakpoints.up('md')]: {
+        fontSize: '3.5rem', // Larger for medium+ screens
+      },
+      [theme.breakpoints.up('lg')]: {
+        fontSize: '3.5rem', // Even larger for large screens
+      },
+    })}
+  >
+    Global Exposure Partner!
+  </Typography>
+</Typography>
+
           <Typography
             sx={{
               textAlign: 'center',
