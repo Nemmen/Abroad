@@ -49,7 +49,7 @@ const Gic = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          'https://abroad-backend-ten.vercel.app/auth/viewAllGicForm',
+          'https://abroad-backend-gray.vercel.app/auth/viewAllGicForm',
         );
         if (response.data.success) {
           const userGicForms = response.data.gicForms.filter(
@@ -61,7 +61,7 @@ const Gic = () => {
             type: form.type || 'N/A',
             Agent: form.agentRef.name.toUpperCase() || 'N/A',
             accOpeningMonth: form.accOpeningMonth || 'N/A',
-            studentName: form.studentName || 'N/A',
+            studentName: form.studentRef.name || 'N/A',
             passportNo: form.studentPassportNo || 'N/A',
             studentPhoneNo: form.studentPhoneNo || 'N/A',
             bankVendor: form.bankVendor || 'N/A',
@@ -89,7 +89,7 @@ const Gic = () => {
         type: item.type || 'N/A',
         Agent: item.agentRef?.name?.toUpperCase() || 'N/A',
         accOpeningMonth: item.accOpeningMonth || 'N/A',
-        studentName: item.studentName || 'N/A',
+        studentName: item.studentRef.name || 'N/A',
         passportNo: item.studentPassportNo || 'N/A', // Correct key for Passport No
         studentPhoneNo: item.studentPhoneNo || 'N/A',
         bankVendor: item.bankVendor || 'N/A',

@@ -81,7 +81,7 @@ function GicForm() {
   const toast = useToast();
   // const handleNewStudentSubmit = async () => {
   //   try {
-  //     const response = await fetch('https://abroad-backend-ten.vercel.app/auth/studentCreate', {
+  //     const response = await fetch('https://abroad-backend-gray.vercel.app/auth/studentCreate', {
   //       method: 'POST',
   //       headers: { 'Content-Type': 'application/json' },
   //       body: JSON.stringify(newStudent),
@@ -119,7 +119,7 @@ function GicForm() {
 
   // useEffect(() => {
   //   const fetchAgents = async () => {
-  //     const apiUrl = 'https://abroad-backend-ten.vercel.app/auth/getAllusers';
+  //     const apiUrl = 'https://abroad-backend-gray.vercel.app/auth/getAllusers';
   //     try {
   //       const response = await fetch(apiUrl);
   //       const result = await response.json();
@@ -185,7 +185,7 @@ function GicForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    console.log('form', formData);
+    // console.log('form', formData);
 
     if (validateForm()) {
       // const { documentFile, documentType } = formData;
@@ -198,7 +198,7 @@ function GicForm() {
 
       try {
         const response = await fetch(
-          'https://abroad-backend-ten.vercel.app/auth/studentCreate',
+          'https://abroad-backend-gray.vercel.app/auth/studentCreate',
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -262,7 +262,7 @@ function GicForm() {
 
         try {
           const response = await fetch(
-            'https://abroad-backend-ten.vercel.app/api/uploads/upload',
+            'https://abroad-backend-gray.vercel.app/api/uploads/upload',
             {
               method: 'POST',
               body: filedata,
@@ -273,7 +273,7 @@ function GicForm() {
           );
           const result = await response.json();
           const respo = result.uploads; // Adjust based on your API response structure
-          console.log(respo);
+          // console.log(respo);
 
           for (let i = 0; i < types.length; i++) {
             formDataToSend.studentDocuments[types[i]] = {
@@ -294,8 +294,8 @@ function GicForm() {
           return; // Stop further execution if file upload fails
         }
 
-        const apiUrl = 'https://abroad-backend-ten.vercel.app/auth/addGicForm';
-        console.log('Form Data to Send:', formDataToSend);
+        const apiUrl = 'https://abroad-backend-gray.vercel.app/auth/addGicForm';
+        // console.log('Form Data to Send:', formDataToSend);
 
         try {
           const response = await fetch(apiUrl, {
@@ -316,7 +316,7 @@ function GicForm() {
               duration: 3000,
               isClosable: true,
             });
-            console.log('Server Response:', result);
+            // console.log('Server Response:', result);
             navigate(`/agent/gic/${result.newGIC._id}`);
             setLoading(false);
           } else {

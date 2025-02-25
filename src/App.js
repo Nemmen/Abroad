@@ -3,10 +3,10 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import AuthLayout from './layouts/auth';
 import AdminLayout from './layouts/admin';
 import AgentLayout from './layouts/agent';
+import Home from './layouts/home';
 import { ChakraProvider } from '@chakra-ui/react';
 import initialTheme from './theme/theme';
 import { useState, useEffect } from 'react';
-
 
 export default function Main() {
   const [currentTheme, setCurrentTheme] = useState(initialTheme);
@@ -52,7 +52,8 @@ export default function Main() {
   return (
     <ChakraProvider theme={currentTheme}>
       <Routes>
-        <Route path="/" element={<Navigate to="/auth/login" replace />} />
+        {/* <Route path="/" element={<Navigate to="/auth/login" replace />} /> */}
+        <Route path="/" element={<Home />} />
         <Route path="auth/*" element={<AuthLayout />} />
 
         {/* Protected Routes */}
