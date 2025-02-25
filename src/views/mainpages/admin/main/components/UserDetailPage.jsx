@@ -36,13 +36,13 @@ const UserDetailPage = () => {
     const fetchUser = async () => {
       try {
         const userResponse = await axios.get(
-          `https://abroad-backend-ten.vercel.app/admin/getuser/${id}`,
+          `https://abroad-backend-gray.vercel.app/admin/getuser/${id}`,
           { withCredentials: true },
         );
 
         setUser(userResponse.data.user);
         const userResponse1 = await axios.get(
-          'https://abroad-backend-ten.vercel.app/admin/getcurrentuser',
+          'https://abroad-backend-gray.vercel.app/admin/getcurrentuser',
           { withCredentials: true },
         );
         setCurrentUserId(userResponse1.data.user);
@@ -63,7 +63,7 @@ const UserDetailPage = () => {
     setIsApproveDialogOpen(false);
     try {
       const data = await axios.put(
-        `https://abroad-backend-ten.vercel.app/admin/approve/${id}`,
+        `https://abroad-backend-gray.vercel.app/admin/approve/${id}`,
         {approvedBy: currentUserId},
         { withCredentials: true },
       );
@@ -91,7 +91,7 @@ const UserDetailPage = () => {
     setIsBlockDialogOpen(false);
     try {
       const data = await axios.put(
-        `https://abroad-backend-ten.vercel.app/admin/block/${id}`,
+        `https://abroad-backend-gray.vercel.app/admin/block/${id}`,
         {},
         { withCredentials: true },
       );

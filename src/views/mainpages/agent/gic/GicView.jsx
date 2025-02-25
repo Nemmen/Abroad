@@ -69,7 +69,7 @@ function GicView() {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          'https://abroad-backend-ten.vercel.app/auth/viewAllGicForm',
+          'https://abroad-backend-gray.vercel.app/auth/viewAllGicForm',
         );
         if (response.data.success) {
           const formData1 = response.data.gicForms.find(
@@ -102,7 +102,7 @@ function GicView() {
   const handleSave = async () => {
     try {
       const response = await axios.put(
-        `https://abroad-backend-ten.vercel.app/auth/updateGicForm/${id}`,
+        `https://abroad-backend-gray.vercel.app/auth/updateGicForm/${id}`,
         editableData,
       );
       if (response.data.success) {

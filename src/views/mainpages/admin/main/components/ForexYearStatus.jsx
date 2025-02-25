@@ -17,7 +17,7 @@ export function ForexYearStatus() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const response = await axios.get('https://abroad-backend-ten.vercel.app/admin/getYearlyForexData');
+        const response = await axios.get('https://abroad-backend-gray.vercel.app/admin/getYearlyForexData');
         const { xAxis, series } = response.data;
 
         // Map xAxis from "YYYY-MM" to month names

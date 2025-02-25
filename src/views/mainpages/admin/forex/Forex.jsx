@@ -47,7 +47,7 @@ const Forex = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          'https://abroad-backend-ten.vercel.app/auth/viewAllForexForms',
+          'https://abroad-backend-gray.vercel.app/auth/viewAllForexForms',
         );
         if (response.data.forexForms) {
           const forexForms = response.data.forexForms.map((item) => ({

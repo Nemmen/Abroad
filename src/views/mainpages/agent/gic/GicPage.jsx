@@ -49,7 +49,7 @@ const Gic = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          'https://abroad-backend-ten.vercel.app/auth/viewAllGicForm',
+          'https://abroad-backend-gray.vercel.app/auth/viewAllGicForm',
         );
         if (response.data.success) {
           const userGicForms = response.data.gicForms.filter(

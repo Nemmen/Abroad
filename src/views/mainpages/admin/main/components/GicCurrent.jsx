@@ -39,7 +39,7 @@ export default function GICcurrentMonth() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const response = await axios.get('https://abroad-backend-ten.vercel.app/admin/getCurrentMonthGICs');
+        const response = await axios.get('https://abroad-backend-gray.vercel.app/admin/getCurrentMonthGICs');
         const { xAxis, series } = response.data;
 
         // Update the graph data state

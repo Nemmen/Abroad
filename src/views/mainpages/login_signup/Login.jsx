@@ -21,7 +21,7 @@ export default function Login() {
     setLoading(true);
     try {
       const request = await post(
-        'https://abroad-backend-ten.vercel.app/auth/login',
+        'https://abroad-backend-gray.vercel.app/auth/login',
         { email, password },
         { credentials: 'include' },
       );

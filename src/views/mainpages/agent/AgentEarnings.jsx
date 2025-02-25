@@ -14,7 +14,7 @@ const AgentEarnings = () => {
     const fetchEarnings = async () => {
       try {
         const token = localStorage.getItem("token_auth"); // Get auth token
-        const response = await axios.get("https://abroad-backend-ten.vercel.app/auth/getAgentCommission", {
+        const response = await axios.get("https://abroad-backend-gray.vercel.app/auth/getAgentCommission", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setEarnings(response.data);

@@ -46,7 +46,7 @@ export default function Agent() {
     const fetchUsers = async () => {
       try {
         const usersResponse = await axios.get(
-          'https://abroad-backend-ten.vercel.app/admin/getuser',
+          'https://abroad-backend-gray.vercel.app/admin/getuser',
           { withCredentials: true },
         );
         const filteredUsers = usersResponse.data.users.filter(

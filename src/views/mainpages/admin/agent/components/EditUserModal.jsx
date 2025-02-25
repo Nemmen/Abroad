@@ -41,7 +41,7 @@ const EditUserModal = ({ userId }) => {
     setIsLoading(true); // Start loading
     try {
       const response = await fetch(
-        `https://abroad-backend-ten.vercel.app/admin/getuser/${userId}`,
+        `https://abroad-backend-gray.vercel.app/admin/getuser/${userId}`,
         {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
@@ -108,7 +108,7 @@ const EditUserModal = ({ userId }) => {
     try {
       const { confirmPassword, ...updatedValues } = values;
       const response = await fetch(
-        `https://abroad-backend-ten.vercel.app/admin/updateuser/${userId}`,
+        `https://abroad-backend-gray.vercel.app/admin/updateuser/${userId}`,
         {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },

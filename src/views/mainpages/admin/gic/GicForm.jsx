@@ -81,7 +81,7 @@ function GicForm() {
   const toast = useToast();
   // const handleNewStudentSubmit = async () => {
   //   try {
-  //     const response = await fetch('https://abroad-backend-ten.vercel.app/auth/studentCreate', {
+  //     const response = await fetch('https://abroad-backend-gray.vercel.app/auth/studentCreate', {
   //       method: 'POST',
   //       headers: { 'Content-Type': 'application/json' },
   //       body: JSON.stringify(newStudent),
@@ -119,7 +119,7 @@ function GicForm() {
 
   useEffect(() => {
     const fetchAgents = async () => {
-      const apiUrl = 'https://abroad-backend-ten.vercel.app/auth/getAllusers';
+      const apiUrl = 'https://abroad-backend-gray.vercel.app/auth/getAllusers';
       try {
         const response = await fetch(apiUrl);
         const result = await response.json();
@@ -200,7 +200,7 @@ function GicForm() {
 
       try {
         const response = await fetch(
-          'https://abroad-backend-ten.vercel.app/auth/studentCreate',
+          'https://abroad-backend-gray.vercel.app/auth/studentCreate',
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -265,7 +265,7 @@ function GicForm() {
         if (documents.length > 0) {
           try {
             const response = await fetch(
-              'https://abroad-backend-ten.vercel.app/api/uploads/upload',
+              'https://abroad-backend-gray.vercel.app/api/uploads/upload',
               {
                 method: 'POST',
                 body: filedata,
@@ -298,7 +298,7 @@ function GicForm() {
           }
         }
 
-        const apiUrl = 'https://abroad-backend-ten.vercel.app/auth/addGicForm';
+        const apiUrl = 'https://abroad-backend-gray.vercel.app/auth/addGicForm';
         // console.log('Form Data to Send:', formDataToSend);
 
         try {
