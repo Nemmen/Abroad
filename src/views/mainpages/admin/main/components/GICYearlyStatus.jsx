@@ -21,7 +21,7 @@ export default function GICYearlyStatus() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const response = await axios.get('https://abroad-backend-ten.vercel.app/admin/getYearlyGICData');
+        const response = await axios.get('https://abroad-backend-gray.vercel.app/admin/getYearlyGICData');
         const { xAxis, series } = response.data;
 
         // Map xAxis from "YYYY-MM" to abbreviated month names

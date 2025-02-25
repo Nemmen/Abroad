@@ -17,7 +17,7 @@ export default function ForexCurrentMonth() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const response = await axios.get('https://abroad-backend-ten.vercel.app/admin/getCurrentMonthForex');
+        const response = await axios.get('https://abroad-backend-gray.vercel.app/admin/getCurrentMonthForex');
         const { month, totalEntries } = response.data;
 
         // Prepare data for the graph

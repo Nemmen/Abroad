@@ -79,7 +79,7 @@ const AddUserModal = () => {
     setIsLoading(true); // Show loader
     try {
       const response = await fetch(
-        'https://abroad-backend-ten.vercel.app/admin/adduser',
+        'https://abroad-backend-gray.vercel.app/admin/adduser',
         {
           method: 'POST',
           headers: {

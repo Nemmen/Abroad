@@ -52,7 +52,7 @@ function ForexView() {
 
   useEffect(() => {
     axios
-      .get(`https://abroad-backend-ten.vercel.app/auth/viewAllForexForms`)
+      .get(`https://abroad-backend-gray.vercel.app/auth/viewAllForexForms`)
       .then((response) => {
         if (response.data.success) {
           const formData1 = response.data.forexForms.find(
@@ -81,7 +81,7 @@ function ForexView() {
   const handleSave = async () => {
     try {
       const response = await axios.put(
-        `https://abroad-backend-ten.vercel.app/auth/updateForexForm/${id}`,
+        `https://abroad-backend-gray.vercel.app/auth/updateForexForm/${id}`,
         editableData,
       );
       if (response.data.success) {

@@ -20,7 +20,7 @@ export default function ResetPassword() {
     setLoading(true);
 
     try {
-      const response = await post("https://abroad-backend-ten.vercel.app/auth/reset-password", {
+      const response = await post("https://abroad-backend-gray.vercel.app/auth/reset-password", {
         email,
         otp,
         newPassword,

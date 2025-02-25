@@ -9,7 +9,7 @@ const GICForexStatus = () => {
   useEffect(() => {
     async function fetchData() {
       try {
-        const response = await axios.get("https://abroad-backend-ten.vercel.app/admin/getForexAndGicData");
+        const response = await axios.get("https://abroad-backend-gray.vercel.app/admin/getForexAndGicData");
         // Ensure data is not null or undefined before setting state
         if (response.data) {
           setData(response.data);
