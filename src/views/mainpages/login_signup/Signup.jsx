@@ -124,7 +124,7 @@ export default function Register() {
 
     try {
       const response = await post(
-        'http://localhost:4000/auth/register',
+        'https://abroad-backend-gray.vercel.app//auth/register',
         formData,
         {
           headers: { 'Content-Type': 'multipart/form-data' },

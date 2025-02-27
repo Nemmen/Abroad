@@ -25,7 +25,7 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-      const request = await post('http://localhost:4000/auth/login', {
+      const request = await post('https://abroad-backend-gray.vercel.app//auth/login', {
         email,
         password,
       });
