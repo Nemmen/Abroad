@@ -93,11 +93,12 @@ const BlockedPage = () => {
         display={'flex'}
         padding={7}
         paddingBottom={3}
+        flexWrap={'wrap'}
         justifyContent={'space-between'}
         alignItems={'center'}
       >
-        <div>
-          <Text fontSize="34px">GIC Registrations</Text>
+        <div className='mb-6 lg:mb-0' >
+          <Text fontSize="34px">Blocked Registrations</Text>
         </div>
 
         <div>

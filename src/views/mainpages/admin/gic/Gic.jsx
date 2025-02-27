@@ -132,10 +132,11 @@ const Gic = () => {
         display={'flex'}
         padding={7}
         paddingBottom={3}
+        flexWrap={'wrap'}
         justifyContent={'space-between'}
         alignItems={'center'}
       >
-        <div>
+        <div className='mb-6 lg:mb-0'>
           <Text fontSize="34px">GIC / Blocked Account Registrations</Text>
         </div>
         <div>
