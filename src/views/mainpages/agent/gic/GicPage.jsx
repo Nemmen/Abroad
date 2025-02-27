@@ -140,8 +140,8 @@ const Gic = () => {
         justifyContent={'space-between'}
         alignItems={'center'}
       >
-        <div>
-          <Text fontSize="34px">GIC / Blocked Account Registrations</Text>
+        <div className='mb-6 lg:mb-0'>
+          <Text fontSize="34px">GIC </Text>
         </div>
         <div>
           <Button

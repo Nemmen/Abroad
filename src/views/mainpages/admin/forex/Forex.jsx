@@ -131,8 +131,9 @@ const Forex = () => {
         paddingBottom={3}
         justifyContent={'space-between'}
         alignItems={'center'}
+        flexWrap={'wrap'}
       >
-        <Text fontSize="34px">FOREX Registrations</Text>
+        <Text fontSize="34px" className='mb-6 lg:mb-0'>FOREX Registrations</Text>
         <div>
           <Button
             onClick={() => setIsModalOpen(true)}
