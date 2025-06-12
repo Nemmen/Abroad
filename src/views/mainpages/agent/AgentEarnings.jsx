@@ -1,69 +1,107 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { 
+  Box, Card, CardContent, Typography, 
+  Grid, Avatar, CircularProgress 
+} from "@mui/material";
 import { BiDollar } from "react-icons/bi";
-// import { FaMoneyBill} from "react-icons/fa";
 import { FaUniversity } from "react-icons/fa";
-import { Spinner, useToast } from "@chakra-ui/react";
 
 const AgentEarnings = () => {
   const [loading, setLoading] = useState(true);
   const [earnings, setEarnings] = useState({ gicCommission: 0, forexCommission: 0 });
-  const toast = useToast();
 
   useEffect(() => {
     const fetchEarnings = async () => {
       try {
-        const token = localStorage.getItem("token_auth"); // Get auth token
+        const token = localStorage.getItem("token_auth");
         const response = await axios.get("https://abroad-backend-gray.vercel.app/auth/getAgentCommission", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setEarnings(response.data);
       } catch (error) {
-        toast({
-          title: "Error fetching earnings",
-          description: error.response?.data?.message || "Something went wrong",
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
+        console.error("Error fetching earnings:", error);
       } finally {
         setLoading(false);
       }
     };
 
     fetchEarnings();
-  }, [toast]);
+  }, []);
+
+  const earningsData = [
+    {
+      id: 1,
+      title: "Forex Earnings",
+      value: `${earnings.forexCommission}/-`,
+      icon: <BiDollar size={30} />,
+      color: "#3B82F6",
+      bgColor: "#EFF6FF"
+    },
+    {
+      id: 2,
+      title: "GIC Earnings",
+      value: `${earnings.gicCommission}/-`,
+      icon: <FaUniversity size={26} />,
+      color: "#10B981",
+      bgColor: "#ECFDF5"
+    }
+  ];
 
   return (
-    <div className="p-6">
-        <h2 className="text-2xl font-semibold text-start text-gray-700 mb-4">Agent Earnings</h2>
-        <div className="flex flex-col items-center justify-center">
-
-        {loading ? (
-            <Spinner size="xl" color="blue.500" />
-        ) : (
-            <div className="grid md:grid-cols-2 gap-6 w-full">
-            {/* Forex Earnings Card */}
-            <div className="bg-white shadow-lg rounded-lg p-6 flex items-center justify-between w-full">
-                <div>
-                <h3 className="text-xl font-semibold text-gray-700">Forex Earnings</h3>
-                <p className="text-2xl font-bold text-blue-600">{earnings.forexCommission}/-</p>
-                </div>
-                <BiDollar className="text-5xl text-blue-500" />
-            </div>
-
-            {/* GIC Earnings Card */}
-            <div className="bg-white shadow-lg rounded-lg p-6 flex items-center justify-between w-full">
-                <div>
-                <h3 className="text-xl font-semibold text-gray-700">GIC Earnings</h3>
-                <p className="text-2xl font-bold text-green-600">{earnings.gicCommission}/-</p>
-                </div>
-                <FaUniversity className="text-5xl text-green-500" />
-            </div>
-            </div>
-        )}
-        </div>
-    </div>
+    <Box sx={{ p: 3 }}>
+      <Typography variant="h5" fontWeight="600" sx={{ mb: 3 }}>
+        Your Earnings
+      </Typography>
+      
+      {loading ? (
+        <Box display="flex" justifyContent="center" p={4}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <Grid container spacing={3}>
+          {earningsData.map((item) => (
+            <Grid item xs={12} sm={6} key={item.id}>
+              <Card 
+                elevation={0}
+                sx={{ 
+                  borderRadius: 2, 
+                  boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
+                  transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
+                  "&:hover": {
+                    transform: "translateY(-4px)",
+                    boxShadow: "0 5px 15px rgba(0,0,0,0.1)",
+                  }
+                }}
+              >
+                <CardContent sx={{ p: 3 }}>
+                  <Box display="flex" alignItems="center" justifyContent="space-between">
+                    <Box>
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                        {item.title}
+                      </Typography>
+                      <Typography variant="h4" fontWeight="700" color={item.color}>
+                        {item.value}
+                      </Typography>
+                    </Box>
+                    <Avatar 
+                      sx={{ 
+                        bgcolor: item.bgColor,
+                        color: item.color,
+                        width: 64,
+                        height: 64
+                      }}
+                    >
+                      {item.icon}
+                    </Avatar>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      )}
+    </Box>
   );
 };
 

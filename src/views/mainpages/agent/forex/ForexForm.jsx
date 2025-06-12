@@ -1,34 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import {
   Box,
-  FormControl,
-  FormLabel,
-  Input,
-  Select,
+  TextField,
   Button,
-  SimpleGrid,
-  NumberInput,
-  NumberInputField,
-  useToast,
-  Text,
-  Flex,
+  Grid,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Typography,
+  Card,
+  CardContent,
+  Stack,
+  Divider,
+  IconButton,
+  CircularProgress,
+  Snackbar,
+  Alert,
   Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalBody,
-  ModalCloseButton,
-  Spinner,
-} from '@chakra-ui/react';
+} from '@mui/material';
 import { format } from 'date-fns';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { useColorMode } from '@chakra-ui/react';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteIcon from '@mui/icons-material/Delete';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+import CloseIcon from '@mui/icons-material/Close';
 import countries from './csvjson.json';
+
 const getCurrentDate = () => format(new Date(), 'yyyy-MM-dd');
 
 function ForexForm() {
   const navigate = useNavigate();
+  const { colorMode } = useColorMode();
   const [formData, setFormData] = useState({
     agentRef: '',
     studentRef: '',
@@ -58,8 +64,62 @@ function ForexForm() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
-  const toast = useToast();
+  
+  // Toast state
+  const [toastOpen, setToastOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastSeverity, setToastSeverity] = useState("success");
+  
+  const showToast = (message, severity) => {
+    setToastMessage(message);
+    setToastSeverity(severity);
+    setToastOpen(true);
+  };
+  
   const [agents, setAgents] = useState([]);
+
+  // Create MUI theme based on Chakra color mode
+  const theme = createTheme({
+    palette: {
+      mode: colorMode,
+      primary: {
+        main: colorMode === 'light' ? '#3B82F6' : '#90CAF9',
+      },
+      secondary: {
+        main: colorMode === 'light' ? '#10B981' : '#5CDB95',
+      },
+      background: {
+        default: colorMode === 'light' ? '#ffffff' : '#121212',
+        paper: colorMode === 'light' ? '#f9fafc' : '#1E1E1E',
+      },
+      text: {
+        primary: colorMode === 'light' ? '#111827' : '#f3f4f6',
+        secondary: colorMode === 'light' ? '#4B5563' : '#9CA3AF',
+      },
+    },
+    typography: {
+      fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    },
+    components: {
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            borderRadius: 8,
+            textTransform: 'none',
+            fontWeight: 600,
+          },
+        },
+      },
+      MuiCard: {
+        styleOverrides: {
+          root: {
+            borderRadius: 12,
+            boxShadow: '0 2px 12px 0 rgba(0,0,0,0.05)',
+          },
+        },
+      },
+    },
+  });
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -82,13 +142,7 @@ function ForexForm() {
   const handleNewStudentSubmit = async () => {
     setLoading(true);
     if (!newStudent.name || !newStudent.email) {
-      toast({
-        title: 'Incomplete Details',
-        description: 'Please fill in both Name and Email.',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
+      showToast('Please fill in both Name and Email', 'error');
       setLoading(false);
       return;
     }
@@ -104,30 +158,16 @@ function ForexForm() {
       if (response.ok) {
         setStudents([...students, result.newStudent]);
         setFormData({ ...formData, studentRef: result.newStudent._id });
-        toast({
-          title: 'Student Created',
-          description: 'New student has been added.',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        });
+        showToast('New student has been added', 'success');
         closeModal();
-        setLoading(false);
       } else {
-        setLoading(false);
         throw new Error(result.message || 'Failed to create student.');
       }
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: error.message,
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
+      showToast(error.message, 'error');
+    } finally {
       setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
@@ -137,7 +177,7 @@ function ForexForm() {
         const response = await fetch(apiUrl);
         const result = await response.json();
         if (response.ok) {
-          const filterResult = result.data.filter((data)=> data.userStatus === 'active')
+          const filterResult = result.data.filter((data)=> data.userStatus === 'active');
           setAgents(filterResult);
         } else {
           console.error('Server Error:', result);
@@ -159,6 +199,7 @@ function ForexForm() {
     'Grand Father',
     'Grand Mother',
   ];
+  
   const documentOptions = [
     'Aadhar',
     'Pan',
@@ -205,6 +246,7 @@ function ForexForm() {
       netPayable,
       commissionStatus,
     } = formData;
+    
     if (
       !agentRef ||
       !studentRef ||
@@ -219,13 +261,7 @@ function ForexForm() {
       !netPayable ||
       !commissionStatus
     ) {
-      toast({
-        title: 'Form Incomplete',
-        description: 'Please fill in all fields.',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
+      showToast('Please fill in all required fields', 'error');
       return false;
     }
     return true;
@@ -234,10 +270,6 @@ function ForexForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    // console.log('Form Data:', formData);
-    // console.log('Passport File:', passportFile);
-    // console.log('Offer Letter File:', offerLetterFile);
-    // console.log('Documents:', documents);
 
     if (validateForm()) {
       try {
@@ -245,9 +277,9 @@ function ForexForm() {
         fileUploadFormData.append(
           'folderId',
           '1f8tN2sgd_UBOdxpDwyQ1CMsyVvi1R96f',
-        ); // Pass dynamic folderId if available
-        fileUploadFormData.append('studentRef', formData.studentRef); // Pass agentCode
-        fileUploadFormData.append('type', 'forex-documents'); // Define the type of document
+        );
+        fileUploadFormData.append('studentRef', formData.studentRef);
+        fileUploadFormData.append('type', 'forex-documents');
 
         const files = [
           passportFile,
@@ -256,7 +288,7 @@ function ForexForm() {
         ].filter(Boolean);
 
         files.forEach((file) => {
-          fileUploadFormData.append('files', file); // Attach files
+          fileUploadFormData.append('files', file);
         });
 
         const uploadResponse = await fetch(
@@ -281,22 +313,20 @@ function ForexForm() {
           passportFile: uploadResult.uploads[0].fileId,
           offerLetterFile: uploadResult.uploads[1].fileId,
         };
-        // console.log(documents[0].documentOf);
-        // Extract the uploaded file details
+
         const uploadedFiles = uploadResult.uploads
           .map((file, index) => {
             if (index > 1) {
               return {
-                documentOf: documents[index - 2].documentOf, // Adjust fields as needed
-                documentType: documents[index - 2].documentType, // Adjust fields as needed
-                documentFile: file.fileId, // Store the Google Drive file ID
+                documentOf: documents[index - 2].documentOf,
+                documentType: documents[index - 2].documentType,
+                documentFile: file.fileId,
               };
             }
-            return null; // Return null for indices 0 and 1
+            return null;
           })
-          .filter(Boolean); // Filter out null values
+          .filter(Boolean);
 
-        // Step 2: Send form data and uploaded file details to the backend
         const finalFormData = {
           ...formdata1,
           documents: uploadedFiles,
@@ -319,38 +349,15 @@ function ForexForm() {
           throw new Error(result.message || 'Failed to submit the form');
         }
 
-        // Show success toast
-        toast({
-          title: 'Form Submitted',
-          description: 'Your form has been submitted successfully!',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-        });
+        showToast('Your form has been submitted successfully!', 'success');
         navigate(`/admin/forex/${result.data._id}`);
       } catch (error) {
         console.error('Error:', error.message);
-
-        // Show error toast
-        toast({
-          title: 'Submission Error',
-          description: `Failed to submit the form: ${error.message}`,
-          status: 'error',
-          duration: 3000,
-          isClosable: true,
-        });
+        showToast(`Failed to submit the form: ${error.message}`, 'error');
       } finally {
         setLoading(false);
       }
     } else {
-      // Show error toast for incomplete form
-      toast({
-        title: 'Form Incomplete',
-        description: 'Please fill in all required fields.',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-      });
       setLoading(false);
     }
   };
@@ -368,418 +375,491 @@ function ForexForm() {
   };
 
   return (
-    <Box
-      maxW="100%"
-      bg="white"
-      mx="auto"
-      mt={10}
-      p={6}
-      borderWidth={1}
-      borderRadius="lg"
-      boxShadow="md"
-    >
-      <form onSubmit={handleSubmit}>
-        <SimpleGrid columns={2} spacing={4}>
-          <FormControl isRequired>
-            <FormLabel>Agent</FormLabel>
+    <ThemeProvider theme={theme}>
+      <Box sx={{ maxWidth: '1200px', mx: 'auto', p: { xs: 2, sm: 3 }, mb: 4 }}>
+        <Card elevation={1}>
+          <Box 
+            sx={{ 
+              p: 3, 
+              backgroundImage: 'linear-gradient(135deg, #11047A 0%, #4D1DB3 100%)',
+              borderTopLeftRadius: '12px',
+              borderTopRightRadius: '12px'
+            }}
+          >
+            <Typography variant="h5" fontWeight="600" color="white">
+              Add New Forex Transaction
+            </Typography>
+          </Box>
+          
+          <CardContent sx={{ p: 3 }}>
+            <form onSubmit={handleSubmit}>
+              <Grid container spacing={3}>
+                <Grid item xs={12} md={6}>
+                  <FormControl fullWidth required>
+                    <InputLabel id="agent-label">Agent</InputLabel>
+                    <Select
+                      labelId="agent-label"
+                      name="agentRef"
+                      value={formData.agentRef}
+                      onChange={handleChange}
+                      label="Agent"
+                    >
+                      {agents.map((agent) => (
+                        <MenuItem key={agent._id} value={agent._id}>
+                          {agent.agentCode}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Date"
+                    type="text"
+                    value={getCurrentDate()}
+                    InputProps={{
+                      readOnly: true,
+                    }}
+                    fullWidth
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <FormControl fullWidth required>
+                    <InputLabel id="student-label">Student Name</InputLabel>
+                    <Select
+                      labelId="student-label"
+                      name="studentRef"
+                      value={formData.studentRef}
+                      onChange={(e) => {
+                        if (e.target.value === 'create') {
+                          openModal();
+                        } else {
+                          handleChange(e);
+                        }
+                      }}
+                      label="Student Name"
+                    >
+                      {students.map((student) => (
+                        <MenuItem key={student?._id} value={student?._id}>
+                          {`${student?.studentCode} - ${student?.name} - ${student?.email}`}
+                        </MenuItem>
+                      ))}
+                      <MenuItem value="create">Create New student</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <FormControl fullWidth required>
+                    <InputLabel id="country-label">Country</InputLabel>
+                    <Select
+                      labelId="country-label"
+                      name="country"
+                      value={formData.country}
+                      onChange={handleChange}
+                      label="Country"
+                    >
+                      {countries.map((country, index) => (
+                        <MenuItem key={index} value={country.Name}>
+                          {country.Name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Currency Booked"
+                    name="currencyBooked"
+                    value={formData.currencyBooked}
+                    onChange={handleChange}
+                    fullWidth
+                    required
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Quotation"
+                    name="quotation"
+                    type="number"
+                    value={formData.quotation}
+                    onChange={handleChange}
+                    fullWidth
+                    required
+                    inputProps={{ min: 0 }}
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Student Paid"
+                    name="studentPaid"
+                    type="number"
+                    value={formData.studentPaid}
+                    onChange={handleChange}
+                    fullWidth
+                    required
+                    inputProps={{ min: 0 }}
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <FormControl fullWidth required>
+                    <InputLabel id="docsStatus-label">DOCs Status</InputLabel>
+                    <Select
+                      labelId="docsStatus-label"
+                      name="docsStatus"
+                      value={formData.docsStatus}
+                      onChange={handleChange}
+                      label="DOCs Status"
+                    >
+                      <MenuItem value="Pending">Pending</MenuItem>
+                      <MenuItem value="Received">Received</MenuItem>
+                      <MenuItem value="Verified">Verified</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <FormControl fullWidth required>
+                    <InputLabel id="ttCopyStatus-label">TT Copy Status</InputLabel>
+                    <Select
+                      labelId="ttCopyStatus-label"
+                      name="ttCopyStatus"
+                      value={formData.ttCopyStatus}
+                      onChange={handleChange}
+                      label="TT Copy Status"
+                    >
+                      <MenuItem value="Pending">Pending</MenuItem>
+                      <MenuItem value="Received">Received</MenuItem>
+                      <MenuItem value="Verified">Verified</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Agent Commission"
+                    name="agentCommission"
+                    type="number"
+                    value={formData.agentCommission}
+                    onChange={handleChange}
+                    fullWidth
+                    required
+                    inputProps={{ min: 0 }}
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="TDS"
+                    name="tds"
+                    type="number"
+                    value={formData.tds}
+                    onChange={handleChange}
+                    fullWidth
+                    required
+                    inputProps={{ min: 0 }}
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Net Payable"
+                    name="netPayable"
+                    type="number"
+                    value={formData.netPayable}
+                    onChange={handleChange}
+                    fullWidth
+                    required
+                    inputProps={{ min: 0 }}
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <FormControl fullWidth required>
+                    <InputLabel id="commissionStatus-label">Commission Status</InputLabel>
+                    <Select
+                      labelId="commissionStatus-label"
+                      name="commissionStatus"
+                      value={formData.commissionStatus}
+                      onChange={handleChange}
+                      label="Commission Status"
+                    >
+                      <MenuItem value="Not Received">Not Received</MenuItem>
+                      <MenuItem value="Paid">Paid</MenuItem>
+                      <MenuItem value="Under Processing">Under Processing</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <Typography variant="subtitle1" gutterBottom>Passport</Typography>
+                  <Stack direction="row" alignItems="center" spacing={2}>
+                    <Button
+                      variant="contained"
+                      startIcon={<AttachFileIcon />}
+                      onClick={() => document.getElementById('passportFile').click()}
+                    >
+                      Choose File
+                    </Button>
+                    <Typography variant="body2">
+                      {passportFile ? passportFile.name : 'No file chosen'}
+                    </Typography>
+                    <input
+                      type="file"
+                      id="passportFile"
+                      onChange={(e) => handleFileChangeoffpass(e, setPassportFile)}
+                      style={{ display: 'none' }}
+                    />
+                  </Stack>
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <Typography variant="subtitle1" gutterBottom>Offer Letter</Typography>
+                  <Stack direction="row" alignItems="center" spacing={2}>
+                    <Button
+                      variant="contained"
+                      startIcon={<AttachFileIcon />}
+                      onClick={() => document.getElementById('offerLetterFile').click()}
+                    >
+                      Choose File
+                    </Button>
+                    <Typography variant="body2">
+                      {offerLetterFile ? offerLetterFile.name : 'No file chosen'}
+                    </Typography>
+                    <input
+                      type="file"
+                      id="offerLetterFile"
+                      onChange={(e) => handleFileChangeoffpass(e, setOfferLetterFile)}
+                      style={{ display: 'none' }}
+                    />
+                  </Stack>
+                </Grid>
+
+                <Grid item xs={12}>
+                  <Divider sx={{ my: 2 }} />
+                  <Typography variant="h6" gutterBottom>Additional Documents</Typography>
+                  
+                  {documents.map((doc, index) => (
+                    <Card key={index} variant="outlined" sx={{ mb: 3, p: 2 }}>
+                      <Grid container spacing={2}>
+                        <Grid item xs={12} md={6}>
+                          <FormControl fullWidth required sx={{ mb: 2 }}>
+                            <InputLabel id={`documentOf-label-${index}`}>Document of</InputLabel>
+                            <Select
+                              labelId={`documentOf-label-${index}`}
+                              value={doc.documentOf}
+                              onChange={(e) =>
+                                handleDocumentChange(index, 'documentOf', e.target.value)
+                              }
+                              label="Document of"
+                            >
+                              {whoOptions.map((option, i) => (
+                                <MenuItem key={i} value={option}>
+                                  {option}
+                                </MenuItem>
+                              ))}
+                            </Select>
+                          </FormControl>
+                        </Grid>
+                        
+                        <Grid item xs={12} md={6}>
+                          <FormControl fullWidth required sx={{ mb: 2 }}>
+                            <InputLabel id={`documentType-label-${index}`}>Document Type</InputLabel>
+                            <Select
+                              labelId={`documentType-label-${index}`}
+                              value={doc.documentType}
+                              onChange={(e) =>
+                                handleDocumentChange(index, 'documentType', e.target.value)
+                              }
+                              label="Document Type"
+                            >
+                              {documentOptions.map((option, i) => (
+                                <MenuItem key={i} value={option}>
+                                  {option}
+                                </MenuItem>
+                              ))}
+                            </Select>
+                          </FormControl>
+                        </Grid>
+                        
+                        <Grid item xs={12}>
+                          <Typography variant="subtitle2" gutterBottom>Upload Document</Typography>
+                          <Stack direction="row" alignItems="center" spacing={2}>
+                            <Button
+                              variant="contained"
+                              startIcon={<AttachFileIcon />}
+                              onClick={() => document.getElementById(`documentFile${index}`).click()}
+                            >
+                              Choose File
+                            </Button>
+                            <Typography variant="body2">
+                              {doc.documentFile ? doc.documentFile.name : 'No file chosen'}
+                            </Typography>
+                            <input
+                              type="file"
+                              id={`documentFile${index}`}
+                              onChange={(e) =>
+                                handleFileChange(index, 'documentFile', e.target.files[0])
+                              }
+                              style={{ display: 'none' }}
+                            />
+                            
+                            <IconButton 
+                              color="error" 
+                              onClick={() => removeDocumentField(index)}
+                              sx={{ ml: 'auto' }}
+                            >
+                              <DeleteIcon />
+                            </IconButton>
+                          </Stack>
+                        </Grid>
+                      </Grid>
+                    </Card>
+                  ))}
+                  
+                  <Button 
+                    variant="outlined" 
+                    startIcon={<AddIcon />} 
+                    onClick={addDocumentField}
+                    sx={{ mt: 2 }}
+                  >
+                    Add Document
+                  </Button>
+                </Grid>
+              </Grid>
+
+              <Button
+                type="submit"
+                variant="contained"
+                fullWidth
+                disabled={loading}
+                sx={{
+                  mt: 4,
+                  py: 1.5,
+                  background: 'linear-gradient(135deg, #11047A 0%, #4D1DB3 100%)',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #0D0362 0%, #3B169A 100%)',
+                  },
+                }}
+              >
+                {loading ? <CircularProgress size={24} color="inherit" /> : 'Submit'}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </Box>
+      
+      {/* Create Student Modal */}
+      <Modal
+        open={isModalOpen}
+        onClose={closeModal}
+        aria-labelledby="create-student-modal"
+      >
+        <Box sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: { xs: '90%', sm: 500 },
+          bgcolor: 'background.paper',
+          borderRadius: 2,
+          boxShadow: 24,
+          p: 4,
+          outline: 'none'
+        }}>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Typography variant="h6" component="h2" fontWeight={600}>
+              Create New Student
+            </Typography>
+            <IconButton onClick={closeModal} size="small">
+              <CloseIcon />
+            </IconButton>
+          </Box>
+          
+          <Divider sx={{ mb: 2 }} />
+          
+          <FormControl fullWidth required sx={{ mb: 3 }}>
+            <InputLabel id="modal-agent-label">Agent</InputLabel>
             <Select
+              labelId="modal-agent-label"
               name="agentRef"
-              value={formData.agentRef}
-              onChange={handleChange}
-              h="50px"
-              w="full"
-              placeholder="Select an agent"
+              value={newStudent.agentRef}
+              onChange={handleNewStudentChange}
+              label="Agent"
             >
               {agents.map((agent) => (
-                <option key={agent._id} value={agent._id}>
+                <MenuItem key={agent._id} value={agent._id}>
                   {agent.agentCode}
-                </option>
+                </MenuItem>
               ))}
             </Select>
           </FormControl>
-
-          <FormControl isReadOnly>
-            <FormLabel>Date</FormLabel>
-            <Input
-              type="text"
-              value={getCurrentDate()}
-              readOnly
-              h="50px"
-              w="full"
-            />
-          </FormControl>
-
-          <FormControl isRequired>
-            <FormLabel>Student Name</FormLabel>
-            <Select
-              name="studentRef"
-              value={formData.studentRef}
-              onChange={(e) => {
-                if (e.target.value === 'create') {
-                  openModal();
-                } else {
-                  handleChange(e);
-                }
+          
+          <TextField
+            label="Name"
+            name="name"
+            value={newStudent.name}
+            onChange={handleNewStudentChange}
+            fullWidth
+            required
+            margin="normal"
+          />
+          
+          <TextField
+            label="Email"
+            name="email"
+            value={newStudent.email}
+            onChange={handleNewStudentChange}
+            fullWidth
+            required
+            margin="normal"
+          />
+          
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3 }}>
+            <Button onClick={closeModal} variant="outlined">
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleNewStudentSubmit}
+              variant="contained"
+              disabled={loading}
+              sx={{ 
+                minWidth: '100px',
+                background: 'linear-gradient(135deg, #11047A 0%, #4D1DB3 100%)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #0D0362 0%, #3B169A 100%)',
+                },
               }}
-              h="50px"
-              w="full"
-              placeholder="Select a student"
             >
-              {students.map((student) => (
-                <option key={student?._id} value={student?._id}>
-                  {`${student?.studentCode} - ${student?.name} - ${student?.email}`}
-                </option>
-              ))}
-              <option value="create">Create New student</option>
-            </Select>
-          </FormControl>
-
-          <FormControl isRequired>
-            <FormLabel>Country</FormLabel>
-            <Select
-              name="country"
-              placeholder="Select Country"
-              value={formData.country}
-              onChange={handleChange}
-              h="50px"
-              w="full"
-            >
-              {countries.map((country, index) => (
-                <option key={index} value={country.Name}>
-                  {country.Name}
-                </option>
-              ))}
-            </Select>
-          </FormControl>
-
-          <FormControl isRequired>
-            <FormLabel>Currency Booked</FormLabel>
-            <Input
-              type="text"
-              name="currencyBooked"
-              value={formData.currencyBooked}
-              onChange={handleChange}
-              h="50px"
-              w="full"
-            />
-          </FormControl>
-
-          <FormControl isRequired>
-            <FormLabel>Quotation</FormLabel>
-            <NumberInput min={0} h="50px" w="full">
-              <NumberInputField
-                name="quotation"
-                value={formData.quotation}
-                placeholder="Number is Accepted"
-                onChange={handleChange}
-                h="50px"
-              />
-            </NumberInput>
-          </FormControl>
-
-          <FormControl isRequired>
-            <FormLabel>Student Paid</FormLabel>
-            <NumberInput min={0} h="50px" w="full">
-              <NumberInputField
-                name="studentPaid"
-                value={formData.studentPaid}
-                onChange={handleChange}
-                h="50px"
-              />
-            </NumberInput>
-          </FormControl>
-
-          <FormControl isRequired>
-            <FormLabel>DOCs Status</FormLabel>
-            <Select
-              name="docsStatus"
-              value={formData.docsStatus}
-              onChange={handleChange}
-              h="50px"
-              w="full"
-            >
-              <option value="">Select an option</option>
-              <option value="Pending">Pending</option>
-              <option value="Received">Received</option>
-              <option value="Verified">Verified</option>
-            </Select>
-          </FormControl>
-
-          <FormControl isRequired>
-            <FormLabel>TT Copy Status</FormLabel>
-            <Select
-              name="ttCopyStatus"
-              value={formData.ttCopyStatus}
-              onChange={handleChange}
-              h="50px"
-              w="full"
-            >
-              <option value="">Select an option</option>
-              <option value="Pending">Pending</option>
-              <option value="Received">Received</option>
-              <option value="Verified">Verified</option>
-            </Select>
-          </FormControl>
-
-          <FormControl isRequired>
-            <FormLabel>Agent Commission</FormLabel>
-            <NumberInput min={0} h="50px" w="full">
-              <NumberInputField
-                name="agentCommission"
-                value={formData.agentCommission}
-                onChange={handleChange}
-                h="50px"
-              />
-            </NumberInput>
-          </FormControl>
-
-          <FormControl isRequired>
-            <FormLabel>TDS</FormLabel>
-            <NumberInput min={0} h="50px" w="full">
-              <NumberInputField
-                name="tds"
-                value={formData.tds}
-                onChange={handleChange}
-                h="50px"
-              />
-            </NumberInput>
-          </FormControl>
-
-          <FormControl isRequired>
-            <FormLabel>Net Payable</FormLabel>
-            <NumberInput min={0} h="50px" w="full">
-              <NumberInputField
-                name="netPayable"
-                value={formData.netPayable}
-                onChange={handleChange}
-                h="50px"
-              />
-            </NumberInput>
-          </FormControl>
-
-          <FormControl isRequired gridColumn={'span 2'}>
-            <FormLabel>Commission Status</FormLabel>
-            <Select
-              name="commissionStatus"
-              placeholder="Select Status"
-              value={formData.commissionStatus}
-              onChange={handleChange}
-              h="50px"
-              w="full"
-            >
-              <option value="Not Received">Not Received</option>
-              <option value="Paid">Paid</option>
-              <option value="Under Processing">Under Processing</option>
-            </Select>
-          </FormControl>
-          <FormControl>
-            <FormLabel>Passport</FormLabel>
-            <Flex align="center">
-              <Button
-                colorScheme="blue"
-                onClick={() => document.getElementById('passportFile').click()}
-                mr={2}
-              >
-                Choose File
-              </Button>
-              <Text>{passportFile ? passportFile.name : 'No file chosen'}</Text>
-              <Input
-                type="file"
-                id="passportFile"
-                name="passportFile"
-                onChange={(e) => handleFileChangeoffpass(e, setPassportFile)}
-                hidden
-              />
-            </Flex>
-          </FormControl>
-
-          <FormControl>
-            <FormLabel>Offer Letter</FormLabel>
-            <Flex align="center">
-              <Button
-                colorScheme="blue"
-                onClick={() =>
-                  document.getElementById('offerLetterFile').click()
-                }
-                mr={2}
-              >
-                Choose File
-              </Button>
-              <Text>
-                {offerLetterFile ? offerLetterFile.name : 'No file chosen'}
-              </Text>
-              <Input
-                type="file"
-                id="offerLetterFile"
-                name="offerLetterFile"
-                onChange={(e) => handleFileChangeoffpass(e, setOfferLetterFile)}
-                hidden
-              />
-            </Flex>
-          </FormControl>
-        </SimpleGrid>
-
-        <Box mt={4}>
-          <FormLabel>Documents</FormLabel>
-          {documents.map((doc, index) => (
-            <Box key={index} mb={4} p={4} borderWidth={1} borderRadius="md">
-              <FormControl isRequired>
-                <FormLabel>Document of</FormLabel>
-                <Select
-                  name="documentOf"
-                  placeholder="Select Relation"
-                  value={doc.documentOf}
-                  onChange={(e) =>
-                    handleDocumentChange(index, 'documentOf', e.target.value)
-                  }
-                >
-                  {whoOptions.map((option, i) => (
-                    <option key={i} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </Select>
-              </FormControl>
-
-              <FormControl isRequired mt={2}>
-                <FormLabel>Document Type</FormLabel>
-                <Select
-                  name="documentType"
-                  placeholder="Select Document Type"
-                  value={doc.documentType}
-                  onChange={(e) =>
-                    handleDocumentChange(index, 'documentType', e.target.value)
-                  }
-                >
-                  {documentOptions.map((option, i) => (
-                    <option key={i} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </Select>
-              </FormControl>
-
-              <FormControl mt={2}>
-                <FormLabel>Upload Document</FormLabel>
-                <Flex align="center">
-                  <Button
-                    colorScheme="blue"
-                    onClick={() =>
-                      document.getElementById(`documentFile${index}`).click()
-                    }
-                    mr={2}
-                  >
-                    Choose File
-                  </Button>
-                  <Text>
-                    {doc.documentFile
-                      ? doc.documentFile.name
-                      : 'No file chosen'}
-                  </Text>
-                  <Input
-                    type="file"
-                    id={`documentFile${index}`}
-                    onChange={(e) =>
-                      handleFileChange(index, 'documentFile', e.target.files[0])
-                    }
-                    hidden
-                  />
-                </Flex>
-              </FormControl>
-
-              <Button
-                colorScheme="red"
-                mt={2}
-                onClick={() => removeDocumentField(index)}
-              >
-                Remove Document
-              </Button>
-            </Box>
-          ))}
-
-          <Button colorScheme="blue" mt={2} onClick={addDocumentField}>
-            Add Document
-          </Button>
+              {loading ? <CircularProgress size={24} color="inherit" /> : 'Submit'}
+            </Button>
+          </Box>
         </Box>
+      </Modal>
 
-        <Modal isOpen={isModalOpen} onClose={closeModal}>
-          <ModalOverlay />
-          <ModalContent>
-            <ModalHeader>Create New Student</ModalHeader>
-            <ModalCloseButton />
-            <ModalBody>
-              <FormControl isRequired>
-                <FormLabel>Agents</FormLabel>
-                <Select
-                  name="agentRef"
-                  value={newStudent.agentRef}
-                  onChange={handleNewStudentChange}
-                  h="50px"
-                  w="full"
-                  mb={'15px'}
-                  placeholder="Select an agent"
-                >
-                  {agents.map((agents) => (
-                    <option key={agents._id} value={agents._id}>
-                      {agents.agentCode}
-                    </option>
-                  ))}
-                </Select>
-              </FormControl>
-
-              <FormControl isRequired>
-                <FormLabel>Name</FormLabel>
-                <Input
-                  name="name"
-                  value={newStudent.name}
-                  onChange={handleNewStudentChange}
-                  placeholder="Enter student name"
-                />
-              </FormControl>
-              <FormControl isRequired mt={4}>
-                <FormLabel>Email</FormLabel>
-                <Input
-                  name="email"
-                  value={newStudent.email}
-                  onChange={handleNewStudentChange}
-                  placeholder="Enter student email"
-                />
-              </FormControl>
-            </ModalBody>
-            <ModalFooter>
-              {loading ? (
-                <Spinner mr={5} />
-              ) : (
-                <Button
-                  colorScheme="blue"
-                  mr={3}
-                  onClick={handleNewStudentSubmit}
-                >
-                  Submit
-                </Button>
-              )}
-              <Button onClick={closeModal}>Cancel</Button>
-            </ModalFooter>
-          </ModalContent>
-        </Modal>
-
-        {loading ? (
-          <Button colorScheme="brand" width="full" mt={6} h="50px">
-            <Spinner />
-          </Button>
-        ) : (
-          <Button
-            type="submit"
-            colorScheme="brand"
-            width="full"
-            mt={6}
-            h="50px"
-          >
-            Submit
-          </Button>
-        )}
-      </form>
-    </Box>
+      {/* Toast Notification */}
+      <Snackbar
+        open={toastOpen}
+        autoHideDuration={6000}
+        onClose={() => setToastOpen(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert 
+          onClose={() => setToastOpen(false)} 
+          severity={toastSeverity}
+          variant="filled"
+          sx={{ width: '100%' }}
+        >
+          {toastMessage}
+        </Alert>
+      </Snackbar>
+    </ThemeProvider>
   );
 }
 

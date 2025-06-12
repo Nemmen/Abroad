@@ -1,24 +1,32 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import {
   Box,
+  Card,
+  Typography,
   Button,
   Divider,
-  Text,
-  Checkbox,
-  VStack,
   Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  ModalFooter,
-} from '@chakra-ui/react';
-import DataTable from 'components/DataTable';
+  Checkbox,
+  FormGroup,
+  FormControlLabel,
+  Grid,
+  IconButton,
+  Chip,
+  Stack,
+  CircularProgress,
+  Tooltip,
+} from '@mui/material';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
 import { useSelector } from 'react-redux';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { useColorMode } from '@chakra-ui/react';
+import AddIcon from '@mui/icons-material/Add';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import FilterAltIcon from '@mui/icons-material/FilterAlt';
+import CloseIcon from '@mui/icons-material/Close';
+import DataTable from 'components/DataTable';
 
 // Define the columns
 const allColumns = [
@@ -44,16 +52,62 @@ const Gic = () => {
   );
   const { user } = useSelector((state) => state.Auth);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const { colorMode } = useColorMode();
+
+  // Create MUI theme based on Chakra color mode
+  const theme = createTheme({
+    palette: {
+      mode: colorMode,
+      primary: {
+        main: colorMode === 'light' ? '#3B82F6' : '#90CAF9',
+      },
+      secondary: {
+        main: colorMode === 'light' ? '#10B981' : '#5CDB95',
+      },
+      background: {
+        default: colorMode === 'light' ? '#ffffff' : '#121212',
+        paper: colorMode === 'light' ? '#f9fafc' : '#1E1E1E',
+      },
+      text: {
+        primary: colorMode === 'light' ? '#111827' : '#f3f4f6',
+        secondary: colorMode === 'light' ? '#4B5563' : '#9CA3AF',
+      },
+    },
+    typography: {
+      fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    },
+    components: {
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            borderRadius: 8,
+            textTransform: 'none',
+            fontWeight: 600,
+          },
+        },
+      },
+      MuiCard: {
+        styleOverrides: {
+          root: {
+            borderRadius: 12,
+            boxShadow: '0 2px 12px 0 rgba(0,0,0,0.05)',
+          },
+        },
+      },
+    },
+  });
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const response = await axios.get(
           'https://abroad-backend-gray.vercel.app/auth/viewAllGicForm',
         );
         if (response.data.success) {
           const userGicForms = response.data.gicForms.filter(
-            (form) => form.agentRef._id === user._id, // Replace with the correct field for user matching
+            (form) => form.agentRef._id === user._id,
           );
           setData(userGicForms);
           const gicForms = userGicForms.map((form, index) => ({
@@ -75,11 +129,13 @@ const Gic = () => {
         }
       } catch (error) {
         console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchData();
-  }, []);
+  }, [user._id]);
 
   const handleDownloadExcel = () => {
     // Clean and prepare data
@@ -90,7 +146,7 @@ const Gic = () => {
         Agent: item.agentRef?.name?.toUpperCase() || 'N/A',
         accOpeningMonth: item.accOpeningMonth || 'N/A',
         studentName: item.studentRef.name || 'N/A',
-        passportNo: item.studentPassportNo || 'N/A', // Correct key for Passport No
+        passportNo: item.studentPassportNo || 'N/A',
         studentPhoneNo: item.studentPhoneNo || 'N/A',
         bankVendor: item.bankVendor || 'N/A',
         accFundingMonth: item.fundingMonth || 'N/A',
@@ -105,9 +161,9 @@ const Gic = () => {
     // Filter columns based on selection
     const filteredData = cleanData.map((item) =>
       selectedColumns.reduce((acc, field) => {
-        acc[field] = item[field] || 'N/A'; // Ensure fallback for missing fields
+        acc[field] = item[field] || 'N/A';
         return acc;
-      }, {}),
+      }, {})
     );
 
     // Generate Excel file
@@ -121,102 +177,241 @@ const Gic = () => {
     setSelectedColumns((prev) =>
       prev.includes(field)
         ? prev.filter((col) => col !== field)
-        : [...prev, field],
+        : [...prev, field]
     );
   };
 
   const memoizedColumns = useMemo(
     () => allColumns.filter((col) => selectedColumns.includes(col.field)),
-    [selectedColumns],
+    [selectedColumns]
   );
+  
   const memoizedRows = useMemo(() => rows, [rows]);
 
   return (
-    <Box width={'full'}>
-      <Box
-        display={'flex'}
-        padding={7}
-        paddingBottom={3}
-        justifyContent={'space-between'}
-        alignItems={'center'}
-      >
-        <div className='mb-6 lg:mb-0'>
-          <Text fontSize="34px">GIC </Text>
-        </div>
-        <div>
-          <Button
-            onClick={() => setIsModalOpen(true)}
-            width={'200px'}
-            variant="solid"
-            colorScheme="teal"
-            borderRadius={'none'}
-            mr={4}
-            mb={1}
+    <ThemeProvider theme={theme}>
+      <Box sx={{ px: { xs: 2, sm: 3 }, py: 2, maxWidth: '1400px', mx: 'auto' }}>
+        <Card elevation={1} sx={{ overflow: 'visible' }}>
+          <Box 
+            sx={{ 
+              p: 3, 
+              backgroundImage: 'linear-gradient(135deg, #11047A 0%, #4D1DB3 100%)',
+              borderTopLeftRadius: '12px',
+              borderTopRightRadius: '12px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 2
+            }}
           >
-            Filter Columns
-          </Button>
-          <Button
-            onClick={handleDownloadExcel}
-            width={'200px'}
-            variant="solid"
-            colorScheme="green"
-            borderRadius={'none'}
-            mr={4}
-            mb={1}
-          >
-            Download Excel
-          </Button>
-          <Link to={'/agent/gic/form'}>
-            <Button
-              width={'200px'}
-              variant="outline"
-              colorScheme="blue"
-              borderRadius={'none'}
-              mb={1}
-            >
-              Add New
-            </Button>
-          </Link>
-        </div>
-      </Box>
-      <Divider
-        width={'96%'}
-        mx={'auto'}
-        mb={'20px'}
-        bgColor={'black'}
-        height={'0.5px'}
-      />
-      <Box maxHeight="1200px" overflowY="auto">
-        <DataTable columns={memoizedColumns} rows={memoizedRows} />
+            <Typography variant="h5" fontWeight="600" color="white">
+              GIC Records
+            </Typography>
+            
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+              <Tooltip title="Filter table columns">
+                <Button
+                  onClick={() => setIsModalOpen(true)}
+                  variant="outlined"
+                  startIcon={<FilterAltIcon />}
+                  sx={{ 
+                    color: 'white', 
+                    borderColor: 'rgba(255,255,255,0.5)',
+                    '&:hover': { 
+                      borderColor: 'white', 
+                      backgroundColor: 'rgba(255,255,255,0.1)' 
+                    } 
+                  }}
+                >
+                  Filter Columns
+                </Button>
+              </Tooltip>
+              
+              <Tooltip title="Download as Excel">
+                <Button
+                  onClick={handleDownloadExcel}
+                  variant="outlined"
+                  startIcon={<FileDownloadIcon />}
+                  sx={{ 
+                    color: 'white', 
+                    borderColor: 'rgba(255,255,255,0.5)',
+                    '&:hover': { 
+                      borderColor: 'white', 
+                      backgroundColor: 'rgba(255,255,255,0.1)' 
+                    } 
+                  }}
+                >
+                  Export to Excel
+                </Button>
+              </Tooltip>
+              
+              <Button
+                component={Link}
+                to="/agent/gic/form"
+                variant="contained"
+                startIcon={<AddIcon />}
+                sx={{ 
+                  bgcolor: 'white', 
+                  color: '#11047A',
+                  '&:hover': { 
+                    bgcolor: 'rgba(255,255,255,0.9)',
+                  } 
+                }}
+              >
+                Add New Record
+              </Button>
+            </Box>
+          </Box>
+          
+          {selectedColumns.length < allColumns.length && (
+            <Box sx={{ px: 3, pt: 2 }}>
+              <Typography variant="body2" color="text.secondary" gutterBottom>
+                Active filters:
+              </Typography>
+              <Stack direction="row" spacing={1} flexWrap="wrap" sx={{ gap: 1 }}>
+                {allColumns.map((col) => 
+                  selectedColumns.includes(col.field) && (
+                    <Chip 
+                      key={col.field}
+                      label={col.headerName} 
+                      size="small"
+                      onDelete={() => handleColumnSelection(col.field)}
+                      sx={{ mb: 1 }}
+                    />
+                  )
+                )}
+              </Stack>
+              <Divider sx={{ my: 2 }} />
+            </Box>
+          )}
+          
+          <Box sx={{ p: 3, pt: selectedColumns.length < allColumns.length ? 1 : 3 }}>
+            {loading ? (
+              <Box display="flex" justifyContent="center" alignItems="center" height="200px">
+                <CircularProgress />
+              </Box>
+            ) : memoizedRows.length === 0 ? (
+              <Box 
+                sx={{ 
+                  display: 'flex', 
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  py: 10,
+                  textAlign: 'center'
+                }}
+              >
+                <Typography variant="h6" color="text.secondary" gutterBottom>
+                  No GIC records found
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                  Start adding new GIC records by clicking the "Add New Record" button
+                </Typography>
+                <Button
+                  component={Link}
+                  to="/agent/gic/form"
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                >
+                  Add New Record
+                </Button>
+              </Box>
+            ) : (
+              <Box sx={{ 
+                height: '100%', 
+                width: '100%',
+                '& .MuiDataGrid-root': {
+                  border: 'none',
+                  minHeight: '400px',
+                }
+              }}>
+                <DataTable 
+                  columns={memoizedColumns} 
+                  rows={memoizedRows} 
+                />
+              </Box>
+            )}
+          </Box>
+        </Card>
       </Box>
 
-      {/* Modal for Column Filtering */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Select Columns</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <VStack align="start">
+      {/* Column Filter Modal */}
+      <Modal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        aria-labelledby="column-filter-modal"
+      >
+        <Box sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: { xs: '90%', sm: 500 },
+          bgcolor: 'background.paper',
+          borderRadius: 2,
+          boxShadow: 24,
+          p: 4,
+          outline: 'none'
+        }}>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Typography variant="h6" component="h2" fontWeight={600}>
+              Select Table Columns
+            </Typography>
+            <IconButton onClick={() => setIsModalOpen(false)} size="small">
+              <CloseIcon />
+            </IconButton>
+          </Box>
+          
+          <Divider sx={{ mb: 2 }} />
+          
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Select which columns you want to display in the table.
+          </Typography>
+          
+          <FormGroup sx={{ mb: 3 }}>
+            <Grid container spacing={1}>
               {allColumns.map((col) => (
-                <Checkbox
-                  key={col.field}
-                  isChecked={selectedColumns.includes(col.field)}
-                  onChange={() => handleColumnSelection(col.field)}
-                >
-                  {col.headerName}
-                </Checkbox>
+                <Grid item xs={6} key={col.field}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox 
+                        checked={selectedColumns.includes(col.field)}
+                        onChange={() => handleColumnSelection(col.field)}
+                        color="primary"
+                      />
+                    }
+                    label={col.headerName}
+                  />
+                </Grid>
               ))}
-            </VStack>
-          </ModalBody>
-          <ModalFooter>
-            <Button colorScheme="blue" onClick={() => setIsModalOpen(false)}>
+            </Grid>
+          </FormGroup>
+          
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+            <Button 
+              onClick={() => setSelectedColumns(allColumns.map(col => col.field))}
+              sx={{ textTransform: 'none' }}
+            >
+              Select All
+            </Button>
+            <Button 
+              variant="contained" 
+              onClick={() => setIsModalOpen(false)}
+              sx={{ 
+                minWidth: '100px',
+                background: 'linear-gradient(135deg, #11047A 0%, #4D1DB3 100%)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #0D0362 0%, #3B169A 100%)',
+                },
+              }}
+            >
               Apply
             </Button>
-          </ModalFooter>
-        </ModalContent>
+          </Box>
+        </Box>
       </Modal>
-    </Box>
+    </ThemeProvider>
   );
 };
 
