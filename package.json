@@ -67,7 +67,9 @@
     "preinstall": "npx npm-force-resolutions"
   },
   "resolutions": {
-    "react-error-overlay": "6.0.9"
+    "react-error-overlay": "6.0.9",
+    "ajv": "^6.12.6",
+    "ajv-keywords": "^3.5.2"
   },
   "eslintConfig": {
     "extends": [
