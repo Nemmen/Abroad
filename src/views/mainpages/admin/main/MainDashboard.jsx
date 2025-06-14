@@ -514,7 +514,7 @@ export default function AdminDashboard() {
         </Box>
         
         {/* GIC and Forex Stats */}
-        <Box mb={{ base: 6, md: 8 }}>
+        {/* <Box mb={{ base: 6, md: 8 }}>
           <Box 
             borderRadius="xl"
             overflow="hidden"
@@ -525,7 +525,7 @@ export default function AdminDashboard() {
               loading={loading}
             />
           </Box>
-        </Box>
+        </Box> */}
         
         {/* Recent Activities and Top Agents */}
         <Grid 
