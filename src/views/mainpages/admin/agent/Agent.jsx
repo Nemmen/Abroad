@@ -351,7 +351,7 @@ export default function Agent() {
       </Box>
       
       {/* Top Performing Agents & Analytics */}
-      <Grid
+      {/* <Grid
         templateColumns={{ base: "1fr", xl: "2fr 1fr" }}
         gap={6}
         mb={6}
@@ -422,7 +422,7 @@ export default function Agent() {
             </CardBody>
           </Card>
         </GridItem>
-      </Grid>
+      </Grid> */}
       
       {/* All Agents Table */}
       <Box mb={6}>
