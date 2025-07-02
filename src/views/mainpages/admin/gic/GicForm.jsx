@@ -18,6 +18,7 @@ import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Gic } from 'views/mainpages/redux/GicSlice';
+import { GoChevronDown , GoChevronUp  } from "react-icons/go";
 
 const getCurrentDate = () => format(new Date(), 'yyyy-MM-dd');
 const getCurrentMonth = () => format(new Date(), 'MMMM');
@@ -27,6 +28,8 @@ function GicForm() {
   // const { gic, error } = useSelector((state) => state.Gic);
   const [agents, setAgents] = useState([]);
   const [documents, setDocuments] = useState([]);
+  const [agentSearch, setAgentSearch] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
   const [accOpeningDate1, setAccOpeningDate1] = useState(getCurrentDate());
   const [accOpeningMonth, setAccOpeningMonth] = useState(getCurrentMonth());
@@ -136,6 +139,27 @@ function GicForm() {
       }
     };
     fetchAgents();
+  }, []);
+
+  // Filtered agents based on search
+  const filteredAgents = agents.filter(
+    (agent) =>
+      agent.name?.toLowerCase().includes(agentSearch.toLowerCase()) ||
+      agent.organisation?.toLowerCase().includes(agentSearch.toLowerCase()),
+  );
+
+  // Handle clicking outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.agent-dropdown-container')) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
   // useEffect(() => {
@@ -389,20 +413,74 @@ function GicForm() {
 
           <FormControl isRequired>
             <FormLabel>Agent Name</FormLabel>
-            <Select
-              name="Agents"
-              value={formData.Agents}
-              onChange={handleChange}
-              h="50px"
-              w="full"
-              placeholder="Select an agent"
-            >
-              {agents.map((agents) => (
-                <option key={agents._id} value={agents._id}>
-                  {agents.name.toUpperCase()}
-                </option>
-              ))}
-            </Select>
+            <Box position="relative" className="agent-dropdown-container">
+              <Box position="relative">
+                <Input
+                  type="text"
+                  placeholder="Search and select agent by name or organisation"
+                  value={agentSearch}
+                  onChange={(e) => {
+                    setAgentSearch(e.target.value);
+                    setIsDropdownOpen(true);
+                  }}
+                  onFocus={() => setIsDropdownOpen(true)}
+                  h="50px"
+                  w="full"
+                  autoComplete="off"
+                  pr="40px"
+                />
+                <Box
+                  position="absolute"
+                  right="10px"
+                  top="50%"
+                  transform="translateY(-50%)"
+                  cursor="pointer"
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  color="gray.400"
+                  fontSize="20px"
+                >
+                   {isDropdownOpen ? <GoChevronUp /> : <GoChevronDown  />}
+                </Box>
+              </Box>
+              {isDropdownOpen && filteredAgents.length > 0 && (
+                <Box
+                  position="absolute"
+                  top="100%"
+                  left="0"
+                  right="0"
+                  bg="white"
+                  border="1px solid"
+                  borderColor="gray.200"
+                  borderRadius="md"
+                  boxShadow="lg"
+                  maxH="200px"
+                  overflowY="auto"
+                  zIndex="10"
+                  mt="2px"
+                >
+                  {filteredAgents.map((agent) => (
+                    <Box
+                      key={agent._id}
+                      p={3}
+                      cursor="pointer"
+                      _hover={{ bg: "gray.100" }}
+                      onClick={() => {
+                        setFormData({ ...formData, Agents: agent._id });
+                        setAgentSearch(agent.name.toUpperCase());
+                        setIsDropdownOpen(false);
+                      }}
+                    >
+                      <Text fontWeight="medium">{agent.name.toUpperCase()}</Text>
+                      {agent.organization && (
+                        <Text fontSize="sm" color="gray.600">
+                          {agent.organization}
+                        </Text>
+                      )}
+                    </Box>
+                  ))}
+                </Box>
+              )}
+            </Box>
           </FormControl>
 
           <FormControl isRequired>

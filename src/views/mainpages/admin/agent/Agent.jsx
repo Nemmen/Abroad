@@ -68,7 +68,7 @@ import UserDataTable from './components/UserDataTable';
 import AgentDetailView from './components/AgentDetailView';
 
 // API base URL
-const API_BASE_URL = 'http://localhost:4000/api/admin/analytics';
+const API_BASE_URL = 'https://abroad-backend-gray.vercel.app/api/admin/analytics';
 
 export default function Agent() {
   // Theme colors
@@ -137,7 +137,7 @@ export default function Agent() {
           yearlyGicRes,
           yearlyForexRes
         ] = await Promise.all([
-          axios.get('http://localhost:4000/admin/getuser', { headers }),
+          axios.get('https://abroad-backend-gray.vercel.app/admin/getuser', { headers }),
           axios.get(`${API_BASE_URL}/agent-analytics`, { headers }),
           axios.get(`${API_BASE_URL}/agent-comparison`, { headers }),
           axios.get(`${API_BASE_URL}/getYearlyGICData`, { headers }),

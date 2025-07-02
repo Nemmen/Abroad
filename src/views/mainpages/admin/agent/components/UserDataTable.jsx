@@ -350,7 +350,7 @@ export default function UserDataTable(props) {
       };
       
       if (currentStatus === 'isdeleted') {
-        const url = `http://localhost:4000/admin/delete/${userId}`;
+        const url = `https://abroad-backend-gray.vercel.app/admin/delete/${userId}`;
         await axios.put(url, {}, { headers });
         const updatedData = data.filter((user) => user._id !== userId);
         setData(updatedData);
@@ -367,8 +367,8 @@ export default function UserDataTable(props) {
       
       const newStatus = currentStatus === 'active' ? 'block' : 'active';
       const url = currentStatus === 'active'
-        ? `http://localhost:4000/admin/block/${userId}`
-        : `http://localhost:4000/admin/unblock/${userId}`;
+        ? `https://abroad-backend-gray.vercel.app/admin/block/${userId}`
+        : `https://abroad-backend-gray.vercel.app/admin/unblock/${userId}`;
         
       await axios.put(url, {}, { headers });
       

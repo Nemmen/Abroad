@@ -52,7 +52,7 @@ import GICYearlyStatus from './components/GICYearlyStatus';
 import GICForexStatus from './components/GICForexStatus';
 
 // Constants
-const API_BASE_URL = 'http://localhost:4000/api/admin/analytics';
+const API_BASE_URL = 'https://abroad-backend-gray.vercel.app/api/admin/analytics';
 
 export default function AdminDashboard() {
   // Theme colors
