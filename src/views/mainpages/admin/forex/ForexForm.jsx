@@ -21,6 +21,7 @@ import {
   ModalCloseButton,
   Spinner,
 } from '@chakra-ui/react';
+import { GoChevronDown , GoChevronUp  } from "react-icons/go";
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import countries from './csvjson.json';
@@ -42,7 +43,7 @@ function ForexForm() {
     tds: '',
     netPayable: '',
     commissionStatus: '',
-    aecommission:'',
+    aecommission: '',
   });
   const [passportFile, setPassportFile] = useState(null);
   const [offerLetterFile, setOfferLetterFile] = useState(null);
@@ -50,7 +51,8 @@ function ForexForm() {
   // const [students, setStudents] = useState([]);
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  const [agentSearch, setAgentSearch] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   // const [isModalOpen, setIsModalOpen] = useState(false);
   // const openModal = () => setIsModalOpen(true);
   // const closeModal = () => setIsModalOpen(false);
@@ -321,7 +323,7 @@ function ForexForm() {
         ...formData,
         date: accOpeningDate1,
         // studentRef: studentId,
-        studentName : formData.studentRef,
+        studentName: formData.studentRef,
         passportFile: {
           fileId: uploadResult?.uploads[0]?.fileId,
           documentFile: uploadResult?.uploads[0]?.viewLink,
@@ -331,7 +333,6 @@ function ForexForm() {
           documentFile: uploadResult?.uploads[1]?.viewLink,
         },
         documents: uploadedFiles,
-
       };
 
       console.log('Final Form Data:', finalFormData);
@@ -391,6 +392,27 @@ function ForexForm() {
     setDocuments(updatedDocuments);
   };
 
+  // Filtered agents based on search
+  const filteredAgents = agents.filter(
+    (agent) =>
+      agent.name?.toLowerCase().includes(agentSearch.toLowerCase()) ||
+      agent.organisation?.toLowerCase().includes(agentSearch.toLowerCase()),
+  );
+
+  // Handle clicking outside to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.agent-dropdown-container')) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   return (
     <Box
       maxW="100%"
@@ -406,20 +428,74 @@ function ForexForm() {
         <SimpleGrid columns={2} spacing={4}>
           <FormControl isRequired>
             <FormLabel>Agent</FormLabel>
-            <Select
-              name="agentRef"
-              value={formData.agentRef}
-              onChange={handleChange}
-              h="50px"
-              w="full"
-              placeholder="Select an agent"
-            >
-              {agents.map((agent) => (
-                <option key={agent._id} value={agent._id}>
-                  {agent.name.toUpperCase()}
-                </option>
-              ))}
-            </Select>
+            <Box position="relative" className="agent-dropdown-container">
+              <Box position="relative">
+                <Input
+                  type="text"
+                  placeholder="Search and select agent by name or organisation"
+                  value={agentSearch}
+                  onChange={(e) => {
+                    setAgentSearch(e.target.value);
+                    setIsDropdownOpen(true);
+                  }}
+                  onFocus={() => setIsDropdownOpen(true)}
+                  h="50px"
+                  w="full"
+                  autoComplete="off"
+                  pr="40px"
+                />
+                <Box
+                  position="absolute"
+                  right="10px"
+                  top="50%"
+                  transform="translateY(-50%)"
+                  cursor="pointer"
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  color="blackAlpha.700"
+                  fontSize="20px"
+                >
+                  {isDropdownOpen ? <GoChevronUp /> : <GoChevronDown  />}
+                </Box>
+              </Box>
+              {isDropdownOpen && filteredAgents.length > 0 && (
+                <Box
+                  position="absolute"
+                  top="100%"
+                  left="0"
+                  right="0"
+                  bg="white"
+                  border="1px solid"
+                  borderColor="gray.200"
+                  borderRadius="md"
+                  boxShadow="lg"
+                  maxH="200px"
+                  overflowY="auto"
+                  zIndex="10"
+                  mt="2px"
+                >
+                  {filteredAgents.map((agent) => (
+                    <Box
+                      key={agent._id}
+                      p={3}
+                      cursor="pointer"
+                      _hover={{ bg: "gray.100" }}
+                      onClick={() => {
+                        setFormData({ ...formData, agentRef: agent._id });
+                        setAgentSearch(agent.name.toUpperCase());
+                        setIsDropdownOpen(false);
+                      }}
+                    >
+                      <Text fontWeight="medium">{agent.name.toUpperCase()}</Text>
+                      {agent.organization && (
+                        <Text fontSize="sm" color="gray.600">
+                          {agent.organization}
+                        </Text>
+                      )}
+                    </Box>
+                  ))}
+                </Box>
+              )}
+            </Box>
           </FormControl>
 
           <FormControl isRequired>
