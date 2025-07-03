@@ -535,7 +535,7 @@ function ForexForm() {
           </FormControl> */}
 
           <FormControl isRequired>
-            <FormLabel>Country</FormLabel>
+            <FormLabel>Currency</FormLabel>
             <Select
               name="country"
               placeholder="Select Country"
@@ -564,18 +564,7 @@ function ForexForm() {
             />
           </FormControl>
 
-          <FormControl>
-            <FormLabel>AE Commission</FormLabel>
-            <Input
-              type="text"
-              name="aecommission"
-              value={formData.aecommission}
-              onChange={handleChange}
-              h="50px"
-              w="full"
-            />
-          </FormControl>
-
+         
           <FormControl isRequired>
             <FormLabel>Quotation</FormLabel>
             <NumberInput min={0} h="50px" w="full">
@@ -656,6 +645,18 @@ function ForexForm() {
               />
             </NumberInput>
           </FormControl>
+           <FormControl>
+            <FormLabel>AE Commission</FormLabel>
+            <Input
+              type="text"
+              name="aecommission"
+              value={formData.aecommission}
+              onChange={handleChange}
+              h="50px"
+              w="full"
+            />
+          </FormControl>
+
 
           <FormControl isRequired>
             <FormLabel>Net Payable</FormLabel>
