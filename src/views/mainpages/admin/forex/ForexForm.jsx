@@ -538,7 +538,7 @@ function ForexForm() {
             <FormLabel>Currency</FormLabel>
             <Select
               name="country"
-              placeholder="Select Country"
+              placeholder="Select Currency"
               value={formData.country}
               onChange={handleChange}
               h="50px"
