@@ -21,7 +21,7 @@ import {
   ModalCloseButton,
   Spinner,
 } from '@chakra-ui/react';
-import { GoChevronDown , GoChevronUp  } from "react-icons/go";
+import { GoChevronDown, GoChevronUp } from 'react-icons/go';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import countries from './csvjson.json';
@@ -30,6 +30,7 @@ const getCurrentDate = () => format(new Date(), 'yyyy-MM-dd');
 function ForexForm() {
   const navigate = useNavigate();
   const [accOpeningDate1, setAccOpeningDate1] = useState(getCurrentDate());
+  const [commissionPaymentDate, setCommissionPaymentDate] = useState(null);
   const [formData, setFormData] = useState({
     agentRef: '',
     studentRef: '',
@@ -47,6 +48,7 @@ function ForexForm() {
   });
   const [passportFile, setPassportFile] = useState(null);
   const [offerLetterFile, setOfferLetterFile] = useState(null);
+  const [commissionPaymentProof, setCommissionPaymentProof] = useState(null);
   // const [emaill, setEmail] = useState('');
   // const [students, setStudents] = useState([]);
   const [documents, setDocuments] = useState([]);
@@ -266,7 +268,12 @@ function ForexForm() {
       let uploadedFiles = [];
       let uploadResult = null;
 
-      if (passportFile || offerLetterFile || documents.length > 0) {
+      if (
+        passportFile ||
+        offerLetterFile ||
+        commissionPaymentProof ||
+        documents.length > 0
+      ) {
         // Update formData with the new student ID
 
         // Step 2: Prepare file upload form data
@@ -281,6 +288,7 @@ function ForexForm() {
         const files = [
           passportFile,
           offerLetterFile,
+          commissionPaymentProof,
           ...documents.map((doc) => doc.documentFile),
         ].filter(Boolean);
 
@@ -307,8 +315,8 @@ function ForexForm() {
           .map((file, index) => {
             if (index > 1) {
               return {
-                documentOf: documents[index - 2]?.documentOf,
-                documentType: documents[index - 2]?.documentType,
+                documentOf: documents[index - 3]?.documentOf,
+                documentType: documents[index - 3]?.documentType,
                 fileId: file.fileId,
                 documentFile: file.viewLink,
               };
@@ -318,10 +326,16 @@ function ForexForm() {
           .filter(Boolean);
       }
 
+      let formattedcommissionPaymentDate = format(
+        commissionPaymentDate,
+        'yyyy-MM-dd',
+      );
+
       // Step 3: Submit the final form data
       const finalFormData = {
         ...formData,
         date: accOpeningDate1,
+        commissionPaymentDate: formattedcommissionPaymentDate,
         // studentRef: studentId,
         studentName: formData.studentRef,
         passportFile: {
@@ -331,6 +345,10 @@ function ForexForm() {
         offerLetterFile: {
           fileId: uploadResult?.uploads[1]?.fileId,
           documentFile: uploadResult?.uploads[1]?.viewLink,
+        },
+        commissionPaymentProof: {
+          fileId: uploadResult?.uploads[2]?.fileId,
+          documentFile: uploadResult?.uploads[2]?.viewLink,
         },
         documents: uploadedFiles,
       };
@@ -454,7 +472,7 @@ function ForexForm() {
                   color="blackAlpha.700"
                   fontSize="20px"
                 >
-                  {isDropdownOpen ? <GoChevronUp /> : <GoChevronDown  />}
+                  {isDropdownOpen ? <GoChevronUp /> : <GoChevronDown />}
                 </Box>
               </Box>
               {isDropdownOpen && filteredAgents.length > 0 && (
@@ -478,14 +496,16 @@ function ForexForm() {
                       key={agent._id}
                       p={3}
                       cursor="pointer"
-                      _hover={{ bg: "gray.100" }}
+                      _hover={{ bg: 'gray.100' }}
                       onClick={() => {
                         setFormData({ ...formData, agentRef: agent._id });
                         setAgentSearch(agent.name.toUpperCase());
                         setIsDropdownOpen(false);
                       }}
                     >
-                      <Text fontWeight="medium">{agent.name.toUpperCase()}</Text>
+                      <Text fontWeight="medium">
+                        {agent.name.toUpperCase()}
+                      </Text>
                       {agent.organization && (
                         <Text fontSize="sm" color="gray.600">
                           {agent.organization}
@@ -564,7 +584,6 @@ function ForexForm() {
             />
           </FormControl>
 
-         
           <FormControl isRequired>
             <FormLabel>Quotation</FormLabel>
             <NumberInput min={0} h="50px" w="full">
@@ -635,6 +654,17 @@ function ForexForm() {
           </FormControl>
 
           <FormControl isRequired>
+            <FormLabel>Commission Payment Date</FormLabel>
+            <Input
+              type="date"
+              value={commissionPaymentDate}
+              onChange={(e) => setCommissionPaymentDate(e.target.value)}
+              h="50px"
+              w="full"
+            />
+          </FormControl>
+
+          <FormControl isRequired>
             <FormLabel>TDS</FormLabel>
             <NumberInput min={0} h="50px" w="full">
               <NumberInputField
@@ -645,7 +675,7 @@ function ForexForm() {
               />
             </NumberInput>
           </FormControl>
-           <FormControl>
+          <FormControl>
             <FormLabel>AE Commission</FormLabel>
             <Input
               type="text"
@@ -656,7 +686,6 @@ function ForexForm() {
               w="full"
             />
           </FormControl>
-
 
           <FormControl isRequired>
             <FormLabel>Net Payable</FormLabel>
@@ -726,6 +755,34 @@ function ForexForm() {
                 id="offerLetterFile"
                 name="offerLetterFile"
                 onChange={(e) => handleFileChangeoffpass(e, setOfferLetterFile)}
+                hidden
+              />
+            </Flex>
+          </FormControl>
+          <FormControl>
+            <FormLabel>Commission Payment Proof</FormLabel>
+            <Flex align="center">
+              <Button
+                colorScheme="blue"
+                onClick={() =>
+                  document.getElementById('commissionPaymentProof').click()
+                }
+                mr={2}
+              >
+                Choose File
+              </Button>
+              <Text>
+                {commissionPaymentProof
+                  ? commissionPaymentProof.name
+                  : 'No file chosen'}
+              </Text>
+              <Input
+                type="file"
+                id="commissionPaymentProof"
+                name="commissionPaymentProof"
+                onChange={(e) =>
+                  handleFileChangeoffpass(e, setCommissionPaymentProof)
+                }
                 hidden
               />
             </Flex>
