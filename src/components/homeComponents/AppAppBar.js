@@ -146,12 +146,12 @@ export default function AppAppBar() {
 
                 <Divider sx={{ my: 3 }} />
                 <MenuItem>
-                  <Button color="primary" variant="contained" fullWidth onClick={()=>( navigate("/auth/login"))} replace>
+                  <Button color="primary" variant="contained" fullWidth onClick={()=>( navigate("/auth/signup"))} replace>
                     Sign up
                   </Button>
                 </MenuItem>
                 <MenuItem>
-                  <Button color="primary" variant="outlined" fullWidth onClick={()=>( navigate("/auth/signup"))} replace>
+                  <Button color="primary" variant="outlined" fullWidth onClick={()=>( navigate("/auth/login"))} replace>
                     Sign in
                   </Button>
                 </MenuItem>
