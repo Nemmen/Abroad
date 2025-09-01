@@ -103,7 +103,7 @@ export default function Login() {
             {/* Logo */}
             <div className="flex justify-center mb-8">
               <img
-                className=""
+                className="h-14 w-auto"
                 src="/Logo.png"
                 alt="Company Logo"
               />
@@ -112,7 +112,7 @@ export default function Login() {
               Welcome Back
             </h2>
             <p className="mt-2 text-sm text-gray-600 text-center">
-              Sign in to your account to continue
+              Access your financial services dashboard
             </p>
           </div>
 
@@ -262,7 +262,7 @@ export default function Login() {
                   </div>
                   
                   {/* Chart title */}
-                  <div className="text-gray-700 text-sm font-medium">Student Success Rate</div>
+                  <div className="text-gray-700 text-sm font-medium">Financial Portfolio</div>
                   <div className="text-gray-500 text-xs">Monthly Analytics</div>
                 </div>
 
@@ -307,42 +307,42 @@ export default function Login() {
 
               {/* Text content */}
               <h1 className="text-4xl font-bold text-white mb-6">
-                Welcome to Your <br />
-                <span className="text-yellow-300">Educational Journey</span>
+                Your Financial <br />
+                <span className="text-yellow-300">Services Hub</span>
               </h1>
               
               <p className="text-xl text-blue-100 mb-8 leading-relaxed">
-                Track your progress, manage applications, and connect with opportunities worldwide
+                Manage GIC, Blocked Accounts, and Forex services seamlessly in one secure platform
               </p>
 
               {/* Feature points */}
               <div className="space-y-4 text-blue-100">
                 <div className="flex items-center space-x-3 justify-center">
                   <div className="w-2 h-2 bg-yellow-300 rounded-full"></div>
-                  <span>Real-time application tracking</span>
+                  <span>Real-time transaction tracking</span>
                 </div>
                 <div className="flex items-center space-x-3 justify-center">
                   <div className="w-2 h-2 bg-yellow-300 rounded-full"></div>
-                  <span>Expert guidance and support</span>
+                  <span>Secure financial operations</span>
                 </div>
                 <div className="flex items-center space-x-3 justify-center">
                   <div className="w-2 h-2 bg-yellow-300 rounded-full"></div>
-                  <span>Global university partnerships</span>
+                  <span>Trusted banking partnerships</span>
                 </div>
               </div>
 
               {/* Bottom quote */}
               <div className="mt-8 p-4 bg-white/10 backdrop-blur-sm rounded-xl">
                 <p className="text-blue-100 italic text-sm">
-                  "Success is not just about reaching your destination, it's about the journey of growth and learning."
+                  "Fast. Easy. Reliable. - Your trusted solution for all financial services needs."
                 </p>
                 <div className="flex items-center justify-center mt-2">
                   <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
                     <FaUser className="text-white text-xs" />
                   </div>
                   <div className="ml-2 text-blue-200 text-xs">
-                    <div className="font-medium">Success Story</div>
-                    <div className="text-blue-300">From our community</div>
+                    <div className="font-medium">Trusted Platform</div>
+                    <div className="text-blue-300">Financial Services</div>
                   </div>
                 </div>
               </div>
