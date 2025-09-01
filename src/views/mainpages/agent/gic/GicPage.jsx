@@ -158,13 +158,17 @@ const Gic = () => {
       return cleanedItem;
     });
 
-    // Filter columns based on selection
-    const filteredData = cleanData.map((item) =>
-      selectedColumns.reduce((acc, field) => {
-        acc[field] = item[field] || 'N/A';
-        return acc;
-      }, {})
-    );
+    // Filter data to include only selected columns
+    const filteredData = cleanData.map((item) => {
+      const filteredItem = {};
+      selectedColumns.forEach(field => {
+        // Get the header name for the field
+        const column = allColumns.find(col => col.field === field);
+        const headerName = column ? column.headerName : field;
+        filteredItem[headerName] = item[field] || 'N/A';
+      });
+      return filteredItem;
+    });
 
     // Generate Excel file
     const worksheet = XLSX.utils.json_to_sheet(filteredData);
@@ -389,6 +393,13 @@ const Gic = () => {
           </FormGroup>
           
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+            <Button 
+              onClick={() => setSelectedColumns([])}
+              sx={{ textTransform: 'none' }}
+              color="error"
+            >
+              Clear Filter
+            </Button>
             <Button 
               onClick={() => setSelectedColumns(allColumns.map(col => col.field))}
               sx={{ textTransform: 'none' }}
