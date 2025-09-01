@@ -258,43 +258,43 @@ export default function Register() {
 
               {/* Text content */}
               <h1 className="text-4xl font-bold text-white mb-6">
-                Begin Your <br />
-                <span className="text-yellow-300">Success Story</span>
+                Manage Your <br />
+                <span className="text-yellow-300">Financial Journey</span>
               </h1>
               
               <p className="text-xl text-indigo-100 mb-8 leading-relaxed">
-                Join thousands of students who have transformed their dreams into reality with our platform
+                Manage GIC, Blocked Accounts, and Forex services in one platform. Simplified. Transparent. Trustworthy.
               </p>
 
               {/* Feature points */}
               <div className="space-y-4 text-indigo-100">
                 <div className="flex items-center space-x-3 justify-center">
                   <div className="w-2 h-2 bg-yellow-300 rounded-full"></div>
-                  <span>Free consultation and guidance</span>
+                  <span>Effortless GIC Account Management</span>
                 </div>
                 <div className="flex items-center space-x-3 justify-center">
                   <div className="w-2 h-2 bg-yellow-300 rounded-full"></div>
-                  <span>Document verification assistance</span>
+                  <span>Trusted Blocked Account Services</span>
                 </div>
                 <div className="flex items-center space-x-3 justify-center">
                   <div className="w-2 h-2 bg-yellow-300 rounded-full"></div>
-                  <span>Scholarship opportunities</span>
+                  <span>Secure Forex Solutions</span>
                 </div>
               </div>
 
               {/* Success metrics */}
               <div className="mt-8 grid grid-cols-3 gap-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-yellow-300">98%</div>
-                  <div className="text-xs text-indigo-200">Success Rate</div>
+                  <div className="text-2xl font-bold text-yellow-300">Fast</div>
+                  <div className="text-xs text-indigo-200">Applications</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-yellow-300">50+</div>
-                  <div className="text-xs text-indigo-200">Countries</div>
+                  <div className="text-2xl font-bold text-yellow-300">Easy</div>
+                  <div className="text-xs text-indigo-200">Process</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-yellow-300">10K+</div>
-                  <div className="text-xs text-indigo-200">Students</div>
+                  <div className="text-2xl font-bold text-yellow-300">Secure</div>
+                  <div className="text-xs text-indigo-200">Transactions</div>
                 </div>
               </div>
             </div>
@@ -318,7 +318,7 @@ export default function Register() {
               Create Account
             </h2>
             <p className="mt-2 text-sm text-gray-600 text-center">
-              Join us and start your educational journey
+              Join us and streamline your financial services journey
             </p>
           </div>
 
