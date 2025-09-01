@@ -103,7 +103,7 @@ export default function Login() {
             {/* Logo */}
             <div className="flex justify-center mb-8">
               <img
-                className=""
+                className="h-14 w-auto"
                 src="/Logo.png"
                 alt="Company Logo"
               />

@@ -309,7 +309,7 @@ export default function Register() {
             {/* Logo */}
             <div className="flex justify-center mb-6">
               <img
-                className="h-36 w-auto"
+                className="h-14 w-auto"
                 src="/Logo.png"
                 alt="Company Logo"
               />
