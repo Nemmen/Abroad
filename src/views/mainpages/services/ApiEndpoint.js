@@ -2,11 +2,7 @@
 import axios from 'axios';
 
 const instance = axios.create({
-<<<<<<< HEAD
-  baseURL: 'https://127.0.0.1:4000',
-=======
   baseURL: 'https://abroad-backend-ten.vercel.app',
->>>>>>> 1ed4caf76eeb4bdcce35045910b516607e2999bb
   headers: {
     'Content-Type': 'application/json'
   },

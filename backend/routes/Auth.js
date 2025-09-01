@@ -1,9 +1,5 @@
 import express from 'express';
-<<<<<<< HEAD
-import {checkUser, login, logout,getAllusers,studentCreate, register, getStudent,addGicForm, viewAllGicForm, addForexForm, viewAllForexForms, getAllBlockedData, updateGicForm, updateForexForm, forgotPassword, resetPassword  } from '../controllers/Auth.js';
-=======
 import {checkUser, verifyAndResetPassword, getAgentCommission, login, logout,getAllusers,studentCreate, register, getStudent,addGicForm, viewAllGicForm, addForexForm, viewAllForexForms, getAllBlockedData, updateGicForm, updateForexForm,getAgentStats, sendOtp  } from '../controllers/Auth.js';
->>>>>>> 1ed4caf76eeb4bdcce35045910b516607e2999bb
 import { IsUser } from '../middleware/verifyToken.js';
 
 const AuthRoutes = express.Router();
@@ -20,14 +16,7 @@ AuthRoutes.post('/register', async (req, res) => {
 AuthRoutes.post('/login', login);
 AuthRoutes.post('/logout', logout);
 AuthRoutes.get('/checkUser', IsUser, checkUser);
-<<<<<<< HEAD
-AuthRoutes.post('/auth/forgot-password', forgotPassword);
-AuthRoutes.post('/auth/reset-password', resetPassword);
-
-
-=======
 // AuthRoutes.put('/updateProfile',IsUser, updateProfile);
->>>>>>> 1ed4caf76eeb4bdcce35045910b516607e2999bb
 
 // Form Handling Routes
 AuthRoutes.post('/addGicForm', addGicForm);

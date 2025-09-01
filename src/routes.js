@@ -10,7 +10,6 @@ import {
   MdBusiness,
   MdVerifiedUser
 } from 'react-icons/md';
-import { CgProfile } from "react-icons/cg";
 
 import { SiAuthentik } from 'react-icons/si';
 
@@ -27,14 +26,8 @@ import Forex from 'views/mainpages/admin/forex/Forex';
 import AgentForex from './views/mainpages/agent/forex/AgentForex.jsx'
 import BlockedPage from 'views/mainpages/agent/blocked/BlockedPage';
 import StudentPage from 'views/mainpages/agent/students/StudentPage';
-<<<<<<< HEAD
-import ForgotPassword from 'views/mainpages/login_signup/ForgotPassword';
-=======
-import Profile from 'views/mainpages/agent/profile/Profile';
-
 import ForgotPassword from "views/mainpages/login_signup/ForgotPassword";
 import ResetPassword from "views/mainpages/login_signup/ResetPassword";
->>>>>>> 1ed4caf76eeb4bdcce35045910b516607e2999bb
 
 const routes = [
   {
@@ -134,26 +127,17 @@ export const Auth = [
     component: <Signup />,
   },
   {
-<<<<<<< HEAD
-    name: 'Forgot Password',
-    layout: '/auth',
-    path: '/forgot-password',
-    icon: <Icon as={BsFillPiggyBankFill} width="20px" height="20px" color="inherit" />,
-    component: <ForgotPassword/>
-=======
     name: "Forgot Password",
     layout: "/auth",
     path: "/forgot-password",
-    
+    icon: <Icon as={BsFillPiggyBankFill} width="20px" height="20px" color="inherit" />,
     component: <ForgotPassword />,
   },
   {
     name: "Reset Password",
     layout: "/auth",
     path: "/reset-password",
-    
     component: <ResetPassword />,
->>>>>>> 1ed4caf76eeb4bdcce35045910b516607e2999bb
   },
 ];
 export default routes;
