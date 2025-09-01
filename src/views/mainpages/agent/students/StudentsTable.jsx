@@ -1,58 +1,79 @@
 import React from 'react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Box,
+  useTheme
+} from '@mui/material';
 
 const StudentsTable = ({ students, agen }) => {
+  const theme = useTheme();
+  // Safe access to theme mode with fallback
+  const isLightMode = theme?.palette?.mode !== 'dark';
+  
   return (
-    <div className="overflow-x-auto bg-white shadow-md rounded-lg">
-      <table className="min-w-full table-auto">
-        <thead>
-          <tr className="bg-gray-200">
-            <th className="py-3 px-6 text-left text-gray-600 font-semibold">
+    <TableContainer 
+      component={Paper} 
+      elevation={1}
+      sx={{
+        borderRadius: 2,
+        overflow: 'hidden',
+        boxShadow: '0 2px 12px 0 rgba(0,0,0,0.05)'
+      }}
+    >
+      <Table sx={{ minWidth: 650 }} aria-label="students table">
+        <TableHead>
+          <TableRow sx={{ 
+            backgroundColor: isLightMode ? 'rgba(0, 0, 0, 0.04)' : 'rgba(255, 255, 255, 0.08)' 
+          }}>
+            <TableCell sx={{ fontWeight: 600, py: 1.5 }}>
               Student Code
-            </th>
-            <th className="py-3 px-6 text-left text-gray-600 font-semibold">
+            </TableCell>
+            <TableCell sx={{ fontWeight: 600, py: 1.5 }}>
               Name
-            </th>
-            <th className="py-3 px-6 text-left text-gray-600 font-semibold">
+            </TableCell>
+            <TableCell sx={{ fontWeight: 600, py: 1.5 }}>
               Email
-            </th>
-
-            <th className="py-3 px-6 text-left text-gray-600 font-semibold">
+            </TableCell>
+            <TableCell sx={{ fontWeight: 600, py: 1.5 }}>
               Created At
-            </th>
-            {/* <th className="py-3 px-6 text-left text-gray-600 font-semibold">
-              Updated At
-            </th> */}
-            {/* <th className="py-3 px-6 text-left text-gray-600 font-semibold">
-              Actions
-            </th> */}
-          </tr>
-        </thead>
-        <tbody>
-          {students.map((student) => (
-            <tr key={student._id} className="border-b hover:bg-gray-50">
-              <td className="py-3 px-6 text-gray-800">{student.studentCode}</td>
-              <td className="py-3 px-6 text-gray-800">{student.name}</td>
-              <td className="py-3 px-6 text-gray-800">{student.email}</td>
-
-              <td className="py-3 px-6 text-gray-800">
-                {new Date(student.createdAt).toLocaleString()}
-              </td>
-              {/* <td className="py-3 px-6 text-gray-800">
-                {new Date(student.updatedAt).toLocaleString()}
-              </td> */}
-              {/* <td className="py-3 px-6">
-                <button className="text-blue-500 hover:text-blue-700">
-                  Edit
-                </button>
-                <button className="ml-4 text-red-500 hover:text-red-700">
-                  Delete
-                </button>
-              </td> */}
-            </tr>
+            </TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {students?.map((student) => (
+            <TableRow 
+              key={student._id} 
+              sx={{ 
+                '&:hover': { 
+                  backgroundColor: isLightMode ? 'rgba(0, 0, 0, 0.04)' : 'rgba(255, 255, 255, 0.08)' 
+                },
+                borderBottom: `1px solid ${theme?.palette?.divider || '#e0e0e0'}`
+              }}
+            >
+              <TableCell>{student.studentCode}</TableCell>
+              <TableCell>{student.name}</TableCell>
+              <TableCell>{student.email}</TableCell>
+              <TableCell>
+                {student.createdAt ? new Date(student.createdAt).toLocaleString() : 'N/A'}
+              </TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
-    </div>
+          {(!students || students.length === 0) && (
+            <TableRow>
+              <TableCell colSpan={4} align="center" sx={{ py: 3 }}>
+                No students found
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 };
 

@@ -1,180 +1,280 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import ReactApexChart from "react-apexcharts";
 import {
   Box,
   Flex,
   Text,
-  Select,
   useColorModeValue,
   Spinner,
+  Center,
+  Button,
+  HStack,
+  VStack,
+  Badge,
+  Tooltip,
+  useBreakpointValue
 } from "@chakra-ui/react";
-import Card from "components/card/Card.js";
-import ReactApexChart from "react-apexcharts"; // Import the new chart library
-import axios from "axios";
-import dayjs from "dayjs";
 
-export default function Conversion(props) {
-  const { ...rest } = props;
+const PieCard = ({ isLoading, users = [] }) => {
+  const [activeFilter, setActiveFilter] = useState(null);
+  const textColor = useColorModeValue("gray.700", "gray.50");
+  const subTextColor = useColorModeValue("gray.500", "gray.400");
+  const cardBg = useColorModeValue("white", "gray.700");
+  
+  // Responsive adjustments
+  const chartHeight = useBreakpointValue({ base: "220px", md: "260px" });
+  const donutSize = useBreakpointValue({ base: "70%", md: "65%" });
+  
+  // Calculate agent distribution by status - memoized for performance
+  const calculateDistribution = useCallback(() => {
+    if (!users || users.length === 0) {
+      return [1, 0, 0]; // Default values to show empty chart
+    }
+    
+    const active = users.filter(u => u.userStatus === 'active').length;
+    const pending = users.filter(u => u.userStatus === 'pending').length;
+    const blocked = users.filter(u => u.userStatus === 'block' || u.userStatus === 'blocked').length;
+    
+    return [active, pending, blocked];
+  }, [users]);
+  
+  // Calculate percentages for display
+  const calculatePercentages = useCallback(() => {
+    const [active, pending, blocked] = calculateDistribution();
+    const total = active + pending + blocked;
+    
+    if (total === 0) return [0, 0, 0];
+    
+    return [
+      Math.round((active / total) * 100),
+      Math.round((pending / total) * 100),
+      Math.round((blocked / total) * 100)
+    ];
+  }, [calculateDistribution]);
 
-  const [users, setUsers] = useState([]);
-  const [filteredData, setFilteredData] = useState({ approved: 0, pending: 0, blocked: 0 });
-  const [timeFilter, setTimeFilter] = useState("monthly");
-  const [loading, setLoading] = useState(true); // Loading state
-
-  const textColor = useColorModeValue("secondaryGray.900", "white");
-  const cardColor = useColorModeValue("white", "navy.700");
-  const cardShadow = useColorModeValue(
-    "0px 18px 40px rgba(112, 144, 176, 0.12)",
-    "unset"
-  );
-
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await axios.get("https://abroad-backend-gray.vercel.app/admin/getuser", {
-          withCredentials: true,
-        });
-        setUsers(response.data.users || []);
-      } catch (error) {
-        console.error("Error fetching users:", error);
-      } finally {
-        setLoading(false); // Stop loading after fetch
-      }
-    };
-
-    fetchUsers();
-  }, []);
-
-  useEffect(() => {
-    if (users.length === 0) return;
-
-    const filteredUsers = users.filter((user) => {
-      const createdAt = dayjs(user.createdAt);
-      if (timeFilter === "daily") {
-        return createdAt.isSame(dayjs(), "day");
-      } else if (timeFilter === "monthly") {
-        return createdAt.isSame(dayjs(), "month");
-      } else if (timeFilter === "yearly") {
-        return createdAt.isSame(dayjs(), "year");
-      }
-      return true;
-    });
-
-    const userStatusCounts = filteredUsers.reduce(
-      (acc, user) => {
-        if (user.userStatus === "active") acc.approved += 1;
-        if (user.userStatus === "pending") acc.pending += 1;
-        if (user.userStatus === "block") acc.blocked += 1;
-        return acc;
+  const [chartData, setChartData] = useState({
+    series: calculateDistribution(),
+    options: {
+      chart: {
+        type: "donut",
+        animations: {
+          dynamicAnimation: {
+            enabled: true,
+            speed: 350
+          }
+        },
+        events: {
+          dataPointSelection: (event, chartContext, config) => {
+            const statusIndex = config.dataPointIndex;
+            setActiveFilter(activeFilter === statusIndex ? null : statusIndex);
+          }
+        }
       },
-      { approved: 0, pending: 0, blocked: 0 }
-    );
+      colors: ["#38A169", "#DD6B20", "#E53E3E"],
+      labels: ["Active", "Pending", "Blocked"],
+      legend: {
+        show: false,
+      },
+      dataLabels: {
+        enabled: false,
+      },
+      plotOptions: {
+        pie: {
+          expandOnClick: false,
+          donut: {
+            size: donutSize,
+            labels: {
+              show: true,
+              total: {
+                show: true,
+                fontSize: "22px",
+                fontWeight: 600,
+                color: textColor,
+                formatter: function (w) {
+                  return w.globals.seriesTotals.reduce((a, b) => a + b, 0);
+                },
+              },
+              value: {
+                fontSize: "16px",
+                show: true,
+                color: textColor,
+                offsetY: 8,
+              },
+            },
+          },
+        },
+      },
+      stroke: {
+        width: 2,
+        colors: [cardBg]
+      },
+      tooltip: {
+        enabled: true,
+        theme: useColorModeValue("light", "dark"),
+        y: {
+          formatter: function(value, { seriesIndex, w }) {
+            const total = w.globals.seriesTotals.reduce((a, b) => a + b, 0);
+            const percentage = ((value / total) * 100).toFixed(1);
+            return `${value} agents (${percentage}%)`;
+          }
+        }
+      },
+      responsive: [{
+        breakpoint: 480,
+        options: {
+          chart: {
+            height: 250
+          }
+        }
+      }],
+      states: {
+        hover: {
+          filter: {
+            type: 'darken',
+            value: 0.85
+          }
+        },
+        active: {
+          filter: {
+            type: 'darken',
+            value: 0.5
+          }
+        }
+      }
+    },
+  });
+  
+  // Update chart when users data changes
+  useEffect(() => {
+    if (!isLoading) {
+      setChartData(prev => ({
+        ...prev,
+        series: calculateDistribution()
+      }));
+    }
+  }, [isLoading, calculateDistribution]);
 
-    setFilteredData(userStatusCounts);
-  }, [users, timeFilter]);
-
-  // Prepare data for pie chart
-  const pieChartData = [
-    { name: "Approved", value: filteredData.approved || 0 },
-    { name: "Pending", value: filteredData.pending || 0 },
-    { name: "Blocked", value: filteredData.blocked || 0 },
+  const legendItems = [
+    { color: "#38A169", label: "Active", status: "active" },
+    { color: "#DD6B20", label: "Pending", status: "pending" },
+    { color: "#E53E3E", label: "Blocked", status: "blocked" },
   ];
 
-  // Chart configuration for ReactApexChart
-  const pieChartOptions = {
-    chart: {
-      type: "pie",
-    },
-    labels: pieChartData.map((data) => data.name),
-    colors: ["#4318FF", "#6AD2FF", "#FF6A6A"],
-    legend: {
-      position: "bottom",
-      labels: {
-        useSeriesColors: true,
-      },
-    },
-    tooltip: {
-      enabled: true,
-      theme: "dark",
-    },
+  // Get the filtered users based on active filter
+  const getFilteredUsers = () => {
+    if (activeFilter === null) return users.length;
+    
+    const status = legendItems[activeFilter].status;
+    return users.filter(u => {
+      if (status === 'blocked') {
+        return u.userStatus === 'block' || u.userStatus === 'blocked';
+      }
+      return u.userStatus === status;
+    }).length;
   };
 
-  const pieChartSeries = pieChartData.map((data) => data.value); // Map values for the chart
-
-  const handleTimeFilterChange = (e) => {
-    setTimeFilter(e.target.value);
-  };
+  // Percentages for display
+  const percentages = calculatePercentages();
 
   return (
-    <Card p="20px" align="center" direction="column" w="100%" {...rest}>
-      <Flex
-        px={{ base: "0px", "2xl": "10px" }}
-        justifyContent="space-between"
-        alignItems="center"
-        w="100%"
-        mb="8px"
-      >
-        <Text color={textColor} fontSize="md" fontWeight="600" mt="4px">
-          User Status Overview
-        </Text>
-        <Select
-          fontSize="sm"
-          variant="subtle"
-          value={timeFilter}
-          onChange={handleTimeFilterChange}
-          fontWeight="700"
-        >
-          <option value="daily">Daily</option>
-          <option value="monthly">Monthly</option>
-          <option value="yearly">Yearly</option>
-        </Select>
-      </Flex>
-
-      {loading ? (
-        <Flex justifyContent="center" alignItems="center" mt="20px">
-          <Spinner size="lg" color={textColor} />
-        </Flex>
+    <Box>
+      {isLoading ? (
+        <Center p={8}>
+          <Spinner size="xl" color="blue.500" thickness="3px" speed="0.65s" />
+        </Center>
       ) : (
-        <ReactApexChart
-          options={pieChartOptions}
-          series={pieChartSeries}
-          type="pie"
-          height="300"
-        />
+        <>
+          <VStack spacing={4}>
+            <Box 
+              height={chartHeight} 
+              width="100%" 
+              position="relative"
+              aria-label="Agent status distribution chart"
+            >
+              <ReactApexChart
+                options={chartData.options}
+                series={chartData.series}
+                type="donut"
+                width="100%"
+                height="100%"
+              />
+              
+              {activeFilter !== null && (
+                <Button 
+                  position="absolute" 
+                  top={2} 
+                  right={2}
+                  size="xs"
+                  colorScheme="gray"
+                  onClick={() => setActiveFilter(null)}
+                >
+                  Clear
+                </Button>
+              )}
+            </Box>
+            
+            <HStack 
+              spacing={3} 
+              flexWrap="wrap" 
+              justify="center"
+              mt={2}
+            >
+              {legendItems.map((item, index) => (
+                <Tooltip 
+                  key={index} 
+                  label={`${item.label}: ${chartData.series[index]} agents (${percentages[index]}%)`}
+                  hasArrow
+                >
+                  <Flex 
+                    align="center" 
+                    bg={activeFilter === index ? `${item.color}50` : 'transparent'} 
+                    borderRadius="md"
+                    px={2}
+                    py={1}
+                    cursor="pointer"
+                    transition="all 0.2s"
+                    _hover={{ bg: `${item.color}30` }}
+                    onClick={() => setActiveFilter(activeFilter === index ? null : index)}
+                    role="button"
+                    aria-pressed={activeFilter === index}
+                    tabIndex={0}
+                    aria-label={`Filter by ${item.label} agents`}
+                  >
+                    <Box
+                      w={4}
+                      h={4}
+                      borderRadius="full"
+                      bg={item.color}
+                      mr={2}
+                      boxShadow={activeFilter === index ? "0 0 0 2px white, 0 0 0 4px " + item.color : "none"}
+                    />
+                    <Text color={textColor} fontSize="sm" fontWeight={activeFilter === index ? "bold" : "normal"}>
+                      {item.label}
+                      <Text as="span" ml={1} color={subTextColor}>
+                        ({percentages[index]}%)
+                      </Text>
+                    </Text>
+                  </Flex>
+                </Tooltip>
+              ))}
+            </HStack>
+            
+            {activeFilter !== null && (
+              <Badge 
+                colorScheme={activeFilter === 0 ? "green" : activeFilter === 1 ? "orange" : "red"}
+                fontSize="md"
+                borderRadius="full"
+                px={3}
+                py={1}
+              >
+                {getFilteredUsers()} {legendItems[activeFilter].label} Agents
+              </Badge>
+            )}
+          </VStack>
+        </>
       )}
-
-      <Card
-        bg={cardColor}
-        boxShadow={cardShadow}
-        w="100%"
-        p="15px"
-        px="20px"
-        mt="15px"
-        mx="auto"
-      >
-        <Flex justifyContent="center">
-          <Box display="grid" gridTemplateColumns="repeat(3, 1fr)" gap="10px">
-            {pieChartOptions.labels.map((label, index) => (
-              <Flex key={index} direction="column" align="center" py="5px">
-                <Flex align="center">
-                  <Box
-                    h="8px"
-                    w="8px"
-                    bg={pieChartOptions.colors[index]}
-                    borderRadius="50%"
-                    me="4px"
-                  />
-                  <Text fontSize="xs" color="secondaryGray.600" fontWeight="700" mb="5px">
-                    {label}
-                  </Text>
-                </Flex>
-                <Text fontSize="lg" color={textColor} fontWeight="700">
-                  {pieChartData[index].value}
-                </Text>
-              </Flex>
-            ))}
-          </Box>
-        </Flex>
-      </Card>
-    </Card>
+    </Box>
   );
-}
+};
+
+export default PieCard;

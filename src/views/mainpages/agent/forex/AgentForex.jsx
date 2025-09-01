@@ -1,24 +1,30 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import {
   Box,
+  Card,
+  Typography,
   Button,
   Divider,
-  Text,
-  VStack,
-  Checkbox,
   Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  ModalFooter,
-} from '@chakra-ui/react';
+  Checkbox,
+  FormGroup,
+  FormControlLabel,
+  Grid,
+  IconButton,
+  Stack,
+  CircularProgress,
+  Tooltip,
+} from '@mui/material';
 import DataTable from 'components/DataTable';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
 import { useSelector } from 'react-redux';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { useColorMode } from '@chakra-ui/react';
+import FilterAltIcon from '@mui/icons-material/FilterAlt';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import CloseIcon from '@mui/icons-material/Close';
 
 const allColumns = [
   { field: 'agentRef', headerName: 'Agent', width: 120 },
@@ -43,20 +49,64 @@ const Forex = () => {
     allColumns.map((col) => col.field),
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
- const { user } = useSelector((state) => state.Auth);
+  const [loading, setLoading] = useState(true);
+  const { user } = useSelector((state) => state.Auth);
+  const { colorMode } = useColorMode();
+
+  // Create MUI theme based on Chakra color mode
+  const theme = createTheme({
+    palette: {
+      mode: colorMode,
+      primary: {
+        main: colorMode === 'light' ? '#3B82F6' : '#90CAF9',
+      },
+      secondary: {
+        main: colorMode === 'light' ? '#10B981' : '#5CDB95',
+      },
+      background: {
+        default: colorMode === 'light' ? '#ffffff' : '#121212',
+        paper: colorMode === 'light' ? '#f9fafc' : '#1E1E1E',
+      },
+      text: {
+        primary: colorMode === 'light' ? '#111827' : '#f3f4f6',
+        secondary: colorMode === 'light' ? '#4B5563' : '#9CA3AF',
+      },
+    },
+    typography: {
+      fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    },
+    components: {
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            borderRadius: 8,
+            textTransform: 'none',
+            fontWeight: 600,
+          },
+        },
+      },
+      MuiCard: {
+        styleOverrides: {
+          root: {
+            borderRadius: 12,
+            boxShadow: '0 2px 12px 0 rgba(0,0,0,0.05)',
+          },
+        },
+      },
+    },
+  });
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const response = await axios.get(
           'https://abroad-backend-gray.vercel.app/auth/viewAllForexForms',
         );
         if (response.data.forexForms) {
-
           const userForexForms = response.data.forexForms.filter(
-            (form) => form.agentRef._id === user._id, // Replace with the correct field for user matching
+            (form) => form.agentRef._id === user._id,
           );
-
 
           const forexForms = userForexForms.map((item) => ({
             id: item._id,
@@ -79,11 +129,13 @@ const Forex = () => {
         }
       } catch (error) {
         console.error('Error fetching forex forms:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchData();
-  }, []);
+  }, [user._id]);
 
   const handleDownloadExcel = () => {
     const cleanData = data.map((item) => {
@@ -132,78 +184,183 @@ const Forex = () => {
   const memoizedRows = useMemo(() => rows, [rows]);
 
   return (
-    <Box width={'full'}>
-      <Box
-        display={'flex'}
-        padding={7}
-        paddingBottom={3}
-        justifyContent={'space-between'}
-        alignItems={'center'}
-      >
-        <Text fontSize="34px">FOREX Registrations</Text>
-        <div>
-          <Button
-            onClick={() => setIsModalOpen(true)}
-            width={'200px'}
-            variant="solid"
-            colorScheme="teal"
-            borderRadius={'none'}
-            mr={4}
-            mb={1}
+    <ThemeProvider theme={theme}>
+      <Box sx={{ px: { xs: 2, sm: 3 }, py: 2, maxWidth: '1400px', mx: 'auto' }}>
+        <Card elevation={1} sx={{ overflow: 'visible' }}>
+          <Box 
+            sx={{ 
+              p: 3, 
+              backgroundImage: 'linear-gradient(135deg, #11047A 0%, #4D1DB3 100%)',
+              borderTopLeftRadius: '12px',
+              borderTopRightRadius: '12px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 2
+            }}
           >
-            Filter Columns
-          </Button>
-          <Button
-            onClick={handleDownloadExcel}
-            width={'200px'}
-            variant="solid"
-            colorScheme="green"
-            borderRadius={'none'}
-            mr={4}
-            mb={1}
-          >
-            Download Excel
-          </Button>
-        </div>
-      </Box>
-      <Divider
-        width={'96%'}
-        mx={'auto'}
-        mb={'20px'}
-        bgColor={'black'}
-        height={'0.5px'}
-      />
-      <Box maxHeight="1200px" overflowY="auto">
-        <DataTable columns={memoizedColumns} rows={memoizedRows} />
+            <Typography variant="h5" fontWeight="600" color="white">
+              FOREX Registrations
+            </Typography>
+            
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+              <Tooltip title="Filter table columns">
+                <Button
+                  onClick={() => setIsModalOpen(true)}
+                  variant="outlined"
+                  startIcon={<FilterAltIcon />}
+                  sx={{ 
+                    color: 'white', 
+                    borderColor: 'rgba(255,255,255,0.5)',
+                    '&:hover': { 
+                      borderColor: 'white', 
+                      backgroundColor: 'rgba(255,255,255,0.1)' 
+                    } 
+                  }}
+                >
+                  Filter Columns
+                </Button>
+              </Tooltip>
+              
+              <Tooltip title="Download as Excel">
+                <Button
+                  onClick={handleDownloadExcel}
+                  variant="outlined"
+                  startIcon={<FileDownloadIcon />}
+                  sx={{ 
+                    color: 'white', 
+                    borderColor: 'rgba(255,255,255,0.5)',
+                    '&:hover': { 
+                      borderColor: 'white', 
+                      backgroundColor: 'rgba(255,255,255,0.1)' 
+                    } 
+                  }}
+                >
+                  Export to Excel
+                </Button>
+              </Tooltip>
+            </Box>
+          </Box>
+          
+          <Box sx={{ p: 3 }}>
+            {loading ? (
+              <Box display="flex" justifyContent="center" alignItems="center" height="200px">
+                <CircularProgress />
+              </Box>
+            ) : memoizedRows.length === 0 ? (
+              <Box 
+                sx={{ 
+                  display: 'flex', 
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  py: 10,
+                  textAlign: 'center'
+                }}
+              >
+                <Typography variant="h6" color="text.secondary" gutterBottom>
+                  No Forex records found
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Your forex transactions will appear here when they are created
+                </Typography>
+              </Box>
+            ) : (
+              <Box sx={{ 
+                height: '100%', 
+                width: '100%',
+                '& .MuiDataGrid-root': {
+                  border: 'none',
+                  minHeight: '400px',
+                }
+              }}>
+                <DataTable 
+                  columns={memoizedColumns} 
+                  rows={memoizedRows} 
+                />
+              </Box>
+            )}
+          </Box>
+        </Card>
       </Box>
 
-      {/* Modal for Column Filtering */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
-        <ModalOverlay />
-        <ModalContent>
-          <ModalHeader>Select Columns</ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <VStack align="start">
+      {/* Column Filter Modal */}
+      <Modal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        aria-labelledby="column-filter-modal"
+      >
+        <Box sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: { xs: '90%', sm: 500 },
+          bgcolor: 'background.paper',
+          borderRadius: 2,
+          boxShadow: 24,
+          p: 4,
+          outline: 'none'
+        }}>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Typography variant="h6" component="h2" fontWeight={600}>
+              Select Table Columns
+            </Typography>
+            <IconButton onClick={() => setIsModalOpen(false)} size="small">
+              <CloseIcon />
+            </IconButton>
+          </Box>
+          
+          <Divider sx={{ mb: 2 }} />
+          
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Select which columns you want to display in the table.
+          </Typography>
+          
+          <FormGroup sx={{ mb: 3 }}>
+            <Grid container spacing={1}>
               {allColumns.map((col) => (
-                <Checkbox
-                  key={col.field}
-                  isChecked={selectedColumns.includes(col.field)}
-                  onChange={() => handleColumnSelection(col.field)}
-                >
-                  {col.headerName}
-                </Checkbox>
+                <Grid item xs={6} key={col.field}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox 
+                        checked={selectedColumns.includes(col.field)}
+                        onChange={() => handleColumnSelection(col.field)}
+                        color="primary"
+                      />
+                    }
+                    label={col.headerName}
+                  />
+                </Grid>
               ))}
-            </VStack>
-          </ModalBody>
-          <ModalFooter>
-            <Button colorScheme="blue" onClick={() => setIsModalOpen(false)}>
+            </Grid>
+          </FormGroup>
+          
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+            <Button 
+              onClick={() => setSelectedColumns(allColumns.map(col => col.field))}
+              sx={{ textTransform: 'none' }}
+            >
+              Select All
+            </Button>
+            <Button 
+              variant="contained" 
+              onClick={() => setIsModalOpen(false)}
+              sx={{ 
+                minWidth: '100px',
+                background: 'linear-gradient(135deg, #11047A 0%, #4D1DB3 100%)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #0D0362 0%, #3B169A 100%)',
+                },
+              }}
+            >
               Apply
             </Button>
-          </ModalFooter>
-        </ModalContent>
+          </Box>
+        </Box>
       </Modal>
-    </Box>
+    </ThemeProvider>
   );
 };
 

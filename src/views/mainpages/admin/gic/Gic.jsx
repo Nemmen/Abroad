@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import {
   Box,
   Button,
@@ -13,6 +13,9 @@ import {
   ModalCloseButton,
   ModalBody,
   ModalFooter,
+  useDisclosure,
+  useToast,
+  Skeleton,
 } from '@chakra-ui/react';
 import DataTable from 'components/DataTable';
 import { Link } from 'react-router-dom';
@@ -38,25 +41,49 @@ const allColumns = [
 const Gic = () => {
   const [rows, setRows] = useState([]);
   const [data, setData] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedColumns, setSelectedColumns] = useState(
     allColumns.map((col) => col.field),
   );
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const toast = useToast();
+
+  // Safely access localStorage with error handling
+  const getAuthToken = useCallback(() => {
+    try {
+      return localStorage.getItem('token_auth');
+    } catch (err) {
+      console.error("LocalStorage access error:", err);
+      return null;
+    }
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       try {
+        const token = getAuthToken();
+
         const response = await axios.get(
           'https://abroad-backend-gray.vercel.app/auth/viewAllGicForm',
+          {
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': token ? `Bearer ${token}` : ''
+            },
+            withCredentials: true
+          }
         );
+        
         if (response.data.success) {
           setData(response.data.gicForms);
+          
           const gicForms = response.data.gicForms.map((form, index) => ({
-            id: form._id || index,
+            id: form._id || `row-${index}`,
             type: form.type || 'N/A',
-            Agent: form.agentRef.name.toUpperCase() || 'N/A',
+            Agent: form.agentRef?.name?.toUpperCase() || 'N/A',
             accOpeningMonth: form.accOpeningMonth || 'N/A',
-            studentName: form.studentRef.name || 'N/A',
+            studentName: form.studentRef?.name || 'N/A',
             passportNo: form.studentPassportNo || 'N/A',
             studentPhoneNo: form.studentPhoneNo || 'N/A',
             bankVendor: form.bankVendor || 'N/A',
@@ -66,26 +93,36 @@ const Gic = () => {
             netPayable: form.netPayable || 0,
             commissionStatus: form.commissionStatus || 'N/A',
           }));
+          
           setRows(gicForms);
         }
       } catch (error) {
         console.error('Error fetching data:', error);
+        toast({
+          title: 'Error fetching data',
+          description: error.message || 'Please try again later',
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        });
+      } finally {
+        setIsLoading(false);
       }
     };
 
     fetchData();
-  }, []);
+  }, [getAuthToken, toast]);
 
-  const handleDownloadExcel = () => {
+  const handleDownloadExcel = useCallback(() => {
     // Clean and prepare data
     const cleanData = data.map((item) => {
       // Retain only relevant fields and rename keys to match column names
-      const cleanedItem = {
+      return {
         type: item.type || 'N/A',
         Agent: item.agentRef?.name?.toUpperCase() || 'N/A',
         accOpeningMonth: item.accOpeningMonth || 'N/A',
-        studentName: item.studentRef.name || 'N/A',
-        passportNo: item.studentPassportNo || 'N/A', // Correct key for Passport No
+        studentName: item.studentRef?.name || 'N/A',
+        passportNo: item.studentPassportNo || 'N/A',
         studentPhoneNo: item.studentPhoneNo || 'N/A',
         bankVendor: item.bankVendor || 'N/A',
         accFundingMonth: item.fundingMonth || 'N/A',
@@ -94,57 +131,78 @@ const Gic = () => {
         netPayable: item.netPayable || 0,
         commissionStatus: item.commissionStatus || 'N/A',
       };
-      return cleanedItem;
     });
   
     // Filter columns based on selection
     const filteredData = cleanData.map((item) =>
       selectedColumns.reduce((acc, field) => {
-        acc[field] = item[field] || 'N/A'; // Ensure fallback for missing fields
+        acc[field] = item[field] || 'N/A'; 
         return acc;
       }, {}),
     );
   
-    // Generate Excel file
-    const worksheet = XLSX.utils.json_to_sheet(filteredData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Gic Data');
-    XLSX.writeFile(workbook, 'GicData.xlsx');
-  };
+    try {
+      // Generate Excel file
+      const worksheet = XLSX.utils.json_to_sheet(filteredData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Gic Data');
+      XLSX.writeFile(workbook, 'GicData.xlsx');
+
+      toast({
+        title: 'Excel file downloaded',
+        status: 'success',
+        duration: 2000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.error('Excel generation error:', error);
+      toast({
+        title: 'Export failed',
+        description: 'Unable to generate Excel file',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  }, [data, selectedColumns, toast]);
   
-  const handleColumnSelection = (field) => {
+  const handleColumnSelection = useCallback((field) => {
     setSelectedColumns((prev) =>
       prev.includes(field)
         ? prev.filter((col) => col !== field)
         : [...prev, field],
     );
-  };
+  }, []);
 
+  // Memoize the filtered columns
   const memoizedColumns = useMemo(
     () => allColumns.filter((col) => selectedColumns.includes(col.field)),
     [selectedColumns],
   );
+  
+  // Memoize rows to prevent re-rendering the table unnecessarily
   const memoizedRows = useMemo(() => rows, [rows]);
 
   return (
-    <Box width={'full'}>
+    <Box width="full">
       <Box
-        display={'flex'}
+        display="flex"
         padding={7}
         paddingBottom={3}
-        justifyContent={'space-between'}
-        alignItems={'center'}
+        flexWrap="wrap"
+        justifyContent="space-between"
+        alignItems="center"
       >
-        <div>
+        <Box className="mb-6 lg:mb-0">
           <Text fontSize="34px">GIC / Blocked Account Registrations</Text>
-        </div>
-        <div>
+        </Box>
+        <Box>
           <Button
-            onClick={() => setIsModalOpen(true)}
-            width={'200px'}
+            onClick={onOpen}
+            width="200px"
             variant="solid"
             colorScheme="teal"
-            borderRadius={'none'}
+            borderRadius="none"
             mr={4}
             mb={1}
           >
@@ -152,52 +210,62 @@ const Gic = () => {
           </Button>
           <Button
             onClick={handleDownloadExcel}
-            width={'200px'}
+            width="200px"
             variant="solid"
             colorScheme="green"
-            borderRadius={'none'}
+            borderRadius="none"
             mr={4}
             mb={1}
+            isDisabled={isLoading || data.length === 0}
           >
             Download Excel
           </Button>
-          <Link to={'/admin/gic/form'}>
+          <Link to="/admin/gic/form">
             <Button
-              width={'200px'}
+              width="200px"
               variant="outline"
               colorScheme="blue"
-              borderRadius={'none'}
+              borderRadius="none"
               mb={1}
             >
               Add New
             </Button>
           </Link>
-        </div>
+        </Box>
       </Box>
       <Divider
-        width={'96%'}
-        mx={'auto'}
-        mb={'20px'}
-        bgColor={'black'}
-        height={'0.5px'}
+        width="96%"
+        mx="auto"
+        mb="20px"
+        bgColor="blackAlpha.400"
+        height="0.5px"
       />
-      <Box maxHeight="1200px" overflowY="auto">
-        <DataTable columns={memoizedColumns} rows={memoizedRows} />
+      
+      <Box maxHeight="1200px" overflowY="auto" px={4}>
+        {isLoading ? (
+          <Box py={4}>
+            <Skeleton height="60px" mb={4} />
+            <Skeleton height="500px" />
+          </Box>
+        ) : (
+          <DataTable columns={memoizedColumns} rows={memoizedRows} />
+        )}
       </Box>
 
       {/* Modal for Column Filtering */}
-      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+      <Modal isOpen={isOpen} onClose={onClose} isCentered>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Select Columns</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <VStack align="start">
+            <VStack align="start" spacing={2}>
               {allColumns.map((col) => (
                 <Checkbox
                   key={col.field}
                   isChecked={selectedColumns.includes(col.field)}
                   onChange={() => handleColumnSelection(col.field)}
+                  colorScheme="blue"
                 >
                   {col.headerName}
                 </Checkbox>
@@ -205,7 +273,7 @@ const Gic = () => {
             </VStack>
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="blue" onClick={() => setIsModalOpen(false)}>
+            <Button colorScheme="blue" onClick={onClose}>
               Apply
             </Button>
           </ModalFooter>

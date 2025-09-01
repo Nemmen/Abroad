@@ -27,7 +27,7 @@ const Blocked = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:4000/auth/getAllBlockedData');
+        const response = await axios.get('https://abroad-backend-gray.vercel.app/auth/getAllBlockedData');
         
         if (response.data.success) {
           setData(response.data.gicForms);

@@ -1,35 +1,95 @@
 import React, { useEffect, useState } from 'react';
 import {
   Box,
-  FormControl,
-  FormLabel,
-  Input,
-  Select,
+  Card,
+  CardContent,
+  Typography,
+  TextField,
+  MenuItem,
   Button,
-  SimpleGrid,
-  NumberInput,
-  NumberInputField,
-  useToast,
-  Flex,
-  Text,
-  Spinner,
-} from '@chakra-ui/react';
+  Grid,
+  InputAdornment,
+  CircularProgress,
+  Divider,
+  IconButton,
+  Alert,
+  Stack,
+} from '@mui/material';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Gic } from 'views/mainpages/redux/GicSlice';
+import DeleteIcon from '@mui/icons-material/Delete';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+import DescriptionIcon from '@mui/icons-material/Description';
+import AddIcon from '@mui/icons-material/Add';
+import { useColorMode } from '@chakra-ui/react';
+import { useToast } from '@chakra-ui/react';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
 
 const getCurrentDate = () => format(new Date(), 'yyyy-MM-dd');
 const getCurrentMonth = () => format(new Date(), 'MMMM');
 
 function GicForm() {
   const dispatch = useDispatch();
-  // const { gic, error } = useSelector((state) => state.Gic);
-
   const { user } = useSelector((state) => state.Auth);
-
   const [documents, setDocuments] = useState([]);
   const navigate = useNavigate();
+  const toast = useToast();
+  const [loading, setLoading] = useState(false);
+  const { colorMode } = useColorMode();
+
+  // Create MUI theme based on Chakra color mode
+  const theme = createTheme({
+    palette: {
+      mode: colorMode,
+      primary: {
+        main: colorMode === 'light' ? '#3B82F6' : '#90CAF9',
+      },
+      background: {
+        default: colorMode === 'light' ? '#ffffff' : '#121212',
+        paper: colorMode === 'light' ? '#f9fafc' : '#1E1E1E',
+      },
+      text: {
+        primary: colorMode === 'light' ? '#111827' : '#f3f4f6',
+        secondary: colorMode === 'light' ? '#4B5563' : '#9CA3AF',
+      },
+    },
+    typography: {
+      fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    },
+    components: {
+      MuiCard: {
+        styleOverrides: {
+          root: {
+            borderRadius: 12,
+            boxShadow: '0 2px 12px 0 rgba(0,0,0,0.05)',
+          },
+        },
+      },
+      MuiTextField: {
+        defaultProps: {
+          variant: 'outlined',
+          fullWidth: true,
+        },
+        styleOverrides: {
+          root: {
+            marginBottom: 16,
+          },
+        },
+      },
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            borderRadius: 8,
+            textTransform: 'none',
+            padding: '10px 24px',
+            fontWeight: 600,
+          },
+        },
+      },
+    },
+  });
 
   const documentTypeOptions = ['aadhar', 'pan', 'ol', 'passport'];
 
@@ -58,8 +118,6 @@ function GicForm() {
     setDocuments(updatedDocuments);
   };
 
-  const [loading, setLoading] = useState(false);
-
   useEffect(() => {
     dispatch(Gic()); // Dispatch the async thunk to fetch data
   }, [dispatch]);
@@ -78,77 +136,6 @@ function GicForm() {
     netPayable: '',
     commissionStatus: 'Under Processing',
   });
-  const toast = useToast();
-  // const handleNewStudentSubmit = async () => {
-  //   try {
-  //     const response = await fetch('https://abroad-backend-gray.vercel.app/auth/studentCreate', {
-  //       method: 'POST',
-  //       headers: { 'Content-Type': 'application/json' },
-  //       body: JSON.stringify(newStudent),
-  //     });
-  //     const result = await response.json();
-
-  //     if (response.ok) {
-  //       setStudents([...students, result.newStudent]);
-  //       setFormData({ ...formData, studentRef: result.newStudent._id });
-  //       toast({
-  //         title: 'Student Created',
-  //         description: 'New student has been added.',
-  //         status: 'success',
-  //         duration: 3000,
-  //         isClosable: true,
-  //       });
-
-  //       setLoading(false);
-  //     } else {
-  //       setLoading(false);
-  //       throw new Error(result.message || 'Failed to create student.');
-  //     }
-  //   } catch (error) {
-  //     toast({
-  //       title: 'Error',
-  //       description: error.message,
-  //       status: 'error',
-  //       duration: 3000,
-  //       isClosable: true,
-  //     });
-  //     setLoading(false);
-  //   }
-  //   setLoading(false);
-  // };
-
-  // useEffect(() => {
-  //   const fetchAgents = async () => {
-  //     const apiUrl = 'https://abroad-backend-gray.vercel.app/auth/getAllusers';
-  //     try {
-  //       const response = await fetch(apiUrl);
-  //       const result = await response.json();
-  //       if (response.ok) {
-  //         const filterResult = result.data.filter(
-  //           (data) => data.userStatus === 'active',
-  //         );
-  //         setAgents(filterResult);
-  //         console.log('ewwer', filterResult);
-  //       } else {
-  //         console.error('Server Error:', result);
-  //       }
-  //     } catch (error) {
-  //       console.error('Network Error:', error);
-  //     }
-  //   };
-  //   fetchAgents();
-  // }, []);
-
-  // useEffect(() => {
-  //   const GIC = gic && gic.length > 0 ? gic.find((gic) => gic.studentPassportNo === formData.passportNo) : null;
-
-  //   if (GIC) {
-  //     setFormData({
-
-  //     });
-
-  //   }
-  // }, [formData.passportNo]);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -159,20 +146,11 @@ function GicForm() {
   };
 
   const validateForm = () => {
-    const { type , Agents, studentRef, passportNo, email, phoneNo, bankVendor } =
-      formData;
-    if (
-      !type ||
-      !Agents ||
-      !studentRef ||
-      !passportNo ||
-      !email ||
-      !phoneNo ||
-      !bankVendor
-    ) {
+    const { type, Agents, studentRef, passportNo, email, phoneNo, bankVendor } = formData;
+    if (!type || !Agents || !studentRef || !passportNo || !email || !phoneNo || !bankVendor) {
       toast({
         title: 'Form Incomplete',
-        description: 'Please fill in all fields, including document upload.',
+        description: 'Please fill in all required fields, including document upload.',
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -185,11 +163,8 @@ function GicForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    // console.log('form', formData);
 
     if (validateForm()) {
-      // const { documentFile, documentType } = formData;
-
       const newStudent = {
         name: formData.studentRef,
         email: formData.email,
@@ -208,14 +183,14 @@ function GicForm() {
         const result = await response.json();
 
         if (response.ok) {
-          // setStudents([...students, result.newStudent]);
+          // Student created successfully
         } else {
           setLoading(false);
           throw new Error(result.message || 'Failed to create student.');
         }
 
         const formDataToSend = {
-          type:formData.type,
+          type: formData.type,
           studentRef: result.newStudent._id,
           commissionAmt: formData.commission,
           fundingMonth: formData.accFundingMonth,
@@ -272,8 +247,7 @@ function GicForm() {
             },
           );
           const result = await response.json();
-          const respo = result.uploads; // Adjust based on your API response structure
-          // console.log(respo);
+          const respo = result.uploads;
 
           for (let i = 0; i < types.length; i++) {
             formDataToSend.studentDocuments[types[i]] = {
@@ -291,11 +265,10 @@ function GicForm() {
             isClosable: true,
           });
           setLoading(false);
-          return; // Stop further execution if file upload fails
+          return;
         }
 
         const apiUrl = 'https://abroad-backend-gray.vercel.app/auth/addGicForm';
-        // console.log('Form Data to Send:', formDataToSend);
 
         try {
           const response = await fetch(apiUrl, {
@@ -311,12 +284,11 @@ function GicForm() {
           if (response.ok) {
             toast({
               title: 'Form Submitted',
-              description: 'Your data has been submitted successfully.',
+              description: 'GIC form has been submitted successfully.',
               status: 'success',
               duration: 3000,
               isClosable: true,
             });
-            // console.log('Server Response:', result);
             navigate(`/agent/gic/${result.newGIC._id}`);
             setLoading(false);
           } else {
@@ -356,345 +328,308 @@ function GicForm() {
   };
 
   return (
-    <Box
-      maxW="100%"
-      bg="white"
-      mx="auto"
-      mt={10}
-      p={6}
-      borderWidth={1}
-      borderRadius="lg"
-      boxShadow="md"
-    >
-      <form onSubmit={handleSubmit}>
-        <SimpleGrid columns={2} spacing={4}>
-          <FormControl isRequired>
-            <FormLabel>Type Of Service</FormLabel>
-            <Select
-              name="type"
-              placeholder="Select Type of Service"
-              value={formData.type}
-              onChange={handleChange}
-              h="50px"
-              w="full"
+    <ThemeProvider theme={theme}>
+      <Box 
+        sx={{ 
+          maxWidth: '1200px', 
+          margin: '24px auto', 
+          padding: { xs: 2, sm: 3 },
+        }}
+      >
+        <Card elevation={1} sx={{ overflow: 'visible' }}>
+          <CardContent sx={{ p: 0 }}>
+            <Box 
+              sx={{ 
+                p: 3, 
+                backgroundImage: 'linear-gradient(135deg, #11047A 0%, #4D1DB3 100%)',
+                borderTopLeftRadius: '12px',
+                borderTopRightRadius: '12px',
+                mb: 4
+              }}
             >
-              <option value="GIC">GIC</option>
-              <option value="BLOCKED ACCOUNT">BLOCKED ACCOUNT</option>
-            </Select>
-          </FormControl>
-
-          <FormControl isReadOnly>
-            <FormLabel>Agent Name</FormLabel>
-            <Input
-              type="text"
-              value={user?.name.toUpperCase()}
-              readOnly
-              h="50px"
-              w="full"
-            />
-          </FormControl>
-
-          <FormControl isRequired>
-            <FormLabel>Passport No.</FormLabel>
-            <Input
-              type="text"
-              name="passportNo"
-              value={formData.passportNo}
-              onChange={handleChange}
-              h="50px"
-              w="full"
-            />
-          </FormControl>
-
-          <FormControl isRequired>
-            <FormLabel>Student Name</FormLabel>
-            <Input
-              name="studentRef"
-              value={formData.studentRef}
-              onChange={handleChange}
-              h="50px"
-              w="full"
-              placeholder="Enter student name"
-            />
-          </FormControl>
-
-          <FormControl isRequired>
-            <FormLabel>Email</FormLabel>
-            <Input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              h="50px"
-              w="full"
-            />
-          </FormControl>
-
-          <FormControl isRequired>
-            <FormLabel>Phone No.</FormLabel>
-            <Input
-              type="tel"
-              name="phoneNo"
-              value={formData.phoneNo}
-              onChange={handleChange}
-              h="50px"
-              w="full"
-            />
-          </FormControl>
-
-          <FormControl isRequired>
-            <FormLabel>Bank Vendor</FormLabel>
-            <Select
-              name="bankVendor"
-              placeholder="Select Bank Vendor"
-              value={formData.bankVendor}
-              onChange={handleChange}
-              h="50px"
-              w="full"
-            >
-              <option value="ICICI">ICICI</option>
-              <option value="RBC">RBC</option>
-              <option value="CIBC">CIBC</option>
-              <option value="BOM">BOM</option>
-              <option value="Expatrio">Expatrio</option>
-              <option value="Fintiba">Fintiba</option>
-              <option value="TD">TD</option>
-            </Select>
-          </FormControl>
-
-          <FormControl isRequired>
-            <FormLabel>Acc Opening Date</FormLabel>
-            <Input
-              type="date"
-              value={getCurrentDate()}
-              readOnly
-              h="50px"
-              w="full"
-            />
-          </FormControl>
-
-          <FormControl isReadOnly>
-            <FormLabel>Acc Opening Month</FormLabel>
-            <Input
-              type="text"
-              value={getCurrentMonth()}
-              readOnly
-              h="50px"
-              w="full"
-            />
-          </FormControl>
-
-          <FormControl isRequired isDisabled>
-            <FormLabel>Acc Funding Month</FormLabel>
-            <Select
-              name="accFundingMonth"
-              placeholder="Select Month"
-              value={formData.accFundingMonth}
-              onChange={handleChange}
-              h="50px"
-              w="full"
-            >
-              {Array.from({ length: 12 }, (_, i) => (
-                <option key={i} value={format(new Date(0, i), 'MMMM')}>
-                  {format(new Date(0, i), 'MMMM')}
-                </option>
-              ))}
-              <option value={'Not Funded Yet'}>Not Funded Yet</option>
-            </Select>
-          </FormControl>
-          {/* 
-          <FormControl isRequired>
-            <FormLabel>Commission</FormLabel>
-            <NumberInput min={0} h="50px" w="full">
-              <NumberInputField
-                name="commission"
-                value={formData.commission}
-                onChange={handleChange}
-                h="50px"
-              />
-            </NumberInput>
-          </FormControl>
-
-          <FormControl isRequired>
-            <FormLabel>TDS</FormLabel>
-            <NumberInput min={0} h="50px" w="full">
-              <NumberInputField
-                name="tds"
-                value={formData.tds}
-                onChange={handleChange}
-                h="50px"
-              />
-            </NumberInput>
-          </FormControl>
-
-          <FormControl isRequired>
-            <FormLabel>Net Payable</FormLabel>
-            <NumberInput min={0} h="50px" w="full">
-              <NumberInputField
-                name="netPayable"
-                value={formData.netPayable}
-                onChange={handleChange}
-                h="50px"
-              />
-            </NumberInput>
-          </FormControl>
-
-          <FormControl isRequired>
-            <FormLabel>Commission Status</FormLabel>
-            <Select
-              name="commissionStatus"
-              placeholder="Select Status"
-              value={formData.commissionStatus}
-              onChange={handleChange}
-              h="50px"
-              w="full"
-            >
-              <option value="Not Received">Not Received</option>
-              <option value="Paid">Paid</option>
-              <option value="Under Processing">Under Processing</option>
-            </Select>
-          </FormControl> */}
-
-          {/* <FormControl
-            isRequired
-            gridColumn={formData.documentType ? 'span 1' : 'span 2'}
-          >
-            <FormLabel>Document Type</FormLabel>
-            <Select
-              name="documentType"
-              placeholder="Select Document Type"
-              value={formData.documentType}
-              onChange={handleChange}
-              h="50px"
-              w="full"
-            >
-              <option value="aadhar">Adhaar</option>
-              <option value="pan">Pan</option>
-              <option value="ol">Offer Letter</option>
-              <option value="passport">Passport</option>
-            </Select>
-          </FormControl>
-
-          {formData.documentType && (
-            <FormControl isRequired>
-              <FormLabel>Upload Document</FormLabel>
-              <Flex align="center">
-                <Button
-                  colorScheme="blue"
-                  onClick={() =>
-                    document.getElementById('documentFile').click()
-                  }
-                  mr={2}
-                >
-                  Choose File
-                </Button>
-                <Text>
-                  {formData.documentFile
-                    ? formData.documentFile.name
-                    : 'No file chosen'}
-                </Text>
-                <Input
-                  type="file"
-                  name="documentFile"
-                  id="documentFile"
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  onChange={handleChange}
-                  hidden
-                />
-              </Flex>
-            </FormControl>
-          )} */}
-        </SimpleGrid>
-
-        <Box mt={4}>
-          {Array.isArray(documents) &&
-            documents.map((doc, index) => (
-              <Flex key={index} direction="column" mb={4}>
-                <FormControl isRequired>
-                  <FormLabel>Document Type</FormLabel>
-                  <Select
-                    name="documentType"
-                    value={doc.documentType}
-                    onChange={(e) => handleChangeDocument(e, index)}
-                    h="50px"
-                    w="full"
+              <Typography variant="h5" fontWeight="600" color="white">
+                GIC Application Form
+              </Typography>
+              <Typography variant="body2" sx={{ mt: 1, opacity: 0.9 }} color="white">
+                Please fill in the required details for student GIC application
+              </Typography>
+            </Box>
+            
+            <Box component="form" onSubmit={handleSubmit} sx={{ px: 3, pb: 3 }}>
+              <Typography variant="h6" fontWeight="600" sx={{ mb: 2 }}>
+                Service Information
+              </Typography>
+              
+              <Grid container spacing={3}>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    select
+                    name="type"
+                    label="Type of Service *"
+                    value={formData.type}
+                    onChange={handleChange}
+                    InputProps={{ sx: { height: '56px' } }}
+                    required
                   >
-                    <option value={''}> -- Select Type --</option>
-                    {documentTypeOptions.map((type) => (
-                      <option key={type} value={type}>
-                        {type === 'ol' ? 'Offer Letter' : type.toUpperCase()}
-                      </option>
+                    <MenuItem value="">Select Type</MenuItem>
+                    <MenuItem value="GIC">GIC</MenuItem>
+                    <MenuItem value="BLOCKED ACCOUNT">BLOCKED ACCOUNT</MenuItem>
+                  </TextField>
+                </Grid>
+                
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Agent Name"
+                    value={user?.name?.toUpperCase() || ''}
+                    InputProps={{
+                      readOnly: true,
+                      sx: { height: '56px' }
+                    }}
+                  />
+                </Grid>
+              </Grid>
+              
+              <Divider sx={{ my: 3 }} />
+              
+              <Typography variant="h6" fontWeight="600" sx={{ mb: 2 }}>
+                Student Information
+              </Typography>
+              
+              <Grid container spacing={3}>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    name="studentRef"
+                    label="Student Name *"
+                    value={formData.studentRef}
+                    onChange={handleChange}
+                    InputProps={{ sx: { height: '56px' } }}
+                    placeholder="Enter full name"
+                    required
+                  />
+                </Grid>
+                
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    name="passportNo"
+                    label="Passport No. *"
+                    value={formData.passportNo}
+                    onChange={handleChange}
+                    InputProps={{ sx: { height: '56px' } }}
+                    required
+                  />
+                </Grid>
+                
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    name="email"
+                    label="Email Address *"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    InputProps={{ sx: { height: '56px' } }}
+                    required
+                  />
+                </Grid>
+                
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    name="phoneNo"
+                    label="Phone Number *"
+                    value={formData.phoneNo}
+                    onChange={handleChange}
+                    InputProps={{ sx: { height: '56px' } }}
+                    required
+                  />
+                </Grid>
+              </Grid>
+              
+              <Divider sx={{ my: 3 }} />
+              
+              <Typography variant="h6" fontWeight="600" sx={{ mb: 2 }}>
+                Bank Information
+              </Typography>
+              
+              <Grid container spacing={3}>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    select
+                    name="bankVendor"
+                    label="Bank Vendor *"
+                    value={formData.bankVendor}
+                    onChange={handleChange}
+                    InputProps={{ sx: { height: '56px' } }}
+                    required
+                  >
+                    <MenuItem value="">Select Bank</MenuItem>
+                    <MenuItem value="ICICI">ICICI</MenuItem>
+                    <MenuItem value="RBC">RBC</MenuItem>
+                    <MenuItem value="CIBC">CIBC</MenuItem>
+                    <MenuItem value="BOM">BOM</MenuItem>
+                    <MenuItem value="Expatrio">Expatrio</MenuItem>
+                    <MenuItem value="Fintiba">Fintiba</MenuItem>
+                    <MenuItem value="TD">TD</MenuItem>
+                  </TextField>
+                </Grid>
+                
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Account Opening Date"
+                    value={getCurrentDate()}
+                    InputProps={{
+                      readOnly: true,
+                      sx: { height: '56px' }
+                    }}
+                  />
+                </Grid>
+                
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    label="Account Opening Month"
+                    value={getCurrentMonth()}
+                    InputProps={{
+                      readOnly: true,
+                      sx: { height: '56px' }
+                    }}
+                  />
+                </Grid>
+                
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    select
+                    name="accFundingMonth"
+                    label="Account Funding Month"
+                    value={formData.accFundingMonth}
+                    onChange={handleChange}
+                    InputProps={{ sx: { height: '56px' } }}
+                    disabled
+                  >
+                    {Array.from({ length: 12 }, (_, i) => (
+                      <MenuItem key={i} value={format(new Date(0, i), 'MMMM')}>
+                        {format(new Date(0, i), 'MMMM')}
+                      </MenuItem>
                     ))}
-                  </Select>
-                </FormControl>
-                <FormControl isRequired mt={5}>
-                  <FormLabel>Upload Document</FormLabel>
-                  <Flex align="center">
-                    <Button
-                      colorScheme="blue"
-                      onClick={() =>
-                        document.getElementById(`documentFile-${index}`).click()
-                      }
-                      mr={2}
-                    >
-                      Choose File
-                    </Button>
-                    <Text>
-                      {doc.documentFile
-                        ? doc.documentFile.name
-                        : 'No file chosen'}
-                    </Text>
-                    <Input
-                      type="file"
-                      name="documentFile"
-                      id={`documentFile-${index}`}
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      onChange={(e) => handleChangeDocument(e, index)}
-                      hidden
-                    />
-                  </Flex>
-                </FormControl>
+                    <MenuItem value="Not Funded Yet">Not Funded Yet</MenuItem>
+                  </TextField>
+                </Grid>
+              </Grid>
+              
+              <Divider sx={{ my: 3 }} />
+              
+              <Typography variant="h6" fontWeight="600" sx={{ mb: 2 }}>
+                Document Upload
+              </Typography>
+              
+              {documents.length === 0 ? (
+                <Alert severity="info" sx={{ mb: 2 }}>
+                  Please add at least one document to continue
+                </Alert>
+              ) : null}
+              
+              <Stack spacing={3} sx={{ mb: 3 }}>
+                {documents.map((doc, index) => (
+                  <Card 
+                    key={index} 
+                    variant="outlined" 
+                    sx={{ 
+                      p: 2,
+                      position: 'relative',
+                      transition: 'all 0.2s',
+                      '&:hover': { boxShadow: '0 4px 10px rgba(0,0,0,0.05)' }
+                    }}
+                  >
+                    <Grid container spacing={2} alignItems="center">
+                      <Grid item xs={12} sm={5}>
+                        <TextField
+                          select
+                          name="documentType"
+                          label="Document Type"
+                          value={doc.documentType}
+                          onChange={(e) => handleChangeDocument(e, index)}
+                          required
+                        >
+                          <MenuItem value="">-- Select Type --</MenuItem>
+                          {documentTypeOptions.map((type) => (
+                            <MenuItem key={type} value={type}>
+                              {type === 'ol' ? 'Offer Letter' : type.toUpperCase()}
+                            </MenuItem>
+                          ))}
+                        </TextField>
+                      </Grid>
+                      
+                      <Grid item xs={12} sm={5}>
+                        <Button
+                          variant="outlined"
+                          component="label"
+                          startIcon={<AttachFileIcon />}
+                          color={doc.documentFile ? "success" : "primary"}
+                          fullWidth
+                          sx={{ height: '56px' }}
+                        >
+                          {doc.documentFile ? doc.documentFile.name : 'Choose File'}
+                          <input
+                            type="file"
+                            name="documentFile"
+                            accept=".pdf,.jpg,.jpeg,.png"
+                            onChange={(e) => handleChangeDocument(e, index)}
+                            style={{ display: 'none' }}
+                          />
+                        </Button>
+                      </Grid>
+                      
+                      <Grid item xs={12} sm={2}>
+                        <IconButton 
+                          color="error" 
+                          onClick={() => removeDocument(index)}
+                          sx={{ 
+                            width: '56px', 
+                            height: '56px',
+                            border: '1px solid rgba(211, 47, 47, 0.5)',
+                          }}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Grid>
+                    </Grid>
+                  </Card>
+                ))}
+              </Stack>
+              
+              {documents.length < 4 && (
                 <Button
-                  colorScheme="red"
-                  mt={2}
-                  width={32}
-                  onClick={() => removeDocument(index)}
+                  variant="outlined"
+                  startIcon={<AddIcon />}
+                  onClick={addDocuments}
+                  fullWidth
+                  sx={{ mb: 3, height: '56px' }}
                 >
-                  Remove
+                  Add Document
                 </Button>
-              </Flex>
-            ))}
-
-          {documents.length < 4 && (
-            <Button
-              colorScheme="blue"
-              onClick={addDocuments}
-              mt={4}
-              width={'100%'}
-            >
-              Add Document
-            </Button>
-          )}
-        </Box>
-
-        {loading ? (
-          <Button colorScheme="brand" width="full" mt={4} h="50px">
-            <Spinner />
-          </Button>
-        ) : (
-          <Button
-            type="submit"
-            colorScheme="brand"
-            width="full"
-            mt={4}
-            h="50px"
-            disabled={loading}
-          >
-            Submit
-          </Button>
-        )}
-      </form>
-    </Box>
+              )}
+              
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={loading}
+                sx={{ 
+                  height: '56px',
+                  background: 'linear-gradient(135deg, #11047A 0%, #4D1DB3 100%)',
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #0D0362 0%, #3B169A 100%)',
+                  },
+                }}
+                fullWidth
+              >
+                {loading ? (
+                  <CircularProgress size={24} color="inherit" />
+                ) : (
+                  'Submit Application'
+                )}
+              </Button>
+            </Box>
+          </CardContent>
+        </Card>
+      </Box>
+    </ThemeProvider>
   );
 }
 

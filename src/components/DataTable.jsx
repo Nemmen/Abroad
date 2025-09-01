@@ -31,7 +31,7 @@ const theme = createTheme({
   },
 });
 
-export default function DataTable({ columns, rows, link }) {
+export default function DataTable({ columns, rows, link  , sx}) {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -46,6 +46,7 @@ export default function DataTable({ columns, rows, link }) {
           <Box sx={{  bgcolor: '#FAFCFE' }}>
             <Box
               sx={{
+                
                 height: 700,
                 width: '100%',
                 overflowX: 'auto', // Enable horizontal scrolling
@@ -61,6 +62,7 @@ export default function DataTable({ columns, rows, link }) {
                 '&::-webkit-scrollbar-thumb:hover': {
                   backgroundColor: '#555',
                 },
+                ...sx
               }}
             >
               <DataGrid

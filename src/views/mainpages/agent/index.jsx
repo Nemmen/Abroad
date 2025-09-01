@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Box, Typography, ThemeProvider, createTheme } from '@mui/material';
+import { Box, Typography, ThemeProvider, createTheme, Paper } from '@mui/material';
 import { useColorMode } from '@chakra-ui/react'; // Import Chakra's color mode hook
 import AgentStats from './AgentStats';
 import AgentEarnings from './AgentEarnings';
@@ -42,50 +42,49 @@ export default function Index() {
 
   return (
     <ThemeProvider theme={muiTheme}>
-      <div>
-        
-      </div>
-      <Box sx={{ mt: 3, width: "100%" }}>
-  {/* Welcome Banner */}
-  <Box
-    sx={{
-      backgroundColor: "#11047A",
-      color: "#ffffff",
-      px: { xs: 3, sm: 6, md: 12 }, // Responsive padding (Left/Right)
-      py: { xs: 6, sm: 8, md: 10 }, // Responsive padding (Top/Bottom)
-      borderRadius: "8px",
-      mb: 3,
-      textAlign: "center", // Ensures center alignment
-    }}
-  >
-    <Typography
-      variant="h3"
-      sx={{
-        fontSize: { xs: "1.75rem", sm: "2.5rem", md: "3rem" }, // Responsive font sizes
-        fontWeight: "bold",
-      }}
-    >
-      Welcome to Your Dashboard!
-    </Typography>
+      <Box sx={{ mx: 'auto', maxWidth: '1400px' }}>
+        <Box sx={{ mt: 3, width: "100%" }}>
+          <Paper 
+            elevation={0}
+            sx={{
+              background: 'linear-gradient(135deg, #11047A 0%, #4D1DB3 100%)',
+              color: "#ffffff",
+              px: { xs: 3, sm: 6, md: 8 },
+              py: { xs: 6, sm: 7, md: 8 },
+              borderRadius: "16px",
+              mb: 4,
+              textAlign: "center",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.15)"
+            }}
+          >
+            <Typography
+              variant="h3"
+              sx={{
+                fontSize: { xs: "1.75rem", sm: "2.5rem", md: "2.75rem" },
+                fontWeight: "700",
+                letterSpacing: "-0.5px"
+              }}
+            >
+              Welcome to Your Dashboard!
+            </Typography>
+            <Typography
+              variant="body1"
+              sx={{
+                fontSize: { xs: "0.9rem", sm: "1rem", md: "1.1rem" },
+                mt: { xs: 1, sm: 2 },
+                opacity: 0.9,
+                maxWidth: "700px",
+                mx: "auto" 
+              }}
+            >
+              Manage your data with ease. Here's a quick overview of your records.
+            </Typography>
+          </Paper>
+        </Box>
 
-    <Typography
-      variant="body1"
-      sx={{
-        fontSize: { xs: "0.9rem", sm: "1rem", md: "1.2rem" }, // Adjusts for readability
-        mt: { xs: 1, sm: 2 }, // Adds spacing on smaller screens
-      }}
-    >
-      Manage your data with ease. Here's a quick overview of your records.
-    </Typography>
-  </Box>
-</Box>
-
-      <div>
         <AgentStats />
-      </div>
-      <div>
         <AgentEarnings />
-      </div>
+      </Box>
     </ThemeProvider>
   );
 }

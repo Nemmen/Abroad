@@ -66,7 +66,7 @@ export default function Register() {
     { name: 'Lakshadweep (UT)' },
     { name: 'Puducherry (UT)' },
   ];
-  // console.log('doc', document1);
+  console.log('doc', document1);
   // Form submission handler
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -146,7 +146,7 @@ export default function Register() {
     } catch (error) {
       toast({
         title: 'Registration Failed',
-        description: error.response?.data?.message,
+        description: 'An error occurred while registering. Please try again.',
         status: 'error',
         duration: 2000,
         isClosable: true,
@@ -159,8 +159,8 @@ export default function Register() {
 
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100">
-      <div className="flex bg-white rounded-lg shadow-lg overflow-hidden h-[655px]">
-        <div className="flex items-center justify-center bg-blue-100 p-6">
+      <div className="flex bg-white rounded-lg md:shadow-lg overflow-hidden h-[655px]">
+        <div className="hidden md:flex items-center justify-center bg-blue-100 p-6">
           <img
             src={registerimg}
             alt="Person registering"
@@ -168,7 +168,7 @@ export default function Register() {
           />
         </div>
         <div className="p-10 flex flex-col justify-center w-[450px] overflow-y-auto pt-[650px]">
-          <h2 className="text-2xl font-semibold text-gray-800 mt-[100px]">Sign Up</h2>
+          <h2 className="text-2xl font-semibold text-gray-800">Sign Up</h2>
           <p className="text-sm text-gray-600 mb-6">Create your account.</p>
 
           <form onSubmit={handleSubmit}>
@@ -178,7 +178,7 @@ export default function Register() {
                 htmlFor="username"
                 className="block text-gray-700 font-semibold"
               >
-                Name <span className='text-orange-500'>*</span>
+                Name
               </label>
               <input
                 type="text"
@@ -194,7 +194,7 @@ export default function Register() {
                 htmlFor="email"
                 className="block text-gray-700 font-semibold"
               >
-                Email<span className='text-orange-500'>*</span>
+                Email
               </label>
               <input
                 type="email"
@@ -210,7 +210,7 @@ export default function Register() {
                 htmlFor="organization"
                 className="block text-gray-700 font-semibold"
               >
-                Organization<span className='text-orange-500'>*</span>
+                Organization
               </label>
               <input
                 type="text"
@@ -226,7 +226,7 @@ export default function Register() {
                 htmlFor="phoneNumber"
                 className="block text-gray-700 font-semibold"
               >
-                Phone Number<span className='text-orange-500'>*</span>
+                Phone Number
               </label>
               <input
                 type="tel"
@@ -247,7 +247,7 @@ export default function Register() {
                 htmlFor="state"
                 className="block text-gray-700 font-semibold"
               >
-                State<span className='text-orange-500'>*</span>
+                State
               </label>
               <select
                 id="state"
@@ -268,7 +268,7 @@ export default function Register() {
                 htmlFor="city"
                 className="block text-gray-700 font-semibold"
               >
-                City<span className='text-orange-500'>*</span>
+                City
               </label>
               <input
                 type="text"
@@ -284,7 +284,7 @@ export default function Register() {
                 htmlFor="password"
                 className="block text-gray-700 font-semibold"
               >
-                Password<span className='text-orange-500'>*</span>
+                Password
               </label>
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -306,7 +306,7 @@ export default function Register() {
                 htmlFor="confirmPassword"
                 className="block text-gray-700 font-semibold"
               >
-                Confirm Password<span className='text-orange-500'>*</span>
+                Confirm Password
               </label>
               <input
                 type={showConfirmPassword ? 'text' : 'password'}
@@ -342,12 +342,12 @@ export default function Register() {
               />
             </div> */}
 
-            {/* <div className="mb-4">
+            <div className="mb-4">
               <label
                 htmlFor="document1"
                 className="block text-gray-700 font-semibold"
               >
-                Business registration
+                Document 1 (Document Verified?)
               </label>
               <input
                 type="file"
@@ -375,7 +375,7 @@ export default function Register() {
                 htmlFor="document2"
                 className="block text-gray-700 font-semibold"
               >
-                GST certificate OF company
+                Document 2 (Document Verified?)
               </label>
               <input
                 type="file"
@@ -400,61 +400,6 @@ export default function Register() {
 
             <div className="mb-4">
               <label
-                htmlFor="document4"
-                className="block text-gray-700 font-semibold"
-              >
-                Bank Account details 
-              </label>
-              <input
-                type="file"
-                id="document3"
-                // onChange={(e) => {
-                //   const file = e.target.files[0];
-                //   if (file) {
-                //     setDocument2(file);
-                //     toast({
-                //       title: 'File Selected',
-                //       description: `Selected file: ${file.name}`,
-                //       status: 'info',
-                //       duration: 2000,
-                //       isClosable: true,
-                //       position: 'bottom-right',
-                //     });
-                //   }
-                // }}
-                className="w-full px-4 py-2 border rounded-lg mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div className="mb-4">
-              <label
-                htmlFor="document4"
-                className="block text-gray-700 font-semibold"
-              >
-                PAN CARD of company
-              </label>
-              <input
-                type="file"
-                id="document4"
-                // onChange={(e) => {
-                //   const file = e.target.files[0];
-                //   if (file) {
-                //     setDocument2(file);
-                //     toast({
-                //       title: 'File Selected',
-                //       description: `Selected file: ${file.name}`,
-                //       status: 'info',
-                //       duration: 2000,
-                //       isClosable: true,
-                //       position: 'bottom-right',
-                //     });
-                //   }
-                // }}
-                className="w-full px-4 py-2 border rounded-lg mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div className="mb-4">
-              <label
                 htmlFor="businessDivision"
                 className="block text-gray-700 font-semibold"
               >
@@ -470,7 +415,7 @@ export default function Register() {
                 <option value="GIC">GIC</option>
                 <option value="FOREX">FOREX</option>
               </select>
-            </div> */}
+            </div>
 
             {loading ? (
              <div className='text-center'>

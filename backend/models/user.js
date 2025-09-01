@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import bcryptjs from 'bcryptjs';
+import bcrypt from 'bcryptjs';
 // import CounterModel from "./counterModel";
 
 // Function to generate unique IDs

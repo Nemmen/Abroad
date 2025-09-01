@@ -80,7 +80,7 @@ export const routeAjent = [
     component: <Agent />,
   },
   {
-    name: 'GIC / Blocked Account',
+    name: 'GIC',
     layout: '/agent',
     path: '/gic',
     icon: (

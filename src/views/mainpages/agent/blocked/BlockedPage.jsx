@@ -1,9 +1,21 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Box, Button, Divider, Text } from '@chakra-ui/react';
+import {
+  Box,
+  Card,
+  Typography,
+  Button,
+  Divider,
+  CircularProgress,
+  Tooltip
+} from '@mui/material';
 import DataTable from 'components/DataTable';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
+import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { useColorMode } from '@chakra-ui/react';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import AddIcon from '@mui/icons-material/Add';
 
 // Define the columns
 const columns = [
@@ -23,9 +35,55 @@ const columns = [
 const BlockedPage = () => {
   const [rows, setRows] = useState([]);
   const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { colorMode } = useColorMode();
+
+  // Create MUI theme based on Chakra color mode
+  const theme = createTheme({
+    palette: {
+      mode: colorMode,
+      primary: {
+        main: colorMode === 'light' ? '#3B82F6' : '#90CAF9',
+      },
+      secondary: {
+        main: colorMode === 'light' ? '#10B981' : '#5CDB95',
+      },
+      background: {
+        default: colorMode === 'light' ? '#ffffff' : '#121212',
+        paper: colorMode === 'light' ? '#f9fafc' : '#1E1E1E',
+      },
+      text: {
+        primary: colorMode === 'light' ? '#111827' : '#f3f4f6',
+        secondary: colorMode === 'light' ? '#4B5563' : '#9CA3AF',
+      },
+    },
+    typography: {
+      fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    },
+    components: {
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            borderRadius: 8,
+            textTransform: 'none',
+            fontWeight: 600,
+          },
+        },
+      },
+      MuiCard: {
+        styleOverrides: {
+          root: {
+            borderRadius: 12,
+            boxShadow: '0 2px 12px 0 rgba(0,0,0,0.05)',
+          },
+        },
+      },
+    },
+  });
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const response = await axios.get('https://abroad-backend-gray.vercel.app/auth/getAllBlockedData');
         if (response.data.success) {
@@ -48,6 +106,8 @@ const BlockedPage = () => {
         }
       } catch (error) {
         console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -88,59 +148,105 @@ const BlockedPage = () => {
   const memoizedRows = useMemo(() => rows, [rows]);
 
   return (
-    <Box width={'full'}>
-      <Box
-        display={'flex'}
-        padding={7}
-        paddingBottom={3}
-        justifyContent={'space-between'}
-        alignItems={'center'}
-      >
-        <div>
-          <Text fontSize="34px">GIC Registrations</Text>
-        </div>
-
-        <div>
-          <Button
-            onClick={handleDownloadExcel}
-            width={'200px'}
-            variant="solid"
-            colorScheme="green"
-            borderRadius={'none'}
-            _hover={{
-              bg: 'green.500',
-              color: 'white',
-              borderColor: 'green.500',
+    <ThemeProvider theme={theme}>
+      <Box sx={{ px: { xs: 2, sm: 3 }, py: 2, maxWidth: '1400px', mx: 'auto' }}>
+        <Card elevation={1} sx={{ overflow: 'visible' }}>
+          <Box 
+            sx={{ 
+              p: 3, 
+              backgroundImage: 'linear-gradient(135deg, #11047A 0%, #4D1DB3 100%)',
+              borderTopLeftRadius: '12px',
+              borderTopRightRadius: '12px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 2
             }}
-            mr={4}
-            mb={1}
           >
-            Download Excel
-          </Button>
-
-          <Link to={'/agent/gic/form'}>
-            <Button
-              width={'200px'}
-              variant="outline"
-              colorScheme="blue"
-              borderRadius={'none'}
-              _hover={{
-                bg: 'blue.500',
-                color: 'white',
-                borderColor: 'blue.500',
-              }}
-              mb={1}
-            >
-              Add New
-            </Button>
-          </Link>
-        </div>
+            <Typography variant="h5" fontWeight="600" color="white">
+              Blocked Registrations
+            </Typography>
+            
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+              <Tooltip title="Download as Excel">
+                <Button
+                  onClick={handleDownloadExcel}
+                  variant="outlined"
+                  startIcon={<FileDownloadIcon />}
+                  sx={{ 
+                    color: 'white', 
+                    borderColor: 'rgba(255,255,255,0.5)',
+                    '&:hover': { 
+                      borderColor: 'white', 
+                      backgroundColor: 'rgba(255,255,255,0.1)' 
+                    } 
+                  }}
+                >
+                  Export to Excel
+                </Button>
+              </Tooltip>
+              
+              <Button
+                component={Link}
+                to="/agent/gic/form"
+                variant="contained"
+                startIcon={<AddIcon />}
+                sx={{ 
+                  bgcolor: 'rgba(255,255,255,0.1)',
+                  color: 'white',
+                  '&:hover': { 
+                    bgcolor: 'rgba(255,255,255,0.2)'
+                  } 
+                }}
+              >
+                Add New
+              </Button>
+            </Box>
+          </Box>
+          
+          <Box sx={{ p: 3 }}>
+            {loading ? (
+              <Box display="flex" justifyContent="center" alignItems="center" height="200px">
+                <CircularProgress />
+              </Box>
+            ) : memoizedRows.length === 0 ? (
+              <Box 
+                sx={{ 
+                  display: 'flex', 
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  py: 10,
+                  textAlign: 'center'
+                }}
+              >
+                <Typography variant="h6" color="text.secondary" gutterBottom>
+                  No blocked registration records found
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Blocked registrations will appear here when they are created
+                </Typography>
+              </Box>
+            ) : (
+              <Box sx={{ 
+                height: '100%', 
+                width: '100%',
+                '& .MuiDataGrid-root': {
+                  border: 'none',
+                  minHeight: '400px',
+                }
+              }}>
+                <DataTable 
+                  columns={memoizedColumns} 
+                  rows={memoizedRows} 
+                />
+              </Box>
+            )}
+          </Box>
+        </Card>
       </Box>
-      <Divider width={'96%'} mx={'auto'} mb={'20px'} bgColor={'black'} height={'0.5px'} />
-      <Box maxHeight="1200px" overflowY="auto">
-        <DataTable columns={memoizedColumns} rows={memoizedRows} />
-      </Box>
-    </Box>
+    </ThemeProvider>
   );
 };
 
