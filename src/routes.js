@@ -73,7 +73,7 @@ export const routeAjent = [
     component: <Agent />,
   },
   {
-    name: 'GIC',
+    name: 'GIC / Blocked Account',
     layout: '/agent',
     path: '/gic',
     icon: (
@@ -90,13 +90,13 @@ export const routeAjent = [
     component: <AgentForex/>,
   },
 
-  {
-    name: 'Blocked',
-    layout: '/agent',
-    path: '/blocked',
-    icon: <Icon as={MdBusiness} width="20px" height="20px" color="inherit" />,
-    component: <BlockedPage/>,
-  },
+  // {
+  //   name: 'Blocked',
+  //   layout: '/agent',
+  //   path: '/blocked',
+  //   icon: <Icon as={MdBusiness} width="20px" height="20px" color="inherit" />,
+  //   component: <BlockedPage/>,
+  // },
   {
     name: 'Students',
     layout: '/agent',

@@ -716,7 +716,7 @@ function ForexForm() {
               h="50px"
               w="full"
             >
-              <option value="Not Received">Not Received</option>
+              <option value="Non Claimable">Non Claimable</option>
               <option value="Paid">Paid</option>
               <option value="Under Processing">Under Processing</option>
             </Select>

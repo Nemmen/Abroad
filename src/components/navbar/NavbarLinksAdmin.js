@@ -167,15 +167,7 @@ export default function HeaderLinks(props) {
             </Text>
           </Flex>
           <Flex flexDirection="column" p="10px">
-            <MenuItem
-              _hover={{ bg: 'none' }}
-              _focus={{ bg: 'none' }}
-              borderRadius="8px"
-              px="14px"
-            >
-              <Text fontSize="sm">
-              <Link to={`${basePath}/profile`}>Profile Settings</Link></Text>
-            </MenuItem>
+            
             {/* <MenuItem
               _hover={{ bg: 'none' }}
               _focus={{ bg: 'none' }}
