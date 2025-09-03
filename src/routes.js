@@ -10,7 +10,6 @@ import {
   MdBusiness,
   MdVerifiedUser
 } from 'react-icons/md';
-import { CgProfile } from "react-icons/cg";
 
 import { SiAuthentik } from 'react-icons/si';
 
@@ -27,8 +26,6 @@ import Forex from 'views/mainpages/admin/forex/Forex';
 import AgentForex from './views/mainpages/agent/forex/AgentForex.jsx'
 import BlockedPage from 'views/mainpages/agent/blocked/BlockedPage';
 import StudentPage from 'views/mainpages/agent/students/StudentPage';
-import Profile from 'views/mainpages/agent/profile/Profile';
-
 import ForgotPassword from "views/mainpages/login_signup/ForgotPassword";
 import ResetPassword from "views/mainpages/login_signup/ResetPassword";
 import EmailTemplateGen from 'views/mainpages/admin/main/components/EmailTemplateGen';
@@ -84,7 +81,7 @@ export const routeAjent = [
     component: <Agent />,
   },
   {
-    name: 'GIC',
+    name: 'GIC / Blocked Account',
     layout: '/agent',
     path: '/gic',
     icon: (
@@ -101,13 +98,13 @@ export const routeAjent = [
     component: <AgentForex/>,
   },
 
-  {
-    name: 'Blocked',
-    layout: '/agent',
-    path: '/blocked',
-    icon: <Icon as={MdBusiness} width="20px" height="20px" color="inherit" />,
-    component: <BlockedPage/>,
-  },
+  // {
+  //   name: 'Blocked',
+  //   layout: '/agent',
+  //   path: '/blocked',
+  //   icon: <Icon as={MdBusiness} width="20px" height="20px" color="inherit" />,
+  //   component: <BlockedPage/>,
+  // },
   {
     name: 'Students',
     layout: '/agent',
@@ -141,14 +138,13 @@ export const Auth = [
     name: "Forgot Password",
     layout: "/auth",
     path: "/forgot-password",
-    
+    icon: <Icon as={BsFillPiggyBankFill} width="20px" height="20px" color="inherit" />,
     component: <ForgotPassword />,
   },
   {
     name: "Reset Password",
     layout: "/auth",
     path: "/reset-password",
-    
     component: <ResetPassword />,
   },
 ];

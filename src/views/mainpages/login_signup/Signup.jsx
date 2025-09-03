@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { post } from '../services/ApiEndpoint';
-import { Button, useToast } from '@chakra-ui/react';
+import { useToast, Spinner } from '@chakra-ui/react';
 import { HiEye, HiEyeOff } from 'react-icons/hi';
-import registerimg from '../../../assets/img/auth/register.png';
-import { Spinner } from '@chakra-ui/react';
+import { FaUser, FaEnvelope, FaBuilding, FaPhone, FaMapMarkerAlt, FaLock, FaFileUpload } from 'react-icons/fa';
 
 export default function Register() {
   const navigate = useNavigate();
@@ -158,281 +157,497 @@ export default function Register() {
   };
 
   return (
-    <div className="flex justify-center items-center h-screen bg-gray-100">
-      <div className="flex bg-white rounded-lg md:shadow-lg overflow-hidden h-[655px]">
-        <div className="hidden md:flex items-center justify-center bg-blue-100 p-6">
-          <img
-            src={registerimg}
-            alt="Person registering"
-            className="w-[30vw] h-auto"
-          />
+    <div className="h-screen flex overflow-hidden">
+      {/* Left Side - Background with Illustration */}
+      <div className="hidden lg:block relative w-0 flex-1">
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 via-purple-600 to-blue-700 overflow-hidden">
+          {/* Decorative circles pattern */}
+          <div className="absolute inset-0">
+            {/* Background circles */}
+            <div className="absolute top-12 right-8 w-20 h-20 border-2 border-white/20 rounded-full"></div>
+            <div className="absolute top-24 right-20 w-10 h-10 border-2 border-white/15 rounded-full"></div>
+            <div className="absolute top-40 right-12 w-14 h-14 border-2 border-white/10 rounded-full"></div>
+            <div className="absolute top-56 right-24 w-8 h-8 border-2 border-white/20 rounded-full"></div>
+            
+            <div className="absolute bottom-12 left-8 w-18 h-18 border-2 border-white/15 rounded-full"></div>
+            <div className="absolute bottom-20 left-20 w-12 h-12 border-2 border-white/20 rounded-full"></div>
+            <div className="absolute bottom-36 left-12 w-16 h-16 border-2 border-white/10 rounded-full"></div>
+            <div className="absolute bottom-52 left-24 w-6 h-6 border-2 border-white/25 rounded-full"></div>
+            
+            {/* Side circles */}
+            <div className="absolute top-72 right-4 w-10 h-10 border-2 border-white/20 rounded-full"></div>
+            <div className="absolute top-88 right-8 w-8 h-8 border-2 border-white/15 rounded-full"></div>
+            <div className="absolute top-104 right-2 w-6 h-6 border-2 border-white/10 rounded-full"></div>
+          </div>
+
+          {/* Main content area */}
+          <div className="relative h-full flex items-center justify-center px-12">
+            <div className="text-center max-w-md">
+              
+              {/* Central illustration area */}
+              <div className="relative mb-8">
+                {/* Main signup/form illustration */}
+                <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-2xl mx-auto w-72 h-52 relative">
+                  {/* Form elements simulation */}
+                  <div className="space-y-3">
+                    <div className="text-gray-700 font-semibold text-left mb-4">Create Your Account</div>
+                    
+                    {/* Input fields simulation */}
+                    <div className="bg-gray-100 h-8 rounded-lg"></div>
+                    <div className="bg-gray-100 h-8 rounded-lg"></div>
+                    <div className="flex space-x-2">
+                      <div className="bg-gray-100 h-8 rounded-lg flex-1"></div>
+                      <div className="bg-gray-100 h-8 rounded-lg flex-1"></div>
+                    </div>
+                    
+                    {/* Button simulation */}
+                    <div className="bg-gradient-to-r from-indigo-500 to-purple-600 h-10 rounded-lg mt-4 flex items-center justify-center">
+                      <span className="text-white text-sm font-medium">Sign Up</span>
+                    </div>
+                  </div>
+                  
+                  {/* Progress indicator */}
+                  <div className="absolute top-4 right-4">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating user avatars */}
+                {/* Top left avatar - Student */}
+                <div className="absolute -top-6 -left-6 w-18 h-18 bg-gradient-to-br from-pink-400 to-pink-500 rounded-full flex items-center justify-center shadow-lg animate-bounce">
+                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
+                    <FaUser className="text-pink-500 text-xl" />
+                  </div>
+                </div>
+
+                {/* Top right avatar - Graduate */}
+                <div className="absolute -top-4 -right-6 w-16 h-16 bg-gradient-to-br from-emerald-400 to-emerald-500 rounded-full flex items-center justify-center shadow-lg animate-pulse">
+                  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+                    <FaUser className="text-emerald-500 text-lg" />
+                  </div>
+                </div>
+
+                {/* Bottom left avatar - Professional */}
+                <div className="absolute -bottom-4 -left-4 w-14 h-14 bg-gradient-to-br from-blue-400 to-blue-500 rounded-full flex items-center justify-center shadow-lg animate-bounce">
+                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+                    <FaUser className="text-blue-500" />
+                  </div>
+                </div>
+
+                {/* Decorative elements */}
+                <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
+                  <div className="flex space-x-2">
+                    <div className="w-3 h-3 bg-yellow-300 rounded-full animate-pulse"></div>
+                    <div className="w-2 h-2 bg-yellow-200 rounded-full animate-ping"></div>
+                    <div className="w-3 h-3 bg-yellow-300 rounded-full animate-pulse"></div>
+                  </div>
+                </div>
+
+                {/* Document/certificate icons */}
+                <div className="absolute bottom-2 right-4">
+                  <div className="flex space-x-1">
+                    <div className="w-3 h-4 bg-white/80 rounded-sm shadow-sm"></div>
+                    <div className="w-3 h-4 bg-white/60 rounded-sm shadow-sm"></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Text content */}
+              <h1 className="text-4xl font-bold text-white mb-6">
+                Manage Your <br />
+                <span className="text-yellow-300">Financial Journey</span>
+              </h1>
+              
+              <p className="text-xl text-indigo-100 mb-8 leading-relaxed">
+                Manage GIC, Blocked Accounts, and Forex services in one platform. Simplified. Transparent. Trustworthy.
+              </p>
+
+              {/* Feature points */}
+              <div className="space-y-4 text-indigo-100">
+                <div className="flex items-center space-x-3 justify-center">
+                  <div className="w-2 h-2 bg-yellow-300 rounded-full"></div>
+                  <span>Effortless GIC Account Management</span>
+                </div>
+                <div className="flex items-center space-x-3 justify-center">
+                  <div className="w-2 h-2 bg-yellow-300 rounded-full"></div>
+                  <span>Trusted Blocked Account Services</span>
+                </div>
+                <div className="flex items-center space-x-3 justify-center">
+                  <div className="w-2 h-2 bg-yellow-300 rounded-full"></div>
+                  <span>Secure Forex Solutions</span>
+                </div>
+              </div>
+
+              {/* Success metrics */}
+              <div className="mt-8 grid grid-cols-3 gap-4">
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-yellow-300">Fast</div>
+                  <div className="text-xs text-indigo-200">Applications</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-yellow-300">Easy</div>
+                  <div className="text-xs text-indigo-200">Process</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-yellow-300">Secure</div>
+                  <div className="text-xs text-indigo-200">Transactions</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="p-10 flex flex-col justify-center w-[450px] overflow-y-auto pt-[650px]">
-          <h2 className="text-2xl font-semibold text-gray-800">Sign Up</h2>
-          <p className="text-sm text-gray-600 mb-6">Create your account.</p>
+      </div>
 
-          <form onSubmit={handleSubmit}>
-            {/* Existing fields */}
-            <div className="mb-4">
-              <label
-                htmlFor="username"
-                className="block text-gray-700 font-semibold"
-              >
-                Name
-              </label>
-              <input
-                type="text"
-                id="username"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Enter your name"
-                className="w-full px-4 py-2 border rounded-lg mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      {/* Right Side - Form */}
+      <div className="flex-1 flex items-start justify-center px-4 sm:px-6 lg:px-20 xl:px-24 bg-white overflow-y-auto h-screen">
+        <div className="mx-auto w-full max-w-lg py-8">
+          <div>
+            {/* Logo */}
+            <div className="flex justify-center mb-6">
+              <img
+                className="h-14 w-auto"
+                src="/Logo.png"
+                alt="Company Logo"
               />
             </div>
-            <div className="mb-4">
-              <label
-                htmlFor="email"
-                className="block text-gray-700 font-semibold"
-              >
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-                className="w-full px-4 py-2 border rounded-lg mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div className="mb-4">
-              <label
-                htmlFor="organization"
-                className="block text-gray-700 font-semibold"
-              >
-                Organization
-              </label>
-              <input
-                type="text"
-                id="organization"
-                value={organization}
-                onChange={(e) => setOrganization(e.target.value)}
-                placeholder="Enter your organization"
-                className="w-full px-4 py-2 border rounded-lg mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div className="mb-4">
-              <label
-                htmlFor="phoneNumber"
-                className="block text-gray-700 font-semibold"
-              >
-                Phone Number
-              </label>
-              <input
-                type="tel"
-                id="phoneNumber"
-                value={phoneNumber}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/[^0-9]/g, ''); // Only allow numbers
-                  setPhoneNumber(value);
-                }}
-                placeholder="Enter your phone number"
-                className="w-full px-4 py-2 border rounded-lg mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                pattern="[0-9]*" // Allow only numbers on mobile devices
-                inputMode="numeric" // Show numeric keyboard on mobile
-              />
-            </div>
-            <div className="mb-4">
-              <label
-                htmlFor="state"
-                className="block text-gray-700 font-semibold"
-              >
-                State
-              </label>
-              <select
-                id="state"
-                value={state}
-                onChange={(e) => setState(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select your state</option>
-                {statesList.map((stateItem, index) => (
-                  <option key={index} value={stateItem.name}>
-                    {stateItem.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="mb-4">
-              <label
-                htmlFor="city"
-                className="block text-gray-700 font-semibold"
-              >
-                City
-              </label>
-              <input
-                type="text"
-                id="city"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                placeholder="Enter your city"
-                className="w-full px-4 py-2 border rounded-lg mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div className="mb-4 relative">
-              <label
-                htmlFor="password"
-                className="block text-gray-700 font-semibold"
-              >
-                Password
-              </label>
-              <input
-                type={showPassword ? 'text' : 'password'}
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Create a password"
-                className="w-full px-4 py-2 border rounded-lg mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <span
-                className="absolute right-3 top-[45px] cursor-pointer"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <HiEyeOff /> : <HiEye />}
-              </span>
-            </div>
-            <div className="mb-4 relative">
-              <label
-                htmlFor="confirmPassword"
-                className="block text-gray-700 font-semibold"
-              >
-                Confirm Password
-              </label>
-              <input
-                type={showConfirmPassword ? 'text' : 'password'}
-                id="confirmPassword"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Re-enter your password"
-                className="w-full px-4 py-2 border rounded-lg mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <span
-                className="absolute right-3 top-[45px] cursor-pointer"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              >
-                {showConfirmPassword ? <HiEyeOff /> : <HiEye />}
-              </span>
-            </div>
-            {/* ... */}
+            <h2 className="text-3xl font-bold text-gray-900 text-center">
+              Create Account
+            </h2>
+            <p className="mt-2 text-sm text-gray-600 text-center">
+              Join us and streamline your financial services journey
+            </p>
+          </div>
 
-            {/* <div className="mb-4">
-              <label
-                htmlFor="abroadReason"
-                className="block text-gray-700 font-semibold"
-              >
-                Why do you want to be a part of abroad?
-              </label>
-              <input
-                type="text"
-                id="abroadReason"
-                value={abroadReason}
-                onChange={(e) => setAbroadReason(e.target.value)}
-                placeholder="Explain your reason"
-                className="w-full px-4 py-2 border rounded-lg mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div> */}
+          <div className="mt-8">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Name Field */}
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                  Full Name
+                </label>
+                <div className="mt-1 relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FaUser className="h-4 w-4 text-gray-400" />
+                  </div>
+                  <input
+                    id="name"
+                    name="name"
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="appearance-none block w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
+                    placeholder="Enter your full name"
+                  />
+                </div>
+              </div>
 
-            <div className="mb-4">
-              <label
-                htmlFor="document1"
-                className="block text-gray-700 font-semibold"
-              >
-                Document 1 (Document Verified?)
-              </label>
-              <input
-                type="file"
-                id="document1"
-                onChange={(e) => {
-                  const file = e.target.files[0];
-                  if (file) {
-                    setDocument1(file);
-                    toast({
-                      title: 'File Selected',
-                      description: `Selected file: ${file.name}`,
-                      status: 'info',
-                      duration: 2000,
-                      isClosable: true,
-                      position: 'bottom-right',
-                    });
-                  }
-                }}
-                className="w-full px-4 py-2 border rounded-lg mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+              {/* Email Field */}
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                  Email Address
+                </label>
+                <div className="mt-1 relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FaEnvelope className="h-4 w-4 text-gray-400" />
+                  </div>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="appearance-none block w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
+                    placeholder="Enter your email"
+                  />
+                </div>
+              </div>
 
-            <div className="mb-4">
-              <label
-                htmlFor="document2"
-                className="block text-gray-700 font-semibold"
-              >
-                Document 2 (Document Verified?)
-              </label>
-              <input
-                type="file"
-                id="document2"
-                onChange={(e) => {
-                  const file = e.target.files[0];
-                  if (file) {
-                    setDocument2(file);
-                    toast({
-                      title: 'File Selected',
-                      description: `Selected file: ${file.name}`,
-                      status: 'info',
-                      duration: 2000,
-                      isClosable: true,
-                      position: 'bottom-right',
-                    });
-                  }
-                }}
-                className="w-full px-4 py-2 border rounded-lg mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
+              {/* Organization and Phone in a row */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="organization" className="block text-sm font-medium text-gray-700">
+                    Organization
+                  </label>
+                  <div className="mt-1 relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <FaBuilding className="h-4 w-4 text-gray-400" />
+                    </div>
+                    <input
+                      id="organization"
+                      name="organization"
+                      type="text"
+                      required
+                      value={organization}
+                      onChange={(e) => setOrganization(e.target.value)}
+                      className="appearance-none block w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
+                      placeholder="Organization"
+                    />
+                  </div>
+                </div>
 
-            <div className="mb-4">
-              <label
-                htmlFor="businessDivision"
-                className="block text-gray-700 font-semibold"
-              >
-                Business Division
-              </label>
-              <select
-                id="businessDivision"
-                value={businessDivision}
-                onChange={(e) => setBusinessDivision(e.target.value)}
-                className="w-full px-4 py-2 border rounded-lg mt-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Select Business Division</option>
-                <option value="GIC">GIC</option>
-                <option value="FOREX">FOREX</option>
-              </select>
-            </div>
+                <div>
+                  <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700">
+                    Phone Number
+                  </label>
+                  <div className="mt-1 relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <FaPhone className="h-4 w-4 text-gray-400" />
+                    </div>
+                    <input
+                      id="phoneNumber"
+                      name="phoneNumber"
+                      type="tel"
+                      required
+                      value={phoneNumber}
+                      onChange={(e) => {
+                        const value = e.target.value.replace(/[^0-9]/g, '');
+                        setPhoneNumber(value);
+                      }}
+                      className="appearance-none block w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
+                      placeholder="Phone number"
+                    />
+                  </div>
+                </div>
+              </div>
 
-            {loading ? (
-             <div className='text-center'>
-               <Spinner />
-             </div>
-            ) : (
-              <Button type="submit" colorScheme="blue" className="w-full mt-4">
-                Register
-              </Button>
-            )}
-          </form>
-          <p className="text-[16px] mx-auto pb-4 text-gray-600 mt-4">
-            Already have an account?{' '}
-            <Link to="/auth/login" className="text-blue-500 hover:underline">
-              Login
-            </Link>
-          </p>
+              {/* State and City in a row */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="state" className="block text-sm font-medium text-gray-700">
+                    State
+                  </label>
+                  <div className="mt-1 relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <FaMapMarkerAlt className="h-4 w-4 text-gray-400" />
+                    </div>
+                    <select
+                      id="state"
+                      name="state"
+                      required
+                      value={state}
+                      onChange={(e) => setState(e.target.value)}
+                      className="appearance-none block w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
+                    >
+                      <option value="">Select State</option>
+                      {statesList.map((stateItem, index) => (
+                        <option key={index} value={stateItem.name}>
+                          {stateItem.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="city" className="block text-sm font-medium text-gray-700">
+                    City
+                  </label>
+                  <div className="mt-1 relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <FaMapMarkerAlt className="h-4 w-4 text-gray-400" />
+                    </div>
+                    <input
+                      id="city"
+                      name="city"
+                      type="text"
+                      required
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      className="appearance-none block w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
+                      placeholder="Enter city"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Password Fields */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                    Password
+                  </label>
+                  <div className="mt-1 relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <FaLock className="h-4 w-4 text-gray-400" />
+                    </div>
+                    <input
+                      id="password"
+                      name="password"
+                      type={showPassword ? 'text' : 'password'}
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="appearance-none block w-full pl-9 pr-10 py-2.5 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
+                      placeholder="Password"
+                    />
+                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                      <button
+                        type="button"
+                        className="text-gray-400 hover:text-gray-600 focus:outline-none"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <HiEyeOff className="h-4 w-4" /> : <HiEye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+                    Confirm Password
+                  </label>
+                  <div className="mt-1 relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <FaLock className="h-4 w-4 text-gray-400" />
+                    </div>
+                    <input
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      required
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="appearance-none block w-full pl-9 pr-10 py-2.5 border border-gray-300 rounded-lg placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
+                      placeholder="Confirm password"
+                    />
+                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                      <button
+                        type="button"
+                        className="text-gray-400 hover:text-gray-600 focus:outline-none"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      >
+                        {showConfirmPassword ? <HiEyeOff className="h-4 w-4" /> : <HiEye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Business Division */}
+              <div>
+                <label htmlFor="businessDivision" className="block text-sm font-medium text-gray-700">
+                  Business Division
+                </label>
+                <div className="mt-1 relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <FaBuilding className="h-4 w-4 text-gray-400" />
+                  </div>
+                  <select
+                    id="businessDivision"
+                    name="businessDivision"
+                    required
+                    value={businessDivision}
+                    onChange={(e) => setBusinessDivision(e.target.value)}
+                    className="appearance-none block w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out"
+                  >
+                    <option value="">Select Business Division</option>
+                    <option value="GIC">GIC</option>
+                    <option value="FOREX">FOREX</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Document Upload Fields */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="document1" className="block text-sm font-medium text-gray-700">
+                    Document 1
+                  </label>
+                  <div className="mt-1 relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <FaFileUpload className="h-4 w-4 text-gray-400" />
+                    </div>
+                    <input
+                      id="document1"
+                      name="document1"
+                      type="file"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          setDocument1(file);
+                          toast({
+                            title: 'File Selected',
+                            description: `Selected: ${file.name}`,
+                            status: 'info',
+                            duration: 2000,
+                            isClosable: true,
+                          });
+                        }
+                      }}
+                      className="appearance-none block w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out file:mr-4 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="document2" className="block text-sm font-medium text-gray-700">
+                    Document 2
+                  </label>
+                  <div className="mt-1 relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <FaFileUpload className="h-4 w-4 text-gray-400" />
+                    </div>
+                    <input
+                      id="document2"
+                      name="document2"
+                      type="file"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          setDocument2(file);
+                          toast({
+                            title: 'File Selected',
+                            description: `Selected: ${file.name}`,
+                            status: 'info',
+                            duration: 2000,
+                            isClosable: true,
+                          });
+                        }
+                      }}
+                      className="appearance-none block w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out file:mr-4 file:py-1 file:px-2 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-4">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-indigo-600 to-purple-700 hover:from-indigo-700 hover:to-purple-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition duration-150 ease-in-out transform hover:scale-105"
+                >
+                  {loading ? (
+                    <Spinner size="sm" color="white" />
+                  ) : (
+                    <>
+                      <span className="absolute left-0 inset-y-0 flex items-center pl-3">
+                        <FaUser className="h-5 w-5 text-indigo-300 group-hover:text-indigo-200" />
+                      </span>
+                      Create Account
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <div className="text-center pt-2">
+                <span className="text-sm text-gray-600">
+                  Already have an account?{' '}
+                  <Link
+                    to="/auth/login"
+                    className="font-medium text-indigo-600 hover:text-indigo-500 transition duration-150 ease-in-out"
+                  >
+                    Sign in here
+                  </Link>
+                </span>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>

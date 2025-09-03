@@ -48,6 +48,7 @@ function ForexForm() {
   });
   const [passportFile, setPassportFile] = useState(null);
   const [offerLetterFile, setOfferLetterFile] = useState(null);
+  const [ttCopyFile, setTtCopyFile] = useState(null);
   const [commissionPaymentProof, setCommissionPaymentProof] = useState(null);
   // const [emaill, setEmail] = useState('');
   // const [students, setStudents] = useState([]);
@@ -271,6 +272,7 @@ function ForexForm() {
       if (
         passportFile ||
         offerLetterFile ||
+        ttCopyFile||
         commissionPaymentProof ||
         documents.length > 0
       ) {
@@ -288,6 +290,7 @@ function ForexForm() {
         const files = [
           passportFile,
           offerLetterFile,
+          ttCopyFile,
           commissionPaymentProof,
           ...documents.map((doc) => doc.documentFile),
         ].filter(Boolean);
@@ -346,9 +349,13 @@ function ForexForm() {
           fileId: uploadResult?.uploads[1]?.fileId,
           documentFile: uploadResult?.uploads[1]?.viewLink,
         },
-        commissionPaymentProof: {
+        ttCopyFile:{
           fileId: uploadResult?.uploads[2]?.fileId,
           documentFile: uploadResult?.uploads[2]?.viewLink,
+        },
+        commissionPaymentProof: {
+          fileId: uploadResult?.uploads[3]?.fileId,
+          documentFile: uploadResult?.uploads[3]?.viewLink,
         },
         documents: uploadedFiles,
       };
@@ -709,7 +716,7 @@ function ForexForm() {
               h="50px"
               w="full"
             >
-              <option value="Not Received">Not Received</option>
+              <option value="Non Claimable">Non Claimable</option>
               <option value="Paid">Paid</option>
               <option value="Under Processing">Under Processing</option>
             </Select>
@@ -755,6 +762,30 @@ function ForexForm() {
                 id="offerLetterFile"
                 name="offerLetterFile"
                 onChange={(e) => handleFileChangeoffpass(e, setOfferLetterFile)}
+                hidden
+              />
+            </Flex>
+          </FormControl>
+          <FormControl>
+            <FormLabel>TT Copy File</FormLabel>
+            <Flex align="center">
+              <Button
+                colorScheme="blue"
+                onClick={() =>
+                  document.getElementById('ttCopyFile').click()
+                }
+                mr={2}
+              >
+                Choose File
+              </Button>
+              <Text>
+                {ttCopyFile ? ttCopyFile.name : 'No file chosen'}
+              </Text>
+              <Input
+                type="file"
+                id="ttCopyFile"
+                name="ttCopyFile"
+                onChange={(e) => handleFileChangeoffpass(e, setTtCopyFile)}
                 hidden
               />
             </Flex>

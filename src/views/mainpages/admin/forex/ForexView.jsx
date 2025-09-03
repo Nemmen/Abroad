@@ -42,6 +42,7 @@ const fieldIcons = {
   commissionStatus: FiCheckSquare,
   passportFile: FiFile,
   offerLetterFile: FiFile,
+  ttCopyFile:FiFile,
 };
 
 function ForexView() {
@@ -162,7 +163,7 @@ function ForexView() {
           )}
           {Object.entries(formData).map(([label, value], index) => {
             const isEditable =
-              label !== 'passportFile' && label !== 'offerLetterFile';
+              label !== 'passportFile' && label !== 'offerLetterFile' && label !== 'ttCopyFile';
 
             const renderSelectOptions = (field) => {
               switch (field) {
@@ -221,7 +222,7 @@ function ForexView() {
                       )
                     ) : label.endsWith('File') &&
                       (label === 'passportFile' ||
-                        label === 'offerLetterFile') ? (
+                        label === 'offerLetterFile' || label === 'ttCopyFile') ? (
                       <Link
                         href={value.documentFile}
                         color="blue.500"
