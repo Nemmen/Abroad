@@ -28,6 +28,7 @@ import BlockedPage from 'views/mainpages/agent/blocked/BlockedPage';
 import StudentPage from 'views/mainpages/agent/students/StudentPage';
 import ForgotPassword from "views/mainpages/login_signup/ForgotPassword";
 import ResetPassword from "views/mainpages/login_signup/ResetPassword";
+import EmailTemplateGen from 'views/mainpages/admin/main/components/EmailTemplateGen';
 
 const routes = [
   {
@@ -61,6 +62,13 @@ const routes = [
     icon: <Icon as={MdSwapHoriz} width="20px" height="20px" color="inherit" />,
     path: '/forex',
     component: <Forex />,
+  },
+  {
+    name: 'EMAIL PROMOTIONS',
+    layout: '/admin',
+    icon: <Icon as={MdSwapHoriz} width="20px" height="20px" color="inherit" />,
+    path: '/email-promotions',
+    component: <EmailTemplateGen/>,
   },
 ];
 
