@@ -82,6 +82,9 @@ export default function AppAppBar() {
               <Button variant="text" color="info" size="small" sx={{ minWidth: 0 }} href="#FAQ">
                 FAQ
               </Button>
+              <Button variant="text" color="info" size="small" sx={{ minWidth: 0 }} href="#contactus">
+                Contact Us
+              </Button>
               
             </Box>
           </Box>
