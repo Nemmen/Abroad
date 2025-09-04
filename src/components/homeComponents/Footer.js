@@ -61,6 +61,7 @@ Best regards,`;
   return (
     <Box
       component="footer"
+      id='contactus'
       sx={{
         backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#000000' : '#ffffff',
         color: (theme) => theme.palette.mode === 'dark' ? 'white' : '#1a1a1a',
