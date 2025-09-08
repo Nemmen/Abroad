@@ -5,6 +5,7 @@ import {
   Divider,
   Text,
   VStack,
+  HStack,
   Checkbox,
   Modal,
   ModalOverlay,
@@ -13,7 +14,18 @@ import {
   ModalCloseButton,
   ModalBody,
   ModalFooter,
+  Input,
+  Select,
+  FormControl,
+  FormLabel,
+  Tabs,
+  TabList,
+  TabPanels,
+  Tab,
+  TabPanel,
+  IconButton,
 } from '@chakra-ui/react';
+import { ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons';
 import DataTable from 'components/DataTable';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
@@ -38,10 +50,22 @@ const allColumns = [
 const Forex = () => {
   const [rows, setRows] = useState([]);
   const [data, setData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
   const [selectedColumns, setSelectedColumns] = useState(
     allColumns.map((col) => col.field),
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  
+  // Filter states
+  const [filters, setFilters] = useState({
+    dateSort: '', // 'asc', 'desc', ''
+    specificDate: '',
+    agentName: '',
+    studentName: '',
+    dateFrom: '',
+    dateTo: '',
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -76,6 +100,78 @@ const Forex = () => {
 
     fetchData();
   }, []);
+
+  // Filter and sort data effect
+  useEffect(() => {
+    let processedData = [...rows];
+
+    // Apply name filters
+    if (filters.agentName) {
+      processedData = processedData.filter(item => 
+        item.agentRef.toLowerCase().includes(filters.agentName.toLowerCase())
+      );
+    }
+    
+    if (filters.studentName) {
+      processedData = processedData.filter(item => 
+        item.studentRef.toLowerCase().includes(filters.studentName.toLowerCase())
+      );
+    }
+
+    // Apply date filters
+    if (filters.specificDate) {
+      processedData = processedData.filter(item => {
+        const itemDate = new Date(item.date);
+        const filterDate = new Date(filters.specificDate);
+        return itemDate.toDateString() === filterDate.toDateString();
+      });
+    }
+
+    if (filters.dateFrom && filters.dateTo) {
+      processedData = processedData.filter(item => {
+        const itemDate = new Date(item.date);
+        const fromDate = new Date(filters.dateFrom);
+        const toDate = new Date(filters.dateTo);
+        return itemDate >= fromDate && itemDate <= toDate;
+      });
+    }
+
+    // Apply date sorting
+    if (filters.dateSort) {
+      processedData.sort((a, b) => {
+        const dateA = new Date(a.date || 0);
+        const dateB = new Date(b.date || 0);
+        
+        if (filters.dateSort === 'asc') {
+          return dateA - dateB;
+        } else if (filters.dateSort === 'desc') {
+          return dateB - dateA;
+        }
+        return 0;
+      });
+    }
+
+    setFilteredData(processedData);
+  }, [rows, filters]);
+
+  // Filter handlers
+  const handleFilterChange = (filterType, value) => {
+    setFilters(prev => ({
+      ...prev,
+      [filterType]: value
+    }));
+  };
+
+  const clearAllFilters = () => {
+    setFilters({
+      dateSort: '',
+      specificDate: '',
+      agentName: '',
+      studentName: '',
+      dateFrom: '',
+      dateTo: '',
+    });
+  };
 
   const handleDownloadExcel = () => {
     const cleanData = data.map((item) => {
@@ -121,7 +217,7 @@ const Forex = () => {
     () => allColumns.filter((col) => selectedColumns.includes(col.field)),
     [selectedColumns],
   );
-  const memoizedRows = useMemo(() => rows, [rows]);
+  const memoizedRows = useMemo(() => filteredData.length > 0 ? filteredData : rows, [filteredData, rows]);
 
   return (
     <Box width={'full'}>
@@ -145,6 +241,17 @@ const Forex = () => {
             mb={1}
           >
             Filter Columns
+          </Button>
+          <Button
+            onClick={() => setIsFilterModalOpen(true)}
+            width={'200px'}
+            variant="solid"
+            colorScheme="purple"
+            borderRadius={'none'}
+            mr={4}
+            mb={1}
+          >
+            Filter & Sort Data
           </Button>
           <Button
             onClick={handleDownloadExcel}
@@ -201,8 +308,158 @@ const Forex = () => {
             </VStack>
           </ModalBody>
           <ModalFooter>
+            <Button 
+              colorScheme="red" 
+              variant="outline" 
+              onClick={() => setSelectedColumns([])}
+              mr={2}
+            >
+              Clear Filter
+            </Button>
+            <Button 
+              colorScheme="gray" 
+              variant="outline" 
+              onClick={() => setSelectedColumns(allColumns.map(col => col.field))}
+              mr={2}
+            >
+              Select All
+            </Button>
             <Button colorScheme="blue" onClick={() => setIsModalOpen(false)}>
               Apply
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Data Filter and Sort Modal */}
+      <Modal isOpen={isFilterModalOpen} onClose={() => setIsFilterModalOpen(false)} size="xl">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Filter & Sort Data</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Tabs>
+              <TabList>
+                <Tab>Sort by Date</Tab>
+                <Tab>Filter by Date</Tab>
+                <Tab>Filter by Name</Tab>
+              </TabList>
+
+              <TabPanels>
+                {/* Date Sorting Tab */}
+                <TabPanel>
+                  <VStack align="start" spacing={4}>
+                    <FormControl>
+                      <FormLabel>Sort by Transaction Date</FormLabel>
+                      <HStack spacing={4}>
+                        <Button
+                          size="sm"
+                          colorScheme={filters.dateSort === 'asc' ? 'blue' : 'gray'}
+                          variant={filters.dateSort === 'asc' ? 'solid' : 'outline'}
+                          leftIcon={<ChevronUpIcon />}
+                          onClick={() => handleFilterChange('dateSort', 'asc')}
+                        >
+                          Ascending (Old → New)
+                        </Button>
+                        <Button
+                          size="sm"
+                          colorScheme={filters.dateSort === 'desc' ? 'blue' : 'gray'}
+                          variant={filters.dateSort === 'desc' ? 'solid' : 'outline'}
+                          leftIcon={<ChevronDownIcon />}
+                          onClick={() => handleFilterChange('dateSort', 'desc')}
+                        >
+                          Descending (New → Old)
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleFilterChange('dateSort', '')}
+                        >
+                          Clear
+                        </Button>
+                      </HStack>
+                    </FormControl>
+                  </VStack>
+                </TabPanel>
+
+                {/* Date Filtering Tab */}
+                <TabPanel>
+                  <VStack align="start" spacing={4}>
+                    <FormControl>
+                      <FormLabel>Filter by Specific Date</FormLabel>
+                      <Input
+                        type="date"
+                        value={filters.specificDate}
+                        onChange={(e) => handleFilterChange('specificDate', e.target.value)}
+                      />
+                    </FormControl>
+                    
+                    <Divider />
+                    
+                    <FormControl>
+                      <FormLabel>Filter by Date Range</FormLabel>
+                      <HStack spacing={4}>
+                        <Box>
+                          <Text fontSize="sm" mb={1}>From Date</Text>
+                          <Input
+                            type="date"
+                            value={filters.dateFrom}
+                            onChange={(e) => handleFilterChange('dateFrom', e.target.value)}
+                          />
+                        </Box>
+                        <Box>
+                          <Text fontSize="sm" mb={1}>To Date</Text>
+                          <Input
+                            type="date"
+                            value={filters.dateTo}
+                            onChange={(e) => handleFilterChange('dateTo', e.target.value)}
+                          />
+                        </Box>
+                      </HStack>
+                    </FormControl>
+                  </VStack>
+                </TabPanel>
+
+                {/* Name Filtering Tab */}
+                <TabPanel>
+                  <VStack align="start" spacing={4}>
+                    <FormControl>
+                      <FormLabel>Filter by Agent Name</FormLabel>
+                      <Input
+                        placeholder="Enter agent name to search..."
+                        value={filters.agentName}
+                        onChange={(e) => handleFilterChange('agentName', e.target.value)}
+                      />
+                    </FormControl>
+                    
+                    <FormControl>
+                      <FormLabel>Filter by Student Name</FormLabel>
+                      <Input
+                        placeholder="Enter student name to search..."
+                        value={filters.studentName}
+                        onChange={(e) => handleFilterChange('studentName', e.target.value)}
+                      />
+                    </FormControl>
+                  </VStack>
+                </TabPanel>
+              </TabPanels>
+            </Tabs>
+          </ModalBody>
+          
+          <ModalFooter>
+            <Button 
+              colorScheme="red" 
+              variant="outline" 
+              onClick={clearAllFilters}
+              mr={2}
+            >
+              Clear All Filters
+            </Button>
+            <Button 
+              colorScheme="blue" 
+              onClick={() => setIsFilterModalOpen(false)}
+            >
+              Apply Filters
             </Button>
           </ModalFooter>
         </ModalContent>
