@@ -61,41 +61,41 @@ export default function BlockAccount() {
           {/* Text Content */}
           <Grid item xs={12} md={6}>
             <Typography variant="h2" gutterBottom sx={{ fontWeight: 'bold', color: theme.palette.text.primary }}>
-              Your Trusted Solution for Blocked Accounts
+              Blocked Accounts for Germany – Fast, Secure, Embassy-Accepted
             </Typography>
-            <Typography variant="h6" gutterBottom sx={{ color: "hsl(210, 98%, 48%)" }}>
-              Fast. Easy. Reliable.
+            <Typography variant="body1" gutterBottom sx={{ color: theme.palette.text.primary, mb: 3 }}>
+              Prove your financial means with ease. Our Fintiba-powered Blocked Account services are designed for students moving to Germany—fully compliant, reliable, and stress-free.
             </Typography>
-            <Typography variant="body1" gutterBottom sx={{ color: theme.palette.text.primary }}>
-              Streamlined Blocked Account Services You Can Count On
-            </Typography>
-            <Typography variant="body2" gutterBottom sx={{ color: theme.palette.text.primary, fontWeight: "bold" }}>
-              Simplify the process of setting up and managing Blocked Accounts for international students:
-            </Typography>
-            <ul style={{ paddingLeft: '20px', color: theme.palette.text.primary }}>
+            <ul style={{ paddingLeft: '20px', color: theme.palette.text.primary, marginBottom: '20px' }}>
               <li>
-                <Typography variant="body1" className='text-md'>
-                  <span className="font-bold" style={{ color: textColor }}>Quick Approvals:</span> Partnered with reliable local banks for faster blocking confirmation.
+                <Typography variant="body1" className='text-md' gutterBottom>
+                  <span className="font-bold" style={{ color: textColor }}>100% Compliance:</span> German embassies accept Fintiba at Sutor Bank.
                 </Typography>
               </li>
               <li>
-                <Typography variant="body1" className='text-md'>
-                  <span className='font-bold' style={{ color: textColor }}>No City Registration Needed:</span> Easy access to funds upon arrival in Germany.
+                <Typography variant="body1" className='text-md' gutterBottom>
+                  <span className='font-bold' style={{ color: textColor }}>Quick Digital Setup:</span> Get instant blocking confirmation online.
                 </Typography>
               </li>
               <li>
-                <Typography variant="body1" className='text-md'>
-                  <span className='font-bold' style={{ color: textColor }}>Guided Process:</span> Multi-language support and app-based navigation for your journey.
+                <Typography variant="body1" className='text-md' gutterBottom>
+                  <span className='font-bold' style={{ color: textColor }}>Safe & Secure:</span> Deposits protected up to €100,000.
                 </Typography>
               </li>
               <li>
-                <Typography variant="body1" className='text-md'>
-                  <span className='font-bold' style={{ color: textColor }}>Instant Confirmation:</span> Receive prompt account opening confirmation through our trusted partners.
+                <Typography variant="body1" className='text-md' gutterBottom>
+                  <span className='font-bold' style={{ color: textColor }}>Fintiba Plus Option:</span> Add health insurance for a complete student package.
                 </Typography>
               </li>
             </ul>
-            <Typography variant="body2" sx={{ mt: 2, color: theme.palette.text.primary }}>
-              Facilitate an easy GIC Blocked Account setup for a seamless visa application experience.
+            <Typography variant="body1" sx={{ mt: 2, color: textColor, fontWeight: 'bold' }}>
+              Open your Blocked Account today—simple, secure, and fully recognized.
+            </Typography>
+            <Typography variant="body1" gutterBottom sx={{ color: theme.palette.text.primary, mt: 2 }}>
+              Early Commission disbursement.
+            </Typography>
+            <Typography variant="body1" sx={{ color: theme.palette.text.primary }}>
+              Full Support in Refunds.
             </Typography>
           </Grid>
 
