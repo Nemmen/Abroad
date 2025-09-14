@@ -45,6 +45,7 @@ function ForexForm() {
     netPayable: '',
     commissionStatus: '',
     aecommission: '',
+    remarks: '',
   });
   const [passportFile, setPassportFile] = useState(null);
   const [offerLetterFile, setOfferLetterFile] = useState(null);
@@ -660,7 +661,7 @@ function ForexForm() {
             </NumberInput>
           </FormControl>
 
-          <FormControl isRequired>
+          <FormControl >
             <FormLabel>Commission Payment Date</FormLabel>
             <Input
               type="date"
@@ -721,6 +722,19 @@ function ForexForm() {
               <option value="Under Processing">Under Processing</option>
             </Select>
           </FormControl>
+
+          <FormControl>
+            <FormLabel>Remarks</FormLabel>
+            <Input
+              name="remarks"
+              placeholder="Enter any remarks or notes"
+              value={formData.remarks}
+              onChange={handleChange}
+              h="50px"
+              w="full"
+            />
+          </FormControl>
+
           <FormControl>
             <FormLabel>Passport</FormLabel>
             <Flex align="center">

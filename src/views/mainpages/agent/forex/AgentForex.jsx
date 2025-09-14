@@ -28,6 +28,13 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { useColorMode } from '@chakra-ui/react';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import { 
+  saveFiltersToStorage, 
+  loadFiltersFromStorage, 
+  clearFiltersFromStorage,
+  FILTER_STORAGE_KEYS,
+  DEFAULT_FILTERS 
+} from 'utils/filterUtils';
 import TuneIcon from '@mui/icons-material/Tune';
 import CloseIcon from '@mui/icons-material/Close';
 
@@ -44,7 +51,27 @@ const allColumns = [
   { field: 'agentCommission', headerName: 'Agent Commission', width: 150 },
   { field: 'tds', headerName: 'TDS', width: 100 },
   { field: 'netPayable', headerName: 'Net Payable', width: 150 },
-  { field: 'commissionStatus', headerName: 'Commission Status', width: 180 },
+  { 
+    field: 'commissionStatus', 
+    headerName: 'Commission Status', 
+    width: 180,
+    renderCell: (params) => {
+      let displayText = params.value;
+      
+      // Replace "not received" with "non claimable" and "received" with "paid"
+      if (displayText?.toLowerCase().includes('not received')) {
+        displayText = displayText.replace(/not received/gi, 'non claimable');
+      } else if (displayText?.toLowerCase().includes('received')) {
+        displayText = displayText.replace(/received/gi, 'paid');
+      }
+      
+      return (
+        <span style={{ fontWeight: '600' }}>
+          {displayText}
+        </span>
+      );
+    }
+  },
 ];
 
 const Forex = () => {
@@ -60,15 +87,10 @@ const Forex = () => {
   const { user } = useSelector((state) => state.Auth);
   const { colorMode } = useColorMode();
   
-  // Filter states
-  const [filters, setFilters] = useState({
-    dateSort: '', // 'asc', 'desc', ''
-    specificDate: '',
-    agentName: '',
-    studentName: '',
-    dateFrom: '',
-    dateTo: '',
-  });
+  // Filter states with persistent storage
+  const [filters, setFilters] = useState(() => 
+    loadFiltersFromStorage(FILTER_STORAGE_KEYS.AGENT_FOREX, DEFAULT_FILTERS.AGENT_FOREX)
+  );
   const [tabValue, setTabValue] = useState("0");
 
   // Create MUI theme based on Chakra color mode
@@ -172,6 +194,37 @@ const Forex = () => {
       );
     }
 
+    // Apply multi-select filters
+    if (filters.countries && filters.countries.length > 0) {
+      processedData = processedData.filter(item => 
+        filters.countries.includes(item.country)
+      );
+    }
+
+    if (filters.currencies && filters.currencies.length > 0) {
+      processedData = processedData.filter(item => 
+        filters.currencies.includes(item.currencyBooked)
+      );
+    }
+
+    if (filters.docsStatuses && filters.docsStatuses.length > 0) {
+      processedData = processedData.filter(item => 
+        filters.docsStatuses.includes(item.docsStatus)
+      );
+    }
+
+    if (filters.ttCopyStatuses && filters.ttCopyStatuses.length > 0) {
+      processedData = processedData.filter(item => 
+        filters.ttCopyStatuses.includes(item.ttCopyStatus)
+      );
+    }
+
+    if (filters.commissionStatuses && filters.commissionStatuses.length > 0) {
+      processedData = processedData.filter(item => 
+        filters.commissionStatuses.includes(item.commissionStatus)
+      );
+    }
+
     // Apply date filters
     if (filters.specificDate) {
       processedData = processedData.filter(item => {
@@ -208,23 +261,58 @@ const Forex = () => {
     setFilteredData(processedData);
   }, [rows, filters]);
 
-  // Filter handlers
+  // Extract unique values for filters
+  const getUniqueValues = (data, field) => {
+    return [...new Set(data.map(item => item[field]).filter(Boolean))].sort();
+  };
+
+  const uniqueCountries = getUniqueValues(rows, 'country');
+  const uniqueCurrencies = getUniqueValues(rows, 'currencyBooked');
+  const uniqueDocsStatuses = getUniqueValues(rows, 'docsStatus');
+  const uniqueTtCopyStatuses = getUniqueValues(rows, 'ttCopyStatus');
+  const uniqueCommissionStatuses = getUniqueValues(rows, 'commissionStatus');
+
+  // Filter handlers with persistent storage
   const handleFilterChange = (filterType, value) => {
-    setFilters(prev => ({
-      ...prev,
+    const newFilters = {
+      ...filters,
       [filterType]: value
-    }));
+    };
+    setFilters(newFilters);
+    saveFiltersToStorage(FILTER_STORAGE_KEYS.AGENT_FOREX, newFilters);
+  };
+
+  const handleMultiSelectFilter = (filterType, value, checked) => {
+    const currentValues = filters[filterType] || [];
+    let newValues;
+    
+    if (checked) {
+      newValues = [...currentValues, value];
+    } else {
+      newValues = currentValues.filter(item => item !== value);
+    }
+    
+    const newFilters = {
+      ...filters,
+      [filterType]: newValues
+    };
+    setFilters(newFilters);
+    saveFiltersToStorage(FILTER_STORAGE_KEYS.AGENT_FOREX, newFilters);
   };
 
   const clearAllFilters = () => {
-    setFilters({
-      dateSort: '',
-      specificDate: '',
-      agentName: '',
-      studentName: '',
-      dateFrom: '',
-      dateTo: '',
-    });
+    const clearedFilters = DEFAULT_FILTERS.AGENT_FOREX;
+    setFilters(clearedFilters);
+    saveFiltersToStorage(FILTER_STORAGE_KEYS.AGENT_FOREX, clearedFilters);
+  };
+
+  const clearSpecificFilter = (filterType) => {
+    const newFilters = {
+      ...filters,
+      [filterType]: Array.isArray(filters[filterType]) ? [] : ''
+    };
+    setFilters(newFilters);
+    saveFiltersToStorage(FILTER_STORAGE_KEYS.AGENT_FOREX, newFilters);
   };
 
   const handleDownloadExcel = () => {
@@ -272,6 +360,18 @@ const Forex = () => {
     [selectedColumns],
   );
   const memoizedRows = useMemo(() => filteredData.length > 0 ? filteredData : rows, [filteredData, rows]);
+
+  const getRowClassName = (params) => {
+    const status = params.row.commissionStatus?.toLowerCase();
+    if (status?.includes('non claimable') || status?.includes('not received')) {
+      return 'row-non-claimable';
+    } else if (status?.includes('under processing')) {
+      return 'row-under-processing';
+    } else if (status?.includes('paid') || status?.includes('received')) {
+      return 'row-paid';
+    }
+    return '';
+  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -386,6 +486,7 @@ const Forex = () => {
                 <DataTable 
                   columns={memoizedColumns} 
                   rows={memoizedRows} 
+                  getRowClassName={getRowClassName}
                 />
               </Box>
             )}
@@ -451,7 +552,7 @@ const Forex = () => {
               sx={{ textTransform: 'none' }}
               color="error"
             >
-              Clear Filter
+              Deselect All
             </Button>
             <Button 
               onClick={() => setSelectedColumns(allColumns.map(col => col.field))}
@@ -517,6 +618,8 @@ const Forex = () => {
                 <Tab label="Sort by Date" value="0" />
                 <Tab label="Filter by Date" value="1" />
                 <Tab label="Filter by Name" value="2" />
+                <Tab label="Countries" value="3" />
+                <Tab label="Currencies & Status" value="4" />
               </Tabs>
             </Box>
 
@@ -547,7 +650,7 @@ const Forex = () => {
                     <Button
                       size="small"
                       variant="text"
-                      onClick={() => handleFilterChange('dateSort', '')}
+                      onClick={() => clearSpecificFilter('dateSort')}
                     >
                       Clear Sort
                     </Button>
@@ -561,9 +664,19 @@ const Forex = () => {
               <Box sx={{ p: 2 }}>
                 <Stack spacing={3}>
                   <Box>
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                      Filter by Specific Date
-                    </Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Filter by Specific Date
+                      </Typography>
+                      <Button
+                        size="small"
+                        variant="text"
+                        onClick={() => clearSpecificFilter('specificDate')}
+                        sx={{ textTransform: 'none', fontSize: '0.7rem' }}
+                      >
+                        Clear
+                      </Button>
+                    </Box>
                     <TextField
                       type="date"
                       fullWidth
@@ -577,9 +690,22 @@ const Forex = () => {
                   <Divider />
                   
                   <Box>
-                    <Typography variant="body2" color="text.secondary" gutterBottom>
-                      Filter by Date Range
-                    </Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Filter by Date Range
+                      </Typography>
+                      <Button
+                        size="small"
+                        variant="text"
+                        onClick={() => {
+                          clearSpecificFilter('dateFrom');
+                          clearSpecificFilter('dateTo');
+                        }}
+                        sx={{ textTransform: 'none', fontSize: '0.7rem' }}
+                      >
+                        Clear Range
+                      </Button>
+                    </Box>
                     <Grid container spacing={2}>
                       <Grid item xs={6}>
                         <TextField
@@ -613,23 +739,223 @@ const Forex = () => {
             {tabValue === "2" && (
               <Box sx={{ p: 2 }}>
                 <Stack spacing={3}>
-                  <TextField
-                    label="Filter by Agent Name"
-                    fullWidth
-                    size="small"
-                    placeholder="Enter agent name to search..."
-                    value={filters.agentName}
-                    onChange={(e) => handleFilterChange('agentName', e.target.value)}
-                  />
+                  <Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Filter by Agent Name
+                      </Typography>
+                      <Button
+                        size="small"
+                        variant="text"
+                        onClick={() => clearSpecificFilter('agentName')}
+                        sx={{ textTransform: 'none', fontSize: '0.7rem' }}
+                      >
+                        Clear
+                      </Button>
+                    </Box>
+                    <TextField
+                      label="Filter by Agent Name"
+                      fullWidth
+                      size="small"
+                      placeholder="Enter agent name to search..."
+                      value={filters.agentName}
+                      onChange={(e) => handleFilterChange('agentName', e.target.value)}
+                    />
+                  </Box>
                   
-                  <TextField
-                    label="Filter by Student Name"
-                    fullWidth
-                    size="small"
-                    placeholder="Enter student name to search..."
-                    value={filters.studentName}
-                    onChange={(e) => handleFilterChange('studentName', e.target.value)}
-                  />
+                  <Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Filter by Student Name
+                      </Typography>
+                      <Button
+                        size="small"
+                        variant="text"
+                        onClick={() => clearSpecificFilter('studentName')}
+                        sx={{ textTransform: 'none', fontSize: '0.7rem' }}
+                      >
+                        Clear
+                      </Button>
+                    </Box>
+                    <TextField
+                      label="Filter by Student Name"
+                      fullWidth
+                      size="small"
+                      placeholder="Enter student name to search..."
+                      value={filters.studentName}
+                      onChange={(e) => handleFilterChange('studentName', e.target.value)}
+                    />
+                  </Box>
+                </Stack>
+              </Box>
+            )}
+
+            {/* Countries Tab */}
+            {tabValue === "3" && (
+              <Box sx={{ p: 2 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Select Countries ({filters.countries?.length || 0} selected)
+                  </Typography>
+                </Box>
+                <FormGroup>
+                  <Grid container spacing={1}>
+                    {uniqueCountries.map((country) => (
+                      <Grid item xs={6} key={country}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              size="small"
+                              checked={filters.countries?.includes(country) || false}
+                              onChange={(e) => handleMultiSelectFilter('countries', country, e.target.checked)}
+                            />
+                          }
+                          label={
+                            <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                              {country}
+                            </Typography>
+                          }
+                        />
+                      </Grid>
+                    ))}
+                  </Grid>
+                </FormGroup>
+              </Box>
+            )}
+
+            {/* Currencies & Status Tab */}
+            {tabValue === "4" && (
+              <Box sx={{ p: 2 }}>
+                <Stack spacing={3}>
+                  {/* Currencies */}
+                  <Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Currencies ({filters.currencies?.length || 0} selected)
+                      </Typography>
+                    </Box>
+                    <FormGroup>
+                      <Grid container spacing={1}>
+                        {uniqueCurrencies.map((currency) => (
+                          <Grid item xs={6} key={currency}>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  size="small"
+                                  checked={filters.currencies?.includes(currency) || false}
+                                  onChange={(e) => handleMultiSelectFilter('currencies', currency, e.target.checked)}
+                                />
+                              }
+                              label={
+                                <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                                  {currency}
+                                </Typography>
+                              }
+                            />
+                          </Grid>
+                        ))}
+                      </Grid>
+                    </FormGroup>
+                  </Box>
+
+                  <Divider />
+
+                  {/* Document Status */}
+                  <Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Document Status ({filters.docsStatuses?.length || 0} selected)
+                      </Typography>
+                    </Box>
+                    <FormGroup>
+                      <Grid container spacing={1}>
+                        {uniqueDocsStatuses.map((status) => (
+                          <Grid item xs={6} key={status}>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  size="small"
+                                  checked={filters.docsStatuses?.includes(status) || false}
+                                  onChange={(e) => handleMultiSelectFilter('docsStatuses', status, e.target.checked)}
+                                />
+                              }
+                              label={
+                                <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                                  {status}
+                                </Typography>
+                              }
+                            />
+                          </Grid>
+                        ))}
+                      </Grid>
+                    </FormGroup>
+                  </Box>
+
+                  <Divider />
+
+                  {/* TT Copy Status */}
+                  <Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        TT Copy Status ({filters.ttCopyStatuses?.length || 0} selected)
+                      </Typography>
+                    </Box>
+                    <FormGroup>
+                      <Grid container spacing={1}>
+                        {uniqueTtCopyStatuses.map((status) => (
+                          <Grid item xs={6} key={status}>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  size="small"
+                                  checked={filters.ttCopyStatuses?.includes(status) || false}
+                                  onChange={(e) => handleMultiSelectFilter('ttCopyStatuses', status, e.target.checked)}
+                                />
+                              }
+                              label={
+                                <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                                  {status}
+                                </Typography>
+                              }
+                            />
+                          </Grid>
+                        ))}
+                      </Grid>
+                    </FormGroup>
+                  </Box>
+
+                  <Divider />
+
+                  {/* Commission Status */}
+                  <Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Commission Status ({filters.commissionStatuses?.length || 0} selected)
+                      </Typography>
+                    </Box>
+                    <FormGroup>
+                      <Grid container spacing={1}>
+                        {uniqueCommissionStatuses.map((status) => (
+                          <Grid item xs={6} key={status}>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  size="small"
+                                  checked={filters.commissionStatuses?.includes(status) || false}
+                                  onChange={(e) => handleMultiSelectFilter('commissionStatuses', status, e.target.checked)}
+                                />
+                              }
+                              label={
+                                <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                                  {status}
+                                </Typography>
+                              }
+                            />
+                          </Grid>
+                        ))}
+                      </Grid>
+                    </FormGroup>
+                  </Box>
                 </Stack>
               </Box>
             )}

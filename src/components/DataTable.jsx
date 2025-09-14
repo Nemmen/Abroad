@@ -13,6 +13,24 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           border: 'none', // Remove outer border
+          '& .row-non-claimable': {
+            backgroundColor: '#ffebee !important',
+            '&:hover': {
+              backgroundColor: '#ffcdd2 !important',
+            },
+          },
+          '& .row-under-processing': {
+            backgroundColor: '#fff8e1 !important',
+            '&:hover': {
+              backgroundColor: '#ffecb3 !important',
+            },
+          },
+          '& .row-paid': {
+            backgroundColor: '#e8f5e8 !important',
+            '&:hover': {
+              backgroundColor: '#c8e6c9 !important',
+            },
+          },
         },
         columnSeparator: {
           display: 'none', // Remove column separator lines
@@ -31,12 +49,18 @@ const theme = createTheme({
   },
 });
 
-export default function DataTable({ columns, rows, link  , sx}) {
+export default function DataTable({ columns, rows, link, sx, onSelectionChange, checkboxSelection = false, getRowClassName }) {
   const location = useLocation();
   const navigate = useNavigate();
 
   const viewHandle = (params) => {
     navigate(`${location.pathname}/${params.id}`);
+  };
+
+  const handleSelectionChange = (newSelection) => {
+    if (onSelectionChange) {
+      onSelectionChange(newSelection);
+    }
   };
 
   return (
@@ -78,6 +102,10 @@ export default function DataTable({ columns, rows, link  , sx}) {
                 pageSizeOptions={[5, 10, 15]}
                 rowHeight={70}
                 onRowClick={viewHandle}
+                checkboxSelection={checkboxSelection}
+                onRowSelectionModelChange={handleSelectionChange}
+                disableRowSelectionOnClick={checkboxSelection}
+                getRowClassName={getRowClassName}
               />
             </Box>
             {/* <Box sx={{ padding: 2, textAlign: 'end' }}>
