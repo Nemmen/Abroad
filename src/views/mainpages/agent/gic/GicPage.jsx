@@ -28,6 +28,13 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
 import { useSelector } from 'react-redux';
+import { 
+  saveFiltersToStorage, 
+  loadFiltersFromStorage, 
+  clearFiltersFromStorage,
+  FILTER_STORAGE_KEYS,
+  DEFAULT_FILTERS 
+} from 'utils/filterUtils';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { useColorMode } from '@chakra-ui/react';
 import AddIcon from '@mui/icons-material/Add';
@@ -47,7 +54,7 @@ const allColumns = [
   { field: 'studentPhoneNo', headerName: 'Student Contact', width: 130 },
   { field: 'bankVendor', headerName: 'Bank Vendor', width: 150 },
   { field: 'accFundingMonth', headerName: 'Acc Funding Month', width: 160 },
-  { field: 'commissionAmt', headerName: 'Commission Amt', width: 140 },
+  { field: 'agentCommission', headerName: 'Agent Commission', width: 150 },
   { field: 'tds', headerName: 'TDS', width: 100 },
   { field: 'netPayable', headerName: 'Net Payable', width: 140 },
   { 
@@ -86,15 +93,10 @@ const Gic = () => {
   const [loading, setLoading] = useState(true);
   const { colorMode } = useColorMode();
   
-  // Filter states
-  const [filters, setFilters] = useState({
-    dateSort: '', // 'asc', 'desc', ''
-    specificDate: '',
-    agentName: '',
-    studentName: '',
-    dateFrom: '',
-    dateTo: '',
-  });
+  // Filter states with persistent storage
+  const [filters, setFilters] = useState(() => 
+    loadFiltersFromStorage(FILTER_STORAGE_KEYS.AGENT_GIC, DEFAULT_FILTERS.AGENT_GIC)
+  );
   const [tabValue, setTabValue] = useState("0");
 
   // Create MUI theme based on Chakra color mode
@@ -162,7 +164,7 @@ const Gic = () => {
             studentPhoneNo: form.studentPhoneNo || 'N/A',
             bankVendor: form.bankVendor || 'N/A',
             accFundingMonth: form.fundingMonth || 'N/A',
-            commissionAmt: form.commissionAmt || 0,
+            agentCommission: form.commissionAmt || 0,
             tds: form.tds || '0',
             netPayable: form.netPayable || 0,
             commissionStatus: form.commissionStatus || 'N/A',
@@ -214,6 +216,25 @@ const Gic = () => {
       });
     }
 
+    // Apply multi-select filters
+    if (filters.commissionStatus && filters.commissionStatus.length > 0) {
+      processedData = processedData.filter(item => 
+        filters.commissionStatus.includes(item.commissionStatus)
+      );
+    }
+
+    if (filters.accountType && filters.accountType.length > 0) {
+      processedData = processedData.filter(item => 
+        filters.accountType.includes(item.type)
+      );
+    }
+
+    if (filters.bankName && filters.bankName.length > 0) {
+      processedData = processedData.filter(item => 
+        filters.bankName.includes(item.bankVendor)
+      );
+    }
+
     // Apply date sorting
     if (filters.dateSort) {
       processedData.sort((a, b) => {
@@ -234,21 +255,37 @@ const Gic = () => {
 
   // Filter handlers
   const handleFilterChange = (filterType, value) => {
-    setFilters(prev => ({
-      ...prev,
+    const newFilters = {
+      ...filters,
       [filterType]: value
-    }));
+    };
+    setFilters(newFilters);
+    saveFiltersToStorage(FILTER_STORAGE_KEYS.AGENT_GIC, newFilters);
   };
 
   const clearAllFilters = () => {
-    setFilters({
-      dateSort: '',
-      specificDate: '',
-      agentName: '',
-      studentName: '',
-      dateFrom: '',
-      dateTo: '',
-    });
+    const defaultFilters = DEFAULT_FILTERS.AGENT_GIC;
+    setFilters(defaultFilters);
+    saveFiltersToStorage(FILTER_STORAGE_KEYS.AGENT_GIC, defaultFilters);
+  };
+
+  // Multi-select filter handlers
+  const handleMultiSelectChange = (filterType, value, checked) => {
+    const newValues = checked 
+      ? [...(filters[filterType] || []), value]
+      : (filters[filterType] || []).filter(item => item !== value);
+    
+    handleFilterChange(filterType, newValues);
+  };
+
+  const clearMultiSelectFilter = (filterType) => {
+    handleFilterChange(filterType, []);
+  };
+
+  // Get unique values for multi-select filters
+  const getUniqueValues = (field) => {
+    const values = rows.map(row => row[field]).filter(Boolean);
+    return [...new Set(values)].sort();
   };
 
   const handleDownloadExcel = () => {
@@ -264,7 +301,7 @@ const Gic = () => {
         studentPhoneNo: item.studentPhoneNo || 'N/A',
         bankVendor: item.bankVendor || 'N/A',
         accFundingMonth: item.fundingMonth || 'N/A',
-        commissionAmt: item.commissionAmt || 0,
+        agentCommission: item.commissionAmt || 0,
         tds: item.tds || '0',
         netPayable: item.netPayable || 0,
         commissionStatus: item.commissionStatus || 'N/A',
