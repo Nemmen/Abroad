@@ -67,22 +67,22 @@ export default function AppAppBar() {
               {/* <Button variant="text" color="info" size="small" href="">
                 About
               </Button> */}
-              <Button variant="text" color="info" size="small" href="#GIC">
+              <Button variant="text" color="info" size="medium" href="#GIC" sx={{ fontSize: '1rem', fontWeight: 500 }}>
                 GIC
               </Button>
-              <Button variant="text" color="info" size="small" href="#BlockAccount">
+              <Button variant="text" color="info" size="medium" href="#BlockAccount" sx={{ fontSize: '1rem', fontWeight: 500 }}>
                 Blocked Account
               </Button>
-              <Button variant="text" color="info" size="small" href="#forex">
+              <Button variant="text" color="info" size="medium" href="#forex" sx={{ fontSize: '1rem', fontWeight: 500 }}>
                 Forex
               </Button>
-              <Button variant="text" color="info" size="small" href="https://abroadeducares.com/"> 
+              <Button variant="text" color="info" size="medium" href="https://abroadeducares.com/" sx={{ fontSize: '1rem', fontWeight: 500 }}> 
                 Immigration
               </Button>
-              <Button variant="text" color="info" size="small" sx={{ minWidth: 0 }} href="#FAQ">
+              <Button variant="text" color="info" size="medium" sx={{ minWidth: 0, fontSize: '1rem', fontWeight: 500 }} href="#FAQ">
                 FAQ
               </Button>
-              <Button variant="text" color="info" size="small" sx={{ minWidth: 0 }} href="#contactus">
+              <Button variant="text" color="info" size="medium" sx={{ minWidth: 0, fontSize: '1rem', fontWeight: 500 }} href="#contactus">
                 Contact Us
               </Button>
               
@@ -95,10 +95,10 @@ export default function AppAppBar() {
               alignItems: 'center',
             }}
           >
-            <Button color="primary" variant="text" size="small" onClick={()=>( navigate("/auth/login"))} replace>
+            <Button color="primary" variant="text" size="medium" onClick={()=>( navigate("/auth/login"))} replace>
               Sign in
             </Button>
-            <Button color="primary" variant="contained" size="small" onClick={()=>( navigate("/auth/signup"))} replace>
+            <Button color="primary" variant="contained" size="medium" onClick={()=>( navigate("/auth/signup"))} replace>
               Sign up
             </Button>
             <ColorModeIconDropdown />
@@ -130,19 +130,19 @@ export default function AppAppBar() {
                   </IconButton>
                 </Box>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-  <Button variant="text" color="info" size="small" href="#GIC">
+  <Button variant="text" color="info" size="medium" href="#GIC" sx={{ fontSize: '1rem', fontWeight: 500 }}>
     GIC
   </Button>
-  <Button variant="text" color="info" size="small" href="#BlockAccount">
+  <Button variant="text" color="info" size="medium" href="#BlockAccount" sx={{ fontSize: '1rem', fontWeight: 500 }}>
     Blocked Account
   </Button>
-  <Button variant="text" color="info" size="small" href="#forex">
+  <Button variant="text" color="info" size="medium" href="#forex" sx={{ fontSize: '1rem', fontWeight: 500 }}>
     Forex
   </Button>
-  <Button variant="text" color="info" size="small" href="https://abroadeducares.com/">
+  <Button variant="text" color="info" size="medium" href="https://abroadeducares.com/" sx={{ fontSize: '1rem', fontWeight: 500 }}>
     Immigration
   </Button>
-  <Button variant="text" color="info" size="small" sx={{ minWidth: 0 }} href="#FAQ">
+  <Button variant="text" color="info" size="medium" sx={{ minWidth: 0, fontSize: '1rem', fontWeight: 500 }} href="#FAQ">
     FAQ
   </Button>
 </Box>

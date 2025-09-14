@@ -58,53 +58,50 @@ export default function Forex() {
           {/* Right Side: Text Content */}
           <Grid item xs={12} md={6}>
             <Typography variant="h2" gutterBottom sx={{ fontWeight: 'bold', color: theme.palette.text.primary }}>
-            Your Go-To Portal for Forex Needs  
-
-
+              Forex Made Simple – Smarter International Transactions
             </Typography>
-            <Typography variant="h6" gutterBottom sx={{ color: "hsl(210, 98%, 48%)" }}>
-            Secure. Competitive. Convenient.
+            <Typography variant="body1" gutterBottom sx={{ color: theme.palette.text.primary, mb: 3 }}>
+              Managing money across borders is now effortless. Our all-in-one foreign exchange solutions are designed to make global payments secure, transparent, and cost-effective.
             </Typography>
-            <Typography variant="body1" gutterBottom sx={{ color: theme.palette.text.primary }}>
-            
-Streamline your international transactions with effortless solutions.
-            </Typography>
-            <Typography variant="body2" gutterBottom sx={{ color: theme.palette.text.primary, fontWeight:"bold" }}>
-            
-Simplify your foreign exchange transactions with seamless integration:  
- 
-            </Typography>
-            <ul style={{ paddingLeft: '20px', color: theme.palette.text.primary }}>
+            <ul style={{ paddingLeft: '20px', color: theme.palette.text.primary, marginBottom: '20px' }}>
               <li>
-                <Typography variant="body" className='text-md' >
-                <span className="font-bold"  style={{ color: textColor }}>Best Exchange Rates:</span> Competitive forex rates with no hidden charges.  
-
-
+                <Typography variant="body1" className='text-md' gutterBottom>
+                  <span className="font-bold" style={{ color: textColor }}>Competitive Rates:</span> Enjoy the best value with zero hidden charges.
                 </Typography>
               </li>
               <li>
-                <Typography variant="body" className='text-md' >
-                <span className='font-bold' style={{ color: textColor }}>Secure Transactions:</span> Guaranteed safety with every transaction.  
-
+                <Typography variant="body1" className='text-md' gutterBottom>
+                  <span className='font-bold' style={{ color: textColor }}>Trusted Security:</span> Advanced safeguards ensure your funds reach safely, every time.
                 </Typography>
               </li>
               <li>
-                <Typography variant="body" className='text-md' >
-                <span className='font-bold' style={{ color: textColor }}>Quick Transfers:</span>  Local and international transfers made easy.  
-
+                <Typography variant="body1" className='text-md' gutterBottom>
+                  <span className='font-bold' style={{ color: textColor }}>Fast & Seamless:</span> Transfer money locally or internationally in just a few clicks.
                 </Typography>
               </li>
               <li>
-                <Typography variant="body" className='text-md' >
-                <span className='font-bold' style={{ color: textColor }}>Integrated Portal:</span> Manage all forex needs alongside other services.  
-
+                <Typography variant="body1" className='text-md' gutterBottom>
+                  <span className='font-bold' style={{ color: textColor }}>Unified Dashboard:</span> Manage all your forex needs alongside other financial services with ease.
                 </Typography>
               </li>
             </ul>
-            <Typography variant="body2" sx={{ mt: 2, color: theme.palette.text.primary }}>
-         
-Handle forex for students, businesses, or personal use – all in one place.
-
+            <Typography variant="body1" gutterBottom sx={{ color: theme.palette.text.primary, fontWeight: 'bold' }}>
+              Fully Transparent process - Make a quote by yourself - Fully Automated process
+            </Typography>
+            <Typography variant="body1" gutterBottom sx={{ color: theme.palette.text.primary }}>
+              Early Commission disbursement.
+            </Typography>
+            <Typography variant="body1" gutterBottom sx={{ color: theme.palette.text.primary }}>
+              Save TCS - We can process TCS free Payment from a Single Account.
+            </Typography>
+            <Typography variant="body1" gutterBottom sx={{ color: theme.palette.text.primary }}>
+              Full Support in Refunds.
+            </Typography>
+            <Typography variant="body1" sx={{ mt: 2, color: theme.palette.text.primary }}>
+              Whether you're a student or a Consultant paying tuition overseas, a business handling global operations, or an individual supporting loved ones abroad, our platform ensures convenience, transparency, and complete peace of mind.
+            </Typography>
+            <Typography variant="body1" sx={{ mt: 2, color: textColor, fontWeight: 'bold' }}>
+              Experience smarter forex today—secure, simple, and reliable.
             </Typography>
           </Grid>
         </Grid>
