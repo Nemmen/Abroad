@@ -618,8 +618,8 @@ const Forex = () => {
                 <Tab label="Sort by Date" value="0" />
                 <Tab label="Filter by Date" value="1" />
                 <Tab label="Filter by Name" value="2" />
-                <Tab label="Countries" value="3" />
-                <Tab label="Currencies & Status" value="4" />
+                {/* <Tab label="Countries" value="3" />
+                <Tab label="Currencies & Status" value="4" /> */}
               </Tabs>
             </Box>
 
@@ -791,7 +791,7 @@ const Forex = () => {
             )}
 
             {/* Countries Tab */}
-            {tabValue === "3" && (
+            {/* {tabValue === "3" && (
               <Box sx={{ p: 2 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                   <Typography variant="body2" color="text.secondary">
@@ -821,13 +821,13 @@ const Forex = () => {
                   </Grid>
                 </FormGroup>
               </Box>
-            )}
+            )} */}
 
-            {/* Currencies & Status Tab */}
-            {tabValue === "4" && (
+            
+            {/* {tabValue === "4" && (
               <Box sx={{ p: 2 }}>
                 <Stack spacing={3}>
-                  {/* Currencies */}
+               
                   <Box>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                       <Typography variant="body2" color="text.secondary">
@@ -860,7 +860,7 @@ const Forex = () => {
 
                   <Divider />
 
-                  {/* Document Status */}
+                
                   <Box>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                       <Typography variant="body2" color="text.secondary">
@@ -893,7 +893,7 @@ const Forex = () => {
 
                   <Divider />
 
-                  {/* TT Copy Status */}
+             
                   <Box>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                       <Typography variant="body2" color="text.secondary">
@@ -926,7 +926,7 @@ const Forex = () => {
 
                   <Divider />
 
-                  {/* Commission Status */}
+               
                   <Box>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                       <Typography variant="body2" color="text.secondary">
@@ -958,7 +958,7 @@ const Forex = () => {
                   </Box>
                 </Stack>
               </Box>
-            )}
+            )} */}
           </Box>
           
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3, pt: 2, borderTop: 1, borderColor: 'divider' }}>

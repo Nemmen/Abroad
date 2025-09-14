@@ -3,6 +3,7 @@ import { Box, Typography, ThemeProvider, createTheme, Paper } from '@mui/materia
 import { useColorMode } from '@chakra-ui/react'; // Import Chakra's color mode hook
 import AgentStats from './AgentStats';
 import AgentEarnings from './AgentEarnings';
+import DashboardCharts from './DashboardCharts';
 
 export default function Index() {
   // Use Chakra's color mode to determine if it's light or dark
@@ -84,6 +85,7 @@ export default function Index() {
 
         <AgentStats />
         <AgentEarnings />
+        <DashboardCharts />
       </Box>
     </ThemeProvider>
   );
