@@ -12,6 +12,11 @@ import {
   Button,
   Input,
   Select,
+  FormControl,
+  FormLabel,
+  NumberInput,
+  NumberInputField,
+  useToast,
 } from '@chakra-ui/react';
 import {
   FiFileText,
@@ -22,6 +27,8 @@ import {
   FiCheckSquare,
   FiPercent,
   FiFolder,
+  FiUpload,
+  FiTrash2,
 } from 'react-icons/fi';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
@@ -40,6 +47,8 @@ const fieldIcons = {
   tds: FiPercent,
   netPayable: FiDollarSign,
   commissionStatus: FiCheckSquare,
+  commissionPaymentDate: FiFileText,
+  remarks: FiFileText,
   passportFile: FiFile,
   offerLetterFile: FiFile,
   ttCopyFile:FiFile,
@@ -47,9 +56,54 @@ const fieldIcons = {
 
 function ForexView() {
   const { id } = useParams();
+  const toast = useToast();
   const [formData, setFormData] = useState({});
-  const [editableData, setEditableData] = useState({});
+  const [editableData, setEditableData] = useState({
+    agentRef: '',
+    studentRef: '',
+    country: '',
+    currencyBooked: '',
+    quotation: '',
+    studentPaid: '',
+    docsStatus: '',
+    ttCopyStatus: '',
+    agentCommission: '',
+    tds: '',
+    netPayable: '',
+    commissionStatus: '',
+    aecommission: '',
+    remarks: '',
+  });
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(false);
+  
+  // File upload states to match ForexForm
+  const [passportFile, setPassportFile] = useState(null);
+  const [offerLetterFile, setOfferLetterFile] = useState(null);
+  const [ttCopyFile, setTtCopyFile] = useState(null);
+  const [commissionPaymentProof, setCommissionPaymentProof] = useState(null);
+  const [commissionPaymentDate, setCommissionPaymentDate] = useState(null);
+  const [documents, setDocuments] = useState([]);
+
+  // Options to match ForexForm
+  const whoOptions = [
+    'Self',
+    'Brother',
+    'Sister', 
+    'Husband',
+    'Father',
+    'Mother',
+    'Grand Father',
+    'Grand Mother',
+  ];
+  
+  const documentOptions = [
+    'Aadhar',
+    'Pan',
+    'Account statement',
+    'Passbook Front',
+    'Cheque Copy',
+  ];
 
   useEffect(() => {
     axios
@@ -61,8 +115,28 @@ function ForexView() {
           );
           if (formData1) {
             setFormData(formData1);
-            // console.log(formData);
-            setEditableData({ ...formData1 });
+            // Initialize editableData with all form fields
+            setEditableData({
+              agentRef: formData1.agentRef || '',
+              studentRef: formData1.studentRef || '',
+              country: formData1.country || '',
+              currencyBooked: formData1.currencyBooked || '',
+              quotation: formData1.quotation || '',
+              studentPaid: formData1.studentPaid || '',
+              docsStatus: formData1.docsStatus || '',
+              ttCopyStatus: formData1.ttCopyStatus || '',
+              agentCommission: formData1.agentCommission || '',
+              tds: formData1.tds || '',
+              netPayable: formData1.netPayable || '',
+              commissionStatus: formData1.commissionStatus || '',
+              aecommission: formData1.aecommission || '',
+              remarks: formData1.remarks || '',
+            });
+            
+            // Initialize file states and commission payment date
+            setCommissionPaymentDate(formData1.commissionPaymentDate || null);
+            setDocuments(formData1.documents || []);
+            
           } else {
             console.error('Form data not found for ID:', id);
           }
@@ -75,23 +149,118 @@ function ForexView() {
       });
   }, [id]);
 
-  const handleChange = (field, value) => {
-    setEditableData((prev) => ({ ...prev, [field]: value }));
+  // Form handlers to match ForexForm
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setEditableData({ ...editableData, [name]: value });
+  };
+
+  const handleDocumentChange = (index, name, value) => {
+    const updatedDocuments = documents.map((doc, i) =>
+      i === index ? { ...doc, [name]: value } : doc,
+    );
+    setDocuments(updatedDocuments);
+  };
+
+  const handleFileChange = (index, fileType, file) => {
+    const updatedDocuments = documents.map((doc, i) =>
+      i === index ? { ...doc, [fileType]: file } : doc,
+    );
+    setDocuments(updatedDocuments);
+  };
+
+  const handleFileChangeoffpass = (e, setFile) => {
+    setFile(e.target.files[0]);
+  };
+
+  const addDocument = () => {
+    setDocuments([
+      ...documents,
+      { documentOf: '', documentType: '', documentFile: null },
+    ]);
+  };
+
+  const removeDocument = (index) => {
+    const updatedDocuments = documents.filter((_, i) => i !== index);
+    setDocuments(updatedDocuments);
   };
 
   const handleSave = async () => {
+    setLoading(true);
     try {
+      // Create FormData to handle file uploads
+      const formDataToSend = new FormData();
+      
+      // Add all form fields
+      Object.keys(editableData).forEach(key => {
+        if (editableData[key] !== null && editableData[key] !== '') {
+          formDataToSend.append(key, editableData[key]);
+        }
+      });
+      
+      // Add commission payment date if exists
+      if (commissionPaymentDate) {
+        formDataToSend.append('commissionPaymentDate', commissionPaymentDate);
+      }
+      
+      // Handle specific file uploads
+      if (passportFile) {
+        formDataToSend.append('passportFile', passportFile);
+      }
+      if (offerLetterFile) {
+        formDataToSend.append('offerLetterFile', offerLetterFile);
+      }
+      if (ttCopyFile) {
+        formDataToSend.append('ttCopyFile', ttCopyFile);
+      }
+      if (commissionPaymentProof) {
+        formDataToSend.append('commissionPaymentProof', commissionPaymentProof);
+      }
+
+      // Handle documents with file uploads
+      for (let i = 0; i < documents.length; i++) {
+        const doc = documents[i];
+        formDataToSend.append(`documents[${i}][documentOf]`, doc.documentOf || '');
+        formDataToSend.append(`documents[${i}][documentType]`, doc.documentType || '');
+        if (doc.documentFile && typeof doc.documentFile === 'object') {
+          // New file upload
+          formDataToSend.append(`documents[${i}][documentFile]`, doc.documentFile);
+        } else if (doc.documentFile && typeof doc.documentFile === 'string') {
+          // Existing file URL
+          formDataToSend.append(`documents[${i}][documentFile]`, doc.documentFile);
+        }
+      }
+
       const response = await axios.put(
         `https://abroad-backend-gray.vercel.app/auth/updateForexForm/${id}`,
-        editableData,
+        formDataToSend,
+        {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        }
       );
+      
       if (response.data.success) {
-        setFormData(editableData);
+        setFormData({ ...editableData, documents, commissionPaymentDate });
         setIsEditing(false);
+        toast({
+          title: 'Success',
+          description: 'Forex form updated successfully!',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
       }
     } catch (error) {
       console.error('Error updating Forex form:', error);
+      toast({
+        title: 'Error', 
+        description: 'Error updating Forex form. Please try again.',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
     }
+    setLoading(false);
   };
 
   const labelColor = useColorModeValue('gray.500', 'gray.400');
@@ -119,205 +288,524 @@ function ForexView() {
           ml={4}
           colorScheme="blue"
           onClick={() => setIsEditing(!isEditing)}
+          isDisabled={loading}
         >
           {isEditing ? 'Cancel' : 'Edit'}
         </Button>
         {isEditing && (
-          <Button ml={4} colorScheme="blue" onClick={handleSave}>
+          <Button 
+            ml={4} 
+            colorScheme="blue" 
+            onClick={handleSave}
+            isLoading={loading}
+            loadingText="Updating..."
+          >
             Update
           </Button>
         )}
       </Flex>
 
       {Object.keys(formData).length > 0 && (
-        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={10}>
-          {formData.agentRef && (
-            <VStack align="start" spacing={2} w="full">
-              <Flex align="center">
-                <Icon as={FiUser} color="blue.500" mr={2} />
-                <Text fontSize="sm" fontWeight="medium" color={labelColor}>
-                  Agent Name
-                </Text>
-              </Flex>
-              <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
-                <Text fontSize="lg" fontWeight="bold" color={valueColor}>
-                  {formData.agentRef.name.toUpperCase()}
-                </Text>
-              </Box>
-            </VStack>
-          )}
-          {formData.agentRef && (
-            <VStack align="start" spacing={2} w="full">
-              <Flex align="center">
-                <Icon as={FiUser} color="blue.500" mr={2} />
+        <>
+          {!isEditing ? (
+            // View Mode - Display existing structure
+            <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
+              {/* Agent Name */}
+              {formData.agentRef && (
+                <VStack align="start" spacing={2} w="full">
+                  <Text fontSize="sm" fontWeight="medium" color={labelColor}>
+                    Agent Name
+                  </Text>
+                  <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
+                    <Text fontSize="lg" fontWeight="bold" color={valueColor}>
+                      {formData.agentRef.name ? formData.agentRef.name.toUpperCase() : 'N/A'}
+                    </Text>
+                  </Box>
+                </VStack>
+              )}
+
+              {/* Student Name */}
+              <VStack align="start" spacing={2} w="full">
                 <Text fontSize="sm" fontWeight="medium" color={labelColor}>
                   Student Name
                 </Text>
-              </Flex>
-              <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
-                <Text fontSize="lg" fontWeight="bold" color={valueColor}>
-                  {formData.studentName}
-                </Text>
-              </Box>
-            </VStack>
-          )}
-          {Object.entries(formData).map(([label, value], index) => {
-            const isEditable =
-              label !== 'passportFile' && label !== 'offerLetterFile' && label !== 'ttCopyFile';
+                <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
+                  <Text fontSize="lg" fontWeight="bold" color={valueColor}>
+                    {formData.studentName || 'N/A'}
+                  </Text>
+                </Box>
+              </VStack>
 
-            const renderSelectOptions = (field) => {
-              switch (field) {
-                case 'ttCopyStatus':
-                case 'docsStatus':
-                  return (
-                    <Select
-                      value={editableData[label]}
-                      onChange={(e) => handleChange(label, e.target.value)}
-                    >
-                      <option value="Pending">Pending</option>
-                      <option value="Received">Received</option>
-                      <option value="Verified">Verified</option>
-                    </Select>
-                  );
-                case 'commissionStatus':
-                  return (
-                    <Select
-                      value={editableData[label]}
-                      onChange={(e) => handleChange(label, e.target.value)}
-                    >
-                      <option value="Not Received">Not Received</option>
-                      <option value="Paid">Paid</option>
-                      <option value="Under Processing">Under Processing</option>
-                    </Select>
-                  );
-                default:
-                  return null;
-              }
-            };
-
-            return (
-              label !== '__v' &&
-              label !== '_id' &&
-              label !== 'documents' &&
-              label !== 'agentRef' &&
-              label !== 'studentName' && (
-                <VStack key={index} align="start" spacing={2} gridColumn={label === 'date' ? 'span 2':''} w="full">
-                  <Flex align="center">
-                    <Icon
-                      as={fieldIcons[label] || FiFileText}
-                      color="blue.500"
-                      mr={2}
-                    />
-                    <Text fontSize="sm" fontWeight="medium" color={labelColor}>
-                      {label === 'country' ? 'Currency' : label.replace(/([A-Z])/g, ' $1')}
-                    </Text>
-                  </Flex>
+              {/* Display all other fields */}
+              {[
+                { key: 'country', label: 'Country' },
+                { key: 'currencyBooked', label: 'Currency Booked' },
+                { key: 'quotation', label: 'Quotation' },
+                { key: 'studentPaid', label: 'Student Paid' },
+                { key: 'docsStatus', label: 'DOCs Status' },
+                { key: 'ttCopyStatus', label: 'TT Copy Status' },
+                { key: 'agentCommission', label: 'Agent Commission' },
+                { key: 'commissionPaymentDate', label: 'Commission Payment Date' },
+                { key: 'tds', label: 'TDS' },
+                { key: 'aecommission', label: 'AE Commission' },
+                { key: 'netPayable', label: 'Net Payable' },
+                { key: 'commissionStatus', label: 'Commission Status' },
+                { key: 'remarks', label: 'Remarks' },
+              ].map(({ key, label }) => (
+                <VStack key={key} align="start" spacing={2} w="full">
+                  <Text fontSize="sm" fontWeight="medium" color={labelColor}>
+                    {label}
+                  </Text>
                   <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
-                    {isEditing && isEditable ? (
-                      renderSelectOptions(label) || (
-                        <Input
-                          value={editableData[label]}
-                          onChange={(e) => handleChange(label, e.target.value)}
-                        />
-                      )
-                    ) : label.endsWith('File') &&
-                      (label === 'passportFile' ||
-                        label === 'offerLetterFile' || label === 'ttCopyFile') ? (
-                      <Link
-                        href={value.documentFile}
-                        color="blue.500"
-                        fontWeight="bold"
-                        isExternal
-                      >
-                        View File 👁️
-                      </Link>
-                    ) : (
-                      <Text fontSize="lg" fontWeight="bold" color={valueColor}>
-                        {label === 'date'
-                          ? new Date(value).toLocaleDateString('en-GB')
-                          : value}
-                      </Text>
-                    )}
+                    <Text fontSize="lg" fontWeight="bold" color={valueColor}>
+                      {key === 'commissionPaymentDate' && formData[key]
+                        ? new Date(formData[key]).toLocaleDateString('en-GB')
+                        : formData[key] || 'Not Set'}
+                    </Text>
                   </Box>
                 </VStack>
-              )
-            );
-          })}
+              ))}
 
-          {/* Documents Section */}
-          <Box gridColumn="span 2" mt={6}>
-            <Flex align="center" mb={4}>
-              <Icon as={FiFolder} color="blue.500" mr={2} />
-              <Heading as="h4" fontSize="2xl" color="blue.600">
-                Documents
-              </Heading>
-            </Flex>
-            {formData.documents &&
-              formData.documents.map((doc, index) => (
-                <Box
-                  key={index}
-                  mb={4}
-                  p={4}
-                  bg={fieldBgColor}
-                  borderRadius="md"
-                  boxShadow="md"
-                >
-                  <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
-                    <VStack align="start">
-                      <Flex align="center">
-                        <Icon as={FiUser} color="blue.500" mr={2} />
-                        <Text
-                          fontSize="sm"
-                          fontWeight="medium"
-                          color={labelColor}
-                        >
-                          Document Of
-                        </Text>
-                      </Flex>
-                      <Text fontSize="md" fontWeight="bold" color={valueColor}>
-                        {doc.documentOf}
-                      </Text>
-                    </VStack>
-                    <VStack align="start">
-                      <Flex align="center">
-                        <Icon as={FiFileText} color="blue.500" mr={2} />
-                        <Text
-                          fontSize="sm"
-                          fontWeight="medium"
-                          color={labelColor}
-                        >
-                          Document Type
-                        </Text>
-                      </Flex>
-                      <Text fontSize="md" fontWeight="bold" color={valueColor}>
-                        {doc.documentType}
-                      </Text>
-                    </VStack>
-                    <VStack align="start">
-                      <Flex align="center">
-                        <Icon as={FiFile} color="blue.500" mr={2} />
-                        <Text
-                          fontSize="sm"
-                          fontWeight="medium"
-                          color={labelColor}
-                        >
-                          File Name
-                        </Text>
-                      </Flex>
+              {/* File Links */}
+              {['passportFile', 'offerLetterFile', 'ttCopyFile', 'commissionPaymentProof'].map((fileKey) => 
+                formData[fileKey] && (
+                  <VStack key={fileKey} align="start" spacing={2} w="full">
+                    <Text fontSize="sm" fontWeight="medium" color={labelColor}>
+                      {fileKey.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                    </Text>
+                    <Box p={4} bg={fieldBgColor} borderRadius="md" width="full">
                       <Link
-                        href={doc.documentFile}
+                        href={formData[fileKey].documentFile || formData[fileKey]}
                         color="blue.500"
                         fontWeight="bold"
                         isExternal
                       >
                         View File 👁️
                       </Link>
+                    </Box>
+                  </VStack>
+                )
+              )}
+            </SimpleGrid>
+          ) : (
+            // Edit Mode - ForexForm structure
+            <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
+              {/* Country */}
+              <FormControl isRequired>
+                <FormLabel>Country</FormLabel>
+                <Input
+                  name="country"
+                  value={editableData.country}
+                  onChange={handleChange}
+                  h="50px"
+                  placeholder="Enter country"
+                />
+              </FormControl>
+
+              {/* Currency Booked */}
+              <FormControl isRequired>
+                <FormLabel>Currency Booked</FormLabel>
+                <Input
+                  name="currencyBooked"
+                  value={editableData.currencyBooked}
+                  onChange={handleChange}
+                  h="50px"
+                  placeholder="Enter currency amount"
+                />
+              </FormControl>
+
+              {/* Quotation */}
+              <FormControl isRequired>
+                <FormLabel>Quotation</FormLabel>
+                <NumberInput min={0} h="50px" w="full">
+                  <NumberInputField
+                    name="quotation"
+                    value={editableData.quotation}
+                    placeholder="Number is Accepted"
+                    onChange={handleChange}
+                    h="50px"
+                  />
+                </NumberInput>
+              </FormControl>
+
+              {/* Student Paid */}
+              <FormControl isRequired>
+                <FormLabel>Student Paid</FormLabel>
+                <NumberInput min={0} h="50px" w="full">
+                  <NumberInputField
+                    name="studentPaid"
+                    value={editableData.studentPaid}
+                    onChange={handleChange}
+                    h="50px"
+                  />
+                </NumberInput>
+              </FormControl>
+
+              {/* DOCs Status */}
+              <FormControl isRequired>
+                <FormLabel>DOCs Status</FormLabel>
+                <Select
+                  name="docsStatus"
+                  value={editableData.docsStatus}
+                  onChange={handleChange}
+                  h="50px"
+                  w="full"
+                >
+                  <option value="">Select an option</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Received">Received</option>
+                  <option value="Verified">Verified</option>
+                </Select>
+              </FormControl>
+
+              {/* TT Copy Status */}
+              <FormControl isRequired>
+                <FormLabel>TT Copy Status</FormLabel>
+                <Select
+                  name="ttCopyStatus"
+                  value={editableData.ttCopyStatus}
+                  onChange={handleChange}
+                  h="50px"
+                  w="full"
+                >
+                  <option value="">Select an option</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Received">Received</option>
+                  <option value="Verified">Verified</option>
+                </Select>
+              </FormControl>
+
+              {/* Agent Commission */}
+              <FormControl isRequired>
+                <FormLabel>Agent Commission</FormLabel>
+                <NumberInput min={0} h="50px" w="full">
+                  <NumberInputField
+                    name="agentCommission"
+                    value={editableData.agentCommission}
+                    onChange={handleChange}
+                    h="50px"
+                  />
+                </NumberInput>
+              </FormControl>
+
+              {/* Commission Payment Date */}
+              <FormControl>
+                <FormLabel>Commission Payment Date</FormLabel>
+                <Input
+                  type="date"
+                  value={commissionPaymentDate ? commissionPaymentDate.split('T')[0] : ''}
+                  onChange={(e) => setCommissionPaymentDate(e.target.value)}
+                  h="50px"
+                  w="full"
+                />
+              </FormControl>
+
+              {/* TDS */}
+              <FormControl isRequired>
+                <FormLabel>TDS</FormLabel>
+                <NumberInput min={0} h="50px" w="full">
+                  <NumberInputField
+                    name="tds"
+                    value={editableData.tds}
+                    onChange={handleChange}
+                    h="50px"
+                  />
+                </NumberInput>
+              </FormControl>
+
+              {/* AE Commission */}
+              <FormControl>
+                <FormLabel>AE Commission</FormLabel>
+                <Input
+                  type="text"
+                  name="aecommission"
+                  value={editableData.aecommission}
+                  onChange={handleChange}
+                  h="50px"
+                  w="full"
+                />
+              </FormControl>
+
+              {/* Net Payable */}
+              <FormControl isRequired>
+                <FormLabel>Net Payable</FormLabel>
+                <NumberInput min={0} h="50px" w="full">
+                  <NumberInputField
+                    name="netPayable"
+                    value={editableData.netPayable}
+                    onChange={handleChange}
+                    h="50px"
+                  />
+                </NumberInput>
+              </FormControl>
+
+              {/* Commission Status */}
+              <FormControl isRequired>
+                <FormLabel>Commission Status</FormLabel>
+                <Select
+                  name="commissionStatus"
+                  placeholder="Select Status"
+                  value={editableData.commissionStatus}
+                  onChange={handleChange}
+                  h="50px"
+                  w="full"
+                >
+                  <option value="Non Claimable">Non Claimable</option>
+                  <option value="Paid">Paid</option>
+                  <option value="Under Processing">Under Processing</option>
+                </Select>
+              </FormControl>
+
+              {/* Remarks */}
+              <FormControl>
+                <FormLabel>Remarks</FormLabel>
+                <Input
+                  name="remarks"
+                  placeholder="Enter any remarks or notes"
+                  value={editableData.remarks}
+                  onChange={handleChange}
+                  h="50px"
+                  w="full"
+                />
+              </FormControl>
+
+              {/* File Upload Sections */}
+              
+              {/* Passport */}
+              <FormControl>
+                <FormLabel>Passport</FormLabel>
+                <Flex align="center">
+                  <Button
+                    colorScheme="blue"
+                    onClick={() => document.getElementById('passportFile').click()}
+                    mr={2}
+                  >
+                    Choose File
+                  </Button>
+                  <Text>{passportFile ? passportFile.name : (formData.passportFile ? 'File exists - Choose new file to replace' : 'No file chosen')}</Text>
+                  <Input
+                    type="file"
+                    id="passportFile"
+                    name="passportFile"
+                    onChange={(e) => handleFileChangeoffpass(e, setPassportFile)}
+                    hidden
+                  />
+                </Flex>
+              </FormControl>
+
+              {/* Offer Letter */}
+              <FormControl>
+                <FormLabel>Offer Letter</FormLabel>
+                <Flex align="center">
+                  <Button
+                    colorScheme="blue"
+                    onClick={() => document.getElementById('offerLetterFile').click()}
+                    mr={2}
+                  >
+                    Choose File
+                  </Button>
+                  <Text>
+                    {offerLetterFile ? offerLetterFile.name : (formData.offerLetterFile ? 'File exists - Choose new file to replace' : 'No file chosen')}
+                  </Text>
+                  <Input
+                    type="file"
+                    id="offerLetterFile"
+                    name="offerLetterFile"
+                    onChange={(e) => handleFileChangeoffpass(e, setOfferLetterFile)}
+                    hidden
+                  />
+                </Flex>
+              </FormControl>
+
+              {/* TT Copy File */}
+              <FormControl>
+                <FormLabel>TT Copy File</FormLabel>
+                <Flex align="center">
+                  <Button
+                    colorScheme="blue"
+                    onClick={() => document.getElementById('ttCopyFile').click()}
+                    mr={2}
+                  >
+                    Choose File
+                  </Button>
+                  <Text>
+                    {ttCopyFile ? ttCopyFile.name : (formData.ttCopyFile ? 'File exists - Choose new file to replace' : 'No file chosen')}
+                  </Text>
+                  <Input
+                    type="file"
+                    id="ttCopyFile"
+                    name="ttCopyFile"
+                    onChange={(e) => handleFileChangeoffpass(e, setTtCopyFile)}
+                    hidden
+                  />
+                </Flex>
+              </FormControl>
+
+              {/* Commission Payment Proof */}
+              <FormControl>
+                <FormLabel>Commission Payment Proof</FormLabel>
+                <Flex align="center">
+                  <Button
+                    colorScheme="blue"
+                    onClick={() => document.getElementById('commissionPaymentProof').click()}
+                    mr={2}
+                  >
+                    Choose File
+                  </Button>
+                  <Text>
+                    {commissionPaymentProof
+                      ? commissionPaymentProof.name
+                      : (formData.commissionPaymentProof ? 'File exists - Choose new file to replace' : 'No file chosen')}
+                  </Text>
+                  <Input
+                    type="file"
+                    id="commissionPaymentProof"
+                    name="commissionPaymentProof"
+                    onChange={(e) => handleFileChangeoffpass(e, setCommissionPaymentProof)}
+                    hidden
+                  />
+                </Flex>
+              </FormControl>
+            </SimpleGrid>
+          )}
+
+          {/* Documents Section */}
+          <Box mt={8}>
+            <FormLabel fontSize="lg" fontWeight="bold">Documents</FormLabel>
+            
+            {/* Add Document Button (Edit Mode Only) */}
+            {isEditing && (
+              <Button
+                colorScheme="blue"
+                onClick={addDocument}
+                mb={4}
+                leftIcon={<Icon as={FiUpload} />}
+              >
+                Add Document
+              </Button>
+            )}
+
+            {/* Documents List */}
+            {documents.map((doc, index) => (
+              <Box key={index} mb={4} p={4} borderWidth={1} borderRadius="md" bg={fieldBgColor}>
+                {isEditing ? (
+                  <>
+                    {/* Edit Mode - Form Fields */}
+                    <FormControl isRequired mb={2}>
+                      <FormLabel>Document of</FormLabel>
+                      <Select
+                        placeholder="Select Relation"
+                        value={doc.documentOf || ''}
+                        onChange={(e) => handleDocumentChange(index, 'documentOf', e.target.value)}
+                      >
+                        {whoOptions.map((option, i) => (
+                          <option key={i} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormControl>
+
+                    <FormControl isRequired mb={2}>
+                      <FormLabel>Document Type</FormLabel>
+                      <Select
+                        placeholder="Select Document Type"
+                        value={doc.documentType || ''}
+                        onChange={(e) => handleDocumentChange(index, 'documentType', e.target.value)}
+                      >
+                        {documentOptions.map((option, i) => (
+                          <option key={i} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </Select>
+                    </FormControl>
+
+                    <FormControl mb={2}>
+                      <FormLabel>Upload Document</FormLabel>
+                      <Flex align="center">
+                        <Button
+                          colorScheme="blue"
+                          onClick={() => document.getElementById(`documentFile${index}`).click()}
+                          mr={2}
+                        >
+                          Choose File
+                        </Button>
+                        <Text>
+                          {doc.documentFile && typeof doc.documentFile === 'object'
+                            ? doc.documentFile.name
+                            : doc.documentFile && typeof doc.documentFile === 'string'
+                            ? 'File exists - Choose new file to replace'
+                            : 'No file chosen'}
+                        </Text>
+                        <Input
+                          type="file"
+                          id={`documentFile${index}`}
+                          onChange={(e) => handleFileChange(index, 'documentFile', e.target.files[0])}
+                          hidden
+                        />
+                      </Flex>
+                    </FormControl>
+
+                    <Button
+                      colorScheme="red"
+                      size="sm"
+                      onClick={() => removeDocument(index)}
+                      leftIcon={<Icon as={FiTrash2} />}
+                    >
+                      Remove Document
+                    </Button>
+                  </>
+                ) : (
+                  // View Mode - Display Document Info
+                  <SimpleGrid columns={{ base: 1, md: 3 }} spacing={4}>
+                    <VStack align="start">
+                      <Text fontSize="sm" fontWeight="medium" color={labelColor}>
+                        Document Of
+                      </Text>
+                      <Text fontSize="md" fontWeight="bold" color={valueColor}>
+                        {doc.documentOf || 'N/A'}
+                      </Text>
+                    </VStack>
+                    <VStack align="start">
+                      <Text fontSize="sm" fontWeight="medium" color={labelColor}>
+                        Document Type
+                      </Text>
+                      <Text fontSize="md" fontWeight="bold" color={valueColor}>
+                        {doc.documentType || 'N/A'}
+                      </Text>
+                    </VStack>
+                    <VStack align="start">
+                      <Text fontSize="sm" fontWeight="medium" color={labelColor}>
+                        File
+                      </Text>
+                      {doc.documentFile ? (
+                        <Link
+                          href={doc.documentFile}
+                          color="blue.500"
+                          fontWeight="bold"
+                          isExternal
+                        >
+                          View File 👁️
+                        </Link>
+                      ) : (
+                        <Text color={labelColor}>No file</Text>
+                      )}
                     </VStack>
                   </SimpleGrid>
-                </Box>
-              ))}
+                )}
+              </Box>
+            ))}
+
+            {documents.length === 0 && (
+              <Box p={4} bg={fieldBgColor} borderRadius="md">
+                <Text color={labelColor} textAlign="center">
+                  No documents uploaded yet.
+                </Text>
+              </Box>
+            )}
           </Box>
-        </SimpleGrid>
+        </>
       )}
     </Box>
   );

@@ -50,7 +50,27 @@ const allColumns = [
   { field: 'commissionAmt', headerName: 'Commission Amt', width: 140 },
   { field: 'tds', headerName: 'TDS', width: 100 },
   { field: 'netPayable', headerName: 'Net Payable', width: 140 },
-  { field: 'commissionStatus', headerName: 'Commission Status', width: 160 },
+  { 
+    field: 'commissionStatus', 
+    headerName: 'Commission Status', 
+    width: 160,
+    renderCell: (params) => {
+      let displayText = params.value;
+      
+      // Replace "not received" with "non claimable" and "received" with "paid"
+      if (displayText?.toLowerCase().includes('not received')) {
+        displayText = displayText.replace(/not received/gi, 'non claimable');
+      } else if (displayText?.toLowerCase().includes('received')) {
+        displayText = displayText.replace(/received/gi, 'paid');
+      }
+      
+      return (
+        <span style={{ fontWeight: '600' }}>
+          {displayText}
+        </span>
+      );
+    }
+  },
 ];
 
 const Gic = () => {
@@ -286,6 +306,18 @@ const Gic = () => {
   
   const memoizedRows = useMemo(() => filteredData.length > 0 ? filteredData : rows, [filteredData, rows]);
 
+  const getRowClassName = (params) => {
+    const status = params.row.commissionStatus?.toLowerCase();
+    if (status?.includes('non claimable') || status?.includes('not received')) {
+      return 'row-non-claimable';
+    } else if (status?.includes('under processing')) {
+      return 'row-under-processing';
+    } else if (status?.includes('paid') || status?.includes('received')) {
+      return 'row-paid';
+    }
+    return '';
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <Box sx={{ px: { xs: 2, sm: 3 }, py: 2, maxWidth: '1400px', mx: 'auto' }}>
@@ -445,6 +477,7 @@ const Gic = () => {
                 <DataTable 
                   columns={memoizedColumns} 
                   rows={memoizedRows} 
+                  getRowClassName={getRowClassName}
                 />
               </Box>
             )}

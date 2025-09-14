@@ -47,7 +47,27 @@ const allColumns = [
   { field: 'commissionAmt', headerName: 'Commission Amt', width: 140 },
   { field: 'tds', headerName: 'TDS', width: 100 },
   { field: 'netPayable', headerName: 'Net Payable', width: 140 },
-  { field: 'commissionStatus', headerName: 'Commission Status', width: 160 },
+  { 
+    field: 'commissionStatus', 
+    headerName: 'Commission Status', 
+    width: 160,
+    renderCell: (params) => {
+      let displayText = params.value;
+      
+      // Replace "not received" with "non claimable" and "received" with "paid"
+      if (displayText?.toLowerCase().includes('not received')) {
+        displayText = displayText.replace(/not received/gi, 'non claimable');
+      } else if (displayText?.toLowerCase().includes('received')) {
+        displayText = displayText.replace(/received/gi, 'paid');
+      }
+      
+      return (
+        <span style={{ fontWeight: '600' }}>
+          {displayText}
+        </span>
+      );
+    }
+  },
 ];
 
 const Gic = () => {
@@ -58,6 +78,14 @@ const Gic = () => {
   const [selectedColumns, setSelectedColumns] = useState(
     allColumns.map((col) => col.field),
   );
+  
+  // Bulk operations states
+  const [selectedRows, setSelectedRows] = useState([]);
+  const [isBulkUpdateModalOpen, setIsBulkUpdateModalOpen] = useState(false);
+  const [bulkUpdateData, setBulkUpdateData] = useState({
+    commissionStatus: '',
+    commissionPaymentDate: '',
+  });
   
   // Filter states
   const [filters, setFilters] = useState({
@@ -284,6 +312,18 @@ const Gic = () => {
   // Memoize rows to prevent re-rendering the table unnecessarily
   const memoizedRows = useMemo(() => filteredData.length > 0 ? filteredData : rows, [filteredData, rows]);
 
+  const getRowClassName = (params) => {
+    const status = params.row.commissionStatus?.toLowerCase();
+    if (status?.includes('non claimable') || status?.includes('not received')) {
+      return 'row-non-claimable';
+    } else if (status?.includes('under processing')) {
+      return 'row-under-processing';
+    } else if (status?.includes('paid') || status?.includes('received')) {
+      return 'row-paid';
+    }
+    return '';
+  };
+
   return (
     <Box width="full">
       <Box
@@ -360,7 +400,7 @@ const Gic = () => {
             <Skeleton height="500px" />
           </Box>
         ) : (
-          <DataTable columns={memoizedColumns} rows={memoizedRows} />
+          <DataTable columns={memoizedColumns} rows={memoizedRows} getRowClassName={getRowClassName} />
         )}
       </Box>
 
