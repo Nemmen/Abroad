@@ -3,101 +3,259 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import { useTheme } from '@mui/system';
-import gic from "../../assets/img/home/gicImage.png";
-import prashant from "../../assets/img/home/prashant.png"
+// import prashant from "../../assets/img/home/prashant.png"
+import gic from '../../assets/img/home/gic.webp'
+
 export default function GIC() {
   const theme = useTheme();
-  const textColor = theme.palette.mode === 'dark' ? 'hsl(210, 98%, 48%)' : '';
+  const textColor = theme.palette.mode === 'dark' ? 'hsl(210, 98%, 48%)' : 'hsl(210, 98%, 48%)';
   return (
     <Box
       id="GIC"
       sx={{
-        py: 4,
+        py: 6,
         px: 2,
-        backgroundColor: theme.palette.mode === 'dark' ? '#121212' : '#ffffff',
+        backgroundColor: theme.palette.mode === 'dark' ? '#121212' : '#f8fafe',
         display: 'flex',
-        justifyContent: 'center', // Center the section
+        justifyContent: 'center',
       }}
     >
       <Box
         sx={{
-          width: '90%', // Set width relative to viewport (adjust as needed)
-          maxWidth: '1200px', // Match the max width of LogoCollection
+          width: '90%',
+          maxWidth: '1400px',
         }}
       >
-        <Grid container spacing={4} alignItems="center">
-          {/* Left Side: Image */}
-          <Grid item xs={12} md={6}>
-            <Box
-              sx={{
-                // width: '160px',
-                // height: '100px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                overflow: 'hidden',
-                margin: '16px',
-                borderRadius: '8px',
-                border: '1px solid #ddd',
-                backgroundColor: theme.palette.mode === 'dark' ? '#ffffff' : '#f9f9f9',
+        <Grid container spacing={6} alignItems="center">
+          {/* Left Side: Text Content */}
+          <Grid item xs={12} md={7}>
+            <Typography 
+              variant="h2" 
+              gutterBottom 
+              sx={{ 
+                fontWeight: 'bold', 
+                color: theme.palette.text.primary,
+                fontSize: { xs: '1.8rem', md: '2.5rem' },
+                lineHeight: 1.2,
+                mb: 3
               }}
             >
-              <Box
-                component="img"
-                // src={gic}
-                src={prashant}
-                alt="GIC Image"
-                sx={{
-                  maxWidth: '100%',
-                  maxHeight: '500px',
-                  objectFit: 'contain',
-                }}
-              />
+              Effortless GIC Account Management – Simplified. Transparent. Trustworthy.
+            </Typography>
+            
+            <Typography 
+              variant="body1" 
+              gutterBottom 
+              sx={{ 
+                color: theme.palette.text.secondary, 
+                mb: 4,
+                fontSize: '1.1rem',
+                lineHeight: 1.6
+              }}
+            >
+              Managing your Guaranteed Investment Certificate (GIC) is now easier than ever. With our trusted bank partnerships, we ensure a smooth, secure, and fast process for students heading to Canada.
+            </Typography>
+
+            {/* Key Features Grid */}
+            <Grid container spacing={3} sx={{ mb: 4 }}>
+              <Grid item xs={12} sm={6}>
+                <Box sx={{ p: 2, backgroundColor: 'white', borderRadius: 2, boxShadow: 1 }}>
+                  <Typography variant="body1" sx={{ fontWeight: 'bold', color: textColor, mb: 1 }}>
+                    Quick Setup
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+                    Instant account number in India and fast GIC blocking confirmation.
+                  </Typography>
+                </Box>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Box sx={{ p: 2, backgroundColor: 'white', borderRadius: 2, boxShadow: 1 }}>
+                  <Typography variant="body1" sx={{ fontWeight: 'bold', color: textColor, mb: 1 }}>
+                    Real-Time Tracking
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+                    Stay updated with live status on applications and fund disbursements.
+                  </Typography>
+                </Box>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Box sx={{ p: 2, backgroundColor: 'white', borderRadius: 2, boxShadow: 1 }}>
+                  <Typography variant="body1" sx={{ fontWeight: 'bold', color: textColor, mb: 1 }}>
+                    One Dashboard
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+                    View all your GIC details, timelines, and documents in a single platform.
+                  </Typography>
+                </Box>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <Box sx={{ p: 2, backgroundColor: 'white', borderRadius: 2, boxShadow: 1 }}>
+                  <Typography variant="body1" sx={{ fontWeight: 'bold', color: textColor, mb: 1 }}>
+                    Trusted Partners
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+                    Seamlessly bank with ICICI Bank Canada & RBC.
+                  </Typography>
+                </Box>
+              </Grid>
+            </Grid>
+
+            {/* Additional Benefits */}
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="body2" sx={{ color: theme.palette.text.primary, mb: 1 }}>
+                ✓ Early Commission disbursement
+              </Typography>
+              <Typography variant="body2" sx={{ color: theme.palette.text.primary, mb: 1 }}>
+                ✓ Full Support in Refunds
+              </Typography>
+              <Typography variant="body1" sx={{ color: textColor, fontWeight: 'bold', mt: 2 }}>
+                Start your student journey with confidence—secure your GIC effortlessly today.
+              </Typography>
             </Box>
           </Grid>
 
-          {/* Right Side: Text Content */}
-          <Grid item xs={12} md={6}>
-            <Typography variant="h2" gutterBottom sx={{ fontWeight: 'bold', color: theme.palette.text.primary }}>
-            Effortless GIC Account Management  
-
-            </Typography>
-            <Typography variant="h6" gutterBottom sx={{ color: "hsl(210, 98%, 48%)" }}>
-            Simplified. Transparent. Trustworthy.
-            </Typography>
-            <Typography variant="body1" gutterBottom sx={{ color: theme.palette.text.primary }}>
-            Hassle-Free GIC Application and Tracking.
-            </Typography>
-            <Typography variant="body2" gutterBottom sx={{ color: theme.palette.text.primary, fontWeight:"bold" }}>
-            Make GIC services stress-free for agents and students:  
-            </Typography>
-            <ul style={{ paddingLeft: '20px', color: theme.palette.text.primary }}>
-              <li>
-                <Typography variant="body" className='text-md' >
-                <span className="font-bold"  style={{ color: textColor }}>Easy Applications:</span> Partnered with reliable local banks for faster blocking confirmation.
-                </Typography>
-              </li>
-              <li>
-                <Typography variant="body" className='text-md' >
-                <span className='font-bold' style={{ color: textColor }}>Real-Time Tracking:</span> Monitor application status and transactions effortlessly.
-                </Typography>
-              </li>
-              <li>
-                <Typography variant="body" className='text-md' >
-                <span className='font-bold' style={{ color: textColor }}>Reliable Partners:</span>  Collaborate with trusted financial institutions.  
-                </Typography>
-              </li>
-              <li>
-                <Typography variant="body" className='text-md' >
-                <span className='font-bold' style={{ color: textColor }}>User-Friendly Dashboard:</span> Access and manage all GIC-related data in one place.
-                </Typography>
-              </li>
-            </ul>
-            <Typography variant="body2" sx={{ mt: 2, color: theme.palette.text.primary }}>
-            Set up and manage GIC accounts with confidence and convenience.
-            </Typography>
+          {/* Right Side: Image */}
+          <Grid item xs={12} md={5}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                position: 'relative',
+              }}
+            >
+              <Box
+                sx={{
+                  width: '100%',
+                  maxWidth: '500px',
+                  height: '400px',
+                  borderRadius: '20px',
+                  overflow: 'hidden',
+                  boxShadow: '0 12px 40px rgba(0,0,0,0.15)',
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  position: 'relative',
+                  p: 2,
+                }}
+              >
+                <Box
+                  component="img"
+                  src={gic}
+                  alt="GIC Account Management"
+                  sx={{
+                    width: '95%',
+                    height: '95%',
+                    objectFit: 'cover',
+                    borderRadius: '16px',
+                  }}
+                />
+                {/* Decorative elements */}
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: '15px',
+                    right: '15px',
+                    width: '70px',
+                    height: '70px',
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(255,255,255,0.9)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
+                  }}
+                >
+                  <Typography sx={{ color: '#667eea', fontWeight: 'bold', fontSize: '1rem' }}>GIC</Typography>
+                </Box>
+              </Box>
+            </Box>
           </Grid>
         </Grid>
+
+        {/* Student Accounts Section */}
+        <Box sx={{ mt: 8 }}>
+          <Typography 
+            variant="h4" 
+            gutterBottom 
+            sx={{ 
+              fontWeight: 'bold', 
+              color: theme.palette.text.primary, 
+              textAlign: 'center',
+              mb: 4
+            }}
+          >
+            Student Accounts with ICICI Bank Canada & RBC
+          </Typography>
+          
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={4}>
+              <Box sx={{ p: 3, backgroundColor: 'white', borderRadius: 3, boxShadow: 2, height: '100%' }}>
+                <Typography variant="h6" sx={{ fontWeight: 'bold', color: textColor, mb: 2 }}>
+                  Instant Account Opening in India
+                </Typography>
+                <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+                  Get your account number in just 5 minutes and begin funding right away.
+                </Typography>
+              </Box>
+            </Grid>
+            
+            <Grid item xs={12} md={4}>
+              <Box sx={{ p: 3, backgroundColor: 'white', borderRadius: 3, boxShadow: 2, height: '100%' }}>
+                <Typography variant="h6" sx={{ fontWeight: 'bold', color: textColor, mb: 2 }}>
+                  Convenient Fund Transfers
+                </Typography>
+                <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+                  Accepts transfers from parents, siblings, or spouse.
+                </Typography>
+              </Box>
+            </Grid>
+            
+            <Grid item xs={12} md={4}>
+              <Box sx={{ p: 3, backgroundColor: 'white', borderRadius: 3, boxShadow: 2, height: '100%' }}>
+                <Typography variant="h6" sx={{ fontWeight: 'bold', color: textColor, mb: 2 }}>
+                  Flexible Limits
+                </Typography>
+                <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+                  Get all your GIC in one shot after reaching Canada or can opt for installments.
+                </Typography>
+              </Box>
+            </Grid>
+            
+            <Grid item xs={12} md={6}>
+              <Box sx={{ p: 3, backgroundColor: 'white', borderRadius: 3, boxShadow: 2, height: '100%' }}>
+                <Typography variant="h6" sx={{ fontWeight: 'bold', color: textColor, mb: 2 }}>
+                  Seamless Arrival Banking
+                </Typography>
+                <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+                  Activate your linked RBC Student Account easily upon reaching Canada.
+                </Typography>
+              </Box>
+            </Grid>
+            
+            <Grid item xs={12} md={6}>
+              <Box sx={{ p: 3, backgroundColor: 'white', borderRadius: 3, boxShadow: 2, height: '100%' }}>
+                <Typography variant="h6" sx={{ fontWeight: 'bold', color: textColor, mb: 2 }}>
+                  Wide Network Access
+                </Typography>
+                <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+                  Enjoy banking across 1,200+ branches and 4,200+ ATMs nationwide.
+                </Typography>
+              </Box>
+            </Grid>
+          </Grid>
+        </Box>
+
+        {/* Call to Action */}
+        <Box sx={{ mt: 6, textAlign: 'center', p: 4, backgroundColor: 'white', borderRadius: 3, boxShadow: 1 }}>
+          <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', color: theme.palette.text.primary }}>
+            Begin Your Journey with Peace of Mind
+          </Typography>
+          <Typography variant="body1" sx={{ color: theme.palette.text.secondary, maxWidth: '800px', mx: 'auto' }}>
+            Open your student account today with ICICI Bank Canada and Royal Bank of Canada (RBC). Experience seamless, secure, and student-focused banking designed to support your academic journey—from India to Canada.
+          </Typography>
+        </Box>
       </Box>
     </Box>
   );
