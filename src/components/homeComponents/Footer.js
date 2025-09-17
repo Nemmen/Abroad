@@ -332,7 +332,7 @@ Best regards,`;
                 </Typography>
                 <Stack spacing={1}>
                   <Link 
-                    href="#" 
+                    href="#home" 
                     sx={{ 
                       color: (theme) => theme.palette.mode === 'dark' ? '#E0E5F2' : '#333333',
                       textDecoration: 'none',
@@ -347,7 +347,7 @@ Best regards,`;
                     About Us
                   </Link>
                   <Link 
-                    href="#" 
+                    href="#highlights" 
                     sx={{ 
                       color: (theme) => theme.palette.mode === 'dark' ? '#E0E5F2' : '#333333',
                       textDecoration: 'none',
