@@ -53,7 +53,7 @@ const AgentStats = () => {
     {
       id: 3,
       title: "Blocked Entries",
-      value: stats.blockedCount || "---",
+      value: stats.blockedCount || 0,
       icon: <GrDocumentVerified size={24} />,
       color: "#F59E0B",
       bgColor: "#FEF3C7"
