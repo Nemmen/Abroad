@@ -4,7 +4,9 @@ import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import { useTheme } from '@mui/system';
 // import prashant from "../../assets/img/home/prashant.png"
-import gic from '../../assets/img/home/gic.webp'
+import gic from '../../assets/img/home/gicImage.jpg'
+import iciciBankLogo from '../../assets/img/home/iciciBankLogo.png';
+import rbcLogo from '../../assets/img/home/rbcLogo.png';
 
 export default function GIC() {
   const theme = useTheme();
@@ -93,9 +95,31 @@ export default function GIC() {
                   <Typography variant="body1" sx={{ fontWeight: 'bold', color: textColor, mb: 1 }}>
                     Trusted Partners
                   </Typography>
-                  <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+                  <Typography variant="body2" sx={{ color: theme.palette.text.secondary, mb: 2 }}>
                     Seamlessly bank with ICICI Bank Canada & RBC.
                   </Typography>
+                  <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', justifyContent: 'flex-start' }}>
+                    <Box
+                      component="img"
+                      src={iciciBankLogo}
+                      alt="ICICI Bank Canada"
+                      sx={{
+                        height: '30px',
+                        width: 'auto',
+                        objectFit: 'contain',
+                      }}
+                    />
+                    <Box
+                      component="img"
+                      src={rbcLogo}
+                      alt="RBC"
+                      sx={{
+                        height: '30px',
+                        width: 'auto',
+                        objectFit: 'contain',
+                      }}
+                    />
+                  </Box>
                 </Box>
               </Grid>
             </Grid>
