@@ -14,7 +14,7 @@ import {
 import { SiAuthentik } from 'react-icons/si';
 
 import Agent from './views/mainpages/agent';
-
+import CurrencyExchangeIcon from '@mui/icons-material/CurrencyExchange';
 //Auth import
 import Login from 'views/mainpages/login_signup/Login';
 import Signup from 'views/mainpages/login_signup/Signup';
@@ -69,6 +69,13 @@ const routes = [
     icon: <Icon as={MdSwapHoriz} width="20px" height="20px" color="inherit" />,
     path: '/email-promotions',
     component: <EmailTemplateGen/>,
+  },
+  {
+    name: 'CONVERSIONS',
+    layout: '/admin',
+    icon: <Icon as={MdSwapHoriz} width="20px" height="20px" color="inherit" />,
+    path: '/conversion-requests',
+    component: <CurrencyExchangeIcon/>,
   },
 ];
 
