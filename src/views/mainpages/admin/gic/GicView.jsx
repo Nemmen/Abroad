@@ -12,6 +12,8 @@ import {
   Input,
   Button,
   Select,
+  NumberInput,
+  NumberInputField,
 } from '@chakra-ui/react';
 import {
   FiFileText,
@@ -78,9 +80,12 @@ function GicView() {
           setFormData(formatGICData(formData1));
        
           setEditableData({
+            studentEmail: formData1?.studentEmail,
             studentPhoneNo: formData1?.studentPhoneNo,
             studentPassportNo: formData1?.studentPassportNo,
+            accOpeningDate: formData1?.accOpeningDate,
             bankVendor: formData1?.bankVendor,
+            accOpeningMonth: formData1?.accOpeningMonth,
             fundingMonth: formData1?.fundingMonth,
             commissionAmt: formData1?.commissionAmt,
             tds: formData1?.tds,
@@ -154,9 +159,12 @@ function GicView() {
       <SimpleGrid columns={{ base: 1, md: 2 }} spacing={10}>
         {Object.entries(formData).map(([label, value], index) => {
           const isEditable = [
+            'studentEmail',
             'studentPhoneNo',
             'studentPassportNo',
+            'accOpeningDate',
             'bankVendor',
+            'accOpeningMonth',
             'fundingMonth',
             'commissionAmt',
             'tds',
@@ -204,6 +212,65 @@ function GicView() {
                           Under Processing
                         </option>
                       </Select>
+                    ) : label === 'bankVendor' ? (
+                      <Select
+                        value={editableData[label]}
+                        onChange={(e) => handleChange(label, e.target.value)}
+                      >
+                        <option value="ICICI">ICICI</option>
+                        <option value="RBC">RBC</option>
+                        <option value="CIBC">CIBC</option>
+                        <option value="BOM">BOM</option>
+                        <option value="Expatrio">Expatrio</option>
+                        <option value="Fintiba">Fintiba</option>
+                        <option value="TD">TD</option>
+                      </Select>
+                    ) : label === 'fundingMonth' || label === 'accOpeningMonth' ? (
+                      <Select
+                        value={editableData[label]}
+                        onChange={(e) => handleChange(label, e.target.value)}
+                      >
+                        <option value="January">January</option>
+                        <option value="February">February</option>
+                        <option value="March">March</option>
+                        <option value="April">April</option>
+                        <option value="May">May</option>
+                        <option value="June">June</option>
+                        <option value="July">July</option>
+                        <option value="August">August</option>
+                        <option value="September">September</option>
+                        <option value="October">October</option>
+                        <option value="November">November</option>
+                        <option value="December">December</option>
+                        {label === 'fundingMonth' && <option value="Not Funded Yet">Not Funded Yet</option>}
+                      </Select>
+                    ) : label === 'accOpeningDate' ? (
+                      <Input
+                        type="date"
+                        value={editableData[label] ? editableData[label].split('T')[0] : ''}
+                        onChange={(e) => handleChange(label, e.target.value)}
+                      />
+                    ) : label === 'studentEmail' ? (
+                      <Input
+                        type="email"
+                        value={editableData[label] || ''}
+                        onChange={(e) => handleChange(label, e.target.value)}
+                        placeholder="Enter email address"
+                      />
+                    ) : label === 'studentPhoneNo' ? (
+                      <Input
+                        type="tel"
+                        value={editableData[label] || ''}
+                        onChange={(e) => handleChange(label, e.target.value)}
+                        placeholder="Enter phone number"
+                      />
+                    ) : ['commissionAmt', 'tds', 'netPayable'].includes(label) ? (
+                      <NumberInput min={0}>
+                        <NumberInputField
+                          value={editableData[label] || ''}
+                          onChange={(e) => handleChange(label, e.target.value)}
+                        />
+                      </NumberInput>
                     ) : (
                       <Input
                         value={editableData[label] || ''}

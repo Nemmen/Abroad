@@ -61,6 +61,7 @@ function ForexView() {
   const [editableData, setEditableData] = useState({
     agentRef: '',
     studentRef: '',
+    date: '',
     country: '',
     currencyBooked: '',
     quotation: '',
@@ -119,6 +120,7 @@ function ForexView() {
             setEditableData({
               agentRef: formData1.agentRef || '',
               studentRef: formData1.studentRef || '',
+              date: formData1.date || '',
               country: formData1.country || '',
               currencyBooked: formData1.currencyBooked || '',
               quotation: formData1.quotation || '',
@@ -390,6 +392,19 @@ function ForexView() {
           ) : (
             // Edit Mode - ForexForm structure
             <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
+              {/* Date */}
+              <FormControl isRequired>
+                <FormLabel>Date</FormLabel>
+                <Input
+                  type="date"
+                  name="date"
+                  value={editableData.date ? editableData.date.split('T')[0] : ''}
+                  onChange={handleChange}
+                  h="50px"
+                  w="full"
+                />
+              </FormControl>
+
               {/* Country */}
               <FormControl isRequired>
                 <FormLabel>Country</FormLabel>
@@ -516,14 +531,14 @@ function ForexView() {
               {/* AE Commission */}
               <FormControl>
                 <FormLabel>AE Commission</FormLabel>
-                <Input
-                  type="text"
-                  name="aecommission"
-                  value={editableData.aecommission}
-                  onChange={handleChange}
-                  h="50px"
-                  w="full"
-                />
+                <NumberInput min={0} h="50px" w="full">
+                  <NumberInputField
+                    name="aecommission"
+                    value={editableData.aecommission}
+                    onChange={handleChange}
+                    h="50px"
+                  />
+                </NumberInput>
               </FormControl>
 
               {/* Net Payable */}

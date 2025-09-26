@@ -140,9 +140,12 @@ function GicView() {
           );
           setFormData(formatGICData(formData1));
           setEditableData({
+            studentEmail: formData1?.studentEmail,
             studentPhoneNo: formData1?.studentPhoneNo,
             studentPassportNo: formData1?.studentPassportNo,
+            accOpeningDate: formData1?.accOpeningDate,
             bankVendor: formData1?.bankVendor,
+            accOpeningMonth: formData1?.accOpeningMonth,
             fundingMonth: formData1?.fundingMonth,
             commissionAmt: formData1?.commissionAmt,
             tds: formData1?.tds,
@@ -181,9 +184,12 @@ function GicView() {
 
   // List of fields that can be edited
   const editableFields = [
+    'studentEmail',
     'studentPhoneNo',
     'studentPassportNo',
+    'accOpeningDate',
     'bankVendor',
+    'accOpeningMonth',
     'fundingMonth',
     'commissionAmt',
     'tds',
@@ -327,6 +333,86 @@ function GicView() {
                                 <MenuItem value="Paid">Paid</MenuItem>
                                 <MenuItem value="Under Processing">Under Processing</MenuItem>
                               </TextField>
+                            ) : label === 'bankVendor' ? (
+                              <TextField
+                                select
+                                fullWidth
+                                value={editableData[label] || ''}
+                                onChange={(e) => handleChange(label, e.target.value)}
+                                variant="outlined"
+                                size="small"
+                              >
+                                <MenuItem value="ICICI">ICICI</MenuItem>
+                                <MenuItem value="RBC">RBC</MenuItem>
+                                <MenuItem value="CIBC">CIBC</MenuItem>
+                                <MenuItem value="BOM">BOM</MenuItem>
+                                <MenuItem value="Expatrio">Expatrio</MenuItem>
+                                <MenuItem value="Fintiba">Fintiba</MenuItem>
+                                <MenuItem value="TD">TD</MenuItem>
+                              </TextField>
+                            ) : label === 'fundingMonth' || label === 'accOpeningMonth' ? (
+                              <TextField
+                                select
+                                fullWidth
+                                value={editableData[label] || ''}
+                                onChange={(e) => handleChange(label, e.target.value)}
+                                variant="outlined"
+                                size="small"
+                              >
+                                <MenuItem value="January">January</MenuItem>
+                                <MenuItem value="February">February</MenuItem>
+                                <MenuItem value="March">March</MenuItem>
+                                <MenuItem value="April">April</MenuItem>
+                                <MenuItem value="May">May</MenuItem>
+                                <MenuItem value="June">June</MenuItem>
+                                <MenuItem value="July">July</MenuItem>
+                                <MenuItem value="August">August</MenuItem>
+                                <MenuItem value="September">September</MenuItem>
+                                <MenuItem value="October">October</MenuItem>
+                                <MenuItem value="November">November</MenuItem>
+                                <MenuItem value="December">December</MenuItem>
+                                {label === 'fundingMonth' && <MenuItem value="Not Funded Yet">Not Funded Yet</MenuItem>}
+                              </TextField>
+                            ) : label === 'accOpeningDate' ? (
+                              <TextField
+                                type="date"
+                                fullWidth
+                                value={editableData[label] ? editableData[label].split('T')[0] : ''}
+                                onChange={(e) => handleChange(label, e.target.value)}
+                                variant="outlined"
+                                size="small"
+                                InputLabelProps={{ shrink: true }}
+                              />
+                            ) : label === 'studentEmail' ? (
+                              <TextField
+                                type="email"
+                                fullWidth
+                                value={editableData[label] || ''}
+                                onChange={(e) => handleChange(label, e.target.value)}
+                                variant="outlined"
+                                size="small"
+                                placeholder="Enter email address"
+                              />
+                            ) : label === 'studentPhoneNo' ? (
+                              <TextField
+                                type="tel"
+                                fullWidth
+                                value={editableData[label] || ''}
+                                onChange={(e) => handleChange(label, e.target.value)}
+                                variant="outlined"
+                                size="small"
+                                placeholder="Enter phone number"
+                              />
+                            ) : ['commissionAmt', 'tds', 'netPayable'].includes(label) ? (
+                              <TextField
+                                type="number"
+                                fullWidth
+                                value={editableData[label] || ''}
+                                onChange={(e) => handleChange(label, e.target.value)}
+                                variant="outlined"
+                                size="small"
+                                inputProps={{ min: 0, step: 0.01 }}
+                              />
                             ) : (
                               <TextField
                                 fullWidth
