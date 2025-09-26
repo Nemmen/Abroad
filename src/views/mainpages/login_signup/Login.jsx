@@ -1,16 +1,171 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { post } from '../services/ApiEndpoint';
 import { useToast, Spinner } from '@chakra-ui/react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { SetUser } from '../redux/AuthSlice';
 import { HiEye, HiEyeOff } from 'react-icons/hi';
 import { FaUser, FaLock } from 'react-icons/fa';
 
+// Animated Logo Background Component
+const AnimatedLogoBackground = () => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Import logos from LogoCollection (using require for dynamic imports)
+  const logos = [
+    { 
+      src: require('../../../assets/img/home/flywireLogo.png'), 
+      alt: "Flywire Logo", 
+      category: "Forex" 
+    },
+    { 
+      src: require('../../../assets/img/home/cibcLogo.png'), 
+      alt: "CIBC Logo", 
+      category: "Banking" 
+    },
+    { 
+      src: require('../../../assets/img/home/iciciBankLogo.png'), 
+      alt: "ICICI Bank Logo", 
+      category: "GIC" 
+    },
+    { 
+      src: require('../../../assets/img/home/rbcLogo.png'), 
+      alt: "RBC Bank Logo", 
+      category: "GIC" 
+    },
+    { 
+      src: require('../../../assets/img/home/fintibaLogo.png'), 
+      alt: "Fintiba Logo", 
+      category: "Blocked Account" 
+    },
+    { 
+      src: require('../../../assets/img/home/expartioLogo.png'), 
+      alt: "Expatrio Logo", 
+      category: "Blocked Account" 
+    },
+    { 
+      src: require('../../../assets/img/home/convera.png'), 
+      alt: "Convera Logo", 
+      category: "Forex" 
+    },
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % logos.length);
+    }, 2500); // Change every 2.5 seconds
+
+    return () => clearInterval(interval);
+  }, [logos.length]);
+
+  return (
+    <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 overflow-hidden">
+      {/* Animated background particles */}
+      <div className="absolute inset-0">
+        <div className="absolute top-16 left-16 w-16 h-16 border-2 border-white/20 rounded-full animate-pulse"></div>
+        <div className="absolute top-40 right-20 w-12 h-12 border-2 border-white/15 rounded-full animate-bounce"></div>
+        <div className="absolute bottom-32 left-24 w-20 h-20 border-2 border-white/10 rounded-full animate-pulse"></div>
+        <div className="absolute bottom-48 right-16 w-8 h-8 border-2 border-white/25 rounded-full animate-bounce"></div>
+        <div className="absolute top-1/2 left-12 w-6 h-6 border-2 border-white/30 rounded-full animate-ping"></div>
+        <div className="absolute top-3/4 right-28 w-4 h-4 border-2 border-white/20 rounded-full animate-pulse"></div>
+      </div>
+
+      {/* Main content container */}
+      <div className="relative h-full flex flex-col items-center justify-center px-8 py-16">
+        <div className="text-center max-w-2xl">
+          
+          {/* Logo Section */}
+          <div className="mb-8">
+            <div className="relative inline-block">
+              {/* Single logo container with proper bounds */}
+              <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-2xl w-72 h-40 flex items-center justify-center relative overflow-hidden">
+                <div className="w-full h-full flex items-center justify-center">
+                  <img
+                    key={currentIndex}
+                    src={logos[currentIndex].src}
+                    alt={logos[currentIndex].alt}
+                    className="max-h-24 max-w-60 object-contain transition-all duration-700 ease-in-out transform"
+                    style={{
+                      animation: 'fadeInScale 2.5s ease-in-out infinite'
+                    }}
+                  />
+                </div>
+                
+                {/* Category badge */}
+                <div className="absolute top-3 right-3 bg-blue-500 text-white text-xs px-2 py-1 rounded-full font-medium">
+                  {logos[currentIndex].category}
+                </div>
+              </div>
+
+              {/* Floating decorative elements */}
+              <div className="absolute -top-3 -left-3 w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full animate-bounce shadow-lg"></div>
+              <div className="absolute -top-2 -right-4 w-6 h-6 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full animate-pulse shadow-lg"></div>
+              <div className="absolute -bottom-3 -left-4 w-7 h-7 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full animate-bounce shadow-lg"></div>
+              <div className="absolute -bottom-2 -right-3 w-5 h-5 bg-gradient-to-br from-pink-400 to-rose-500 rounded-full animate-pulse shadow-lg"></div>
+            </div>
+
+            {/* Progress dots */}
+            <div className="flex items-center justify-center space-x-2 mt-6">
+              {logos.map((_, index) => (
+                <div
+                  key={index}
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    index === currentIndex 
+                      ? 'bg-yellow-300 w-8' 
+                      : 'bg-white/40 w-2'
+                  }`}
+                ></div>
+              ))}
+            </div>
+          </div>
+
+          {/* Text content */}
+          <h1 className="text-4xl font-bold text-white mb-4">
+            Trusted <span className="text-yellow-300">Partners</span>
+          </h1>
+          
+          <p className="text-lg text-blue-100 mb-8 leading-relaxed max-w-lg mx-auto">
+            Connect with leading financial institutions for secure GIC, Blocked Account, and Forex services
+          </p>
+
+          {/* Service highlights */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+              <div className="text-xl font-bold text-white">7+</div>
+              <div className="text-blue-200 text-sm">Global Partners</div>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+              <div className="text-xl font-bold text-white">Secure</div>
+              <div className="text-blue-200 text-sm">Transactions</div>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+              <div className="text-xl font-bold text-white">24/7</div>
+              <div className="text-blue-200 text-sm">Support</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Custom CSS for logo animation */}
+      <style jsx>{`
+        @keyframes fadeInScale {
+          0%, 20% {
+            opacity: 1;
+            transform: scale(1);
+          }
+          80%, 100% {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+      `}</style>
+    </div>
+  );
+};
+
 
 
 export default function Login() {
-  const user = useSelector((state) => state.Auth);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
@@ -221,134 +376,9 @@ export default function Login() {
         </div>
       </div>
 
-      {/* Right Side - Background with Illustration */}
+      {/* Right Side - Animated Logo Background */}
       <div className="hidden lg:block relative w-0 flex-1">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-700 overflow-hidden">
-          {/* Decorative circles pattern */}
-          <div className="absolute inset-0">
-            {/* Background circles */}
-            <div className="absolute top-8 left-8 w-16 h-16 border-2 border-white/20 rounded-full"></div>
-            <div className="absolute top-16 left-20 w-8 h-8 border-2 border-white/15 rounded-full"></div>
-            <div className="absolute top-32 left-12 w-12 h-12 border-2 border-white/10 rounded-full"></div>
-            <div className="absolute top-48 left-24 w-6 h-6 border-2 border-white/20 rounded-full"></div>
-            
-            <div className="absolute bottom-8 right-8 w-20 h-20 border-2 border-white/15 rounded-full"></div>
-            <div className="absolute bottom-16 right-20 w-10 h-10 border-2 border-white/20 rounded-full"></div>
-            <div className="absolute bottom-32 right-12 w-14 h-14 border-2 border-white/10 rounded-full"></div>
-            <div className="absolute bottom-48 right-24 w-8 h-8 border-2 border-white/25 rounded-full"></div>
-            
-            {/* Side circles */}
-            <div className="absolute top-64 left-4 w-12 h-12 border-2 border-white/20 rounded-full"></div>
-            <div className="absolute top-80 left-8 w-6 h-6 border-2 border-white/15 rounded-full"></div>
-            <div className="absolute top-96 left-2 w-8 h-8 border-2 border-white/10 rounded-full"></div>
-          </div>
-
-          {/* Main content area */}
-          <div className="relative h-full flex items-center justify-center px-12">
-            <div className="text-center max-w-md">
-              
-              {/* Central illustration area */}
-              <div className="relative mb-8">
-                {/* Main chart/dashboard card */}
-                <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-2xl mx-auto w-64 h-48 relative">
-                  {/* Chart bars */}
-                  <div className="flex items-end justify-between h-32 mb-4">
-                    <div className="bg-gradient-to-t from-blue-500 to-blue-400 w-8 h-16 rounded-t"></div>
-                    <div className="bg-gradient-to-t from-indigo-500 to-indigo-400 w-8 h-24 rounded-t"></div>
-                    <div className="bg-gradient-to-t from-purple-500 to-purple-400 w-8 h-20 rounded-t"></div>
-                    <div className="bg-gradient-to-t from-blue-500 to-blue-400 w-8 h-28 rounded-t"></div>
-                    <div className="bg-gradient-to-t from-indigo-500 to-indigo-400 w-8 h-18 rounded-t"></div>
-                    <div className="bg-gradient-to-t from-purple-500 to-purple-400 w-8 h-22 rounded-t"></div>
-                  </div>
-                  
-                  {/* Chart title */}
-                  <div className="text-gray-700 text-sm font-medium">Financial Portfolio</div>
-                  <div className="text-gray-500 text-xs">Monthly Analytics</div>
-                </div>
-
-                {/* Floating user avatars */}
-                {/* Top left avatar */}
-                <div className="absolute -top-4 -left-8 w-16 h-16 bg-gradient-to-br from-orange-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg animate-bounce">
-                  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                    <FaUser className="text-orange-500 text-lg" />
-                  </div>
-                </div>
-
-                {/* Top right avatar */}
-                <div className="absolute -top-8 -right-4 w-14 h-14 bg-gradient-to-br from-green-400 to-green-500 rounded-full flex items-center justify-center shadow-lg animate-pulse">
-                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                    <FaUser className="text-green-500" />
-                  </div>
-                </div>
-
-                {/* Bottom right avatar */}
-                <div className="absolute -bottom-6 -right-8 w-12 h-12 bg-gradient-to-br from-purple-400 to-purple-500 rounded-full flex items-center justify-center shadow-lg animate-bounce">
-                  <div className="w-7 h-7 bg-white rounded-full flex items-center justify-center">
-                    <FaUser className="text-purple-500 text-sm" />
-                  </div>
-                </div>
-
-                {/* Decorative stars */}
-                <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
-                  <div className="flex space-x-2">
-                    <div className="w-2 h-2 bg-yellow-300 rounded-full animate-pulse"></div>
-                    <div className="w-1 h-1 bg-yellow-200 rounded-full animate-ping"></div>
-                    <div className="w-2 h-2 bg-yellow-300 rounded-full animate-pulse"></div>
-                  </div>
-                </div>
-
-                <div className="absolute bottom-0 left-8">
-                  <div className="flex space-x-1">
-                    <div className="w-1 h-1 bg-white/60 rounded-full animate-pulse"></div>
-                    <div className="w-2 h-2 bg-white/80 rounded-full animate-ping"></div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Text content */}
-              <h1 className="text-4xl font-bold text-white mb-6">
-                Your Financial <br />
-                <span className="text-yellow-300">Services Hub</span>
-              </h1>
-              
-              <p className="text-xl text-blue-100 mb-8 leading-relaxed">
-                Manage GIC, Blocked Accounts, and Forex services seamlessly in one secure platform
-              </p>
-
-              {/* Feature points */}
-              <div className="space-y-4 text-blue-100">
-                <div className="flex items-center space-x-3 justify-center">
-                  <div className="w-2 h-2 bg-yellow-300 rounded-full"></div>
-                  <span>Real-time transaction tracking</span>
-                </div>
-                <div className="flex items-center space-x-3 justify-center">
-                  <div className="w-2 h-2 bg-yellow-300 rounded-full"></div>
-                  <span>Secure financial operations</span>
-                </div>
-                <div className="flex items-center space-x-3 justify-center">
-                  <div className="w-2 h-2 bg-yellow-300 rounded-full"></div>
-                  <span>Trusted banking partnerships</span>
-                </div>
-              </div>
-
-              {/* Bottom quote */}
-              <div className="mt-8 p-4 bg-white/10 backdrop-blur-sm rounded-xl">
-                <p className="text-blue-100 italic text-sm">
-                  "Fast. Easy. Reliable. - Your trusted solution for all financial services needs."
-                </p>
-                <div className="flex items-center justify-center mt-2">
-                  <div className="w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
-                    <FaUser className="text-white text-xs" />
-                  </div>
-                  <div className="ml-2 text-blue-200 text-xs">
-                    <div className="font-medium">Trusted Platform</div>
-                    <div className="text-blue-300">Financial Services</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <AnimatedLogoBackground />
       </div>
     </div>
   );
