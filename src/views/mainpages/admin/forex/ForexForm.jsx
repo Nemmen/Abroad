@@ -685,14 +685,14 @@ function ForexForm() {
           </FormControl>
           <FormControl>
             <FormLabel>AE Commission</FormLabel>
-            <Input
-              type="text"
-              name="aecommission"
-              value={formData.aecommission}
-              onChange={handleChange}
-              h="50px"
-              w="full"
-            />
+            <NumberInput min={0} h="50px" w="full">
+              <NumberInputField
+                name="aecommission"
+                value={formData.aecommission}
+                onChange={handleChange}
+                h="50px"
+              />
+            </NumberInput>
           </FormControl>
 
           <FormControl isRequired>

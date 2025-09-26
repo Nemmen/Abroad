@@ -404,9 +404,12 @@ const updateGicForm = async (req, res) => {
   try {
     const { id } = req.params; // Get the GIC form ID from params
     const {
+      studentEmail,
       studentPhoneNo,
       studentPassportNo,
+      accOpeningDate,
       bankVendor,
+      accOpeningMonth,
       fundingMonth,
       commissionAmt,
       tds,
@@ -415,15 +418,23 @@ const updateGicForm = async (req, res) => {
     } = req.body; // Get editable fields from request body
 
     const updatedFields = {
+      studentEmail,
       studentPhoneNo,
       studentPassportNo,
+      accOpeningDate,
       bankVendor,
+      accOpeningMonth,
       fundingMonth,
       commissionAmt,
       tds,
       netPayable,
       commissionStatus,
     };
+
+    // Remove undefined fields
+    Object.keys(updatedFields).forEach(key => 
+      updatedFields[key] === undefined && delete updatedFields[key]
+    );
 
     // Update the GIC form in the database
     const updatedGIC = await GICModel.findByIdAndUpdate(

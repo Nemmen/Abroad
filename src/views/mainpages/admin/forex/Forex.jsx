@@ -324,7 +324,12 @@ const Forex = () => {
     }
     
     const total = dataToCalculate.reduce((sum, item) => {
-      return sum + (parseFloat(item.aecommission) || 0);
+      // Clean the value: remove commas and convert to valid number
+      const cleanValue = item.aecommission 
+        ? String(item.aecommission).replace(/,/g, '').trim() 
+        : '0';
+      const numValue = parseFloat(cleanValue) || 0;
+      return sum + numValue;
     }, 0);
     
     setAeCommissionSummary(prev => ({ ...prev, total }));
