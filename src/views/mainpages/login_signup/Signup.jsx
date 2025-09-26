@@ -1,9 +1,129 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { post } from '../services/ApiEndpoint';
 import { useToast, Spinner } from '@chakra-ui/react';
 import { HiEye, HiEyeOff } from 'react-icons/hi';
 import { FaUser, FaEnvelope, FaBuilding, FaPhone, FaMapMarkerAlt, FaLock, FaFileUpload } from 'react-icons/fa';
+// Simple Service Slider Component
+const ServiceSlider = () => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const services = [
+    { name: "GIC", type: "text" },
+    { name: "Blocked Accounts", type: "text" },
+    { name: "Forex", type: "text" },
+    { name: "/Logo.png", type: "logo" }
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % services.length);
+    }, 2500);
+
+    return () => clearInterval(interval);
+  }, [services.length]);
+
+  return (
+    <div className="relative h-full flex flex-col items-center justify-center px-8">
+      {/* Main Display */}
+      <div className="relative w-full max-w-lg">
+        <div className="bg-white/95 backdrop-blur-sm rounded-3xl p-12 shadow-2xl relative overflow-hidden">
+          
+          {/* Content Display */}
+          <div className="text-center">
+            {services[currentIndex].type === "text" ? (
+              <div>
+                <h2 className="text-5xl font-bold text-gray-800 mb-4">
+                  {services[currentIndex].name}
+                </h2>
+                <div className="text-gray-500 text-lg">Financial Services</div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center">
+                <img
+                  src="/Logo.png"
+                  alt="AbroCare Logo"
+                  className="max-h-20 max-w-64 object-contain"
+                  onError={(e) => {
+                    console.log('Logo failed to load, trying fallback');
+                    e.target.src = '/LogoWhite.png';
+                  }}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Decorative elements */}
+          <div className="absolute top-4 right-4 w-3 h-3 bg-blue-400 rounded-full animate-pulse"></div>
+          <div className="absolute bottom-4 left-4 w-2 h-2 bg-green-400 rounded-full animate-bounce"></div>
+          <div className="absolute top-6 left-6 w-2 h-2 bg-purple-400 rounded-full animate-ping"></div>
+          <div className="absolute bottom-6 right-6 w-3 h-3 bg-orange-400 rounded-full animate-pulse"></div>
+        </div>
+
+        {/* Progress Dots */}
+        <div className="flex items-center justify-center space-x-2 mt-6">
+          {services.map((_, index) => (
+            <div
+              key={index}
+              className={`h-2 rounded-full transition-all duration-300 ${
+                index === currentIndex 
+                  ? 'bg-white w-8 shadow-lg' 
+                  : 'bg-white/40 w-2'
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+
+      {/* Bottom Text */}
+      <div className="text-center mt-12 max-w-md">
+        <h1 className="text-4xl font-bold text-white mb-4">
+          Your Financial <br />
+          <span className="text-yellow-300">Journey Starts Here</span>
+        </h1>
+        <p className="text-xl text-indigo-100 leading-relaxed mb-8">
+          Comprehensive financial services for international students
+        </p>
+        
+        {/* Feature Points */}
+        <div className="space-y-4 text-indigo-100">
+          <div className="flex items-center space-x-3 justify-center">
+            <div className="w-2 h-2 bg-yellow-300 rounded-full animate-pulse"></div>
+            <span>Effortless GIC Account Management</span>
+          </div>
+          <div className="flex items-center space-x-3 justify-center">
+            <div className="w-2 h-2 bg-yellow-300 rounded-full animate-pulse"></div>
+            <span>Trusted Blocked Account Services</span>
+          </div>
+          <div className="flex items-center space-x-3 justify-center">
+            <div className="w-2 h-2 bg-yellow-300 rounded-full animate-pulse"></div>
+            <span>Secure Forex Solutions</span>
+          </div>
+          <div className="flex items-center space-x-3 justify-center">
+            <div className="w-2 h-2 bg-yellow-300 rounded-full animate-pulse"></div>
+            <span>24/7 Professional Support</span>
+          </div>
+        </div>
+
+        {/* Success Metrics */}
+        <div className="mt-8 grid grid-cols-3 gap-4">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-yellow-300">Fast</div>
+            <div className="text-xs text-indigo-200">Processing</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-yellow-300">Secure</div>
+            <div className="text-xs text-indigo-200">Transactions</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-yellow-300">Trusted</div>
+            <div className="text-xs text-indigo-200">Platform</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default function Register() {
   const navigate = useNavigate();
@@ -158,147 +278,21 @@ export default function Register() {
 
   return (
     <div className="h-screen flex overflow-hidden">
-      {/* Left Side - Background with Illustration */}
+      {/* Left Side - Service Slider */}
       <div className="hidden lg:block relative w-0 flex-1">
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 via-purple-600 to-blue-700 overflow-hidden">
           {/* Decorative circles pattern */}
           <div className="absolute inset-0">
-            {/* Background circles */}
-            <div className="absolute top-12 right-8 w-20 h-20 border-2 border-white/20 rounded-full"></div>
-            <div className="absolute top-24 right-20 w-10 h-10 border-2 border-white/15 rounded-full"></div>
-            <div className="absolute top-40 right-12 w-14 h-14 border-2 border-white/10 rounded-full"></div>
-            <div className="absolute top-56 right-24 w-8 h-8 border-2 border-white/20 rounded-full"></div>
-            
-            <div className="absolute bottom-12 left-8 w-18 h-18 border-2 border-white/15 rounded-full"></div>
-            <div className="absolute bottom-20 left-20 w-12 h-12 border-2 border-white/20 rounded-full"></div>
-            <div className="absolute bottom-36 left-12 w-16 h-16 border-2 border-white/10 rounded-full"></div>
-            <div className="absolute bottom-52 left-24 w-6 h-6 border-2 border-white/25 rounded-full"></div>
-            
-            {/* Side circles */}
-            <div className="absolute top-72 right-4 w-10 h-10 border-2 border-white/20 rounded-full"></div>
-            <div className="absolute top-88 right-8 w-8 h-8 border-2 border-white/15 rounded-full"></div>
-            <div className="absolute top-104 right-2 w-6 h-6 border-2 border-white/10 rounded-full"></div>
+            <div className="absolute top-16 right-12 w-16 h-16 border-2 border-white/20 rounded-full animate-pulse"></div>
+            <div className="absolute top-32 right-20 w-8 h-8 border-2 border-white/15 rounded-full animate-bounce"></div>
+            <div className="absolute bottom-20 left-12 w-20 h-20 border-2 border-white/10 rounded-full animate-pulse"></div>
+            <div className="absolute bottom-40 left-24 w-6 h-6 border-2 border-white/25 rounded-full animate-bounce"></div>
+            <div className="absolute top-1/2 left-8 w-4 h-4 border-2 border-white/30 rounded-full animate-ping"></div>
+            <div className="absolute top-3/4 right-16 w-12 h-12 border-2 border-white/20 rounded-full animate-pulse"></div>
           </div>
 
-          {/* Main content area */}
-          <div className="relative h-full flex items-center justify-center px-12">
-            <div className="text-center max-w-md">
-              
-              {/* Central illustration area */}
-              <div className="relative mb-8">
-                {/* Main signup/form illustration */}
-                <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-6 shadow-2xl mx-auto w-72 h-52 relative">
-                  {/* Form elements simulation */}
-                  <div className="space-y-3">
-                    <div className="text-gray-700 font-semibold text-left mb-4">Create Your Account</div>
-                    
-                    {/* Input fields simulation */}
-                    <div className="bg-gray-100 h-8 rounded-lg"></div>
-                    <div className="bg-gray-100 h-8 rounded-lg"></div>
-                    <div className="flex space-x-2">
-                      <div className="bg-gray-100 h-8 rounded-lg flex-1"></div>
-                      <div className="bg-gray-100 h-8 rounded-lg flex-1"></div>
-                    </div>
-                    
-                    {/* Button simulation */}
-                    <div className="bg-gradient-to-r from-indigo-500 to-purple-600 h-10 rounded-lg mt-4 flex items-center justify-center">
-                      <span className="text-white text-sm font-medium">Sign Up</span>
-                    </div>
-                  </div>
-                  
-                  {/* Progress indicator */}
-                  <div className="absolute top-4 right-4">
-                    <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Floating user avatars */}
-                {/* Top left avatar - Student */}
-                <div className="absolute -top-6 -left-6 w-18 h-18 bg-gradient-to-br from-pink-400 to-pink-500 rounded-full flex items-center justify-center shadow-lg animate-bounce">
-                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
-                    <FaUser className="text-pink-500 text-xl" />
-                  </div>
-                </div>
-
-                {/* Top right avatar - Graduate */}
-                <div className="absolute -top-4 -right-6 w-16 h-16 bg-gradient-to-br from-emerald-400 to-emerald-500 rounded-full flex items-center justify-center shadow-lg animate-pulse">
-                  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                    <FaUser className="text-emerald-500 text-lg" />
-                  </div>
-                </div>
-
-                {/* Bottom left avatar - Professional */}
-                <div className="absolute -bottom-4 -left-4 w-14 h-14 bg-gradient-to-br from-blue-400 to-blue-500 rounded-full flex items-center justify-center shadow-lg animate-bounce">
-                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                    <FaUser className="text-blue-500" />
-                  </div>
-                </div>
-
-                {/* Decorative elements */}
-                <div className="absolute -top-2 left-1/2 transform -translate-x-1/2">
-                  <div className="flex space-x-2">
-                    <div className="w-3 h-3 bg-yellow-300 rounded-full animate-pulse"></div>
-                    <div className="w-2 h-2 bg-yellow-200 rounded-full animate-ping"></div>
-                    <div className="w-3 h-3 bg-yellow-300 rounded-full animate-pulse"></div>
-                  </div>
-                </div>
-
-                {/* Document/certificate icons */}
-                <div className="absolute bottom-2 right-4">
-                  <div className="flex space-x-1">
-                    <div className="w-3 h-4 bg-white/80 rounded-sm shadow-sm"></div>
-                    <div className="w-3 h-4 bg-white/60 rounded-sm shadow-sm"></div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Text content */}
-              <h1 className="text-4xl font-bold text-white mb-6">
-                Manage Your <br />
-                <span className="text-yellow-300">Financial Journey</span>
-              </h1>
-              
-              <p className="text-xl text-indigo-100 mb-8 leading-relaxed">
-                Manage GIC, Blocked Accounts, and Forex services in one platform. Simplified. Transparent. Trustworthy.
-              </p>
-
-              {/* Feature points */}
-              <div className="space-y-4 text-indigo-100">
-                <div className="flex items-center space-x-3 justify-center">
-                  <div className="w-2 h-2 bg-yellow-300 rounded-full"></div>
-                  <span>Effortless GIC Account Management</span>
-                </div>
-                <div className="flex items-center space-x-3 justify-center">
-                  <div className="w-2 h-2 bg-yellow-300 rounded-full"></div>
-                  <span>Trusted Blocked Account Services</span>
-                </div>
-                <div className="flex items-center space-x-3 justify-center">
-                  <div className="w-2 h-2 bg-yellow-300 rounded-full"></div>
-                  <span>Secure Forex Solutions</span>
-                </div>
-              </div>
-
-              {/* Success metrics */}
-              <div className="mt-8 grid grid-cols-3 gap-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-yellow-300">Fast</div>
-                  <div className="text-xs text-indigo-200">Applications</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-yellow-300">Easy</div>
-                  <div className="text-xs text-indigo-200">Process</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-yellow-300">Secure</div>
-                  <div className="text-xs text-indigo-200">Transactions</div>
-                </div>
-              </div>
-            </div>
-          </div>
+          {/* Service Slider Component */}
+          <ServiceSlider />
         </div>
       </div>
 
