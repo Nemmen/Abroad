@@ -11,7 +11,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Drawer from '@mui/material/Drawer';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
-import { Typography } from '@mui/material';
+
 import ColorModeIconDropdown from '../../theme/shared-theme/ColorModeIconDropdown';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '@mui/system';
@@ -42,6 +42,8 @@ export default function AppAppBar() {
     setOpen(newOpen);
   };
 
+  
+
   return (
     <AppBar
       position="fixed"
@@ -56,17 +58,32 @@ export default function AppAppBar() {
       <Container maxWidth="xl">
         <StyledToolbar variant="dense" disableGutters>
           <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', px: 0 }}>
-            {/* <Sitemark /><h4 className="font-bold text-black uppercase hover:cursor-pointer" href="#home">Abrocare</h4> */}
-            <a href="#home"><Typography variant="p" gutterBottom sx={{ fontWeight: 'bold', color: theme.palette.text.primary }}>
-            ABROCARE
-            </Typography></a>
-            <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-              {/* <Button variant="text" color="info" size="small">
-               Home
-              </Button> */}
-              {/* <Button variant="text" color="info" size="small" href="">
-                About
-              </Button> */}
+            {/* Logo */}
+            <a href="#home">
+              <Box
+                component="img"
+                src={theme.palette.mode === 'dark' ? '/LogoWhite.png' : '/Logo.png'}
+                alt="AbroCare Logo"
+                sx={{
+                  height: theme.palette.mode === 'dark' 
+                    ? { xs: '55px', md: '65px' } 
+                    : { xs: '45px', md: '50px' },
+                  width: 'auto',
+                  objectFit: 'contain',
+                  mr: 2,
+                  transition: 'all 0.3s ease',
+                  filter: theme.palette.mode === 'dark' ? 'brightness(1.1)' : 'none'
+                }}
+              />
+            </a>
+            
+            {/* Centered Navigation */}
+            <Box sx={{ 
+              display: { xs: 'none', md: 'flex' }, 
+              flexGrow: 1,
+              justifyContent: 'center',
+              gap: 1
+            }}>
               <Button variant="text" color="info" size="medium" href="#GIC" sx={{ fontSize: '1rem', fontWeight: 500 }}>
                 GIC
               </Button>
@@ -82,10 +99,9 @@ export default function AppAppBar() {
               <Button variant="text" color="info" size="medium" sx={{ minWidth: 0, fontSize: '1rem', fontWeight: 500 }} href="#FAQ">
                 FAQ
               </Button>
-              <Button variant="text" color="info" size="medium" sx={{ minWidth: 0, fontSize: '1rem', fontWeight: 500 }} href="#contactus">
+              <Button  variant="text" color="info" size="medium" sx={{ minWidth: 0, fontSize: '1rem', fontWeight: 500 }} href="#enquiry">
                 Contact Us
               </Button>
-              
             </Box>
           </Box>
           <Box
@@ -144,6 +160,9 @@ export default function AppAppBar() {
   </Button>
   <Button variant="text" color="info" size="medium" sx={{ minWidth: 0, fontSize: '1rem', fontWeight: 500 }} href="#FAQ">
     FAQ
+  </Button>
+  <Button variant="text" color="info" size="medium" sx={{ minWidth: 0, fontSize: '1rem', fontWeight: 500 }} href="#enquiry">
+    Contact Us
   </Button>
 </Box>
 

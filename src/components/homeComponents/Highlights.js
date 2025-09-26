@@ -77,10 +77,27 @@ export default function Highlights() {
             textAlign: { sm: 'left', md: 'center' },
           }}
         >
-          <Typography component="h2" variant="h4" gutterBottom>
+          <Typography 
+            component="h2" 
+            variant="h4" 
+            gutterBottom
+            sx={{
+              fontSize: { xs: '1.8rem', md: '2.5rem' },
+              fontWeight: 700,
+              mb: 3
+            }}
+          >
             Why Choose AbroCare
           </Typography>
-          <Typography variant="body1" sx={{ color: 'grey.400' }}>
+          <Typography 
+            variant="h6" 
+            sx={{ 
+              color: 'grey.400',
+              fontSize: { xs: '1.1rem', md: '1.25rem' },
+              lineHeight: 1.6,
+              fontWeight: 400
+            }}
+          >
             Your trusted partner for GIC accounts, Blocked accounts, and Forex services. 
             We simplify financial requirements for students pursuing education in Canada and Germany 
             with transparent processes and expert support.

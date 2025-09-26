@@ -46,16 +46,14 @@ function Copyright() {
 
 export default function Footer() {
   const handleContactUs = () => {
-    const email = 'manpreet@abrocare.com';
-    const subject = 'Inquiry from AbroCare Website';
-    const body = `Hello AbroCare Team,
-
-I am interested in learning more about your services. Please get in touch with me.
-
-Best regards,`;
-    
-    const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.open(mailtoLink, '_blank');
+    // Scroll to enquiry section smoothly
+    const enquirySection = document.getElementById('enquiry');
+    if (enquirySection) {
+      enquirySection.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    }
   };
 
   return (
@@ -103,11 +101,12 @@ Best regards,`;
                     mb: 3,
                     maxWidth: '350px',
                     fontFamily: 'DM Sans, sans-serif',
-                    color: (theme) => theme.palette.mode === 'dark' ? '#E0E5F2' : '#666666'
+                    color: (theme) => theme.palette.mode === 'dark' ? '#E0E5F2' : '#666666',
+                    fontSize: '1.1rem'
                   }}
                 >
-                  Your trusted partner for overseas education and visa consultancy. 
-                  Making your global education dreams come true with expert guidance and support.
+                  Your Global Exposure Partner! Get seamless financial solutions for international students. 
+                  Manage GIC, Blocked Accounts, and Forex services with embassy-accepted, transparent, and secure solutions.
                 </Typography>
                 
                 <Button
@@ -122,6 +121,7 @@ Best regards,`;
                     borderRadius: '12px',
                     px: 3,
                     py: 1.5,
+                    fontSize: '1rem',
                     boxShadow: '0 4px 15px rgba(247, 155, 28, 0.3)',
                     '&:hover': {
                       backgroundColor: '#e6890a',
@@ -131,7 +131,7 @@ Best regards,`;
                     transition: 'all 0.3s ease',
                   }}
                 >
-                  Get In Touch
+                  Enquiry Now
                 </Button>
               </Box>
             </Grid>
@@ -184,7 +184,7 @@ Best regards,`;
                         }
                       }}
                     >
-                      manpreet@abrocare.com
+                      support@abrocare.com
                     </Link>
                   </Box>
                 </Box>
@@ -331,38 +331,9 @@ Best regards,`;
                   Quick Links
                 </Typography>
                 <Stack spacing={1}>
+                  
                   <Link 
-                    href="#home" 
-                    sx={{ 
-                      color: (theme) => theme.palette.mode === 'dark' ? '#E0E5F2' : '#333333',
-                      textDecoration: 'none',
-                      fontSize: '0.9rem',
-                      fontFamily: 'DM Sans, sans-serif',
-                      '&:hover': { 
-                        color: '#f79b1c',
-                        textDecoration: 'underline'
-                      }
-                    }}
-                  >
-                    About Us
-                  </Link>
-                  <Link 
-                    href="#highlights" 
-                    sx={{ 
-                      color: (theme) => theme.palette.mode === 'dark' ? '#E0E5F2' : '#333333',
-                      textDecoration: 'none',
-                      fontSize: '0.9rem',
-                      fontFamily: 'DM Sans, sans-serif',
-                      '&:hover': { 
-                        color: '#f79b1c',
-                        textDecoration: 'underline'
-                      }
-                    }}
-                  >
-                    Our Services
-                  </Link>
-                  <Link 
-                    href="#" 
+                    href="/privacy-policy" 
                     sx={{ 
                       color: (theme) => theme.palette.mode === 'dark' ? '#E0E5F2' : '#333333',
                       textDecoration: 'none',
@@ -377,7 +348,7 @@ Best regards,`;
                     Privacy Policy
                   </Link>
                   <Link 
-                    href="#" 
+                    href="/terms-of-service" 
                     sx={{ 
                       color: (theme) => theme.palette.mode === 'dark' ? '#E0E5F2' : '#333333',
                       textDecoration: 'none',
@@ -410,17 +381,7 @@ Best regards,`;
           }}
         >
           <Copyright />
-          <Typography 
-            variant="body2" 
-            sx={{ 
-              opacity: 0.7,
-              textAlign: { xs: 'center', sm: 'right' },
-              color: (theme) => theme.palette.mode === 'dark' ? '#A3AED0' : '#666666',
-              fontFamily: 'DM Sans, sans-serif'
-            }}
-          >
-            Made with ❤️ for global education
-          </Typography>
+         
         </Box>
       </Container>
     </Box>
