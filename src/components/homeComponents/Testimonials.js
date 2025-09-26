@@ -165,10 +165,11 @@ export default function Testimonials() {
             top: '50%',
             transform: 'translateY(-50%)',
             zIndex: 2,
-            backgroundColor: 'rgba(255,255,255,0.9)',
+            backgroundColor: theme.palette.mode === 'dark' ? 'rgba(30,30,30,0.9)' : 'rgba(255,255,255,0.9)',
             color: '#1976d2',
+            border: theme.palette.mode === 'dark' ? '1px solid rgba(255,255,255,0.1)' : 'none',
             '&:hover': {
-              backgroundColor: 'rgba(255,255,255,1)',
+              backgroundColor: theme.palette.mode === 'dark' ? 'rgba(30,30,30,1)' : 'rgba(255,255,255,1)',
               transform: 'translateY(-50%) scale(1.1)',
             },
             transition: 'all 0.3s ease',
@@ -185,10 +186,11 @@ export default function Testimonials() {
             top: '50%',
             transform: 'translateY(-50%)',
             zIndex: 2,
-            backgroundColor: 'rgba(255,255,255,0.9)',
+            backgroundColor: theme.palette.mode === 'dark' ? 'rgba(30,30,30,0.9)' : 'rgba(255,255,255,0.9)',
             color: '#1976d2',
+            border: theme.palette.mode === 'dark' ? '1px solid rgba(255,255,255,0.1)' : 'none',
             '&:hover': {
-              backgroundColor: 'rgba(255,255,255,1)',
+              backgroundColor: theme.palette.mode === 'dark' ? 'rgba(30,30,30,1)' : 'rgba(255,255,255,1)',
               transform: 'translateY(-50%) scale(1.1)',
             },
             transition: 'all 0.3s ease',
@@ -233,7 +235,7 @@ export default function Testimonials() {
               <Typography
                 variant="h6"
                 sx={{
-                  color: 'black',
+                  color: 'text.primary',
                   fontStyle: 'italic',
                   mb: 4,
                   maxWidth: '700px',
@@ -247,7 +249,7 @@ export default function Testimonials() {
               {/* Author Info */}
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Box sx={{ textAlign: 'left' }}>
-                  <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'black' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
                     {testimonial.name}
                   </Typography>
                   <Typography variant="body2" sx={{ color: 'text.secondary' }}>
