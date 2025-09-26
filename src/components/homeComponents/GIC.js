@@ -46,13 +46,14 @@ export default function GIC() {
             </Typography>
             
             <Typography 
-              variant="body1" 
+              variant="h6" 
               gutterBottom 
               sx={{ 
                 color: theme.palette.text.secondary, 
                 mb: 4,
-                fontSize: '1.1rem',
-                lineHeight: 1.6
+                fontSize: { xs: '1.1rem', md: '1.25rem' },
+                lineHeight: 1.6,
+                fontWeight: 400
               }}
             >
               Managing your Guaranteed Investment Certificate (GIC) is now easier than ever. With our trusted bank partnerships, we ensure a smooth, secure, and fast process for students heading to Canada.
@@ -61,41 +62,41 @@ export default function GIC() {
             {/* Key Features Grid */}
             <Grid container spacing={3} sx={{ mb: 4 }}>
               <Grid item xs={12} sm={6}>
-                <Box sx={{ p: 2, backgroundColor: 'white', borderRadius: 2, boxShadow: 1 }}>
-                  <Typography variant="body1" sx={{ fontWeight: 'bold', color: textColor, mb: 1 }}>
+                <Box sx={{ p: 2, backgroundColor: theme.palette.mode === 'dark' ? '#1e1e1e' : 'white', borderRadius: 2, boxShadow: 1 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', color: textColor, mb: 1, fontSize: { xs: '1.1rem', md: '1.3rem' } }}>
                     Quick Setup
                   </Typography>
-                  <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+                  <Typography variant="body1" sx={{ color: theme.palette.text.secondary, fontSize: { xs: '1rem', md: '1.1rem' }, lineHeight: 1.5 }}>
                     Instant account number in India and fast GIC blocking confirmation.
                   </Typography>
                 </Box>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Box sx={{ p: 2, backgroundColor: 'white', borderRadius: 2, boxShadow: 1 }}>
-                  <Typography variant="body1" sx={{ fontWeight: 'bold', color: textColor, mb: 1 }}>
+                <Box sx={{ p: 2, backgroundColor: theme.palette.mode === 'dark' ? '#1e1e1e' : 'white', borderRadius: 2, boxShadow: 1 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', color: textColor, mb: 1, fontSize: { xs: '1.1rem', md: '1.3rem' } }}>
                     Real-Time Tracking
                   </Typography>
-                  <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+                  <Typography variant="body1" sx={{ color: theme.palette.text.secondary, fontSize: { xs: '1rem', md: '1.1rem' }, lineHeight: 1.5 }}>
                     Stay updated with live status on applications and fund disbursements.
                   </Typography>
                 </Box>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Box sx={{ p: 2, backgroundColor: 'white', borderRadius: 2, boxShadow: 1 }}>
-                  <Typography variant="body1" sx={{ fontWeight: 'bold', color: textColor, mb: 1 }}>
+                <Box sx={{ p: 2, backgroundColor: theme.palette.mode === 'dark' ? '#1e1e1e' : 'white', borderRadius: 2, boxShadow: 1 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', color: textColor, mb: 1, fontSize: { xs: '1.1rem', md: '1.3rem' } }}>
                     One Dashboard
                   </Typography>
-                  <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+                  <Typography variant="body1" sx={{ color: theme.palette.text.secondary, fontSize: { xs: '1rem', md: '1.1rem' }, lineHeight: 1.5 }}>
                     View all your GIC details, timelines, and documents in a single platform.
                   </Typography>
                 </Box>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Box sx={{ p: 2, backgroundColor: 'white', borderRadius: 2, boxShadow: 1 }}>
-                  <Typography variant="body1" sx={{ fontWeight: 'bold', color: textColor, mb: 1 }}>
+                <Box sx={{ p: 2, backgroundColor: theme.palette.mode === 'dark' ? '#1e1e1e' : 'white', borderRadius: 2, boxShadow: 1 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', color: textColor, mb: 1, fontSize: { xs: '1.1rem', md: '1.3rem' } }}>
                     Trusted Partners
                   </Typography>
-                  <Typography variant="body2" sx={{ color: theme.palette.text.secondary, mb: 2 }}>
+                  <Typography variant="body1" sx={{ color: theme.palette.text.secondary, mb: 2, fontSize: { xs: '1rem', md: '1.1rem' }, lineHeight: 1.5 }}>
                     Seamlessly bank with ICICI Bank Canada & RBC.
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', justifyContent: 'flex-start' }}>
@@ -104,7 +105,7 @@ export default function GIC() {
                       src={iciciBankLogo}
                       alt="ICICI Bank Canada"
                       sx={{
-                        height: '30px',
+                        height: '25px',
                         width: 'auto',
                         objectFit: 'contain',
                       }}
@@ -114,7 +115,7 @@ export default function GIC() {
                       src={rbcLogo}
                       alt="RBC"
                       sx={{
-                        height: '30px',
+                        height: '34px',
                         width: 'auto',
                         objectFit: 'contain',
                       }}
@@ -271,14 +272,43 @@ export default function GIC() {
           </Grid>
         </Box>
 
-        {/* Call to Action */}
-        <Box sx={{ mt: 6, textAlign: 'center', p: 4, backgroundColor: 'white', borderRadius: 3, boxShadow: 1 }}>
-          <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', color: theme.palette.text.primary }}>
-            Begin Your Journey with Peace of Mind
+        {/* Our Partners */}
+        <Box sx={{ mt: 6, textAlign: 'center', p: 4, backgroundColor: theme.palette.mode === 'dark' ? '#1e1e1e' : 'white', borderRadius: 3, boxShadow: 1 }}>
+          <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold', color: theme.palette.text.primary, mb: 4 }}>
+            Our Partners
           </Typography>
-          <Typography variant="body1" sx={{ color: theme.palette.text.secondary, maxWidth: '800px', mx: 'auto' }}>
-            Open your student account today with ICICI Bank Canada and Royal Bank of Canada (RBC). Experience seamless, secure, and student-focused banking designed to support your academic journey—from India to Canada.
-          </Typography>
+          <Box sx={{ display: 'flex', gap: 4, alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Box
+              component="img"
+              src={iciciBankLogo}
+              alt="ICICI Bank Canada"
+              sx={{
+                height: '30px',
+                width: 'auto',
+                objectFit: 'contain',
+              }}
+            />
+            <Box
+              component="img"
+              src={rbcLogo}
+              alt="RBC"
+              sx={{
+                height: '40px',
+                width: 'auto',
+                objectFit: 'contain',
+              }}
+            />
+            <Box
+              component="img"
+              src={require('../../assets/img/home/cibcLogo.png')}
+              alt="CIBC"
+              sx={{
+                height: '25px',
+                width: 'auto',
+                objectFit: 'contain',
+              }}
+            />
+          </Box>
         </Box>
       </Box>
     </Box>

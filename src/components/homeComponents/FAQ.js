@@ -37,9 +37,12 @@ export default function FAQ() {
           color: 'text.primary',
           width: { sm: '100%', md: '60%' },
           textAlign: { sm: 'left', md: 'center' },
+          fontSize: { xs: '1.8rem', md: '2.5rem' },
+          fontWeight: 700,
+          mb: 2
         }}
       >
-        Frequently asked questions
+        Frequently Asked Questions
       </Typography>
       <Box sx={{ width: '100%' }}>
         <Accordion

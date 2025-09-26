@@ -9,6 +9,7 @@ import fintiba from "../../assets/img/home/fintibaLogo.png";
 import flywire from "../../assets/img/home/flywireLogo.png";
 import icici from "../../assets/img/home/iciciBankLogo.png";
 import rbc from "../../assets/img/home/rbcLogo.png";
+import convera from "../../assets/img/home/convera.png"
 
 // All logos in a single array for continuous slider
 const allLogos = [
@@ -18,6 +19,7 @@ const allLogos = [
   { src: rbc, alt: "RBC Bank Logo", category: "GIC" },
   { src: fintiba, alt: "Fintiba Logo", category: "Blocked Account" },
   { src: expartio, alt: "Expatrio Logo", category: "Blocked Account" },
+  { src: convera, alt: "Convera Logo" },
 ];
 
 // Keyframes for smooth infinite scroll
@@ -139,7 +141,7 @@ export default function LogoCollection() {
               key={index}
               sx={{
                 ...containerStyle,
-                backgroundColor: theme.palette.mode === 'dark' ? '#ffffff' : '#ffffff',
+                backgroundColor: theme.palette.mode === 'dark' ? '#1e1e1e' : '#ffffff',
                 '& img:hover': {
                   filter: 'grayscale(0%)',
                 },
@@ -149,7 +151,15 @@ export default function LogoCollection() {
                 component="img"
                 src={logo.src}
                 alt={logo.alt}
-                sx={logoStyle}
+                sx={{
+                  ...logoStyle,
+                  // Special styling for Convera logo to make it larger
+                  ...(logo.alt === "Convera Logo" && {
+                    maxWidth: '170px',
+                    maxHeight: '100px',
+                    transform: 'scale(1.2)',
+                  }),
+                }}
               />
             </Box>
           ))}

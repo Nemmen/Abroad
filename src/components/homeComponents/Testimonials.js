@@ -152,7 +152,7 @@ export default function Testimonials() {
           position: 'relative',
           overflow: 'hidden',
           borderRadius: '20px',
-          backgroundColor: 'white',
+          backgroundColor: theme.palette.mode === 'dark' ? '#1e1e1e' : 'white',
           boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
         }}
       >
@@ -225,7 +225,7 @@ export default function Testimonials() {
               {/* Stars Rating */}
               <Box sx={{ display: 'flex', gap: 0.5, mb: 3 }}>
                 {[...Array(testimonial.rating)].map((_, i) => (
-                  <StarIcon key={i} sx={{ color: '#ffc107', fontSize: '1.5rem' }} />
+                  <StarIcon key={i} sx={{ color: theme.palette.mode === 'dark' ? '#ffeb3b' : '#ffc107', fontSize: '1.5rem' }} />
                 ))}
               </Box>
 
@@ -282,7 +282,7 @@ export default function Testimonials() {
                 width: 12,
                 height: 12,
                 borderRadius: '50%',
-                backgroundColor: index === currentIndex ? '#1976d2' : 'rgba(0,0,0,0.3)',
+                backgroundColor: index === currentIndex ? '#1976d2' : theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)',
                 cursor: 'pointer',
                 transition: 'all 0.3s ease',
                 '&:hover': {

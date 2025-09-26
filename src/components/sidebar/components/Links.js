@@ -61,18 +61,17 @@ export function SidebarLinks(props) {
                   }
                   py='5px'
                   ps='10px'>
-                  <Flex w='100%' alignItems='center' justifyContent='center'>
+                  <Flex w='100%' alignItems='center' justifyContent='flex-start'>
                     <Box
                       color={
                         activeRoute(route.path.toLowerCase())
                           ? activeIcon
                           : textColor
                       }
-                      me='18px'>
+                      me='12px'>
                       {route.icon}
                     </Box>
                     <Text
-                      me='auto'
                       color={
                         activeRoute(route.path.toLowerCase())
                           ? activeColor
@@ -82,7 +81,9 @@ export function SidebarLinks(props) {
                         activeRoute(route.path.toLowerCase())
                           ? "bold"
                           : "normal"
-                      }>
+                      }
+                      textAlign='left'
+                      flex='1'>
                       {route.name}
                     </Text>
                   </Flex>

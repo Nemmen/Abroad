@@ -46,13 +46,14 @@ export default function BlockAccount() {
             </Typography>
             
             <Typography 
-              variant="body1" 
+              variant="h6" 
               gutterBottom 
               sx={{ 
                 color: theme.palette.text.secondary, 
                 mb: 4,
-                fontSize: '1.1rem',
-                lineHeight: 1.6
+                fontSize: { xs: '1.1rem', md: '1.25rem' },
+                lineHeight: 1.6,
+                fontWeight: 400
               }}
             >
               Prove your financial means with ease. Our Fintiba-powered Blocked Account services are designed for students moving to Germany—fully compliant, reliable, and stress-free.
@@ -61,41 +62,41 @@ export default function BlockAccount() {
             {/* Key Features Grid */}
             <Grid container spacing={3} sx={{ mb: 4 }}>
               <Grid item xs={12} sm={6}>
-                <Box sx={{ p: 2, backgroundColor: 'white', borderRadius: 2, boxShadow: 1 }}>
-                  <Typography variant="body1" sx={{ fontWeight: 'bold', color: textColor, mb: 1 }}>
+                <Box sx={{ p: 2, backgroundColor: theme.palette.mode === 'dark' ? '#1e1e1e' : 'white', borderRadius: 2, boxShadow: 1 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', color: textColor, mb: 1, fontSize: { xs: '1.1rem', md: '1.3rem' } }}>
                     100% Compliance
                   </Typography>
-                  <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+                  <Typography variant="body1" sx={{ color: theme.palette.text.secondary, fontSize: { xs: '1rem', md: '1.1rem' }, lineHeight: 1.5 }}>
                     German embassies accept Fintiba at Sutor Bank.
                   </Typography>
                 </Box>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Box sx={{ p: 2, backgroundColor: 'white', borderRadius: 2, boxShadow: 1 }}>
-                  <Typography variant="body1" sx={{ fontWeight: 'bold', color: textColor, mb: 1 }}>
+                <Box sx={{ p: 2, backgroundColor: theme.palette.mode === 'dark' ? '#1e1e1e' : 'white', borderRadius: 2, boxShadow: 1 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', color: textColor, mb: 1, fontSize: { xs: '1.1rem', md: '1.3rem' } }}>
                     Quick Digital Setup
                   </Typography>
-                  <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+                  <Typography variant="body1" sx={{ color: theme.palette.text.secondary, fontSize: { xs: '1rem', md: '1.1rem' }, lineHeight: 1.5 }}>
                     Get instant blocking confirmation online.
                   </Typography>
                 </Box>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Box sx={{ p: 2, backgroundColor: 'white', borderRadius: 2, boxShadow: 1 }}>
-                  <Typography variant="body1" sx={{ fontWeight: 'bold', color: textColor, mb: 1 }}>
+                <Box sx={{ p: 2, backgroundColor: theme.palette.mode === 'dark' ? '#1e1e1e' : 'white', borderRadius: 2, boxShadow: 1 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', color: textColor, mb: 1, fontSize: { xs: '1.1rem', md: '1.3rem' } }}>
                     Safe & Secure
                   </Typography>
-                  <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+                  <Typography variant="body1" sx={{ color: theme.palette.text.secondary, fontSize: { xs: '1rem', md: '1.1rem' }, lineHeight: 1.5 }}>
                     Deposits protected up to €100,000.
                   </Typography>
                 </Box>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Box sx={{ p: 2, backgroundColor: 'white', borderRadius: 2, boxShadow: 1 }}>
-                  <Typography variant="body1" sx={{ fontWeight: 'bold', color: textColor, mb: 1 }}>
+                <Box sx={{ p: 2, backgroundColor: theme.palette.mode === 'dark' ? '#1e1e1e' : 'white', borderRadius: 2, boxShadow: 1 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', color: textColor, mb: 1, fontSize: { xs: '1.1rem', md: '1.3rem' } }}>
                     Fintiba Plus Option
                   </Typography>
-                  <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+                  <Typography variant="body1" sx={{ color: theme.palette.text.secondary, fontSize: { xs: '1rem', md: '1.1rem' }, lineHeight: 1.5 }}>
                     Add health insurance for a complete student package.
                   </Typography>
                 </Box>
@@ -177,7 +178,7 @@ export default function BlockAccount() {
         </Grid>
 
         {/* Partners Section */}
-        <Box sx={{ mt: 6, textAlign: 'center', p: 4, backgroundColor: 'white', borderRadius: 3, boxShadow: 1 }}>
+        <Box sx={{ mt: 6, textAlign: 'center', p: 4, backgroundColor: theme.palette.mode === 'dark' ? '#1e1e1e' : 'white', borderRadius: 3, boxShadow: 1 }}>
           <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', color: theme.palette.text.primary }}>
             Our Trusted Partners for Germany
           </Typography>

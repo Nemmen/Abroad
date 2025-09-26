@@ -82,7 +82,7 @@ export default function Forex() {
                     boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
                   }}
                 >
-                  <Typography sx={{ color: '#667eea', fontWeight: 'bold', fontSize: '0.8rem' }}>FX</Typography>
+                  <Typography sx={{ color: theme.palette.mode === 'dark' ? '#90caf9' : '#667eea', fontWeight: 'bold', fontSize: '0.8rem' }}>FX</Typography>
                 </Box>
               </Box>
             </Box>
@@ -105,13 +105,14 @@ export default function Forex() {
             </Typography>
             
             <Typography 
-              variant="body1" 
+              variant="h6" 
               gutterBottom 
               sx={{ 
                 color: theme.palette.text.secondary, 
                 mb: 4,
-                fontSize: '1.1rem',
-                lineHeight: 1.6
+                fontSize: { xs: '1.1rem', md: '1.25rem' },
+                lineHeight: 1.6,
+                fontWeight: 400
               }}
             >
               Managing money across borders is now effortless. Our all-in-one foreign exchange solutions are designed to make global payments secure, transparent, and cost-effective.
@@ -120,41 +121,41 @@ export default function Forex() {
             {/* Key Features Grid */}
             <Grid container spacing={3} sx={{ mb: 4 }}>
               <Grid item xs={12} sm={6}>
-                <Box sx={{ p: 2, backgroundColor: 'white', borderRadius: 2, boxShadow: 1 }}>
-                  <Typography variant="body1" sx={{ fontWeight: 'bold', color: textColor, mb: 1 }}>
+                <Box sx={{ p: 2, backgroundColor: theme.palette.mode === 'dark' ? '#1e1e1e' : 'white', borderRadius: 2, boxShadow: 1 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', color: textColor, mb: 1, fontSize: { xs: '1.1rem', md: '1.3rem' } }}>
                     Competitive Rates
                   </Typography>
-                  <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+                  <Typography variant="body1" sx={{ color: theme.palette.text.secondary, fontSize: { xs: '1rem', md: '1.1rem' }, lineHeight: 1.5 }}>
                     Enjoy the best value with zero hidden charges.
                   </Typography>
                 </Box>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Box sx={{ p: 2, backgroundColor: 'white', borderRadius: 2, boxShadow: 1 }}>
-                  <Typography variant="body1" sx={{ fontWeight: 'bold', color: textColor, mb: 1 }}>
+                <Box sx={{ p: 2, backgroundColor: theme.palette.mode === 'dark' ? '#1e1e1e' : 'white', borderRadius: 2, boxShadow: 1 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', color: textColor, mb: 1, fontSize: { xs: '1.1rem', md: '1.3rem' } }}>
                     Trusted Security
                   </Typography>
-                  <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+                  <Typography variant="body1" sx={{ color: theme.palette.text.secondary, fontSize: { xs: '1rem', md: '1.1rem' }, lineHeight: 1.5 }}>
                     Advanced safeguards ensure your funds reach safely, every time.
                   </Typography>
                 </Box>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Box sx={{ p: 2, backgroundColor: 'white', borderRadius: 2, boxShadow: 1 }}>
-                  <Typography variant="body1" sx={{ fontWeight: 'bold', color: textColor, mb: 1 }}>
+                <Box sx={{ p: 2, backgroundColor: theme.palette.mode === 'dark' ? '#1e1e1e' : 'white', borderRadius: 2, boxShadow: 1 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', color: textColor, mb: 1, fontSize: { xs: '1.1rem', md: '1.3rem' } }}>
                     Fast & Seamless
                   </Typography>
-                  <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+                  <Typography variant="body1" sx={{ color: theme.palette.text.secondary, fontSize: { xs: '1rem', md: '1.1rem' }, lineHeight: 1.5 }}>
                     Transfer money locally or internationally in just a few clicks.
                   </Typography>
                 </Box>
               </Grid>
               <Grid item xs={12} sm={6}>
-                <Box sx={{ p: 2, backgroundColor: 'white', borderRadius: 2, boxShadow: 1 }}>
-                  <Typography variant="body1" sx={{ fontWeight: 'bold', color: textColor, mb: 1 }}>
+                <Box sx={{ p: 2, backgroundColor: theme.palette.mode === 'dark' ? '#1e1e1e' : 'white', borderRadius: 2, boxShadow: 1 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', color: textColor, mb: 1, fontSize: { xs: '1.1rem', md: '1.3rem' } }}>
                     Unified Dashboard
                   </Typography>
-                  <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+                  <Typography variant="body1" sx={{ color: theme.palette.text.secondary, fontSize: { xs: '1rem', md: '1.1rem' }, lineHeight: 1.5 }}>
                     Manage all your forex needs alongside other financial services with ease.
                   </Typography>
                 </Box>
@@ -187,7 +188,7 @@ export default function Forex() {
         </Grid>
 
         {/* Partners Section */}
-        <Box sx={{ mt: 6, textAlign: 'center', p: 4, backgroundColor: 'white', borderRadius: 3, boxShadow: 1 }}>
+        <Box sx={{ mt: 6, textAlign: 'center', p: 4, backgroundColor: theme.palette.mode === 'dark' ? '#1e1e1e' : 'white', borderRadius: 3, boxShadow: 1 }}>
           <Typography variant="h5" gutterBottom sx={{ fontWeight: 'bold', color: theme.palette.text.primary }}>
             Our Trusted Forex Partners
           </Typography>
