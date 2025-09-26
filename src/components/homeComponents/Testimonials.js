@@ -233,7 +233,7 @@ export default function Testimonials() {
               <Typography
                 variant="h6"
                 sx={{
-                  color: 'text.primary',
+                  color: 'black',
                   fontStyle: 'italic',
                   mb: 4,
                   maxWidth: '700px',
@@ -247,7 +247,7 @@ export default function Testimonials() {
               {/* Author Info */}
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Box sx={{ textAlign: 'left' }}>
-                  <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'black' }}>
                     {testimonial.name}
                   </Typography>
                   <Typography variant="body2" sx={{ color: 'text.secondary' }}>
