@@ -31,7 +31,22 @@ const theme = createTheme({
   },
 });
 
-export default function DataTable({ columns, rows, link  , sx}) {
+export default function DataTable({ 
+  columns, 
+  rows, 
+  link, 
+  sx, 
+  loading = false, 
+  pagination = true,
+  paginationMode = 'client',
+  sortingMode = 'client',
+  paginationModel = { page: 0, pageSize: 10 },
+  pageSizeOptions = [5, 10, 15],
+  rowCount = 0,
+  onPaginationModelChange,
+  onSortModelChange,
+  sortModel = []
+}) {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -68,14 +83,16 @@ export default function DataTable({ columns, rows, link  , sx}) {
               <DataGrid
                 rows={rows}
                 columns={columns}
-                initialState={{
-                  pagination: {
-                    paginationModel: {
-                      pageSize: 10,
-                    },
-                  },
-                }}
-                pageSizeOptions={[5, 10, 15]}
+                loading={loading}
+                pagination={pagination}
+                paginationMode={paginationMode}
+                sortingMode={sortingMode}
+                paginationModel={paginationModel}
+                pageSizeOptions={pageSizeOptions}
+                rowCount={rowCount}
+                onPaginationModelChange={onPaginationModelChange}
+                onSortModelChange={onSortModelChange}
+                sortModel={sortModel}
                 rowHeight={70}
                 onRowClick={viewHandle}
               />
