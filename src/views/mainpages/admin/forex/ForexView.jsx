@@ -61,6 +61,7 @@ function ForexView() {
   const [editableData, setEditableData] = useState({
     agentRef: '',
     studentRef: '',
+    studentName: '',
     date: '',
     country: '',
     currencyBooked: '',
@@ -107,19 +108,19 @@ function ForexView() {
   ];
 
   useEffect(() => {
+    // Change from viewAllForexForms to specific forex endpoint
     axios
-      .get(`https://abroad-backend-gray.vercel.app/auth/viewAllForexForms`)
+      .get(`https://abroad-backend-gray.vercel.app/auth/getForexForm/${id}`)
       .then((response) => {
         if (response.data.success) {
-          const formData1 = response.data.forexForms.find(
-            (form) => form._id === id,
-          );
+          const formData1 = response.data.forexForm; // Single form, not array
           if (formData1) {
             setFormData(formData1);
             // Initialize editableData with all form fields
             setEditableData({
-              agentRef: formData1.agentRef || '',
-              studentRef: formData1.studentRef || '',
+              agentRef: formData1.agentRef?._id || formData1.agentRef || '',
+              studentRef: formData1.studentRef?._id || formData1.studentRef || '',
+              studentName: formData1.studentName || '',
               date: formData1.date || '',
               country: formData1.country || '',
               currencyBooked: formData1.currencyBooked || '',
@@ -147,7 +148,7 @@ function ForexView() {
         }
       })
       .catch((error) => {
-        console.error('Error fetching data:', error);
+        console.error('Error fetching forex data:', error);
       });
   }, [id]);
 
@@ -190,59 +191,150 @@ function ForexView() {
   const handleSave = async () => {
     setLoading(true);
     try {
-      // Create FormData to handle file uploads
-      const formDataToSend = new FormData();
-      
-      // Add all form fields
-      Object.keys(editableData).forEach(key => {
-        if (editableData[key] !== null && editableData[key] !== '') {
-          formDataToSend.append(key, editableData[key]);
-        }
-      });
+      let updatedFormData = { ...editableData };
       
       // Add commission payment date if exists
       if (commissionPaymentDate) {
-        formDataToSend.append('commissionPaymentDate', commissionPaymentDate);
-      }
-      
-      // Handle specific file uploads
-      if (passportFile) {
-        formDataToSend.append('passportFile', passportFile);
-      }
-      if (offerLetterFile) {
-        formDataToSend.append('offerLetterFile', offerLetterFile);
-      }
-      if (ttCopyFile) {
-        formDataToSend.append('ttCopyFile', ttCopyFile);
-      }
-      if (commissionPaymentProof) {
-        formDataToSend.append('commissionPaymentProof', commissionPaymentProof);
+        updatedFormData.commissionPaymentDate = commissionPaymentDate;
       }
 
-      // Handle documents with file uploads
-      for (let i = 0; i < documents.length; i++) {
-        const doc = documents[i];
-        formDataToSend.append(`documents[${i}][documentOf]`, doc.documentOf || '');
-        formDataToSend.append(`documents[${i}][documentType]`, doc.documentType || '');
-        if (doc.documentFile && typeof doc.documentFile === 'object') {
-          // New file upload
-          formDataToSend.append(`documents[${i}][documentFile]`, doc.documentFile);
-        } else if (doc.documentFile && typeof doc.documentFile === 'string') {
-          // Existing file URL
-          formDataToSend.append(`documents[${i}][documentFile]`, doc.documentFile);
+      // Step 1: Upload individual files first and get their URLs
+      if (passportFile && typeof passportFile === 'object') {
+        const passportFormData = new FormData();
+        passportFormData.append('file', passportFile);
+        
+        const passportResponse = await axios.post(
+          'https://abroad-backend-gray.vercel.app/upload/upload',
+          passportFormData,
+          { headers: { 'Content-Type': 'multipart/form-data' } }
+        );
+        
+        if (passportResponse.data.success) {
+          updatedFormData.passportFile = {
+            fileId: passportResponse.data.fileId,
+            documentFile: passportResponse.data.fileUrl
+          };
         }
       }
 
+      if (offerLetterFile && typeof offerLetterFile === 'object') {
+        const offerFormData = new FormData();
+        offerFormData.append('file', offerLetterFile);
+        
+        const offerResponse = await axios.post(
+          'https://abroad-backend-gray.vercel.app/upload/upload',
+          offerFormData,
+          { headers: { 'Content-Type': 'multipart/form-data' } }
+        );
+        
+        if (offerResponse.data.success) {
+          updatedFormData.offerLetterFile = {
+            fileId: offerResponse.data.fileId,
+            documentFile: offerResponse.data.fileUrl
+          };
+        }
+      }
+
+      if (ttCopyFile && typeof ttCopyFile === 'object') {
+        const ttFormData = new FormData();
+        ttFormData.append('file', ttCopyFile);
+        
+        const ttResponse = await axios.post(
+          'https://abroad-backend-gray.vercel.app/upload/upload',
+          ttFormData,
+          { headers: { 'Content-Type': 'multipart/form-data' } }
+        );
+        
+        if (ttResponse.data.success) {
+          updatedFormData.ttCopyFile = {
+            fileId: ttResponse.data.fileId,
+            documentFile: ttResponse.data.fileUrl
+          };
+        }
+      }
+
+      if (commissionPaymentProof && typeof commissionPaymentProof === 'object') {
+        const proofFormData = new FormData();
+        proofFormData.append('file', commissionPaymentProof);
+        
+        const proofResponse = await axios.post(
+          'https://abroad-backend-gray.vercel.app/upload/upload',
+          proofFormData,
+          { headers: { 'Content-Type': 'multipart/form-data' } }
+        );
+        
+        if (proofResponse.data.success) {
+          updatedFormData.commissionPaymentProof = {
+            fileId: proofResponse.data.fileId,
+            documentFile: proofResponse.data.fileUrl
+          };
+        }
+      }
+
+      // Step 2: Upload document files and prepare documents array
+      const updatedDocuments = [];
+      for (let i = 0; i < documents.length; i++) {
+        const doc = documents[i];
+        let documentData = {
+          documentOf: doc.documentOf,
+          documentType: doc.documentType,
+          fileId: doc.fileId || '',
+          documentFile: doc.documentFile
+        };
+
+        // If there's a new file to upload
+        if (doc.documentFile && typeof doc.documentFile === 'object') {
+          const docFormData = new FormData();
+          docFormData.append('file', doc.documentFile);
+          
+          const docResponse = await axios.post(
+            'https://abroad-backend-gray.vercel.app/upload/upload',
+            docFormData,
+            { headers: { 'Content-Type': 'multipart/form-data' } }
+          );
+          
+          if (docResponse.data.success) {
+            documentData.fileId = docResponse.data.fileId;
+            documentData.documentFile = docResponse.data.fileUrl;
+          }
+        }
+        
+        updatedDocuments.push(documentData);
+      }
+      
+      updatedFormData.documents = updatedDocuments;
+
+      // Clean up empty ObjectId fields before sending to backend
+      const cleanedFormData = { ...updatedFormData };
+      
+      // Remove empty string ObjectId fields to prevent CastError
+      if (cleanedFormData.studentRef === '' || cleanedFormData.studentRef === null) {
+        delete cleanedFormData.studentRef;
+      }
+      if (cleanedFormData.agentRef === '' || cleanedFormData.agentRef === null) {
+        delete cleanedFormData.agentRef;
+      }
+      
+      // Remove empty string fields to avoid overwriting existing data
+      Object.keys(cleanedFormData).forEach(key => {
+        if (cleanedFormData[key] === '' || cleanedFormData[key] === null || cleanedFormData[key] === undefined) {
+          delete cleanedFormData[key];
+        }
+      });
+
+      console.log('Sending cleaned data to backend:', cleanedFormData);
+
+      // Step 3: Send the form data with file URLs to backend
       const response = await axios.put(
         `https://abroad-backend-gray.vercel.app/auth/updateForexForm/${id}`,
-        formDataToSend,
+        cleanedFormData,
         {
-          headers: { 'Content-Type': 'multipart/form-data' },
+          headers: { 'Content-Type': 'application/json' },
         }
       );
       
       if (response.data.success) {
-        setFormData({ ...editableData, documents, commissionPaymentDate });
+        setFormData(response.data.data);
         setIsEditing(false);
         toast({
           title: 'Success',
@@ -402,6 +494,18 @@ function ForexView() {
                   onChange={handleChange}
                   h="50px"
                   w="full"
+                />
+              </FormControl>
+
+              {/* Student Name */}
+              <FormControl isRequired>
+                <FormLabel>Student Name</FormLabel>
+                <Input
+                  name="studentName"
+                  value={editableData.studentName || formData.studentName || ''}
+                  onChange={handleChange}
+                  h="50px"
+                  placeholder="Enter student name"
                 />
               </FormControl>
 

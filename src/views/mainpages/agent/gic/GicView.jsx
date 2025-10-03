@@ -13,6 +13,11 @@ import {
   Link as MuiLink,
   IconButton,
   Chip,
+  FormControl,
+  InputLabel,
+  Select,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import {
   FileText as FileTextIcon,
@@ -25,6 +30,8 @@ import {
   Save as SaveIcon,
   X as CancelIcon,
   ExternalLink as ExternalLinkIcon,
+  Upload as UploadIcon,
+  Trash2 as Trash2Icon,
 } from 'react-feather';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
@@ -81,7 +88,15 @@ function GicView() {
   const [editableData, setEditableData] = useState({});
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [saveLoading, setSaveLoading] = useState(false);
   const { colorMode } = useColorMode();
+  
+  // Document management states
+  const [documents, setDocuments] = useState([]);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  
+  // Document type options to match GicForm
+  const documentTypeOptions = ['aadhar', 'pan', 'ol', 'passport'];
   
   // Create MUI theme based on Chakra color mode
   const theme = createTheme({
@@ -138,23 +153,99 @@ function GicView() {
           const formData1 = response.data.gicForms.find(
             (form) => form._id === id,
           );
-          setFormData(formatGICData(formData1));
+          
+          if (formData1) {
+            setFormData(formatGICData(formData1));
+            setEditableData({
+              type: formData1?.type || '',
+              Agents: formData1?.agentRef?._id || '',
+              passportNo: formData1?.studentPassportNo || '',
+              studentRef: formData1?.studentRef?.name || formData1?.studentName || '',
+              email: formData1?.studentEmail || '',
+              phoneNo: formData1?.studentPhoneNo || '',
+              bankVendor: formData1?.bankVendor || '',
+              accOpeningDate: formData1?.accOpeningDate || '',
+              accOpeningMonth: formData1?.accOpeningMonth || '',
+              accFundingMonth: formData1?.fundingMonth || '',
+              commission: formData1?.commissionAmt || '',
+              tds: formData1?.tds || '',
+              netPayable: formData1?.netPayable || '',
+              commissionStatus: formData1?.commissionStatus || 'Not Received',
+            });
+            
+            // Initialize documents with proper null checks
+            setDocuments(formData1?.studentDocuments && typeof formData1.studentDocuments === 'object' ? 
+              Object.entries(formData1.studentDocuments).map(([type, data]) => ({
+                documentType: type,
+                documentFile: data?.documentFile || '',
+                fileId: data?.fileId || ''
+              })) : []
+            );
+          } else {
+            // Handle case where GIC form is not found
+            console.error('GIC form not found with ID:', id);
+            setFormData({});
+            setEditableData({
+              type: '',
+              Agents: '',
+              passportNo: '',
+              studentRef: '',
+              email: '',
+              phoneNo: '',
+              bankVendor: '',
+              accOpeningDate: '',
+              accOpeningMonth: '',
+              accFundingMonth: '',
+              commission: '',
+              tds: '',
+              netPayable: '',
+              commissionStatus: 'Not Received',
+            });
+            setDocuments([]);
+          }
+        } else {
+          // Handle API error response
+          console.error('API returned success: false');
+          setFormData({});
           setEditableData({
-            studentEmail: formData1?.studentEmail,
-            studentPhoneNo: formData1?.studentPhoneNo,
-            studentPassportNo: formData1?.studentPassportNo,
-            accOpeningDate: formData1?.accOpeningDate,
-            bankVendor: formData1?.bankVendor,
-            accOpeningMonth: formData1?.accOpeningMonth,
-            fundingMonth: formData1?.fundingMonth,
-            commissionAmt: formData1?.commissionAmt,
-            tds: formData1?.tds,
-            netPayable: formData1?.netPayable,
-            commissionStatus: formData1?.commissionStatus || 'Not Received',
+            type: '',
+            Agents: '',
+            passportNo: '',
+            studentRef: '',
+            email: '',
+            phoneNo: '',
+            bankVendor: '',
+            accOpeningDate: '',
+            accOpeningMonth: '',
+            accFundingMonth: '',
+            commission: '',
+            tds: '',
+            netPayable: '',
+            commissionStatus: 'Not Received',
           });
+          setDocuments([]);
         }
       } catch (error) {
         console.error('Error fetching data:', error);
+        // Set safe default values to prevent null reference errors
+        setFormData({});
+        setEditableData({
+          type: '',
+          Agents: '',
+          passportNo: '',
+          studentRef: '',
+          email: '',
+          phoneNo: '',
+          bankVendor: '',
+          accOpeningDate: '',
+          accOpeningMonth: '',
+          accFundingMonth: '',
+          commission: '',
+          tds: '',
+          netPayable: '',
+          commissionStatus: 'Not Received',
+        });
+        setDocuments([]);
       } finally {
         setLoading(false);
       }
@@ -167,23 +258,159 @@ function GicView() {
     setEditableData((prev) => ({ ...prev, [field]: value }));
   };
 
+  // Document management functions
+  const addDocument = () => {
+    if (documents.length < 4) {
+      setDocuments([
+        ...documents,
+        { documentType: '', documentFile: null, fileId: '' }
+      ]);
+    }
+  };
+
+  const removeDocument = (index) => {
+    const updatedDocuments = documents.filter((_, i) => i !== index);
+    setDocuments(updatedDocuments);
+  };
+
+  const handleDocumentChange = (index, name, value) => {
+    const updatedDocuments = documents.map((doc, i) =>
+      i === index ? { ...doc, [name]: value } : doc
+    );
+    setDocuments(updatedDocuments);
+  };
+
   const handleSave = async () => {
+    setSaveLoading(true);
     try {
+      // Handle document uploads if any new files are selected
+      const studentDocuments = {};
+      const filesToUpload = [];
+      const types = [];
+      
+      for (let i = 0; i < documents.length; i++) {
+        const doc = documents[i];
+        if (doc.documentType) {
+          if (doc.documentFile && typeof doc.documentFile === 'object') {
+            // New file to upload
+            filesToUpload.push(doc.documentFile);
+            types.push(doc.documentType);
+          } else if (doc.documentFile && typeof doc.documentFile === 'string') {
+            // Existing file URL
+            studentDocuments[doc.documentType] = {
+              fileId: doc.fileId || '',
+              documentFile: doc.documentFile
+            };
+          }
+        }
+      }
+      
+      // Upload new files if any
+      if (filesToUpload.length > 0) {
+        try {
+          const formDataForUpload = new FormData();
+          filesToUpload.forEach((file, index) => {
+            formDataForUpload.append('files', file);
+          });
+          
+          const uploadResponse = await axios.post(
+            'https://abroad-backend-gray.vercel.app/upload/upload-multiple',
+            formDataForUpload,
+            { headers: { 'Content-Type': 'multipart/form-data' } }
+          );
+          
+          if (uploadResponse.data.success) {
+            const uploads = uploadResponse.data.uploads;
+            for (let i = 0; i < types.length; i++) {
+              studentDocuments[types[i]] = {
+                fileId: uploads[i].fileId,
+                documentFile: uploads[i].viewLink
+              };
+            }
+          }
+        } catch (uploadError) {
+          console.error('Error uploading files:', uploadError);
+          setSnackbar({
+            open: true,
+            message: 'Error uploading files. Please try again.',
+            severity: 'error'
+          });
+          setSaveLoading(false);
+          return;
+        }
+      }
+      
+      // Map the form data to match the backend API exactly as provided
+      const apiData = {
+        studentPhoneNo: editableData.phoneNo,
+        studentPassportNo: editableData.passportNo,
+        bankVendor: editableData.bankVendor,
+        fundingMonth: editableData.accFundingMonth,
+        commissionAmt: editableData.commission,
+        tds: editableData.tds,
+        netPayable: editableData.netPayable,
+        commissionStatus: editableData.commissionStatus,
+      };
+      
+      // Add studentDocuments if any documents exist
+      if (Object.keys(studentDocuments).length > 0) {
+        apiData.studentDocuments = studentDocuments;
+      }
+      
+      // Remove empty fields
+      Object.keys(apiData).forEach(key => {
+        if (apiData[key] === '' || apiData[key] === null || apiData[key] === undefined) {
+          delete apiData[key];
+        }
+      });
+
       const response = await axios.put(
         `https://abroad-backend-gray.vercel.app/auth/updateGicForm/${id}`,
-        editableData,
+        apiData,
+        {
+          headers: { 'Content-Type': 'application/json' },
+        }
       );
+      
       if (response.data.success) {
-        setFormData((prev) => ({ ...prev, ...editableData }));
+        // Use the updated data from the response
+        const updatedGIC = response.data.updatedGIC || response.data.gicForm || response.data.data;
+        if (updatedGIC) {
+          const formattedData = formatGICData(updatedGIC);
+          setFormData(formattedData);
+          
+          // Update documents state with the new data
+          setDocuments(updatedGIC?.studentDocuments && typeof updatedGIC.studentDocuments === 'object' ? 
+            Object.entries(updatedGIC.studentDocuments).map(([type, data]) => ({
+              documentType: type,
+              documentFile: data?.documentFile || '',
+              fileId: data?.fileId || ''
+            })) : []
+          );
+        }
+        
         setIsEditing(false);
+        setSnackbar({
+          open: true,
+          message: 'GIC form updated successfully!',
+          severity: 'success'
+        });
       }
     } catch (error) {
       console.error('Error updating GIC form:', error);
+      setSnackbar({
+        open: true,
+        message: 'Error updating GIC form. Please try again.',
+        severity: 'error'
+      });
     }
+    setSaveLoading(false);
   };
 
   // List of fields that can be edited
   const editableFields = [
+    'type',
+    'studentName',
     'studentEmail',
     'studentPhoneNo',
     'studentPassportNo',
@@ -191,6 +418,7 @@ function GicView() {
     'bankVendor',
     'accOpeningMonth',
     'fundingMonth',
+    'amount',
     'commissionAmt',
     'tds',
     'netPayable',
@@ -228,6 +456,7 @@ function GicView() {
                 <Button
                   variant="contained"
                   onClick={handleSave}
+                  disabled={saveLoading}
                   startIcon={<SaveIcon size={18} />}
                   sx={{ 
                     bgcolor: 'white', 
@@ -238,7 +467,7 @@ function GicView() {
                     } 
                   }}
                 >
-                  Save
+                  {saveLoading ? 'Saving...' : 'Save'}
                 </Button>
                 <Button
                   variant="outlined"
@@ -279,226 +508,422 @@ function GicView() {
               <Box display="flex" justifyContent="center" p={6}>
                 <CircularProgress />
               </Box>
-            ) : (
-              <Grid container spacing={3}>
-                {/* Main student information */}
-                {Object.entries(formData).map(([label, value], index) => {
-                  if (
-                    label === '__v' ||
-                    label === '_id' ||
-                    label === 'studentDocuments'
-                  ) {
-                    return null;
-                  }
-
-                  const isEditable = editableFields.includes(label);
-                  const IconComponent = fieldIcons[label] || FileTextIcon;
-                  
-                  return (
-                    <Grid item xs={12} md={label === 'commissionStatus' ? 12 : 6} key={index}>
-                      <Card variant="outlined" sx={{ height: '100%' }}>
-                        <CardContent>
-                          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                            <Box 
-                              sx={{ 
-                                display: 'flex', 
-                                alignItems: 'center', 
-                                justifyContent: 'center', 
-                                mr: 1.5,
-                                width: 32,
-                                height: 32,
-                                borderRadius: '50%',
-                                bgcolor: 'primary.main',
-                                color: 'white',
-                              }}
-                            >
-                              {getIcon(label)}
-                            </Box>
-                            <Typography variant="subtitle2" color="text.secondary">
-                              {formatFieldLabel(label)}
-                            </Typography>
-                          </Box>
-                          
-                          {isEditing && isEditable ? (
-                            label === 'commissionStatus' ? (
-                              <TextField
-                                select
-                                fullWidth
-                                value={editableData[label] || ''}
-                                onChange={(e) => handleChange(label, e.target.value)}
-                                variant="outlined"
-                                size="small"
-                              >
-                                <MenuItem value="Not Received">Not Received</MenuItem>
-                                <MenuItem value="Paid">Paid</MenuItem>
-                                <MenuItem value="Under Processing">Under Processing</MenuItem>
-                              </TextField>
-                            ) : label === 'bankVendor' ? (
-                              <TextField
-                                select
-                                fullWidth
-                                value={editableData[label] || ''}
-                                onChange={(e) => handleChange(label, e.target.value)}
-                                variant="outlined"
-                                size="small"
-                              >
-                                <MenuItem value="ICICI">ICICI</MenuItem>
-                                <MenuItem value="RBC">RBC</MenuItem>
-                                <MenuItem value="CIBC">CIBC</MenuItem>
-                                <MenuItem value="BOM">BOM</MenuItem>
-                                <MenuItem value="Expatrio">Expatrio</MenuItem>
-                                <MenuItem value="Fintiba">Fintiba</MenuItem>
-                                <MenuItem value="TD">TD</MenuItem>
-                              </TextField>
-                            ) : label === 'fundingMonth' || label === 'accOpeningMonth' ? (
-                              <TextField
-                                select
-                                fullWidth
-                                value={editableData[label] || ''}
-                                onChange={(e) => handleChange(label, e.target.value)}
-                                variant="outlined"
-                                size="small"
-                              >
-                                <MenuItem value="January">January</MenuItem>
-                                <MenuItem value="February">February</MenuItem>
-                                <MenuItem value="March">March</MenuItem>
-                                <MenuItem value="April">April</MenuItem>
-                                <MenuItem value="May">May</MenuItem>
-                                <MenuItem value="June">June</MenuItem>
-                                <MenuItem value="July">July</MenuItem>
-                                <MenuItem value="August">August</MenuItem>
-                                <MenuItem value="September">September</MenuItem>
-                                <MenuItem value="October">October</MenuItem>
-                                <MenuItem value="November">November</MenuItem>
-                                <MenuItem value="December">December</MenuItem>
-                                {label === 'fundingMonth' && <MenuItem value="Not Funded Yet">Not Funded Yet</MenuItem>}
-                              </TextField>
-                            ) : label === 'accOpeningDate' ? (
-                              <TextField
-                                type="date"
-                                fullWidth
-                                value={editableData[label] ? editableData[label].split('T')[0] : ''}
-                                onChange={(e) => handleChange(label, e.target.value)}
-                                variant="outlined"
-                                size="small"
-                                InputLabelProps={{ shrink: true }}
-                              />
-                            ) : label === 'studentEmail' ? (
-                              <TextField
-                                type="email"
-                                fullWidth
-                                value={editableData[label] || ''}
-                                onChange={(e) => handleChange(label, e.target.value)}
-                                variant="outlined"
-                                size="small"
-                                placeholder="Enter email address"
-                              />
-                            ) : label === 'studentPhoneNo' ? (
-                              <TextField
-                                type="tel"
-                                fullWidth
-                                value={editableData[label] || ''}
-                                onChange={(e) => handleChange(label, e.target.value)}
-                                variant="outlined"
-                                size="small"
-                                placeholder="Enter phone number"
-                              />
-                            ) : ['commissionAmt', 'tds', 'netPayable'].includes(label) ? (
-                              <TextField
-                                type="number"
-                                fullWidth
-                                value={editableData[label] || ''}
-                                onChange={(e) => handleChange(label, e.target.value)}
-                                variant="outlined"
-                                size="small"
-                                inputProps={{ min: 0, step: 0.01 }}
-                              />
-                            ) : (
-                              <TextField
-                                fullWidth
-                                value={editableData[label] || ''}
-                                onChange={(e) => handleChange(label, e.target.value)}
-                                variant="outlined"
-                                size="small"
-                              />
-                            )
-                          ) : (
-                            <Typography variant="h6" fontWeight="medium" sx={{ mt: 1 }}>
-                              {typeof value === 'object' ? JSON.stringify(value) : 
-                                label === 'commissionStatus' ? (
-                                  <Chip 
-                                    label={value} 
-                                    color={
-                                      value === 'Paid' ? 'success' : 
-                                      value === 'Under Processing' ? 'warning' : 'default'
-                                    }
-                                    variant="outlined"
-                                  />
-                                ) : value
-                              }
-                            </Typography>
-                          )}
-                        </CardContent>
-                      </Card>
-                    </Grid>
-                  );
-                })}
-                
-                {/* Document section */}
-                {formData.studentDocuments && (
-                  <Grid item xs={12}>
-                    <Typography variant="h6" fontWeight="600" sx={{ mt: 2, mb: 3 }}>
-                      Student Documents
-                    </Typography>
-                    <Grid container spacing={2}>
-                      {Object.entries(formData.studentDocuments).map(([docLabel, doc]) => (
-                        <Grid item xs={12} sm={6} md={3} key={docLabel}>
-                          <Card 
-                            variant="outlined" 
-                            sx={{ 
-                              height: '100%',
-                              transition: 'transform 0.2s, box-shadow 0.2s',
-                              '&:hover': {
-                                transform: 'translateY(-4px)',
-                                boxShadow: '0 6px 12px rgba(0,0,0,0.1)',
-                              }
-                            }}
-                          >
+            ) : formData && Object.keys(formData).length > 0 ? (
+              <>
+                {!isEditing ? (
+                  // View Mode - Display all data
+                  <Grid container spacing={3}>
+                    {[
+                      { key: 'type', label: 'Service Type' },
+                      { key: 'AgentName', label: 'Agent Name' },
+                      { key: 'studentName', label: 'Student Name' },
+                      { key: 'studentPassportNo', label: 'Passport No' },
+                      { key: 'studentEmail', label: 'Email' },
+                      { key: 'studentPhoneNo', label: 'Phone No' },
+                      { key: 'bankVendor', label: 'Bank Vendor' },
+                      { key: 'accOpeningDate', label: 'Account Opening Date' },
+                      { key: 'accOpeningMonth', label: 'Account Opening Month' },
+                      { key: 'fundingMonth', label: 'Funding Month' },
+                      { key: 'commissionAmt', label: 'Commission Amount' },
+                      { key: 'tds', label: 'TDS' },
+                      { key: 'netPayable', label: 'Net Payable' },
+                      { key: 'commissionStatus', label: 'Commission Status' },
+                    ].map(({ key, label }) => (
+                      formData[key] && (
+                        <Grid item xs={12} md={6} key={key}>
+                          <Card variant="outlined" sx={{ height: '100%' }}>
                             <CardContent>
-                              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                                <FileTextIcon size={18} style={{ marginRight: 8 }} color="#3B82F6" />
-                                <Typography variant="subtitle2" color="text.secondary">
-                                  {docLabel === 'ol' ? 'OFFER LETTER' : docLabel.toUpperCase()}
+                              <Box display="flex" alignItems="center" mb={2}>
+                                {getIcon(key)}
+                                <Typography 
+                                  variant="body2" 
+                                  color="text.secondary" 
+                                  fontWeight={500}
+                                  ml={1}
+                                >
+                                  {label}
                                 </Typography>
                               </Box>
+                              <Typography 
+                                variant="h6" 
+                                component="div" 
+                                fontWeight={600}
+                              >
+                                {key === 'accOpeningDate' && formData[key]
+                                  ? new Date(formData[key]).toLocaleDateString('en-GB')
+                                  : formData[key] || 'Not Set'}
+                              </Typography>
+                            </CardContent>
+                          </Card>
+                        </Grid>
+                      )
+                    ))}
+                  </Grid>
+                ) : (
+                  // Edit Mode - Complete form matching GicForm.jsx
+                  <Grid container spacing={3}>
+                    {/* Service Type */}
+                    <Grid item xs={12} md={6}>
+                      <FormControl fullWidth>
+                        <InputLabel>Type Of Service</InputLabel>
+                        <Select
+                          value={editableData.type || ''}
+                          onChange={(e) => handleChange('type', e.target.value)}
+                          label="Type Of Service"
+                        >
+                          <MenuItem value="">Select Type of Service</MenuItem>
+                          <MenuItem value="GIC">GIC</MenuItem>
+                          <MenuItem value="BLOCKED ACCOUNT">BLOCKED ACCOUNT</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+
+                    {/* Agent Name - Display only */}
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        fullWidth
+                        label="Agent Name"
+                        value={formData.AgentName || ''}
+                        InputProps={{ readOnly: true }}
+                        variant="filled"
+                      />
+                    </Grid>
+
+                    {/* Passport No */}
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        fullWidth
+                        required
+                        label="Passport No."
+                        value={editableData.passportNo || ''}
+                        onChange={(e) => handleChange('passportNo', e.target.value)}
+                        placeholder="Enter passport number"
+                      />
+                    </Grid>
+
+                    {/* Student Name */}
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        fullWidth
+                        required
+                        label="Student Name"
+                        value={editableData.studentRef || ''}
+                        onChange={(e) => handleChange('studentRef', e.target.value)}
+                        placeholder="Enter student name"
+                      />
+                    </Grid>
+
+                    {/* Email */}
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        fullWidth
+                        required
+                        type="email"
+                        label="Email"
+                        value={editableData.email || ''}
+                        onChange={(e) => handleChange('email', e.target.value)}
+                        placeholder="Enter email address"
+                      />
+                    </Grid>
+
+                    {/* Phone No */}
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        fullWidth
+                        required
+                        type="tel"
+                        label="Phone No."
+                        value={editableData.phoneNo || ''}
+                        onChange={(e) => handleChange('phoneNo', e.target.value)}
+                        placeholder="Enter phone number"
+                      />
+                    </Grid>
+
+                    {/* Bank Vendor */}
+                    <Grid item xs={12} md={6}>
+                      <FormControl fullWidth required>
+                        <InputLabel>Bank Vendor</InputLabel>
+                        <Select
+                          value={editableData.bankVendor || ''}
+                          onChange={(e) => handleChange('bankVendor', e.target.value)}
+                          label="Bank Vendor"
+                        >
+                          <MenuItem value="">Select Bank Vendor</MenuItem>
+                          <MenuItem value="ICICI">ICICI</MenuItem>
+                          <MenuItem value="RBC">RBC</MenuItem>
+                          <MenuItem value="CIBC">CIBC</MenuItem>
+                          <MenuItem value="BOM">BOM</MenuItem>
+                          <MenuItem value="Expatrio">Expatrio</MenuItem>
+                          <MenuItem value="Fintiba">Fintiba</MenuItem>
+                          <MenuItem value="TD">TD</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+
+                    {/* Account Opening Date */}
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        fullWidth
+                        required
+                        type="date"
+                        label="Account Opening Date"
+                        value={editableData.accOpeningDate ? editableData.accOpeningDate.split('T')[0] : ''}
+                        onChange={(e) => handleChange('accOpeningDate', e.target.value)}
+                        InputLabelProps={{ shrink: true }}
+                      />
+                    </Grid>
+
+                    {/* Account Opening Month */}
+                    <Grid item xs={12} md={6}>
+                      <FormControl fullWidth>
+                        <InputLabel>Account Opening Month</InputLabel>
+                        <Select
+                          value={editableData.accOpeningMonth || ''}
+                          onChange={(e) => handleChange('accOpeningMonth', e.target.value)}
+                          label="Account Opening Month"
+                        >
+                          <MenuItem value="">Select Month</MenuItem>
+                          {Array.from({ length: 12 }, (_, i) => {
+                            const month = new Date(0, i).toLocaleString('default', { month: 'long' });
+                            return (
+                              <MenuItem key={month} value={month}>
+                                {month}
+                              </MenuItem>
+                            );
+                          })}
+                        </Select>
+                      </FormControl>
+                    </Grid>
+
+                    {/* Account Funding Month */}
+                    <Grid item xs={12} md={6}>
+                      <FormControl fullWidth required>
+                        <InputLabel>Account Funding Month</InputLabel>
+                        <Select
+                          value={editableData.accFundingMonth || ''}
+                          onChange={(e) => handleChange('accFundingMonth', e.target.value)}
+                          label="Account Funding Month"
+                        >
+                          <MenuItem value="">Select Month</MenuItem>
+                          {Array.from({ length: 12 }, (_, i) => {
+                            const month = new Date(0, i).toLocaleString('default', { month: 'long' });
+                            return (
+                              <MenuItem key={month} value={month}>
+                                {month}
+                              </MenuItem>
+                            );
+                          })}
+                          <MenuItem value="Not Funded Yet">Not Funded Yet</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+
+                    {/* Commission */}
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        fullWidth
+                        type="number"
+                        label="Commission"
+                        value={editableData.commission || ''}
+                        onChange={(e) => handleChange('commission', e.target.value)}
+                        placeholder="Enter commission amount"
+                        inputProps={{ min: 0 }}
+                      />
+                    </Grid>
+
+                    {/* TDS */}
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        fullWidth
+                        type="number"
+                        label="TDS"
+                        value={editableData.tds || ''}
+                        onChange={(e) => handleChange('tds', e.target.value)}
+                        placeholder="Enter TDS amount"
+                        inputProps={{ min: 0 }}
+                      />
+                    </Grid>
+
+                    {/* Net Payable */}
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        fullWidth
+                        type="number"
+                        label="Net Payable"
+                        value={editableData.netPayable || ''}
+                        onChange={(e) => handleChange('netPayable', e.target.value)}
+                        placeholder="Enter net payable amount"
+                        inputProps={{ min: 0 }}
+                      />
+                    </Grid>
+
+                    {/* Commission Status */}
+                    <Grid item xs={12} md={6}>
+                      <FormControl fullWidth>
+                        <InputLabel>Commission Status</InputLabel>
+                        <Select
+                          value={editableData.commissionStatus || ''}
+                          onChange={(e) => handleChange('commissionStatus', e.target.value)}
+                          label="Commission Status"
+                        >
+                          <MenuItem value="">Select Status</MenuItem>
+                          <MenuItem value="Not Received">Not Received</MenuItem>
+                          <MenuItem value="Paid">Paid</MenuItem>
+                          <MenuItem value="Under Processing">Under Processing</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                  </Grid>
+                )}
+
+                {/* Documents Section */}
+                <Box mt={4}>
+                  <Typography variant="h6" fontWeight="600" mb={3}>
+                    Documents
+                  </Typography>
+                  
+                  {/* Add Document Button (Edit Mode Only) */}
+                  {isEditing && (
+                    <Button
+                      variant="contained"
+                      onClick={addDocument}
+                      disabled={documents.length >= 4}
+                      startIcon={<UploadIcon size={18} />}
+                      sx={{ mb: 3 }}
+                    >
+                      Add Document ({documents.length}/4)
+                    </Button>
+                  )}
+
+                  {/* Documents List */}
+                  {documents.map((doc, index) => (
+                    <Card key={index} variant="outlined" sx={{ mb: 2 }}>
+                      <CardContent>
+                        {isEditing ? (
+                          <Grid container spacing={2} alignItems="center">
+                            {/* Document Type */}
+                            <Grid item xs={12} sm={4}>
+                              <FormControl fullWidth required>
+                                <InputLabel>Document Type</InputLabel>
+                                <Select
+                                  value={doc.documentType || ''}
+                                  onChange={(e) => handleDocumentChange(index, 'documentType', e.target.value)}
+                                  label="Document Type"
+                                >
+                                  <MenuItem value="">Select Document Type</MenuItem>
+                                  {documentTypeOptions.map((type) => (
+                                    <MenuItem key={type} value={type}>
+                                      {type === 'ol' ? 'Offer Letter' : type.toUpperCase()}
+                                    </MenuItem>
+                                  ))}
+                                </Select>
+                              </FormControl>
+                            </Grid>
+
+                            {/* File Upload */}
+                            <Grid item xs={12} sm={6}>
+                              <Button
+                                variant="outlined"
+                                component="label"
+                                startIcon={<UploadIcon size={18} />}
+                                fullWidth
+                              >
+                                {doc.documentFile && typeof doc.documentFile === 'object'
+                                  ? doc.documentFile.name
+                                  : doc.documentFile && typeof doc.documentFile === 'string'
+                                  ? 'Replace File'
+                                  : 'Choose File'}
+                                <input
+                                  type="file"
+                                  hidden
+                                  accept=".pdf,.jpg,.jpeg,.png"
+                                  onChange={(e) => handleDocumentChange(index, 'documentFile', e.target.files[0])}
+                                />
+                              </Button>
+                            </Grid>
+
+                            {/* Remove Button */}
+                            <Grid item xs={12} sm={2}>
+                              <Button
+                                variant="outlined"
+                                color="error"
+                                onClick={() => removeDocument(index)}
+                                startIcon={<Trash2Icon size={18} />}
+                                fullWidth
+                              >
+                                Remove
+                              </Button>
+                            </Grid>
+                          </Grid>
+                        ) : (
+                          // View Mode
+                          <Grid container spacing={2}>
+                            <Grid item xs={12} sm={6}>
+                              <Typography variant="body2" color="text.secondary">
+                                Document Type
+                              </Typography>
+                              <Typography variant="body1" fontWeight={500}>
+                                {doc.documentType === 'ol' ? 'Offer Letter' : doc.documentType?.toUpperCase() || 'N/A'}
+                              </Typography>
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                              <Typography variant="body2" color="text.secondary">
+                                File
+                              </Typography>
                               {doc.documentFile ? (
                                 <Button
-                                  variant="text"
                                   component="a"
                                   href={doc.documentFile}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   startIcon={<ExternalLinkIcon size={16} />}
-                                  sx={{ mt: 1 }}
+                                  sx={{ p: 0, textTransform: 'none' }}
                                 >
-                                  View Document
+                                  View File
                                 </Button>
                               ) : (
-                                <Typography variant="body2" color="text.secondary">
-                                  Not Provided
-                                </Typography>
+                                <Typography color="text.secondary">No file</Typography>
                               )}
-                            </CardContent>
-                          </Card>
-                        </Grid>
-                      ))}
-                    </Grid>
-                  </Grid>
-                )}
-              </Grid>
+                            </Grid>
+                          </Grid>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+
+                  {documents.length === 0 && (
+                    <Card variant="outlined">
+                      <CardContent>
+                        <Typography color="text.secondary" textAlign="center">
+                          No documents uploaded yet.
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  )}
+                </Box>
+              </>
+            ) : (
+              <Box display="flex" justifyContent="center" p={6}>
+                <Typography>No data available</Typography>
+              </Box>
             )}
           </CardContent>
         </Card>
+
+        {/* Snackbar for notifications */}
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={3000}
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+        >
+          <Alert 
+            onClose={() => setSnackbar({ ...snackbar, open: false })} 
+            severity={snackbar.severity}
+            sx={{ width: '100%' }}
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
       </Box>
     </ThemeProvider>
   );

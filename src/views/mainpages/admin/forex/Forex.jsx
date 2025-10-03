@@ -25,6 +25,7 @@ import {
   TabPanel,
   IconButton,
   useToast,
+  Spinner,
 } from '@chakra-ui/react';
 import { ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons';
 import DataTable from 'components/DataTable';
@@ -105,45 +106,130 @@ const Forex = () => {
     dateFrom: '',
     dateTo: '',
   });
+  
+  const [aeCommissionLoading, setAeCommissionLoading] = useState(false);
+
+  // Pagination states
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10, // Default page size
+    total: 0,
+    pages: 0
+  });
+  
+  // Loading state
+  const [loading, setLoading] = useState(false);
+
+  // Fetch data with pagination
+  const fetchData = async (page = pagination.page, limit = pagination.limit) => {
+    setLoading(true);
+    try {
+      // For better performance, fetch all records at once if limit is high
+      const requestLimit = limit > 100 ? 1000 : limit; // Set high limit for "show all" scenarios
+      
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: requestLimit.toString(),
+        sortField: 'date',
+        sortOrder: 'desc'
+      });
+
+      const response = await axios.get(
+        `https://abroad-backend-gray.vercel.app/auth/viewAllForexForms?${params}`,
+      );
+      
+      if (response.data && response.data.forexForms && response.data.forexForms.length > 0) {
+        const forexForms = response.data.forexForms.map((item) => ({
+          id: item._id,
+          agentRef: item.agentRef?.name.toUpperCase() || 'N/A',
+          studentRef: item?.studentName || 'N/A',
+          date: new Date(item.date).toLocaleDateString('en-US'),
+          country: item.country || 'N/A',
+          currencyBooked: item.currencyBooked || 'N/A',
+          quotation: item.quotation || 'N/A',
+          studentPaid: item.studentPaid || 'N/A',
+          docsStatus: item.docsStatus || 'N/A',
+          ttCopyStatus: item.ttCopyStatus || 'N/A',
+          agentCommission: item.agentCommission || 0,
+          aecommission: item.aecommission || 0,
+          tds: item.tds || 0,
+          netPayable: item.netPayable || 0,
+          remarks: item.remarks || 'N/A',
+          commissionStatus: item.commissionStatus || 'N/A',
+        }));
+        
+        setRows(forexForms);
+        setData(response.data.forexForms);
+        
+        console.log('Admin Forex - Fetched data:', {
+          totalRecords: response.data.forexForms.length,
+          formattedRows: forexForms.length,
+          pagination: response.data.pagination
+        });
+        
+        // Update pagination info
+        if (response.data.pagination) {
+          setPagination(prev => ({
+            ...prev,
+            page: page,
+            limit: limit,
+            total: response.data.pagination.total,
+            pages: response.data.pagination.pages
+          }));
+        }
+      } else {
+        console.log('Admin Forex - No data received from backend');
+        setRows([]);
+        setData([]);
+        setPagination(prev => ({
+          ...prev,
+          total: 0,
+          pages: 0
+        }));
+      }
+    } catch (error) {
+      console.error('Error fetching forex forms:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch total AE commission using dedicated API endpoint
+  const fetchTotalAeCommission = async (dateFrom = null, dateTo = null) => {
+    setAeCommissionLoading(true);
+    try {
+      const params = new URLSearchParams();
+
+      // Add date filters if provided
+      if (dateFrom) {
+        params.append('startDate', dateFrom);
+      }
+      if (dateTo) {
+        params.append('endDate', dateTo);
+      }
+
+      const response = await axios.get(
+        `https://abroad-backend-gray.vercel.app/auth/totalAeCommission?${params}`,
+      );
+      
+      if (response.data.success) {
+        setAeCommissionSummary(prev => ({ 
+          ...prev, 
+          total: response.data.totalAeCommission || 0 
+        }));
+      }
+    } catch (error) {
+      console.error('Error fetching total AE commission:', error);
+      // Fallback to 0 if API fails
+      setAeCommissionSummary(prev => ({ ...prev, total: 0 }));
+    } finally {
+      setAeCommissionLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(
-          'https://abroad-backend-gray.vercel.app/auth/viewAllForexForms',
-        );
-        if (response.data.forexForms) {
-          const forexForms = response.data.forexForms.map((item) => ({
-            id: item._id,
-            agentRef: item.agentRef?.name.toUpperCase() || 'N/A',
-            studentRef: item?.studentName || 'N/A',
-            date: new Date(item.date).toLocaleDateString('en-US'),
-            country: item.country || 'N/A',
-            currencyBooked: item.currencyBooked || 'N/A',
-            quotation: item.quotation || 'N/A',
-            studentPaid: item.studentPaid || 'N/A',
-            docsStatus: item.docsStatus || 'N/A',
-            ttCopyStatus: item.ttCopyStatus || 'N/A',
-            agentCommission: item.agentCommission || 0,
-            aecommission: item.aecommission || 0,
-            tds: item.tds || 0,
-            netPayable: item.netPayable || 0,
-            remarks: item.remarks || 'N/A',
-            commissionStatus: item.commissionStatus || 'N/A',
-          }));
-          
-          // Sort by date (latest first)
-          forexForms.sort((a, b) => new Date(b.date) - new Date(a.date));
-          
-          setRows(forexForms);
-          setData(response.data.forexForms);
-        }
-      } catch (error) {
-        console.error('Error fetching forex forms:', error);
-      }
-    };
-
     fetchData();
+    fetchTotalAeCommission(); // Fetch total AE commission on component mount
   }, []);
 
   // Extract unique values for filter dropdowns
@@ -309,42 +395,33 @@ const Forex = () => {
     XLSX.writeFile(workbook, 'ForexData.xlsx');
   };
 
-  // Calculate AE Commission summary
+  // Calculate AE Commission summary by fetching from backend
   const calculateAeCommissionSummary = () => {
-    let dataToCalculate = data;
-    
-    // Apply date filter if provided
-    if (aeCommissionSummary.dateFrom && aeCommissionSummary.dateTo) {
-      dataToCalculate = data.filter(item => {
-        const itemDate = new Date(item.date);
-        const fromDate = new Date(aeCommissionSummary.dateFrom);
-        const toDate = new Date(aeCommissionSummary.dateTo);
-        return itemDate >= fromDate && itemDate <= toDate;
-      });
-    }
-    
-    const total = dataToCalculate.reduce((sum, item) => {
-      // Clean the value: remove commas and convert to valid number
-      const cleanValue = item.aecommission 
-        ? String(item.aecommission).replace(/,/g, '').trim() 
-        : '0';
-      const numValue = parseFloat(cleanValue) || 0;
-      return sum + numValue;
-    }, 0);
-    
-    setAeCommissionSummary(prev => ({ ...prev, total }));
+    // Fetch total AE commission with date filters
+    fetchTotalAeCommission(aeCommissionSummary.dateFrom, aeCommissionSummary.dateTo);
   };
 
-  // Calculate summary when data or dates change
+  // Calculate summary when dates change
   useEffect(() => {
-    calculateAeCommissionSummary();
-  }, [data, aeCommissionSummary.dateFrom, aeCommissionSummary.dateTo]);
+    if (aeCommissionSummary.dateFrom || aeCommissionSummary.dateTo) {
+      calculateAeCommissionSummary();
+    }
+  }, [aeCommissionSummary.dateFrom, aeCommissionSummary.dateTo]);
 
   const handleAeCommissionDateChange = (field, value) => {
     setAeCommissionSummary(prev => ({
       ...prev,
       [field]: value
     }));
+  };
+
+  // Pagination handlers
+  const handlePageChange = (newPage) => {
+    fetchData(newPage, pagination.limit);
+  };
+
+  const handlePageSizeChange = (newPageSize) => {
+    fetchData(1, newPageSize);
   };
 
   const handleColumnSelection = (field) => {
@@ -436,7 +513,15 @@ const Forex = () => {
     () => allColumns.filter((col) => selectedColumns.includes(col.field)),
     [selectedColumns],
   );
-  const memoizedRows = useMemo(() => filteredData.length > 0 ? filteredData : rows, [filteredData, rows]);
+  const memoizedRows = useMemo(() => {
+    console.log('Admin Forex - Memoized rows calculation:', {
+      filteredDataLength: filteredData.length,
+      rowsLength: rows.length,
+      usingFiltered: filteredData.length > 0,
+      result: filteredData.length > 0 ? filteredData : rows
+    });
+    return filteredData.length > 0 ? filteredData : rows;
+  }, [filteredData, rows]);
 
   const getRowClassName = (params) => {
     const status = params.row.commissionStatus?.toLowerCase();
@@ -491,7 +576,11 @@ const Forex = () => {
                 AE Commission
               </Text>
               <Text fontSize="3xl" fontWeight="bold" color="gray.800">
-                ₹{aeCommissionSummary.total.toLocaleString('en-IN')}
+                {aeCommissionLoading ? (
+                  <Spinner size="sm" color="blue.500" />
+                ) : (
+                  `₹${aeCommissionSummary.total.toLocaleString('en-IN')}`
+                )}
               </Text>
               <Text fontSize="sm" color="gray.500">
                 From forex transactions
@@ -612,6 +701,15 @@ const Forex = () => {
           checkboxSelection={true}
           onSelectionChange={handleRowSelection}
           getRowClassName={getRowClassName}
+          loading={loading}
+          pagination={{
+            page: pagination.page,
+            pageSize: pagination.limit,
+            total: pagination.total,
+            pageSizeOptions: [10, 15, 25],
+            onPageChange: handlePageChange,
+            onPageSizeChange: handlePageSizeChange,
+          }}
         />
       </Box>
 

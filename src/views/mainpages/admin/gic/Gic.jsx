@@ -96,6 +96,8 @@ const Gic = () => {
     dateFrom: '',
     dateTo: '',
   });
+
+
   
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { 
@@ -115,60 +117,63 @@ const Gic = () => {
     }
   }, []);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const token = getAuthToken();
+  // Fetch all data without pagination
+  const fetchData = async () => {
+    setIsLoading(true);
+    try {
+      const token = getAuthToken();
 
-        const response = await axios.get(
-          'https://abroad-backend-gray.vercel.app/auth/viewAllGicForm',
-          {
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': token ? `Bearer ${token}` : ''
-            },
-            withCredentials: true
-          }
-        );
-        
-        if (response.data.success) {
-          setData(response.data.gicForms);
-          
-          const gicForms = response.data.gicForms.map((form, index) => ({
-            id: form._id || `row-${index}`,
-            type: form.type || 'N/A',
-            Agent: form.agentRef?.name?.toUpperCase() || 'N/A',
-            accOpeningMonth: form.accOpeningMonth || 'N/A',
-            studentName: form.studentRef?.name || 'N/A',
-            passportNo: form.studentPassportNo || 'N/A',
-            studentPhoneNo: form.studentPhoneNo || 'N/A',
-            bankVendor: form.bankVendor || 'N/A',
-            accFundingMonth: form.fundingMonth || 'N/A',
-            commissionAmt: form.commissionAmt || 0,
-            tds: form.tds || '0',
-            netPayable: form.netPayable || 0,
-            commissionStatus: form.commissionStatus || 'N/A',
-          }));
-          
-          setRows(gicForms);
+      const response = await axios.get(
+        'https://abroad-backend-gray.vercel.app/auth/viewAllGicForm',
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': token ? `Bearer ${token}` : ''
+          },
+          withCredentials: true
         }
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        toast({
-          title: 'Error fetching data',
-          description: error.message || 'Please try again later',
-          status: 'error',
-          duration: 5000,
-          isClosable: true,
-        });
-      } finally {
-        setIsLoading(false);
+      );
+        
+      if (response.data.success) {
+        setData(response.data.gicForms);
+        
+        const gicForms = response.data.gicForms.map((form, index) => ({
+          id: form._id || `row-${index}`,
+          type: form.type || 'N/A',
+          Agent: form.agentRef?.name?.toUpperCase() || 'N/A',
+          accOpeningMonth: form.accOpeningMonth || 'N/A',
+          studentName: form.studentRef?.name || 'N/A',
+          passportNo: form.studentPassportNo || 'N/A',
+          studentPhoneNo: form.studentPhoneNo || 'N/A',
+          bankVendor: form.bankVendor || 'N/A',
+          accFundingMonth: form.fundingMonth || 'N/A',
+          commissionAmt: form.commissionAmt || 0,
+          tds: form.tds || '0',
+          netPayable: form.netPayable || 0,
+          commissionStatus: form.commissionStatus || 'N/A',
+        }));
+        
+        setRows(gicForms);
       }
-    };
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      toast({
+        title: 'Error fetching data',
+        description: error.message || 'Please try again later',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchData();
-  }, [getAuthToken, toast]);
+  }, []);
+
+
 
   // Filter and sort data effect
   useEffect(() => {
@@ -400,7 +405,11 @@ const Gic = () => {
             <Skeleton height="500px" />
           </Box>
         ) : (
-          <DataTable columns={memoizedColumns} rows={memoizedRows} getRowClassName={getRowClassName} />
+          <DataTable 
+            columns={memoizedColumns} 
+            rows={memoizedRows} 
+            getRowClassName={getRowClassName}
+          />
         )}
       </Box>
 

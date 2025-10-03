@@ -93,6 +93,14 @@ const Forex = () => {
   );
   const [tabValue, setTabValue] = useState("0");
 
+  // Pagination states
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10, // Default page size
+    total: 0,
+    pages: 0
+  });
+
   // Create MUI theme based on Chakra color mode
   const theme = createTheme({
     palette: {
@@ -136,45 +144,93 @@ const Forex = () => {
     },
   });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const response = await axios.get(
-          'https://abroad-backend-gray.vercel.app/auth/viewAllForexForms',
+  // Fetch data with pagination
+  const fetchData = async (page = pagination.page, limit = pagination.limit) => {
+    if (!user || !user._id) {
+      console.log('Agent Forex - User not authenticated');
+      setLoading(false);
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        sortField: 'date',
+        sortOrder: 'desc'
+      });
+
+      const response = await axios.get(
+        `https://abroad-backend-gray.vercel.app/auth/viewAllForexForms?${params}`,
+      );
+      
+      if (response.data && response.data.forexForms && response.data.forexForms.length > 0) {
+        const userForexForms = response.data.forexForms.filter(
+          (form) => form.agentRef._id === user._id,
         );
-        if (response.data.forexForms) {
-          const userForexForms = response.data.forexForms.filter(
-            (form) => form.agentRef._id === user._id,
-          );
 
-          const forexForms = userForexForms.map((item) => ({
-            id: item._id,
-            agentRef: item.agentRef?.name.toUpperCase() || 'N/A',
-            studentRef: item?.studentName || 'N/A',
-            date: new Date(item.date).toLocaleDateString('en-US'),
-            country: item.country || 'N/A',
-            currencyBooked: item.currencyBooked || 'N/A',
-            quotation: item.quotation || 'N/A',
-            studentPaid: item.studentPaid || 'N/A',
-            docsStatus: item.docsStatus || 'N/A',
-            ttCopyStatus: item.ttCopyStatus || 'N/A',
-            agentCommission: item.agentCommission || 0,
-            tds: item.tds || 0,
-            netPayable: item.netPayable || 0,
-            commissionStatus: item.commissionStatus || 'N/A',
-          }));
-          setRows(forexForms);
-          setData(userForexForms);
-        }
-      } catch (error) {
-        console.error('Error fetching forex forms:', error);
-      } finally {
-        setLoading(false);
+        const forexForms = userForexForms.map((item) => ({
+          id: item._id,
+          agentRef: item.agentRef?.name.toUpperCase() || 'N/A',
+          studentRef: item?.studentName || 'N/A',
+          date: new Date(item.date).toLocaleDateString('en-US'),
+          country: item.country || 'N/A',
+          currencyBooked: item.currencyBooked || 'N/A',
+          quotation: item.quotation || 'N/A',
+          studentPaid: item.studentPaid || 'N/A',
+          docsStatus: item.docsStatus || 'N/A',
+          ttCopyStatus: item.ttCopyStatus || 'N/A',
+          agentCommission: item.agentCommission || 0,
+          tds: item.tds || 0,
+          netPayable: item.netPayable || 0,
+          commissionStatus: item.commissionStatus || 'N/A',
+        }));
+        
+        setRows(forexForms);
+        setData(userForexForms);
+        
+        console.log('Agent Forex - Fetched data:', {
+          totalBackendRecords: response.data.forexForms.length,
+          userRecords: userForexForms.length,
+          formattedRows: forexForms.length,
+          userId: user._id
+        });
+        
+        // Calculate pagination for filtered data
+        const totalAgentRecords = userForexForms.length;
+        const totalRecordsFromBackend = response.data.pagination?.total || 0;
+        
+        // Adjust pagination based on agent's data
+        setPagination({
+          page: page,
+          limit: limit,
+          total: totalAgentRecords,
+          pages: Math.ceil(totalAgentRecords / limit)
+        });
+      } else {
+        console.log('Agent Forex - No data received from backend');
+        setRows([]);
+        setData([]);
+        setPagination(prev => ({
+          ...prev,
+          total: 0,
+          pages: 0
+        }));
       }
-    };
+    } catch (error) {
+      console.error('Error fetching forex forms:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchData();
+  useEffect(() => {
+    if (user && user._id) {
+      fetchData();
+    } else {
+      console.log('Agent Forex - User not available:', user);
+    }
   }, [user._id]);
 
   // Filter and sort data effect
@@ -355,11 +411,28 @@ const Forex = () => {
     );
   };
 
+  // Pagination handlers
+  const handlePageChange = (newPage) => {
+    fetchData(newPage, pagination.limit);
+  };
+
+  const handlePageSizeChange = (newPageSize) => {
+    fetchData(1, newPageSize);
+  };
+
   const memoizedColumns = useMemo(
     () => allColumns.filter((col) => selectedColumns.includes(col.field)),
     [selectedColumns],
   );
-  const memoizedRows = useMemo(() => filteredData.length > 0 ? filteredData : rows, [filteredData, rows]);
+  const memoizedRows = useMemo(() => {
+    console.log('Agent Forex - Memoized rows calculation:', {
+      filteredDataLength: filteredData.length,
+      rowsLength: rows.length,
+      usingFiltered: filteredData.length > 0,
+      result: filteredData.length > 0 ? filteredData : rows
+    });
+    return filteredData.length > 0 ? filteredData : rows;
+  }, [filteredData, rows]);
 
   const getRowClassName = (params) => {
     const status = params.row.commissionStatus?.toLowerCase();
@@ -487,6 +560,15 @@ const Forex = () => {
                   columns={memoizedColumns} 
                   rows={memoizedRows} 
                   getRowClassName={getRowClassName}
+                  loading={loading}
+                  pagination={{
+                    page: pagination.page,
+                    pageSize: pagination.limit,
+                    total: pagination.total,
+                    pageSizeOptions: [10, 15, 25],
+                    onPageChange: handlePageChange,
+                    onPageSizeChange: handlePageSizeChange,
+                  }}
                 />
               </Box>
             )}

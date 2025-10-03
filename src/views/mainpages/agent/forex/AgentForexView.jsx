@@ -97,25 +97,26 @@ function ForexView() {
 
   useEffect(() => {
     setLoading(true);
+    // Change from viewAllForexForms to specific forex endpoint
     axios
-      .get(`https://abroad-backend-gray.vercel.app/auth/viewAllForexForms`)
+      .get(`https://abroad-backend-gray.vercel.app/auth/getForexForm/${id}`)
       .then((response) => {
         if (response.data.success) {
-          const formData1 = response.data.forexForms.find(
-            (form) => form._id === id,
-          );
-          if (formData1) {
-            setFormData(formData1);
-          } else {
-            console.error('Form data not found for ID:', id);
+          const formData1 = response.data.forexForm; // Single form, not array
+          
+          // For agents, verify they own this record
+          const user = JSON.parse(localStorage.getItem('user'));
+          if (formData1.agentRef._id !== user._id) {
+            console.error('Access denied: This record belongs to another agent');
+            return;
           }
-        } else {
-          console.error('Request was not successful:', response.data);
+          
+          setFormData(formData1);
         }
         setLoading(false);
       })
       .catch((error) => {
-        console.error('Error fetching data:', error);
+        console.error('Error fetching forex data:', error);
         setLoading(false);
       });
   }, [id]);
