@@ -49,7 +49,17 @@ const theme = createTheme({
   },
 });
 
-export default function DataTable({ columns, rows, link, sx, onSelectionChange, checkboxSelection = false, getRowClassName }) {
+export default function DataTable({ 
+  columns, 
+  rows, 
+  link, 
+  sx, 
+  onSelectionChange, 
+  checkboxSelection = false, 
+  getRowClassName,
+  loading = false,
+  pagination
+}) {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -92,14 +102,22 @@ export default function DataTable({ columns, rows, link, sx, onSelectionChange, 
               <DataGrid
                 rows={rows}
                 columns={columns}
-                initialState={{
-                  pagination: {
-                    paginationModel: {
-                      pageSize: 10,
-                    },
-                  },
+                loading={loading}
+                pageSizeOptions={[10, 15, 25]}
+                paginationMode={pagination ? 'server' : 'client'}
+                rowCount={pagination?.total || rows.length}
+                paginationModel={{
+                  pageSize: pagination?.pageSize || 10,
+                  page: (pagination?.page || 1) - 1, // DataGrid uses 0-based indexing
                 }}
-                pageSizeOptions={[5, 10, 15]}
+                onPaginationModelChange={(model) => {
+                  if (pagination?.onPageChange) {
+                    pagination.onPageChange(model.page + 1); // Convert back to 1-based
+                  }
+                  if (pagination?.onPageSizeChange && model.pageSize !== pagination.pageSize) {
+                    pagination.onPageSizeChange(model.pageSize);
+                  }
+                }}
                 rowHeight={70}
                 onRowClick={viewHandle}
                 checkboxSelection={checkboxSelection}

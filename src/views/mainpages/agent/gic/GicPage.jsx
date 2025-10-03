@@ -99,6 +99,8 @@ const Gic = () => {
   );
   const [tabValue, setTabValue] = useState("0");
 
+
+
   // Create MUI theme based on Chakra color mode
   const theme = createTheme({
     palette: {
@@ -142,42 +144,47 @@ const Gic = () => {
     },
   });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const response = await axios.get(
-          'https://abroad-backend-gray.vercel.app/auth/viewAllGicForm',
+  // Fetch all data without pagination
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(
+        'https://abroad-backend-gray.vercel.app/auth/viewAllGicForm',
+      );
+      if (response.data.success) {
+        const userGicForms = response.data.gicForms.filter(
+          (form) => form.agentRef._id === user._id,
         );
-        if (response.data.success) {
-          const userGicForms = response.data.gicForms.filter(
-            (form) => form.agentRef._id === user._id,
-          );
-          setData(userGicForms);
-          const gicForms = userGicForms.map((form, index) => ({
-            id: form._id || index,
-            type: form.type || 'N/A',
-            Agent: form.agentRef.name.toUpperCase() || 'N/A',
-            accOpeningMonth: form.accOpeningMonth || 'N/A',
-            studentName: form.studentRef.name || 'N/A',
-            passportNo: form.studentPassportNo || 'N/A',
-            studentPhoneNo: form.studentPhoneNo || 'N/A',
-            bankVendor: form.bankVendor || 'N/A',
-            accFundingMonth: form.fundingMonth || 'N/A',
-            agentCommission: form.commissionAmt || 0,
-            tds: form.tds || '0',
-            netPayable: form.netPayable || 0,
-            commissionStatus: form.commissionStatus || 'N/A',
-          }));
-          setRows(gicForms);
-        }
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
+        setData(userGicForms);
+        
+        // Calculate pagination for filtered data
+        const totalAgentRecords = userGicForms.length;
+        
+        const gicForms = userGicForms.map((form, index) => ({
+          id: form._id || index,
+          type: form.type || 'N/A',
+          Agent: form.agentRef.name.toUpperCase() || 'N/A',
+          accOpeningMonth: form.accOpeningMonth || 'N/A',
+          studentName: form.studentRef.name || 'N/A',
+          passportNo: form.studentPassportNo || 'N/A',
+          studentPhoneNo: form.studentPhoneNo || 'N/A',
+          bankVendor: form.bankVendor || 'N/A',
+          accFundingMonth: form.fundingMonth || 'N/A',
+          agentCommission: form.commissionAmt || 0,
+          tds: form.tds || '0',
+          netPayable: form.netPayable || 0,
+          commissionStatus: form.commissionStatus || 'N/A',
+        }));
+        setRows(gicForms);
       }
-    };
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchData();
   }, [user._id]);
 
