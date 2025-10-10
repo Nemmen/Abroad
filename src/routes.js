@@ -14,7 +14,7 @@ import {
 import { SiAuthentik } from 'react-icons/si';
 
 import Agent from './views/mainpages/agent';
-import CurrencyExchangeIcon from '@mui/icons-material/CurrencyExchange';
+
 //Auth import
 import Login from 'views/mainpages/login_signup/Login';
 import Signup from 'views/mainpages/login_signup/Signup';
@@ -70,7 +70,6 @@ const routes = [
     path: '/email-promotions',
     component: <EmailTemplateGen/>,
   },
-  
 ];
 
 export const routeAjent = [

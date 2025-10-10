@@ -1,87 +1,101 @@
 import * as React from 'react';
-import Card from '@mui/material/Card';
-import CardHeader from '@mui/material/CardHeader';
-import CardContent from '@mui/material/CardContent';
 import Avatar from '@mui/material/Avatar';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
-import Grid from '@mui/material/Grid2';
+import IconButton from '@mui/material/IconButton';
 import { useTheme } from '@mui/system';
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import StarIcon from '@mui/icons-material/Star';
 import GoogleIcon from '../../assets/img/home/GoogleIcon.png';
 const userTestimonials = [
   {
-    avatar: <Avatar alt="Ananya Sharma" src="/static/images/avatar/1.jpg" />,
+    avatar: <Avatar alt="Ananya Sharma" sx={{ bgcolor: '#1976d2' }}>AS</Avatar>,
     name: 'Ananya Sharma',
     occupation: 'Senior Engineer',
     testimonial:
       "I absolutely love how versatile this platform is! Managing GIC, Blocked Accounts, and Forex services has never been this effortless. The intuitive dashboard has transformed my workflow, making tasks more efficient and enjoyable",
+    rating: 5,
   },
   {
-    avatar: <Avatar alt="Amit Gupta" src="/static/images/avatar/2.jpg" />,
+    avatar: <Avatar alt="Amit Gupta" sx={{ bgcolor: '#9c27b0' }}>AG</Avatar>,
     name: 'Amit Gupta',
     occupation: 'Lead Product Designer',
     testimonial:
       "One of the standout features of this platform is the exceptional customer support. The team is always quick to respond and incredibly helpful. It's reassuring to work with a service that truly cares about its users.",
+    rating: 5,
   },
   {
-    avatar: <Avatar alt="Kavya Mehta" src="/static/images/avatar/3.jpg" />,
+    avatar: <Avatar alt="Kavya Mehta" sx={{ bgcolor: '#f57c00' }}>KM</Avatar>,
     name: 'Kavya Mehta',
     occupation: 'CTO',
     testimonial:
       'The simplicity and user-friendliness of this platform have significantly streamlined my work. Managing financial services for international students is now hassle-free, thanks to this well-designed solution.',
+    rating: 5,
   },
   {
-    avatar: <Avatar alt="Rohan Verma" src="/static/images/avatar/4.jpg" />,
+    avatar: <Avatar alt="Rohan Verma" sx={{ bgcolor: '#388e3c' }}>RV</Avatar>,
     name: 'Rohan Verma',
     occupation: 'Senior Engineer',
     testimonial:
       "The attention to detail in this platform is outstanding. From seamless GIC applications to real-time tracking, every feature is thoughtfully designed to provide a premium experience.",
+    rating: 5,
   },
   {
-    avatar: <Avatar alt="Priya Nair" src="/static/images/avatar/5.jpg" />,
+    avatar: <Avatar alt="Priya Nair" sx={{ bgcolor: '#d32f2f' }}>PN</Avatar>,
     name: 'Priya Nair',
     occupation: 'Product Designer',
     testimonial:
       "I've tried other services, but this one stands out for its innovative features and seamless integration. The creators have truly addressed the needs of students and agents with this comprehensive solution.",
+    rating: 5,
   },
   {
-    avatar: <Avatar alt="Rajesh Iyer" src="/static/images/avatar/6.jpg" />,
+    avatar: <Avatar alt="Rajesh Iyer" sx={{ bgcolor: '#7b1fa2' }}>RI</Avatar>,
     name: 'Rajesh Iyer',
     occupation: 'CDO',
     testimonial:
       "The quality and reliability of this platform exceeded my expectations. It's built to deliver a trustworthy, stress-free experience for financial services. A game-changer for international transactions!",
+    rating: 5,
   },
 ];
 
-// const whiteLogos = [
-
-  // 'https://assets-global.website-files.com/61ed56ae9da9fd7e0ef0a967/6560628e8573c43893fe0ace_Sydney-white.svg',
-  // 'https://assets-global.website-files.com/61ed56ae9da9fd7e0ef0a967/655f4d520d0517ae8e8ddf13_Bern-white.svg',
-  // 'https://assets-global.website-files.com/61ed56ae9da9fd7e0ef0a967/655f46794c159024c1af6d44_Montreal-white.svg',
-  // 'https://assets-global.website-files.com/61ed56ae9da9fd7e0ef0a967/61f12e891fa22f89efd7477a_TerraLight.svg',
-  // 'https://assets-global.website-files.com/61ed56ae9da9fd7e0ef0a967/6560a09d1f6337b1dfed14ab_colorado-white.svg',
-  // 'https://assets-global.website-files.com/61ed56ae9da9fd7e0ef0a967/655f5caa77bf7d69fb78792e_Ankara-white.svg',
-// ];
-
-// const darkLogos = [
-//   'https://assets-global.website-files.com/61ed56ae9da9fd7e0ef0a967/6560628889c3bdf1129952dc_Sydney-black.svg',
-//   'https://assets-global.website-files.com/61ed56ae9da9fd7e0ef0a967/655f4d4d8b829a89976a419c_Bern-black.svg',
-//   'https://assets-global.website-files.com/61ed56ae9da9fd7e0ef0a967/655f467502f091ccb929529d_Montreal-black.svg',
-//   'https://assets-global.website-files.com/61ed56ae9da9fd7e0ef0a967/61f12e911fa22f2203d7514c_TerraDark.svg',
-//   'https://assets-global.website-files.com/61ed56ae9da9fd7e0ef0a967/6560a0990f3717787fd49245_colorado-black.svg',
-//   'https://assets-global.website-files.com/61ed56ae9da9fd7e0ef0a967/655f5ca4e548b0deb1041c33_Ankara-black.svg',
-// ];
-
-const logoStyle = {
-  width: '40px',
-  // opacity: 0.3,
-};
-
 export default function Testimonials() {
   const theme = useTheme();
-  // const logos = theme.palette.mode === 'light' ? darkLogos : whiteLogos;
-  
+  const [currentIndex, setCurrentIndex] = React.useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = React.useState(true);
+
+  // Auto-play functionality
+  React.useEffect(() => {
+    if (!isAutoPlaying) return;
+    
+    const interval = setInterval(() => {
+      setCurrentIndex((prevIndex) => 
+        prevIndex === userTestimonials.length - 1 ? 0 : prevIndex + 1
+      );
+    }, 4000); // Change slide every 4 seconds
+
+    return () => clearInterval(interval);
+  }, [isAutoPlaying]);
+
+  const handlePrevious = () => {
+    setIsAutoPlaying(false);
+    setCurrentIndex(currentIndex === 0 ? userTestimonials.length - 1 : currentIndex - 1);
+    setTimeout(() => setIsAutoPlaying(true), 5000); // Resume auto-play after 5 seconds
+  };
+
+  const handleNext = () => {
+    setIsAutoPlaying(false);
+    setCurrentIndex(currentIndex === userTestimonials.length - 1 ? 0 : currentIndex + 1);
+    setTimeout(() => setIsAutoPlaying(true), 5000); // Resume auto-play after 5 seconds
+  };
+
+  const goToSlide = (index) => {
+    setIsAutoPlaying(false);
+    setCurrentIndex(index);
+    setTimeout(() => setIsAutoPlaying(true), 5000); // Resume auto-play after 5 seconds
+  };
+
   return (
     <Container
       id="testimonials"
@@ -93,21 +107,35 @@ export default function Testimonials() {
         flexDirection: 'column',
         alignItems: 'center',
         gap: { xs: 3, sm: 6 },
+        backgroundColor: theme.palette.mode === 'dark' ? '#121212' : '#f8fafe',
       }}
     >
       <Box
         sx={{
           width: { sm: '100%', md: '60%' },
-          textAlign: { sm: 'left', md: 'center' },
+          textAlign: 'center',
         }}
       >
         <Typography
           component="h2"
-          variant="h4"
+          variant="h3"
           gutterBottom
-          sx={{ color: 'text.primary' }}
+          sx={{ 
+            color: 'text.primary',
+            fontWeight: 'bold',
+            mb: 2
+          }}
         >
-          Testimonials
+          Customer Testimonials
+        </Typography>
+        <Typography 
+          variant="h6" 
+          sx={{ 
+            color: 'text.secondary',
+            mb: 1
+          }}
+        >
+          What Our Clients Say About Us
         </Typography>
         <Typography variant="body1" sx={{ color: 'text.secondary' }}>
           See what our customers love about our products. Discover how we excel in
@@ -115,50 +143,158 @@ export default function Testimonials() {
           and reliable support.
         </Typography>
       </Box>
-      <Grid container spacing={2}>
-        {userTestimonials.map((testimonial, index) => (
-          <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index} sx={{ display: 'flex' }}>
-            <Card
-              variant="outlined"
+
+      {/* Carousel Container */}
+      <Box
+        sx={{
+          width: '100%',
+          maxWidth: '900px',
+          position: 'relative',
+          overflow: 'hidden',
+          borderRadius: '20px',
+          backgroundColor: theme.palette.mode === 'dark' ? '#1e1e1e' : 'white',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+        }}
+      >
+        {/* Navigation Arrows */}
+        <IconButton
+          onClick={handlePrevious}
+          sx={{
+            position: 'absolute',
+            left: '20px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            zIndex: 2,
+            backgroundColor: theme.palette.mode === 'dark' ? 'rgba(30,30,30,0.9)' : 'rgba(255,255,255,0.9)',
+            color: '#1976d2',
+            border: theme.palette.mode === 'dark' ? '1px solid rgba(255,255,255,0.1)' : 'none',
+            '&:hover': {
+              backgroundColor: theme.palette.mode === 'dark' ? 'rgba(30,30,30,1)' : 'rgba(255,255,255,1)',
+              transform: 'translateY(-50%) scale(1.1)',
+            },
+            transition: 'all 0.3s ease',
+          }}
+        >
+          <ArrowBackIosIcon />
+        </IconButton>
+        
+        <IconButton
+          onClick={handleNext}
+          sx={{
+            position: 'absolute',
+            right: '20px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            zIndex: 2,
+            backgroundColor: theme.palette.mode === 'dark' ? 'rgba(30,30,30,0.9)' : 'rgba(255,255,255,0.9)',
+            color: '#1976d2',
+            border: theme.palette.mode === 'dark' ? '1px solid rgba(255,255,255,0.1)' : 'none',
+            '&:hover': {
+              backgroundColor: theme.palette.mode === 'dark' ? 'rgba(30,30,30,1)' : 'rgba(255,255,255,1)',
+              transform: 'translateY(-50%) scale(1.1)',
+            },
+            transition: 'all 0.3s ease',
+          }}
+        >
+          <ArrowForwardIosIcon />
+        </IconButton>
+
+        {/* Testimonial Cards */}
+        <Box
+          sx={{
+            display: 'flex',
+            transform: `translateX(-${currentIndex * 100}%)`,
+            transition: 'transform 0.5s ease-in-out',
+          }}
+        >
+          {userTestimonials.map((testimonial, index) => (
+            <Box
+              key={index}
               sx={{
+                minWidth: '100%',
+                p: 6,
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'space-between',
-                flexGrow: 1,
+                alignItems: 'center',
+                textAlign: 'center',
               }}
             >
-              <CardContent>
-                <Typography
-                  variant="body1"
-                  gutterBottom
-                  sx={{ color: 'text.secondary' }}
-                >
-                  {testimonial.testimonial}
-                </Typography>
-              </CardContent>
-              <Box
+              {/* Avatar */}
+              <Box sx={{ mb: 3 }}>
+                {testimonial.avatar}
+              </Box>
+
+              {/* Stars Rating */}
+              <Box sx={{ display: 'flex', gap: 0.5, mb: 3 }}>
+                {[...Array(testimonial.rating)].map((_, i) => (
+                  <StarIcon key={i} sx={{ color: theme.palette.mode === 'dark' ? '#ffeb3b' : '#ffc107', fontSize: '1.5rem' }} />
+                ))}
+              </Box>
+
+              {/* Testimonial Text */}
+              <Typography
+                variant="h6"
                 sx={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
+                  color: 'text.primary',
+                  fontStyle: 'italic',
+                  mb: 4,
+                  maxWidth: '700px',
+                  lineHeight: 1.8,
+                  fontSize: { xs: '1rem', md: '1.1rem' }
                 }}
               >
-                <CardHeader
-                  avatar={testimonial.avatar}
-                  title={testimonial.name}
-                  // subheader={testimonial.occupation}
-                />
-                <img
-                  // src={logos[index]}
-                  // alt={`Logo ${index + 1}`}
+                "{testimonial.testimonial}"
+              </Typography>
+
+              {/* Author Info */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Box sx={{ textAlign: 'left' }}>
+                  <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
+                    {testimonial.name}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                    {testimonial.occupation}
+                  </Typography>
+                </Box>
+                <Box
+                  component="img"
                   src={GoogleIcon}
-                  style={logoStyle}
+                  alt="Google Icon"
+                  sx={{ width: '32px', height: '32px', ml: 2 }}
                 />
               </Box>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+            </Box>
+          ))}
+        </Box>
+
+        {/* Dots Indicator */}
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: 1,
+            pb: 3,
+          }}
+        >
+          {userTestimonials.map((_, index) => (
+            <Box
+              key={index}
+              onClick={() => goToSlide(index)}
+              sx={{
+                width: 12,
+                height: 12,
+                borderRadius: '50%',
+                backgroundColor: index === currentIndex ? '#1976d2' : theme.palette.mode === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                '&:hover': {
+                  transform: 'scale(1.2)',
+                },
+              }}
+            />
+          ))}
+        </Box>
+      </Box>
     </Container>
   );
 }

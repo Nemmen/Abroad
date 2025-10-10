@@ -5,49 +5,49 @@ import Container from '@mui/material/Container';
 import Grid from '@mui/material/Grid2';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import AutoFixHighRoundedIcon from '@mui/icons-material/AutoFixHighRounded';
-import ConstructionRoundedIcon from '@mui/icons-material/ConstructionRounded';
-import QueryStatsRoundedIcon from '@mui/icons-material/QueryStatsRounded';
-import SettingsSuggestRoundedIcon from '@mui/icons-material/SettingsSuggestRounded';
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import SecurityIcon from '@mui/icons-material/Security';
+import SpeedIcon from '@mui/icons-material/Speed';
 import SupportAgentRoundedIcon from '@mui/icons-material/SupportAgentRounded';
-import ThumbUpAltRoundedIcon from '@mui/icons-material/ThumbUpAltRounded';
+import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 
 const items = [
   {
-    icon: <SettingsSuggestRoundedIcon />,
-    title: 'Adaptable performance',
+    icon: <AccountBalanceIcon />,
+    title: 'Trusted Bank Partnerships',
     description:
-      'Our product effortlessly adjusts to your needs, boosting efficiency and simplifying your tasks.',
+      'Partner with leading banks like ICICI, RBC, CIBC, and authorized providers like Fintiba for reliable financial services.',
   },
   {
-    icon: <ConstructionRoundedIcon />,
-    title: 'Built to last',
+    icon: <SecurityIcon />,
+    title: 'Embassy-Approved Solutions',
     description:
-      'Experience unmatched durability that goes above and beyond with lasting investment.',
+      'All our GIC and Blocked Account services are fully compliant and accepted by Canadian and German embassies.',
   },
   {
-    icon: <ThumbUpAltRoundedIcon />,
-    title: 'Great user experience',
+    icon: <SpeedIcon />,
+    title: 'Quick Processing',
     description:
-      'Integrate our product into your routine with an intuitive and easy-to-use interface.',
+      'Get your account number in just 5 minutes and experience fast fund transfers with real-time tracking.',
   },
   {
-    icon: <AutoFixHighRoundedIcon />,
-    title: 'Innovative functionality',
+    icon: <VerifiedUserIcon />,
+    title: 'Transparent Operations',
     description:
-      'Stay ahead with features that set new standards, addressing your evolving needs better than the rest.',
+      'Complete visibility into your applications, fund status, and commission details through our unified dashboard.',
   },
   {
     icon: <SupportAgentRoundedIcon />,
-    title: 'Reliable support',
+    title: 'Dedicated Student Support',
     description:
-      'Count on our responsive customer support, offering assistance that goes beyond the purchase.',
+      'Expert guidance throughout your journey from application to arrival, with specialized support for international students.',
   },
   {
-    icon: <QueryStatsRoundedIcon />,
-    title: 'Precision in every detail',
+    icon: <TrendingUpIcon />,
+    title: 'Competitive Rates',
     description:
-      'Enjoy a meticulously crafted product where small touches make a significant impact on your overall experience.',
+      'Enjoy competitive exchange rates for forex services and transparent fee structures with no hidden charges.',
   },
 ];
 
@@ -77,13 +77,30 @@ export default function Highlights() {
             textAlign: { sm: 'left', md: 'center' },
           }}
         >
-          <Typography component="h2" variant="h4" gutterBottom>
-            Highlights
+          <Typography 
+            component="h2" 
+            variant="h4" 
+            gutterBottom
+            sx={{
+              fontSize: { xs: '1.8rem', md: '2.5rem' },
+              fontWeight: 700,
+              mb: 3
+            }}
+          >
+            Why Choose AbroCare
           </Typography>
-          <Typography variant="body1" sx={{ color: 'grey.400' }}>
-            Explore why our product stands out: adaptability, durability,
-            user-friendly design, and innovation. Enjoy reliable customer support and
-            precision in every detail.
+          <Typography 
+            variant="h6" 
+            sx={{ 
+              color: 'grey.400',
+              fontSize: { xs: '1.1rem', md: '1.25rem' },
+              lineHeight: 1.6,
+              fontWeight: 400
+            }}
+          >
+            Your trusted partner for GIC accounts, Blocked accounts, and Forex services. 
+            We simplify financial requirements for students pursuing education in Canada and Germany 
+            with transparent processes and expert support.
           </Typography>
         </Box>
         <Grid container spacing={2}>

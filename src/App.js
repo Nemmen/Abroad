@@ -4,6 +4,8 @@ import AuthLayout from './layouts/auth';
 import AdminLayout from './layouts/admin';
 import AgentLayout from './layouts/agent';
 import Home from './layouts/home';
+import PrivacyPolicy from './components/homeComponents/PrivacyPolicy';
+import TermsOfService from './components/homeComponents/TermsOfService';
 import { ChakraProvider } from '@chakra-ui/react';
 import initialTheme from './theme/theme';
 import { useState, useEffect } from 'react';
@@ -54,6 +56,8 @@ export default function Main() {
       <Routes>
         {/* <Route path="/" element={<Navigate to="/auth/login" replace />} /> */}
         <Route path="/" element={<Home />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/terms-of-service" element={<TermsOfService />} />
         <Route path="auth/*" element={<AuthLayout />} />
 
         {/* Protected Routes */}

@@ -99,15 +99,19 @@ export default function Hero() {
 </Typography>
 
           <Typography
+            variant="h6"
             sx={{
               textAlign: 'center',
               color: 'text.secondary',
               width: { sm: '100%', md: '80%' },
+              fontSize: { xs: '1.1rem', md: '1.3rem' },
+              lineHeight: 1.6,
+              fontWeight: 400,
+              mt: 2
             }}
           >
-            Explore our cutting-edge dashboard, delivering high-quality solutions
-            tailored to your needs. Elevate your experience with top-tier features
-            and services.
+            Seamless financial solutions for international students. Expert guidance for GIC accounts, 
+            Blocked Accounts, and Forex services - all managed in one secure platform.
           </Typography>
           {/* <Stack
             direction={{ xs: 'column', sm: 'row' }}

@@ -14,7 +14,11 @@ import {
   Stack,
   CircularProgress,
   Tooltip,
+  TextField,
+  Tabs,
+  Tab,
 } from '@mui/material';
+import { KeyboardArrowUp, KeyboardArrowDown } from '@mui/icons-material';
 import DataTable from 'components/DataTable';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
@@ -24,6 +28,14 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { useColorMode } from '@chakra-ui/react';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import { 
+  saveFiltersToStorage, 
+  loadFiltersFromStorage, 
+  clearFiltersFromStorage,
+  FILTER_STORAGE_KEYS,
+  DEFAULT_FILTERS 
+} from 'utils/filterUtils';
+import TuneIcon from '@mui/icons-material/Tune';
 import CloseIcon from '@mui/icons-material/Close';
 
 const allColumns = [
@@ -39,19 +51,55 @@ const allColumns = [
   { field: 'agentCommission', headerName: 'Agent Commission', width: 150 },
   { field: 'tds', headerName: 'TDS', width: 100 },
   { field: 'netPayable', headerName: 'Net Payable', width: 150 },
-  { field: 'commissionStatus', headerName: 'Commission Status', width: 180 },
+  { 
+    field: 'commissionStatus', 
+    headerName: 'Commission Status', 
+    width: 180,
+    renderCell: (params) => {
+      let displayText = params.value;
+      
+      // Replace "not received" with "non claimable" and "received" with "paid"
+      if (displayText?.toLowerCase().includes('not received')) {
+        displayText = displayText.replace(/not received/gi, 'non claimable');
+      } else if (displayText?.toLowerCase().includes('received')) {
+        displayText = displayText.replace(/received/gi, 'paid');
+      }
+      
+      return (
+        <span style={{ fontWeight: '600' }}>
+          {displayText}
+        </span>
+      );
+    }
+  },
 ];
 
 const Forex = () => {
   const [rows, setRows] = useState([]);
   const [data, setData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
   const [selectedColumns, setSelectedColumns] = useState(
     allColumns.map((col) => col.field),
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const { user } = useSelector((state) => state.Auth);
   const { colorMode } = useColorMode();
+  
+  // Filter states with persistent storage
+  const [filters, setFilters] = useState(() => 
+    loadFiltersFromStorage(FILTER_STORAGE_KEYS.AGENT_FOREX, DEFAULT_FILTERS.AGENT_FOREX)
+  );
+  const [tabValue, setTabValue] = useState("0");
+
+  // Pagination states
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10, // Default page size
+    total: 0,
+    pages: 0
+  });
 
   // Create MUI theme based on Chakra color mode
   const theme = createTheme({
@@ -96,46 +144,232 @@ const Forex = () => {
     },
   });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const response = await axios.get(
-          'https://abroad-backend-gray.vercel.app/auth/viewAllForexForms',
+  // Fetch data with pagination
+  const fetchData = async (page = pagination.page, limit = pagination.limit) => {
+    if (!user || !user._id) {
+      console.log('Agent Forex - User not authenticated');
+      setLoading(false);
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        sortField: 'date',
+        sortOrder: 'desc'
+      });
+
+      const response = await axios.get(
+        `https://abroad-backend-gray.vercel.app/auth/viewAllForexForms?${params}`,
+      );
+      
+      if (response.data && response.data.forexForms && response.data.forexForms.length > 0) {
+        const userForexForms = response.data.forexForms.filter(
+          (form) => form.agentRef._id === user._id,
         );
-        if (response.data.forexForms) {
-          const userForexForms = response.data.forexForms.filter(
-            (form) => form.agentRef._id === user._id,
-          );
 
-          const forexForms = userForexForms.map((item) => ({
-            id: item._id,
-            agentRef: item.agentRef?.name.toUpperCase() || 'N/A',
-            studentRef: item?.studentName || 'N/A',
-            date: new Date(item.date).toLocaleDateString('en-US'),
-            country: item.country || 'N/A',
-            currencyBooked: item.currencyBooked || 'N/A',
-            quotation: item.quotation || 'N/A',
-            studentPaid: item.studentPaid || 'N/A',
-            docsStatus: item.docsStatus || 'N/A',
-            ttCopyStatus: item.ttCopyStatus || 'N/A',
-            agentCommission: item.agentCommission || 0,
-            tds: item.tds || 0,
-            netPayable: item.netPayable || 0,
-            commissionStatus: item.commissionStatus || 'N/A',
-          }));
-          setRows(forexForms);
-          setData(userForexForms);
-        }
-      } catch (error) {
-        console.error('Error fetching forex forms:', error);
-      } finally {
-        setLoading(false);
+        const forexForms = userForexForms.map((item) => ({
+          id: item._id,
+          agentRef: item.agentRef?.name.toUpperCase() || 'N/A',
+          studentRef: item?.studentName || 'N/A',
+          date: new Date(item.date).toLocaleDateString('en-US'),
+          country: item.country || 'N/A',
+          currencyBooked: item.currencyBooked || 'N/A',
+          quotation: item.quotation || 'N/A',
+          studentPaid: item.studentPaid || 'N/A',
+          docsStatus: item.docsStatus || 'N/A',
+          ttCopyStatus: item.ttCopyStatus || 'N/A',
+          agentCommission: item.agentCommission || 0,
+          tds: item.tds || 0,
+          netPayable: item.netPayable || 0,
+          commissionStatus: item.commissionStatus || 'N/A',
+        }));
+        
+        setRows(forexForms);
+        setData(userForexForms);
+        
+        console.log('Agent Forex - Fetched data:', {
+          totalBackendRecords: response.data.forexForms.length,
+          userRecords: userForexForms.length,
+          formattedRows: forexForms.length,
+          userId: user._id
+        });
+        
+        // Calculate pagination for filtered data
+        const totalAgentRecords = userForexForms.length;
+        const totalRecordsFromBackend = response.data.pagination?.total || 0;
+        
+        // Adjust pagination based on agent's data
+        setPagination({
+          page: page,
+          limit: limit,
+          total: totalAgentRecords,
+          pages: Math.ceil(totalAgentRecords / limit)
+        });
+      } else {
+        console.log('Agent Forex - No data received from backend');
+        setRows([]);
+        setData([]);
+        setPagination(prev => ({
+          ...prev,
+          total: 0,
+          pages: 0
+        }));
       }
-    };
+    } catch (error) {
+      console.error('Error fetching forex forms:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchData();
+  useEffect(() => {
+    if (user && user._id) {
+      fetchData();
+    } else {
+      console.log('Agent Forex - User not available:', user);
+    }
   }, [user._id]);
+
+  // Filter and sort data effect
+  useEffect(() => {
+    let processedData = [...rows];
+
+    // Apply name filters
+    if (filters.agentName) {
+      processedData = processedData.filter(item => 
+        item.agentRef.toLowerCase().includes(filters.agentName.toLowerCase())
+      );
+    }
+    
+    if (filters.studentName) {
+      processedData = processedData.filter(item => 
+        item.studentRef.toLowerCase().includes(filters.studentName.toLowerCase())
+      );
+    }
+
+    // Apply multi-select filters
+    if (filters.countries && filters.countries.length > 0) {
+      processedData = processedData.filter(item => 
+        filters.countries.includes(item.country)
+      );
+    }
+
+    if (filters.currencies && filters.currencies.length > 0) {
+      processedData = processedData.filter(item => 
+        filters.currencies.includes(item.currencyBooked)
+      );
+    }
+
+    if (filters.docsStatuses && filters.docsStatuses.length > 0) {
+      processedData = processedData.filter(item => 
+        filters.docsStatuses.includes(item.docsStatus)
+      );
+    }
+
+    if (filters.ttCopyStatuses && filters.ttCopyStatuses.length > 0) {
+      processedData = processedData.filter(item => 
+        filters.ttCopyStatuses.includes(item.ttCopyStatus)
+      );
+    }
+
+    if (filters.commissionStatuses && filters.commissionStatuses.length > 0) {
+      processedData = processedData.filter(item => 
+        filters.commissionStatuses.includes(item.commissionStatus)
+      );
+    }
+
+    // Apply date filters
+    if (filters.specificDate) {
+      processedData = processedData.filter(item => {
+        const itemDate = new Date(item.date);
+        const filterDate = new Date(filters.specificDate);
+        return itemDate.toDateString() === filterDate.toDateString();
+      });
+    }
+
+    if (filters.dateFrom && filters.dateTo) {
+      processedData = processedData.filter(item => {
+        const itemDate = new Date(item.date);
+        const fromDate = new Date(filters.dateFrom);
+        const toDate = new Date(filters.dateTo);
+        return itemDate >= fromDate && itemDate <= toDate;
+      });
+    }
+
+    // Apply date sorting
+    if (filters.dateSort) {
+      processedData.sort((a, b) => {
+        const dateA = new Date(a.date || 0);
+        const dateB = new Date(b.date || 0);
+        
+        if (filters.dateSort === 'asc') {
+          return dateA - dateB;
+        } else if (filters.dateSort === 'desc') {
+          return dateB - dateA;
+        }
+        return 0;
+      });
+    }
+
+    setFilteredData(processedData);
+  }, [rows, filters]);
+
+  // Extract unique values for filters
+  const getUniqueValues = (data, field) => {
+    return [...new Set(data.map(item => item[field]).filter(Boolean))].sort();
+  };
+
+  const uniqueCountries = getUniqueValues(rows, 'country');
+  const uniqueCurrencies = getUniqueValues(rows, 'currencyBooked');
+  const uniqueDocsStatuses = getUniqueValues(rows, 'docsStatus');
+  const uniqueTtCopyStatuses = getUniqueValues(rows, 'ttCopyStatus');
+  const uniqueCommissionStatuses = getUniqueValues(rows, 'commissionStatus');
+
+  // Filter handlers with persistent storage
+  const handleFilterChange = (filterType, value) => {
+    const newFilters = {
+      ...filters,
+      [filterType]: value
+    };
+    setFilters(newFilters);
+    saveFiltersToStorage(FILTER_STORAGE_KEYS.AGENT_FOREX, newFilters);
+  };
+
+  const handleMultiSelectFilter = (filterType, value, checked) => {
+    const currentValues = filters[filterType] || [];
+    let newValues;
+    
+    if (checked) {
+      newValues = [...currentValues, value];
+    } else {
+      newValues = currentValues.filter(item => item !== value);
+    }
+    
+    const newFilters = {
+      ...filters,
+      [filterType]: newValues
+    };
+    setFilters(newFilters);
+    saveFiltersToStorage(FILTER_STORAGE_KEYS.AGENT_FOREX, newFilters);
+  };
+
+  const clearAllFilters = () => {
+    const clearedFilters = DEFAULT_FILTERS.AGENT_FOREX;
+    setFilters(clearedFilters);
+    saveFiltersToStorage(FILTER_STORAGE_KEYS.AGENT_FOREX, clearedFilters);
+  };
+
+  const clearSpecificFilter = (filterType) => {
+    const newFilters = {
+      ...filters,
+      [filterType]: Array.isArray(filters[filterType]) ? [] : ''
+    };
+    setFilters(newFilters);
+    saveFiltersToStorage(FILTER_STORAGE_KEYS.AGENT_FOREX, newFilters);
+  };
 
   const handleDownloadExcel = () => {
     const cleanData = data.map((item) => {
@@ -177,11 +411,40 @@ const Forex = () => {
     );
   };
 
+  // Pagination handlers
+  const handlePageChange = (newPage) => {
+    fetchData(newPage, pagination.limit);
+  };
+
+  const handlePageSizeChange = (newPageSize) => {
+    fetchData(1, newPageSize);
+  };
+
   const memoizedColumns = useMemo(
     () => allColumns.filter((col) => selectedColumns.includes(col.field)),
     [selectedColumns],
   );
-  const memoizedRows = useMemo(() => rows, [rows]);
+  const memoizedRows = useMemo(() => {
+    console.log('Agent Forex - Memoized rows calculation:', {
+      filteredDataLength: filteredData.length,
+      rowsLength: rows.length,
+      usingFiltered: filteredData.length > 0,
+      result: filteredData.length > 0 ? filteredData : rows
+    });
+    return filteredData.length > 0 ? filteredData : rows;
+  }, [filteredData, rows]);
+
+  const getRowClassName = (params) => {
+    const status = params.row.commissionStatus?.toLowerCase();
+    if (status?.includes('non claimable') || status?.includes('not received')) {
+      return 'row-non-claimable';
+    } else if (status?.includes('under processing')) {
+      return 'row-under-processing';
+    } else if (status?.includes('paid') || status?.includes('received')) {
+      return 'row-paid';
+    }
+    return '';
+  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -220,6 +483,24 @@ const Forex = () => {
                   }}
                 >
                   Filter Columns
+                </Button>
+              </Tooltip>
+              
+              <Tooltip title="Filter and sort data">
+                <Button
+                  onClick={() => setIsFilterModalOpen(true)}
+                  variant="outlined"
+                  startIcon={<TuneIcon />}
+                  sx={{ 
+                    color: 'white', 
+                    borderColor: 'rgba(255,255,255,0.5)',
+                    '&:hover': { 
+                      borderColor: 'white', 
+                      backgroundColor: 'rgba(255,255,255,0.1)' 
+                    } 
+                  }}
+                >
+                  Filter & Sort Data
                 </Button>
               </Tooltip>
               
@@ -278,6 +559,16 @@ const Forex = () => {
                 <DataTable 
                   columns={memoizedColumns} 
                   rows={memoizedRows} 
+                  getRowClassName={getRowClassName}
+                  loading={loading}
+                  pagination={{
+                    page: pagination.page,
+                    pageSize: pagination.limit,
+                    total: pagination.total,
+                    pageSizeOptions: [10, 15, 25],
+                    onPageChange: handlePageChange,
+                    onPageSizeChange: handlePageSizeChange,
+                  }}
                 />
               </Box>
             )}
@@ -339,6 +630,13 @@ const Forex = () => {
           
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
             <Button 
+              onClick={() => setSelectedColumns([])}
+              sx={{ textTransform: 'none' }}
+              color="error"
+            >
+              Deselect All
+            </Button>
+            <Button 
               onClick={() => setSelectedColumns(allColumns.map(col => col.field))}
               sx={{ textTransform: 'none' }}
             >
@@ -356,6 +654,416 @@ const Forex = () => {
               }}
             >
               Apply
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
+
+      {/* Data Filter and Sort Modal */}
+      <Modal
+        open={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+        aria-labelledby="filter-modal"
+      >
+        <Box sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: { xs: '95%', sm: '600px' },
+          bgcolor: 'background.paper',
+          borderRadius: 2,
+          boxShadow: 24,
+          p: 4,
+          outline: 'none',
+          maxHeight: '90vh',
+          overflow: 'auto'
+        }}>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Typography variant="h6" component="h2" fontWeight={600}>
+              Filter & Sort Data
+            </Typography>
+            <IconButton onClick={() => setIsFilterModalOpen(false)} size="small">
+              <CloseIcon />
+            </IconButton>
+          </Box>
+          
+          <Divider sx={{ mb: 2 }} />
+          
+          <Box sx={{ width: '100%' }}>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+              <Tabs 
+                value={tabValue} 
+                onChange={(e, newValue) => setTabValue(newValue)}
+                variant="fullWidth"
+              >
+                <Tab label="Sort by Date" value="0" />
+                <Tab label="Filter by Date" value="1" />
+                <Tab label="Filter by Name" value="2" />
+                {/* <Tab label="Countries" value="3" />
+                <Tab label="Currencies & Status" value="4" /> */}
+              </Tabs>
+            </Box>
+
+            {/* Date Sorting Tab */}
+            {tabValue === "0" && (
+              <Box sx={{ p: 2 }}>
+                <Stack spacing={3}>
+                  <Typography variant="body2" color="text.secondary">
+                    Sort records by Transaction Date
+                  </Typography>
+                  <Stack direction="row" spacing={2} flexWrap="wrap">
+                    <Button
+                      size="small"
+                      variant={filters.dateSort === 'asc' ? 'contained' : 'outlined'}
+                      startIcon={<KeyboardArrowUp />}
+                      onClick={() => handleFilterChange('dateSort', 'asc')}
+                    >
+                      Ascending (Old → New)
+                    </Button>
+                    <Button
+                      size="small"
+                      variant={filters.dateSort === 'desc' ? 'contained' : 'outlined'}
+                      startIcon={<KeyboardArrowDown />}
+                      onClick={() => handleFilterChange('dateSort', 'desc')}
+                    >
+                      Descending (New → Old)
+                    </Button>
+                    <Button
+                      size="small"
+                      variant="text"
+                      onClick={() => clearSpecificFilter('dateSort')}
+                    >
+                      Clear Sort
+                    </Button>
+                  </Stack>
+                </Stack>
+              </Box>
+            )}
+
+            {/* Date Filtering Tab */}
+            {tabValue === "1" && (
+              <Box sx={{ p: 2 }}>
+                <Stack spacing={3}>
+                  <Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Filter by Specific Date
+                      </Typography>
+                      <Button
+                        size="small"
+                        variant="text"
+                        onClick={() => clearSpecificFilter('specificDate')}
+                        sx={{ textTransform: 'none', fontSize: '0.7rem' }}
+                      >
+                        Clear
+                      </Button>
+                    </Box>
+                    <TextField
+                      type="date"
+                      fullWidth
+                      size="small"
+                      value={filters.specificDate}
+                      onChange={(e) => handleFilterChange('specificDate', e.target.value)}
+                      InputLabelProps={{ shrink: true }}
+                    />
+                  </Box>
+                  
+                  <Divider />
+                  
+                  <Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Filter by Date Range
+                      </Typography>
+                      <Button
+                        size="small"
+                        variant="text"
+                        onClick={() => {
+                          clearSpecificFilter('dateFrom');
+                          clearSpecificFilter('dateTo');
+                        }}
+                        sx={{ textTransform: 'none', fontSize: '0.7rem' }}
+                      >
+                        Clear Range
+                      </Button>
+                    </Box>
+                    <Grid container spacing={2}>
+                      <Grid item xs={6}>
+                        <TextField
+                          label="From Date"
+                          type="date"
+                          fullWidth
+                          size="small"
+                          value={filters.dateFrom}
+                          onChange={(e) => handleFilterChange('dateFrom', e.target.value)}
+                          InputLabelProps={{ shrink: true }}
+                        />
+                      </Grid>
+                      <Grid item xs={6}>
+                        <TextField
+                          label="To Date"
+                          type="date"
+                          fullWidth
+                          size="small"
+                          value={filters.dateTo}
+                          onChange={(e) => handleFilterChange('dateTo', e.target.value)}
+                          InputLabelProps={{ shrink: true }}
+                        />
+                      </Grid>
+                    </Grid>
+                  </Box>
+                </Stack>
+              </Box>
+            )}
+
+            {/* Name Filtering Tab */}
+            {tabValue === "2" && (
+              <Box sx={{ p: 2 }}>
+                <Stack spacing={3}>
+                  <Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Filter by Agent Name
+                      </Typography>
+                      <Button
+                        size="small"
+                        variant="text"
+                        onClick={() => clearSpecificFilter('agentName')}
+                        sx={{ textTransform: 'none', fontSize: '0.7rem' }}
+                      >
+                        Clear
+                      </Button>
+                    </Box>
+                    <TextField
+                      label="Filter by Agent Name"
+                      fullWidth
+                      size="small"
+                      placeholder="Enter agent name to search..."
+                      value={filters.agentName}
+                      onChange={(e) => handleFilterChange('agentName', e.target.value)}
+                    />
+                  </Box>
+                  
+                  <Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Filter by Student Name
+                      </Typography>
+                      <Button
+                        size="small"
+                        variant="text"
+                        onClick={() => clearSpecificFilter('studentName')}
+                        sx={{ textTransform: 'none', fontSize: '0.7rem' }}
+                      >
+                        Clear
+                      </Button>
+                    </Box>
+                    <TextField
+                      label="Filter by Student Name"
+                      fullWidth
+                      size="small"
+                      placeholder="Enter student name to search..."
+                      value={filters.studentName}
+                      onChange={(e) => handleFilterChange('studentName', e.target.value)}
+                    />
+                  </Box>
+                </Stack>
+              </Box>
+            )}
+
+            {/* Countries Tab */}
+            {/* {tabValue === "3" && (
+              <Box sx={{ p: 2 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    Select Countries ({filters.countries?.length || 0} selected)
+                  </Typography>
+                </Box>
+                <FormGroup>
+                  <Grid container spacing={1}>
+                    {uniqueCountries.map((country) => (
+                      <Grid item xs={6} key={country}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              size="small"
+                              checked={filters.countries?.includes(country) || false}
+                              onChange={(e) => handleMultiSelectFilter('countries', country, e.target.checked)}
+                            />
+                          }
+                          label={
+                            <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                              {country}
+                            </Typography>
+                          }
+                        />
+                      </Grid>
+                    ))}
+                  </Grid>
+                </FormGroup>
+              </Box>
+            )} */}
+
+            
+            {/* {tabValue === "4" && (
+              <Box sx={{ p: 2 }}>
+                <Stack spacing={3}>
+               
+                  <Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Currencies ({filters.currencies?.length || 0} selected)
+                      </Typography>
+                    </Box>
+                    <FormGroup>
+                      <Grid container spacing={1}>
+                        {uniqueCurrencies.map((currency) => (
+                          <Grid item xs={6} key={currency}>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  size="small"
+                                  checked={filters.currencies?.includes(currency) || false}
+                                  onChange={(e) => handleMultiSelectFilter('currencies', currency, e.target.checked)}
+                                />
+                              }
+                              label={
+                                <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                                  {currency}
+                                </Typography>
+                              }
+                            />
+                          </Grid>
+                        ))}
+                      </Grid>
+                    </FormGroup>
+                  </Box>
+
+                  <Divider />
+
+                
+                  <Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Document Status ({filters.docsStatuses?.length || 0} selected)
+                      </Typography>
+                    </Box>
+                    <FormGroup>
+                      <Grid container spacing={1}>
+                        {uniqueDocsStatuses.map((status) => (
+                          <Grid item xs={6} key={status}>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  size="small"
+                                  checked={filters.docsStatuses?.includes(status) || false}
+                                  onChange={(e) => handleMultiSelectFilter('docsStatuses', status, e.target.checked)}
+                                />
+                              }
+                              label={
+                                <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                                  {status}
+                                </Typography>
+                              }
+                            />
+                          </Grid>
+                        ))}
+                      </Grid>
+                    </FormGroup>
+                  </Box>
+
+                  <Divider />
+
+             
+                  <Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        TT Copy Status ({filters.ttCopyStatuses?.length || 0} selected)
+                      </Typography>
+                    </Box>
+                    <FormGroup>
+                      <Grid container spacing={1}>
+                        {uniqueTtCopyStatuses.map((status) => (
+                          <Grid item xs={6} key={status}>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  size="small"
+                                  checked={filters.ttCopyStatuses?.includes(status) || false}
+                                  onChange={(e) => handleMultiSelectFilter('ttCopyStatuses', status, e.target.checked)}
+                                />
+                              }
+                              label={
+                                <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                                  {status}
+                                </Typography>
+                              }
+                            />
+                          </Grid>
+                        ))}
+                      </Grid>
+                    </FormGroup>
+                  </Box>
+
+                  <Divider />
+
+               
+                  <Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Commission Status ({filters.commissionStatuses?.length || 0} selected)
+                      </Typography>
+                    </Box>
+                    <FormGroup>
+                      <Grid container spacing={1}>
+                        {uniqueCommissionStatuses.map((status) => (
+                          <Grid item xs={6} key={status}>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  size="small"
+                                  checked={filters.commissionStatuses?.includes(status) || false}
+                                  onChange={(e) => handleMultiSelectFilter('commissionStatuses', status, e.target.checked)}
+                                />
+                              }
+                              label={
+                                <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>
+                                  {status}
+                                </Typography>
+                              }
+                            />
+                          </Grid>
+                        ))}
+                      </Grid>
+                    </FormGroup>
+                  </Box>
+                </Stack>
+              </Box>
+            )} */}
+          </Box>
+          
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3, pt: 2, borderTop: 1, borderColor: 'divider' }}>
+            <Button 
+              onClick={clearAllFilters}
+              color="error"
+              sx={{ textTransform: 'none' }}
+            >
+              Clear All Filters
+            </Button>
+            <Button 
+              variant="contained" 
+              onClick={() => setIsFilterModalOpen(false)}
+              sx={{ 
+                minWidth: '100px',
+                background: 'linear-gradient(135deg, #11047A 0%, #4D1DB3 100%)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #0D0362 0%, #3B169A 100%)',
+                },
+                textTransform: 'none'
+              }}
+            >
+              Apply Filters
             </Button>
           </Box>
         </Box>

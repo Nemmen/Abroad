@@ -13,6 +13,24 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           border: 'none', // Remove outer border
+          '& .row-non-claimable': {
+            backgroundColor: '#ffebee !important',
+            '&:hover': {
+              backgroundColor: '#ffcdd2 !important',
+            },
+          },
+          '& .row-under-processing': {
+            backgroundColor: '#fff8e1 !important',
+            '&:hover': {
+              backgroundColor: '#ffecb3 !important',
+            },
+          },
+          '& .row-paid': {
+            backgroundColor: '#e8f5e8 !important',
+            '&:hover': {
+              backgroundColor: '#c8e6c9 !important',
+            },
+          },
         },
         columnSeparator: {
           display: 'none', // Remove column separator lines
@@ -36,22 +54,23 @@ export default function DataTable({
   rows, 
   link, 
   sx, 
-  loading = false, 
-  pagination = true,
-  paginationMode = 'client',
-  sortingMode = 'client',
-  paginationModel = { page: 0, pageSize: 10 },
-  pageSizeOptions = [5, 10, 15],
-  rowCount = 0,
-  onPaginationModelChange,
-  onSortModelChange,
-  sortModel = []
+  onSelectionChange, 
+  checkboxSelection = false, 
+  getRowClassName,
+  loading = false,
+  pagination
 }) {
   const location = useLocation();
   const navigate = useNavigate();
 
   const viewHandle = (params) => {
     navigate(`${location.pathname}/${params.id}`);
+  };
+
+  const handleSelectionChange = (newSelection) => {
+    if (onSelectionChange) {
+      onSelectionChange(newSelection);
+    }
   };
 
   return (
@@ -84,17 +103,27 @@ export default function DataTable({
                 rows={rows}
                 columns={columns}
                 loading={loading}
-                pagination={pagination}
-                paginationMode={paginationMode}
-                sortingMode={sortingMode}
-                paginationModel={paginationModel}
-                pageSizeOptions={pageSizeOptions}
-                rowCount={rowCount}
-                onPaginationModelChange={onPaginationModelChange}
-                onSortModelChange={onSortModelChange}
-                sortModel={sortModel}
+                pageSizeOptions={[10, 15, 25]}
+                paginationMode={pagination ? 'server' : 'client'}
+                rowCount={pagination?.total || rows.length}
+                paginationModel={{
+                  pageSize: pagination?.pageSize || 10,
+                  page: (pagination?.page || 1) - 1, // DataGrid uses 0-based indexing
+                }}
+                onPaginationModelChange={(model) => {
+                  if (pagination?.onPageChange) {
+                    pagination.onPageChange(model.page + 1); // Convert back to 1-based
+                  }
+                  if (pagination?.onPageSizeChange && model.pageSize !== pagination.pageSize) {
+                    pagination.onPageSizeChange(model.pageSize);
+                  }
+                }}
                 rowHeight={70}
                 onRowClick={viewHandle}
+                checkboxSelection={checkboxSelection}
+                onRowSelectionModelChange={handleSelectionChange}
+                disableRowSelectionOnClick={checkboxSelection}
+                getRowClassName={getRowClassName}
               />
             </Box>
             {/* <Box sx={{ padding: 2, textAlign: 'end' }}>

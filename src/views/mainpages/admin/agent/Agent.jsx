@@ -116,63 +116,6 @@ export default function Agent() {
     return Math.round((current / total) * 100);
   };
 
-  const [usersPagination, setUsersPagination] = useState({
-    page: 1,
-    limit: 10,
-    total: 0,
-    pages: 0
-  });
-  
-  const [usersSearch, setUsersSearch] = useState('');
-  const [sortField, setSortField] = useState('name');
-  const [sortOrder, setSortOrder] = useState('asc');
-  
-  const fetchUsers = async (page = 1, limit = 10, search = '', sortField = 'name', sortOrder = 'asc') => {
-    try {
-      // Get token from localStorage
-      const token = localStorage.getItem('token_auth');
-      
-      // Set up headers with the token
-      const headers = {
-        'Authorization': `Bearer ${token}`
-      };
-      
-      // Build query parameters
-      const params = new URLSearchParams({
-        page,
-        limit,
-        sortField,
-        sortOrder,
-        role: 'user' // Only get agents
-      });
-      
-      // Add search parameter if provided
-      if (search) {
-        params.append('search', search);
-      }
-      
-      const response = await axios.get(
-        `https://abroad-backend-gray.vercel.app/auth/getAllusers?${params.toString()}`,
-        { headers }
-      );
-      
-      if (response.data.users) {
-        setUsers(response.data.users);
-        
-        if (response.data.pagination) {
-          setUsersPagination({
-            page: response.data.pagination.page,
-            limit: response.data.pagination.limit,
-            total: response.data.pagination.total,
-            pages: response.data.pagination.pages
-          });
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching users:', error);
-    }
-  };
-  
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -186,21 +129,24 @@ export default function Agent() {
           'Authorization': `Bearer ${token}`
         };
         
-        // Fetch users separately with pagination
-        await fetchUsers(usersPagination.page, usersPagination.limit, usersSearch, sortField, sortOrder);
-        
-        // Fetch other analytics data in parallel
+        // Parallel API calls for better performance
         const [
+          usersRes, 
           statsRes, 
           comparisonRes,
           yearlyGicRes,
           yearlyForexRes
         ] = await Promise.all([
+          axios.get('https://abroad-backend-gray.vercel.app/admin/getuser', { headers }),
           axios.get(`${API_BASE_URL}/agent-analytics`, { headers }),
           axios.get(`${API_BASE_URL}/agent-comparison`, { headers }),
           axios.get(`${API_BASE_URL}/getYearlyGICData`, { headers }),
           axios.get(`${API_BASE_URL}/getYearlyForexData`, { headers })
         ]);
+        
+        // Process users data
+        const filteredUsers = usersRes.data.users.filter(user => user.role === 'user');
+        setUsers(filteredUsers);
         
         // Process agent stats
         if (statsRes.data && statsRes.data.success) {
@@ -502,19 +448,6 @@ export default function Agent() {
               setSearchValue={setSearchValue} 
               onRowClick={handleUserRowClick} 
               isLoading={loading}
-              pagination={usersPagination}
-              onPageChange={(page) => fetchUsers(page, usersPagination.limit, usersSearch, sortField, sortOrder)}
-              onPageSizeChange={(size) => fetchUsers(1, size, usersSearch, sortField, sortOrder)}
-              onSortChange={(field, order) => {
-                setSortField(field);
-                setSortOrder(order);
-                fetchUsers(1, usersPagination.limit, usersSearch, field, order);
-              }}
-              onSearchChange={(search) => {
-                setUsersSearch(search);
-                fetchUsers(1, usersPagination.limit, search, sortField, sortOrder);
-              }}
-              serverSide={true}
             />
           </CardBody>
         </Card>

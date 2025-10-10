@@ -5,6 +5,7 @@ import {
   Divider,
   Text,
   VStack,
+  HStack,
   Checkbox,
   Modal,
   ModalOverlay,
@@ -13,18 +14,29 @@ import {
   ModalCloseButton,
   ModalBody,
   ModalFooter,
-  FormControl,
-  FormLabel,
   Input,
   Select,
-  Grid,
-  GridItem,
-  HStack,
+  FormControl,
+  FormLabel,
+  Tabs,
+  TabList,
+  TabPanels,
+  Tab,
+  TabPanel,
+  IconButton,
+  useToast,
   Spinner,
 } from '@chakra-ui/react';
-import { SearchIcon, CloseIcon } from '@chakra-ui/icons';
+import { ChevronDownIcon, ChevronUpIcon } from '@chakra-ui/icons';
 import DataTable from 'components/DataTable';
 import { Link } from 'react-router-dom';
+import { 
+  saveFiltersToStorage, 
+  loadFiltersFromStorage, 
+  clearFiltersFromStorage,
+  FILTER_STORAGE_KEYS,
+  DEFAULT_FILTERS 
+} from 'utils/filterUtils';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
 
@@ -39,87 +51,97 @@ const allColumns = [
   { field: 'docsStatus', headerName: 'DOCs Status', width: 150 },
   { field: 'ttCopyStatus', headerName: 'TT Copy Status', width: 150 },
   { field: 'agentCommission', headerName: 'Agent Commission', width: 150 },
+  { field: 'aecommission', headerName: 'AE Commission', width: 150 },
   { field: 'tds', headerName: 'TDS', width: 100 },
   { field: 'netPayable', headerName: 'Net Payable', width: 150 },
-  { field: 'commissionStatus', headerName: 'Commission Status', width: 180 },
+  { field: 'remarks', headerName: 'Remarks', width: 200 },
+  { 
+    field: 'commissionStatus', 
+    headerName: 'Commission Status', 
+    width: 180,
+    renderCell: (params) => {
+      let displayText = params.value;
+      
+      // Replace "not received" with "non claimable" for display
+      if (displayText?.toLowerCase().includes('not received')) {
+        displayText = displayText.replace(/not received/gi, 'non claimable');
+      }
+      
+      return (
+        <span style={{ fontWeight: '600' }}>
+          {displayText}
+        </span>
+      );
+    }
+  },
 ];
 
 const Forex = () => {
   const [rows, setRows] = useState([]);
   const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [filteredData, setFilteredData] = useState([]);
   const [selectedColumns, setSelectedColumns] = useState(
     allColumns.map((col) => col.field),
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [tabValue, setTabValue] = useState("0");
   
-  const [pagination, setPagination] = useState({
-    page: 0, // MUI DataGrid uses 0-based pages
-    pageSize: 10,
-    total: 0,
-    pages: 1
-  });
-  
-  const [sortModel, setSortModel] = useState([
-    {
-      field: 'date',
-      sort: 'desc',
-    },
-  ]);
-  
-  const [filterModel, setFilterModel] = useState({
-    agentName: '',
-    studentName: '',
-    country: '',
+  // Bulk operations states
+  const [selectedRows, setSelectedRows] = useState([]);
+  const [isBulkUpdateModalOpen, setIsBulkUpdateModalOpen] = useState(false);
+  const [bulkUpdateData, setBulkUpdateData] = useState({
     commissionStatus: '',
-    docsStatus: '',
-    ttCopyStatus: '',
-    startDate: '',
-    endDate: '',
+    commissionPaymentDate: '',
   });
+  
+  // Filter states with persistent storage
+  const [filters, setFilters] = useState(() => 
+    loadFiltersFromStorage(FILTER_STORAGE_KEYS.ADMIN_FOREX, DEFAULT_FILTERS.ADMIN_FOREX)
+  );
+  
+  // AE Commission summary states
+  const [aeCommissionSummary, setAeCommissionSummary] = useState({
+    total: 0,
+    dateFrom: '',
+    dateTo: '',
+  });
+  
+  const [aeCommissionLoading, setAeCommissionLoading] = useState(false);
 
-  const fetchData = async (page = 0, pageSize = 10, sortField = 'date', sortOrder = 'desc', filters = {}) => {
+  // Pagination states
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 10, // Default page size
+    total: 0,
+    pages: 0
+  });
+  
+  // Loading state
+  const [loading, setLoading] = useState(false);
+
+  // Fetch data with pagination
+  const fetchData = async (page = pagination.page, limit = pagination.limit) => {
     setLoading(true);
     try {
-      // Convert MUI's 0-based page to backend's 1-based page
-      const backendPage = page + 1;
+      // For better performance, fetch all records at once if limit is high
+      const requestLimit = limit > 100 ? 1000 : limit; // Set high limit for "show all" scenarios
       
-      // Build query parameters
       const params = new URLSearchParams({
-        page: backendPage,
-        limit: pageSize,
-        sortField,
-        sortOrder
+        page: page.toString(),
+        limit: requestLimit.toString(),
+        sortField: 'date',
+        sortOrder: 'desc'
       });
-      
-      // Add any filter parameters that have values
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value) {
-          params.append(key, value);
-        }
-      });
-      
+
       const response = await axios.get(
-        `https://abroad-backend-gray.vercel.app/auth/viewAllForexForms?${params.toString()}`
+        `https://abroad-backend-gray.vercel.app/auth/viewAllForexForms?${params}`,
       );
       
-      if (response.data.forexForms) {
-        setData(response.data.forexForms);
-        
-        // Update pagination state
-        if (response.data.pagination) {
-          setPagination({
-            page, // Keep 0-based for MUI
-            pageSize,
-            total: response.data.pagination.total,
-            pages: response.data.pagination.pages
-          });
-        }
-        
-        // Map data for the DataGrid
+      if (response.data && response.data.forexForms && response.data.forexForms.length > 0) {
         const forexForms = response.data.forexForms.map((item) => ({
           id: item._id,
-          agentRef: item.agentRef?.name?.toUpperCase() || 'N/A',
+          agentRef: item.agentRef?.name.toUpperCase() || 'N/A',
           studentRef: item?.studentName || 'N/A',
           date: new Date(item.date).toLocaleDateString('en-US'),
           country: item.country || 'N/A',
@@ -129,11 +151,41 @@ const Forex = () => {
           docsStatus: item.docsStatus || 'N/A',
           ttCopyStatus: item.ttCopyStatus || 'N/A',
           agentCommission: item.agentCommission || 0,
+          aecommission: item.aecommission || 0,
           tds: item.tds || 0,
           netPayable: item.netPayable || 0,
+          remarks: item.remarks || 'N/A',
           commissionStatus: item.commissionStatus || 'N/A',
         }));
+        
         setRows(forexForms);
+        setData(response.data.forexForms);
+        
+        console.log('Admin Forex - Fetched data:', {
+          totalRecords: response.data.forexForms.length,
+          formattedRows: forexForms.length,
+          pagination: response.data.pagination
+        });
+        
+        // Update pagination info
+        if (response.data.pagination) {
+          setPagination(prev => ({
+            ...prev,
+            page: page,
+            limit: limit,
+            total: response.data.pagination.total,
+            pages: response.data.pagination.pages
+          }));
+        }
+      } else {
+        console.log('Admin Forex - No data received from backend');
+        setRows([]);
+        setData([]);
+        setPagination(prev => ({
+          ...prev,
+          total: 0,
+          pages: 0
+        }));
       }
     } catch (error) {
       console.error('Error fetching forex forms:', error);
@@ -142,94 +194,234 @@ const Forex = () => {
     }
   };
 
-  // Handle page change
-  const handlePageChange = (newPage) => {
-    fetchData(newPage, pagination.pageSize, sortModel[0]?.field, sortModel[0]?.sort, filterModel);
-  };
+  // Fetch total AE commission using dedicated API endpoint
+  const fetchTotalAeCommission = async (dateFrom = null, dateTo = null) => {
+    setAeCommissionLoading(true);
+    try {
+      const params = new URLSearchParams();
 
-  // Handle page size change
-  const handlePageSizeChange = (newPageSize) => {
-    fetchData(0, newPageSize, sortModel[0]?.field, sortModel[0]?.sort, filterModel);
-  };
+      // Add date filters if provided
+      if (dateFrom) {
+        params.append('startDate', dateFrom);
+      }
+      if (dateTo) {
+        params.append('endDate', dateTo);
+      }
 
-  // Handle sorting change
-  const handleSortModelChange = (newSortModel) => {
-    if (newSortModel.length) {
-      setSortModel(newSortModel);
-    } else {
-      // If sort is cleared, reset to default sort
-      setSortModel([{ field: 'date', sort: 'desc' }]);
+      const response = await axios.get(
+        `https://abroad-backend-gray.vercel.app/auth/totalAeCommission?${params}`,
+      );
+      
+      if (response.data.success) {
+        setAeCommissionSummary(prev => ({ 
+          ...prev, 
+          total: response.data.totalAeCommission || 0 
+        }));
+      }
+    } catch (error) {
+      console.error('Error fetching total AE commission:', error);
+      // Fallback to 0 if API fails
+      setAeCommissionSummary(prev => ({ ...prev, total: 0 }));
+    } finally {
+      setAeCommissionLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchData(
-      pagination.page, 
-      pagination.pageSize, 
-      sortModel[0]?.field || 'date', 
-      sortModel[0]?.sort || 'desc',
-      filterModel
-    );
-  }, [pagination.page, pagination.pageSize, sortModel]);
+    fetchData();
+    fetchTotalAeCommission(); // Fetch total AE commission on component mount
+  }, []);
 
-  const handleDownloadExcel = async () => {
-    setLoading(true);
-    try {
-      // Fetch all data for export (no pagination)
-      const response = await axios.get(
-        'https://abroad-backend-gray.vercel.app/auth/viewAllForexForms',
-        {
-          params: {
-            limit: 1000, // Get a large number of records for export
-            // Maintain any current filters
-            ...Object.fromEntries(
-              Object.entries(filterModel).filter(([_, value]) => value)
-            )
-          }
-        }
+  // Extract unique values for filter dropdowns
+  const uniqueValues = useMemo(() => {
+    return {
+      commissionStatus: [...new Set(rows.map(item => item.commissionStatus).filter(val => val && val !== 'N/A'))],
+      country: [...new Set(rows.map(item => item.country).filter(val => val && val !== 'N/A'))],
+      docsStatus: [...new Set(rows.map(item => item.docsStatus).filter(val => val && val !== 'N/A'))],
+      ttCopyStatus: [...new Set(rows.map(item => item.ttCopyStatus).filter(val => val && val !== 'N/A'))],
+    };
+  }, [rows]);
+
+  // Filter and sort data effect
+  useEffect(() => {
+    let processedData = [...rows];
+
+    // Apply name filters
+    if (filters.agentName) {
+      processedData = processedData.filter(item => 
+        item.agentRef.toLowerCase().includes(filters.agentName.toLowerCase())
       );
-
-      if (!response.data.forexForms || response.data.forexForms.length === 0) {
-        console.error("No data available for export");
-        return;
-      }
-
-      const exportData = response.data.forexForms;
-      
-      const cleanData = exportData.map((item) => {
-        return {
-          agentRef: item.agentRef?.name || 'N/A',
-          studentRef: item?.studentName || 'N/A',
-          date: new Date(item.date).toLocaleDateString('en-US'),
-          country: item.country || 'N/A',
-          currencyBooked: item.currencyBooked || 'N/A',
-          quotation: item.quotation || 'N/A',
-          studentPaid: item.studentPaid || 'N/A',
-          docsStatus: item.docsStatus || 'N/A',
-          ttCopyStatus: item.ttCopyStatus || 'N/A',
-          agentCommission: item.agentCommission || 0,
-          tds: item.tds || 0,
-          netPayable: item.netPayable || 0,
-          commissionStatus: item.commissionStatus || 'N/A',
-        };
-      });
-
-      const filteredData = cleanData.map((item) =>
-        selectedColumns.reduce((acc, field) => {
-          acc[field] = item[field] || 'N/A';
-          return acc;
-        }, {}),
-      );
-
-      const worksheet = XLSX.utils.json_to_sheet(filteredData);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Forex Data');
-      XLSX.writeFile(workbook, 'ForexData.xlsx');
-    } catch (error) {
-      console.error("Error exporting data to Excel:", error);
-    } finally {
-      setLoading(false);
     }
+    
+    if (filters.studentName) {
+      processedData = processedData.filter(item => 
+        item.studentRef.toLowerCase().includes(filters.studentName.toLowerCase())
+      );
+    }
+
+    // Apply multi-select filters
+    if (filters.commissionStatus && filters.commissionStatus.length > 0) {
+      processedData = processedData.filter(item => 
+        filters.commissionStatus.includes(item.commissionStatus)
+      );
+    }
+
+    if (filters.country && filters.country.length > 0) {
+      processedData = processedData.filter(item => 
+        filters.country.includes(item.country)
+      );
+    }
+
+    if (filters.docsStatus && filters.docsStatus.length > 0) {
+      processedData = processedData.filter(item => 
+        filters.docsStatus.includes(item.docsStatus)
+      );
+    }
+
+    if (filters.ttCopyStatus && filters.ttCopyStatus.length > 0) {
+      processedData = processedData.filter(item => 
+        filters.ttCopyStatus.includes(item.ttCopyStatus)
+      );
+    }
+
+    // Apply date filters
+    if (filters.specificDate) {
+      processedData = processedData.filter(item => {
+        const itemDate = new Date(item.date);
+        const filterDate = new Date(filters.specificDate);
+        return itemDate.toDateString() === filterDate.toDateString();
+      });
+    }
+
+    if (filters.dateFrom && filters.dateTo) {
+      processedData = processedData.filter(item => {
+        const itemDate = new Date(item.date);
+        const fromDate = new Date(filters.dateFrom);
+        const toDate = new Date(filters.dateTo);
+        return itemDate >= fromDate && itemDate <= toDate;
+      });
+    }
+
+    // Apply date sorting
+    if (filters.dateSort) {
+      processedData.sort((a, b) => {
+        const dateA = new Date(a.date || 0);
+        const dateB = new Date(b.date || 0);
+        
+        if (filters.dateSort === 'asc') {
+          return dateA - dateB;
+        } else if (filters.dateSort === 'desc') {
+          return dateB - dateA;
+        }
+        return 0;
+      });
+    }
+
+    setFilteredData(processedData);
+  }, [rows, filters]);
+
+  // Filter handlers with persistent storage
+  const handleFilterChange = (filterType, value) => {
+    const newFilters = {
+      ...filters,
+      [filterType]: value
+    };
+    setFilters(newFilters);
+    saveFiltersToStorage(FILTER_STORAGE_KEYS.ADMIN_FOREX, newFilters);
+  };
+
+  const handleMultiSelectFilter = (filterType, value, checked) => {
+    const currentValues = filters[filterType] || [];
+    let newValues;
+    
+    if (checked) {
+      newValues = [...currentValues, value];
+    } else {
+      newValues = currentValues.filter(item => item !== value);
+    }
+    
+    const newFilters = {
+      ...filters,
+      [filterType]: newValues
+    };
+    setFilters(newFilters);
+    saveFiltersToStorage(FILTER_STORAGE_KEYS.ADMIN_FOREX, newFilters);
+  };
+
+  const clearAllFilters = () => {
+    const clearedFilters = DEFAULT_FILTERS.ADMIN_FOREX;
+    setFilters(clearedFilters);
+    saveFiltersToStorage(FILTER_STORAGE_KEYS.ADMIN_FOREX, clearedFilters);
+  };
+
+  const clearSpecificFilter = (filterType) => {
+    const newFilters = {
+      ...filters,
+      [filterType]: Array.isArray(filters[filterType]) ? [] : ''
+    };
+    setFilters(newFilters);
+    saveFiltersToStorage(FILTER_STORAGE_KEYS.ADMIN_FOREX, newFilters);
+  };
+
+  const handleDownloadExcel = () => {
+    const cleanData = data.map((item) => {
+      return {
+        agentRef: item.agentRef?.name || 'N/A',
+        studentRef: item?.studentName || 'N/A',
+        date: new Date(item.date).toLocaleDateString('en-US'),
+        country: item.country || 'N/A',
+        currencyBooked: item.currencyBooked || 'N/A',
+        quotation: item.quotation || 'N/A',
+        studentPaid: item.studentPaid || 'N/A',
+        docsStatus: item.docsStatus || 'N/A',
+        ttCopyStatus: item.ttCopyStatus || 'N/A',
+        agentCommission: item.agentCommission || 0,
+        tds: item.tds || 0,
+        netPayable: item.netPayable || 0,
+        commissionStatus: item.commissionStatus || 'N/A',
+      };
+    });
+
+    const filteredData = cleanData.map((item) =>
+      selectedColumns.reduce((acc, field) => {
+        acc[field] = item[field] || 'N/A';
+        return acc;
+      }, {}),
+    );
+
+    const worksheet = XLSX.utils.json_to_sheet(filteredData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Forex Data');
+    XLSX.writeFile(workbook, 'ForexData.xlsx');
+  };
+
+  // Calculate AE Commission summary by fetching from backend
+  const calculateAeCommissionSummary = () => {
+    // Fetch total AE commission with date filters
+    fetchTotalAeCommission(aeCommissionSummary.dateFrom, aeCommissionSummary.dateTo);
+  };
+
+  // Calculate summary when dates change
+  useEffect(() => {
+    if (aeCommissionSummary.dateFrom || aeCommissionSummary.dateTo) {
+      calculateAeCommissionSummary();
+    }
+  }, [aeCommissionSummary.dateFrom, aeCommissionSummary.dateTo]);
+
+  const handleAeCommissionDateChange = (field, value) => {
+    setAeCommissionSummary(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  // Pagination handlers
+  const handlePageChange = (newPage) => {
+    fetchData(newPage, pagination.limit);
+  };
+
+  const handlePageSizeChange = (newPageSize) => {
+    fetchData(1, newPageSize);
   };
 
   const handleColumnSelection = (field) => {
@@ -240,11 +432,108 @@ const Forex = () => {
     );
   };
 
+  // Bulk update handlers
+  const handleRowSelection = (newSelection) => {
+    setSelectedRows(newSelection);
+  };
+
+  const handleBulkUpdate = async () => {
+    if (selectedRows.length === 0) {
+      alert('Please select at least one row to update.');
+      return;
+    }
+    
+    if (!bulkUpdateData.commissionStatus) {
+      alert('Please select a commission status.');
+      return;
+    }
+
+    try {
+      const updatePromises = selectedRows.map(rowId => 
+        axios.put(`https://abroad-backend-gray.vercel.app/auth/updateForexForm/${rowId}`, {
+          commissionStatus: bulkUpdateData.commissionStatus,
+          commissionPaymentDate: bulkUpdateData.commissionPaymentDate || undefined,
+        })
+      );
+
+      await Promise.all(updatePromises);
+      
+      // Refresh data
+      const response = await axios.get(
+        'https://abroad-backend-gray.vercel.app/auth/viewAllForexForms',
+      );
+      
+      if (response.data.forexForms) {
+        const forexForms = response.data.forexForms.map((item) => ({
+          id: item._id,
+          agentRef: item.agentRef?.name.toUpperCase() || 'N/A',
+          studentRef: item?.studentName || 'N/A',
+          date: new Date(item.date).toLocaleDateString('en-US'),
+          country: item.country || 'N/A',
+          currencyBooked: item.currencyBooked || 'N/A',
+          quotation: item.quotation || 'N/A',
+          studentPaid: item.studentPaid || 'N/A',
+          docsStatus: item.docsStatus || 'N/A',
+          ttCopyStatus: item.ttCopyStatus || 'N/A',
+          agentCommission: item.agentCommission || 'N/A',
+          aecommission: item.aecommission || 'N/A',
+          tds: item.tds || 'N/A',
+          netPayable: item.netPayable || 'N/A',
+          remarks: item.remarks || 'N/A',
+          commissionStatus: item.commissionStatus || 'N/A',
+        }));
+        
+        // Sort by date (latest first)
+        forexForms.sort((a, b) => new Date(b.date) - new Date(a.date));
+        
+        setRows(forexForms);
+        setData(response.data.forexForms);
+      }
+      
+      // Reset states
+      setSelectedRows([]);
+      setBulkUpdateData({ commissionStatus: '', commissionPaymentDate: '' });
+      setIsBulkUpdateModalOpen(false);
+      
+      alert(`Successfully updated ${selectedRows.length} records.`);
+    } catch (error) {
+      console.error('Error updating records:', error);
+      alert('Error updating records. Please try again.');
+    }
+  };
+
+  const handleBulkUpdateChange = (field, value) => {
+    setBulkUpdateData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
   const memoizedColumns = useMemo(
     () => allColumns.filter((col) => selectedColumns.includes(col.field)),
     [selectedColumns],
   );
-  const memoizedRows = useMemo(() => rows, [rows]);
+  const memoizedRows = useMemo(() => {
+    console.log('Admin Forex - Memoized rows calculation:', {
+      filteredDataLength: filteredData.length,
+      rowsLength: rows.length,
+      usingFiltered: filteredData.length > 0,
+      result: filteredData.length > 0 ? filteredData : rows
+    });
+    return filteredData.length > 0 ? filteredData : rows;
+  }, [filteredData, rows]);
+
+  const getRowClassName = (params) => {
+    const status = params.row.commissionStatus?.toLowerCase();
+    if (status?.includes('non claimable')) {
+      return 'row-non-claimable';
+    } else if (status?.includes('under processing')) {
+      return 'row-under-processing';
+    } else if (status?.includes('paid')) {
+      return 'row-paid';
+    }
+    return '';
+  };
 
   return (
     <Box width={'full'}>
@@ -257,6 +546,87 @@ const Forex = () => {
         flexWrap={'wrap'}
       >
         <Text fontSize="34px" className='mb-6 lg:mb-0'>FOREX Registrations</Text>
+        
+        {/* AE Commission Summary - Full Width Card Design */}
+        <Box 
+          width={'100%'} 
+          bg={'white'} 
+          border={'1px solid'} 
+          borderColor={'gray.200'} 
+          borderRadius={'lg'} 
+          p={6}
+          mb={4}
+          position={'relative'}
+          boxShadow={'sm'}
+        >
+          {/* Green accent bar at top */}
+          <Box 
+            position={'absolute'}
+            top={0}
+            left={0}
+            right={0}
+            height={'4px'}
+            bg={'green.400'}
+            borderTopRadius={'lg'}
+          />
+          
+          <HStack justify={'space-between'} align={'center'}>
+            <VStack align={'start'} spacing={1}>
+              <Text fontSize="sm" color="gray.500" fontWeight={'medium'}>
+                AE Commission
+              </Text>
+              <Text fontSize="3xl" fontWeight="bold" color="gray.800">
+                {aeCommissionLoading ? (
+                  <Spinner size="sm" color="blue.500" />
+                ) : (
+                  `₹${aeCommissionSummary.total.toLocaleString('en-IN')}`
+                )}
+              </Text>
+              <Text fontSize="sm" color="gray.500">
+                From forex transactions
+              </Text>
+            </VStack>
+            
+            <VStack align={'end'} spacing={3}>
+              <HStack spacing={3}>
+                <Input 
+                  type="date"
+                  size="sm"
+                  placeholder="From Date"
+                  value={aeCommissionSummary.dateFrom}
+                  onChange={(e) => handleAeCommissionDateChange('dateFrom', e.target.value)}
+                  width={'130px'}
+                  borderColor={'gray.300'}
+                />
+                <Input 
+                  type="date"
+                  size="sm"
+                  placeholder="To Date"
+                  value={aeCommissionSummary.dateTo}
+                  onChange={(e) => handleAeCommissionDateChange('dateTo', e.target.value)}
+                  width={'130px'}
+                  borderColor={'gray.300'}
+                />
+              </HStack>
+              
+              {/* Dollar icon in green circle */}
+              <Box
+                bg={'green.100'}
+                borderRadius={'full'}
+                width={'50px'}
+                height={'50px'}
+                display={'flex'}
+                alignItems={'center'}
+                justifyContent={'center'}
+              >
+                <Text fontSize={'24px'} color={'green.600'}>
+                  $
+                </Text>
+              </Box>
+            </VStack>
+          </HStack>
+        </Box>
+        
         <div>
           <Button
             onClick={() => setIsModalOpen(true)}
@@ -270,6 +640,17 @@ const Forex = () => {
             Filter Columns
           </Button>
           <Button
+            onClick={() => setIsFilterModalOpen(true)}
+            width={'200px'}
+            variant="solid"
+            colorScheme="purple"
+            borderRadius={'none'}
+            mr={4}
+            mb={1}
+          >
+            Filter & Sort Data
+          </Button>
+          <Button
             onClick={handleDownloadExcel}
             width={'200px'}
             variant="solid"
@@ -277,9 +658,20 @@ const Forex = () => {
             borderRadius={'none'}
             mr={4}
             mb={1}
-            isLoading={loading}
           >
             Download Excel
+          </Button>
+          <Button
+            onClick={() => setIsBulkUpdateModalOpen(true)}
+            width={'200px'}
+            variant="solid"
+            colorScheme="orange"
+            borderRadius={'none'}
+            mr={4}
+            mb={1}
+            isDisabled={selectedRows.length === 0}
+          >
+            Bulk Update ({selectedRows.length})
           </Button>
           <Link to={'/admin/forex/form'}>
             <Button
@@ -302,179 +694,22 @@ const Forex = () => {
         height={'0.5px'}
       />
       
-      {/* Filter Section */}
-      <Box p={4} bg="white" borderRadius="md" shadow="md" mb={4} mx={7}>
-        <Grid templateColumns={{ base: "repeat(1, 1fr)", md: "repeat(3, 1fr)" }} gap={4}>
-          <GridItem>
-            <FormControl>
-              <FormLabel fontSize="sm">Agent Name</FormLabel>
-              <Input 
-                placeholder="Search by agent name" 
-                size="sm"
-                value={filterModel.agentName || ''}
-                onChange={(e) => setFilterModel({...filterModel, agentName: e.target.value})}
-              />
-            </FormControl>
-          </GridItem>
-          
-          <GridItem>
-            <FormControl>
-              <FormLabel fontSize="sm">Student Name</FormLabel>
-              <Input 
-                placeholder="Search by student name" 
-                size="sm" 
-                value={filterModel.studentName || ''}
-                onChange={(e) => setFilterModel({...filterModel, studentName: e.target.value})}
-              />
-            </FormControl>
-          </GridItem>
-          
-          <GridItem>
-            <FormControl>
-              <FormLabel fontSize="sm">Country</FormLabel>
-              <Input 
-                placeholder="Search by country" 
-                size="sm" 
-                value={filterModel.country || ''}
-                onChange={(e) => setFilterModel({...filterModel, country: e.target.value})}
-              />
-            </FormControl>
-          </GridItem>
-          
-          <GridItem>
-            <FormControl>
-              <FormLabel fontSize="sm">Commission Status</FormLabel>
-              <Select 
-                placeholder="All statuses" 
-                size="sm"
-                value={filterModel.commissionStatus || ''}
-                onChange={(e) => setFilterModel({...filterModel, commissionStatus: e.target.value})}
-              >
-                <option value="Not Received">Not Received</option>
-                <option value="Paid">Paid</option>
-                <option value="Under Processing">Under Processing</option>
-              </Select>
-            </FormControl>
-          </GridItem>
-          
-          <GridItem>
-            <FormControl>
-              <FormLabel fontSize="sm">Docs Status</FormLabel>
-              <Select 
-                placeholder="All statuses" 
-                size="sm"
-                value={filterModel.docsStatus || ''}
-                onChange={(e) => setFilterModel({...filterModel, docsStatus: e.target.value})}
-              >
-                <option value="Received">Received</option>
-                <option value="Not Received">Not Received</option>
-                <option value="Pending">Pending</option>
-              </Select>
-            </FormControl>
-          </GridItem>
-          
-          <GridItem>
-            <FormControl>
-              <FormLabel fontSize="sm">TT Copy Status</FormLabel>
-              <Select 
-                placeholder="All statuses" 
-                size="sm"
-                value={filterModel.ttCopyStatus || ''}
-                onChange={(e) => setFilterModel({...filterModel, ttCopyStatus: e.target.value})}
-              >
-                <option value="Received">Received</option>
-                <option value="Not Received">Not Received</option>
-                <option value="Pending">Pending</option>
-              </Select>
-            </FormControl>
-          </GridItem>
-          
-          <GridItem>
-            <FormControl>
-              <FormLabel fontSize="sm">Start Date</FormLabel>
-              <Input 
-                type="date" 
-                size="sm"
-                value={filterModel.startDate || ''}
-                onChange={(e) => setFilterModel({...filterModel, startDate: e.target.value})}
-              />
-            </FormControl>
-          </GridItem>
-          
-          <GridItem>
-            <FormControl>
-              <FormLabel fontSize="sm">End Date</FormLabel>
-              <Input 
-                type="date" 
-                size="sm"
-                value={filterModel.endDate || ''}
-                onChange={(e) => setFilterModel({...filterModel, endDate: e.target.value})}
-              />
-            </FormControl>
-          </GridItem>
-          
-          <GridItem display="flex" alignItems="flex-end">
-            <HStack spacing={2}>
-              <Button 
-                leftIcon={<SearchIcon />} 
-                colorScheme="blue" 
-                size="sm"
-                onClick={() => fetchData(0, pagination.pageSize, sortModel[0]?.field, sortModel[0]?.sort, filterModel)}
-                isLoading={loading}
-              >
-                Search
-              </Button>
-              <Button 
-                leftIcon={<CloseIcon />} 
-                variant="outline" 
-                size="sm"
-                onClick={() => {
-                  const resetFilters = {
-                    agentName: '',
-                    studentName: '',
-                    country: '',
-                    commissionStatus: '',
-                    docsStatus: '',
-                    ttCopyStatus: '',
-                    startDate: '',
-                    endDate: '',
-                  };
-                  setFilterModel(resetFilters);
-                  fetchData(0, pagination.pageSize, sortModel[0]?.field, sortModel[0]?.sort, resetFilters);
-                }}
-              >
-                Reset
-              </Button>
-            </HStack>
-          </GridItem>
-        </Grid>
-      </Box>
-      
       <Box maxHeight="1200px" overflowY="auto">
         <DataTable 
           columns={memoizedColumns} 
-          rows={memoizedRows}
+          rows={memoizedRows} 
+          checkboxSelection={true}
+          onSelectionChange={handleRowSelection}
+          getRowClassName={getRowClassName}
           loading={loading}
-          paginationModel={{
+          pagination={{
             page: pagination.page,
-            pageSize: pagination.pageSize,
+            pageSize: pagination.limit,
+            total: pagination.total,
+            pageSizeOptions: [10, 15, 25],
+            onPageChange: handlePageChange,
+            onPageSizeChange: handlePageSizeChange,
           }}
-          pageSizeOptions={[5, 10, 25, 50]}
-          pagination
-          paginationMode="server"
-          sortingMode="server"
-          rowCount={pagination.total}
-          onPaginationModelChange={(model) => {
-            if (model.page !== pagination.page) {
-              handlePageChange(model.page);
-            }
-            if (model.pageSize !== pagination.pageSize) {
-              handlePageSizeChange(model.pageSize);
-            }
-          }}
-          onSortModelChange={handleSortModelChange}
-          sortModel={sortModel}
-          sx={{ minHeight: 400 }}
         />
       </Box>
 
@@ -498,8 +733,333 @@ const Forex = () => {
             </VStack>
           </ModalBody>
           <ModalFooter>
+            <Button 
+              colorScheme="red" 
+              variant="outline" 
+              onClick={() => setSelectedColumns([])}
+              mr={2}
+            >
+              Deselect All
+            </Button>
+            <Button 
+              colorScheme="gray" 
+              variant="outline" 
+              onClick={() => setSelectedColumns(allColumns.map(col => col.field))}
+              mr={2}
+            >
+              Select All
+            </Button>
             <Button colorScheme="blue" onClick={() => setIsModalOpen(false)}>
               Apply
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Data Filter and Sort Modal */}
+      <Modal isOpen={isFilterModalOpen} onClose={() => setIsFilterModalOpen(false)} size="xl">
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Filter & Sort Data</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Tabs index={parseInt(tabValue)} onChange={(index) => setTabValue(index.toString())}>
+              <TabList>
+                <Tab>Sort by Date</Tab>
+                <Tab>Filter by Date</Tab>
+                <Tab>Filter by Name</Tab>
+                <Tab>Status Filters</Tab>
+                <Tab>Location & Docs</Tab>
+              </TabList>
+
+              <TabPanels>
+                {/* Date Sorting Tab */}
+                <TabPanel>
+                  <VStack align="start" spacing={4}>
+                    <FormControl>
+                      <FormLabel>Sort by Transaction Date</FormLabel>
+                      <HStack spacing={4}>
+                        <Button
+                          size="sm"
+                          colorScheme={filters.dateSort === 'asc' ? 'blue' : 'gray'}
+                          variant={filters.dateSort === 'asc' ? 'solid' : 'outline'}
+                          leftIcon={<ChevronUpIcon />}
+                          onClick={() => handleFilterChange('dateSort', 'asc')}
+                        >
+                          Ascending (Old → New)
+                        </Button>
+                        <Button
+                          size="sm"
+                          colorScheme={filters.dateSort === 'desc' ? 'blue' : 'gray'}
+                          variant={filters.dateSort === 'desc' ? 'solid' : 'outline'}
+                          leftIcon={<ChevronDownIcon />}
+                          onClick={() => handleFilterChange('dateSort', 'desc')}
+                        >
+                          Descending (New → Old)
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => clearSpecificFilter('dateSort')}
+                        >
+                          Clear
+                        </Button>
+                      </HStack>
+                    </FormControl>
+                  </VStack>
+                </TabPanel>
+
+                {/* Date Filtering Tab */}
+                <TabPanel>
+                  <VStack align="start" spacing={4}>
+                    <FormControl>
+                      <HStack justify="space-between" align="center">
+                        <FormLabel>Filter by Specific Date</FormLabel>
+                        <Button 
+                          size="xs" 
+                          variant="ghost" 
+                          colorScheme="red"
+                          onClick={() => clearSpecificFilter('specificDate')}
+                        >
+                          Clear
+                        </Button>
+                      </HStack>
+                      <Input
+                        type="date"
+                        value={filters.specificDate}
+                        onChange={(e) => handleFilterChange('specificDate', e.target.value)}
+                      />
+                    </FormControl>
+                    
+                    <Divider />
+                    
+                    <FormControl>
+                      <HStack justify="space-between" align="center">
+                        <FormLabel>Filter by Date Range</FormLabel>
+                        <Button 
+                          size="xs" 
+                          variant="ghost" 
+                          colorScheme="red"
+                          onClick={() => {
+                            clearSpecificFilter('dateFrom');
+                            clearSpecificFilter('dateTo');
+                          }}
+                        >
+                          Clear Range
+                        </Button>
+                      </HStack>
+                      <HStack spacing={4}>
+                        <Box>
+                          <Text fontSize="sm" mb={1}>From Date</Text>
+                          <Input
+                            type="date"
+                            value={filters.dateFrom}
+                            onChange={(e) => handleFilterChange('dateFrom', e.target.value)}
+                          />
+                        </Box>
+                        <Box>
+                          <Text fontSize="sm" mb={1}>To Date</Text>
+                          <Input
+                            type="date"
+                            value={filters.dateTo}
+                            onChange={(e) => handleFilterChange('dateTo', e.target.value)}
+                          />
+                        </Box>
+                      </HStack>
+                    </FormControl>
+                  </VStack>
+                </TabPanel>
+
+                {/* Name Filtering Tab */}
+                <TabPanel>
+                  <VStack align="start" spacing={4}>
+                    <FormControl>
+                      <HStack justify="space-between" align="center">
+                        <FormLabel>Filter by Agent Name</FormLabel>
+                        <Button 
+                          size="xs" 
+                          variant="ghost" 
+                          colorScheme="red"
+                          onClick={() => clearSpecificFilter('agentName')}
+                        >
+                          Clear
+                        </Button>
+                      </HStack>
+                      <Input
+                        placeholder="Enter agent name to search..."
+                        value={filters.agentName}
+                        onChange={(e) => handleFilterChange('agentName', e.target.value)}
+                      />
+                    </FormControl>
+                    
+                    <FormControl>
+                      <HStack justify="space-between" align="center">
+                        <FormLabel>Filter by Student Name</FormLabel>
+                        <Button 
+                          size="xs" 
+                          variant="ghost" 
+                          colorScheme="red"
+                          onClick={() => clearSpecificFilter('studentName')}
+                        >
+                          Clear
+                        </Button>
+                      </HStack>
+                      <Input
+                        placeholder="Enter student name to search..."
+                        value={filters.studentName}
+                        onChange={(e) => handleFilterChange('studentName', e.target.value)}
+                      />
+                    </FormControl>
+                  </VStack>
+                </TabPanel>
+
+                {/* Status Filters Tab */}
+                <TabPanel>
+                  <VStack align="start" spacing={4}>
+                    <FormControl>
+                      <FormLabel>Commission Status</FormLabel>
+                      <VStack align="start" spacing={2} maxH="200px" overflowY="auto">
+                        {uniqueValues.commissionStatus.map((status) => (
+                          <Checkbox
+                            key={status}
+                            isChecked={filters.commissionStatus?.includes(status) || false}
+                            onChange={(e) => handleMultiSelectFilter('commissionStatus', status, e.target.checked)}
+                          >
+                            {status}
+                          </Checkbox>
+                        ))}
+                      </VStack>
+                    </FormControl>
+                  </VStack>
+                </TabPanel>
+
+                {/* Location & Documents Tab */}
+                <TabPanel>
+                  <VStack align="start" spacing={4}>
+                    <FormControl>
+                      <FormLabel>Country</FormLabel>
+                      <VStack align="start" spacing={2} maxH="150px" overflowY="auto">
+                        {uniqueValues.country.map((country) => (
+                          <Checkbox
+                            key={country}
+                            isChecked={filters.country?.includes(country) || false}
+                            onChange={(e) => handleMultiSelectFilter('country', country, e.target.checked)}
+                          >
+                            {country}
+                          </Checkbox>
+                        ))}
+                      </VStack>
+                    </FormControl>
+
+                    <Divider />
+
+                    <FormControl>
+                      <FormLabel>DOCs Status</FormLabel>
+                      <VStack align="start" spacing={2} maxH="150px" overflowY="auto">
+                        {uniqueValues.docsStatus.map((status) => (
+                          <Checkbox
+                            key={status}
+                            isChecked={filters.docsStatus?.includes(status) || false}
+                            onChange={(e) => handleMultiSelectFilter('docsStatus', status, e.target.checked)}
+                          >
+                            {status}
+                          </Checkbox>
+                        ))}
+                      </VStack>
+                    </FormControl>
+
+                    <Divider />
+
+                    <FormControl>
+                      <FormLabel>TT Copy Status</FormLabel>
+                      <VStack align="start" spacing={2} maxH="150px" overflowY="auto">
+                        {uniqueValues.ttCopyStatus.map((status) => (
+                          <Checkbox
+                            key={status}
+                            isChecked={filters.ttCopyStatus?.includes(status) || false}
+                            onChange={(e) => handleMultiSelectFilter('ttCopyStatus', status, e.target.checked)}
+                          >
+                            {status}
+                          </Checkbox>
+                        ))}
+                      </VStack>
+                    </FormControl>
+                  </VStack>
+                </TabPanel>
+              </TabPanels>
+            </Tabs>
+          </ModalBody>
+          
+          <ModalFooter>
+            <HStack spacing={2}>
+              <Text fontSize="sm" color="gray.600">
+                Filters persist when switching tabs
+              </Text>
+              <Button 
+                colorScheme="red" 
+                variant="outline" 
+                onClick={clearAllFilters}
+              >
+                Clear All Filters
+              </Button>
+              <Button 
+                colorScheme="blue" 
+                onClick={() => setIsFilterModalOpen(false)}
+              >
+                Apply Filters
+              </Button>
+            </HStack>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Bulk Update Modal */}
+      <Modal isOpen={isBulkUpdateModalOpen} onClose={() => setIsBulkUpdateModalOpen(false)}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Bulk Update Commission Status</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <VStack spacing={4}>
+              <Text>Selected Records: {selectedRows.length}</Text>
+              
+              <FormControl isRequired>
+                <FormLabel>Commission Status</FormLabel>
+                <Select 
+                  placeholder="Select status"
+                  value={bulkUpdateData.commissionStatus}
+                  onChange={(e) => handleBulkUpdateChange('commissionStatus', e.target.value)}
+                >
+                  <option value="Non Claimable">Non Claimable</option>
+                  <option value="Under Processing">Under Processing</option>
+                  <option value="Paid">Paid</option>
+                </Select>
+              </FormControl>
+
+              <FormControl>
+                <FormLabel>Commission Payment Date (Optional)</FormLabel>
+                <Input 
+                  type="date"
+                  value={bulkUpdateData.commissionPaymentDate}
+                  onChange={(e) => handleBulkUpdateChange('commissionPaymentDate', e.target.value)}
+                />
+              </FormControl>
+            </VStack>
+          </ModalBody>
+          <ModalFooter>
+            <Button 
+              colorScheme="gray" 
+              mr={3} 
+              onClick={() => setIsBulkUpdateModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              colorScheme="blue" 
+              onClick={handleBulkUpdate}
+              isDisabled={!bulkUpdateData.commissionStatus}
+            >
+              Update Records
             </Button>
           </ModalFooter>
         </ModalContent>

@@ -49,27 +49,13 @@ import EditUserModal from './EditUserModal';
 const columnHelper = createColumnHelper();
 
 export default function UserDataTable(props) {
-  const { 
-    tableData, 
-    onRowClick, 
-    searchValue, 
-    setSearchValue, 
-    isLoading: parentLoading,
-    pagination,
-    onPageChange,
-    onPageSizeChange,
-    onSortChange,
-    onSearchChange,
-    serverSide = false
-  } = props;
-  
+  const { tableData, onRowClick, searchValue, setSearchValue, isLoading: parentLoading } = props;
   const [sorting, setSorting] = useState([]);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(parentLoading);
   const [loadingButtonId, setLoadingButtonId] = useState(null);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const [totalRecords, setTotalRecords] = useState(0);
   
   // Toast notifications
   const toast = useToast();
@@ -87,28 +73,15 @@ export default function UserDataTable(props) {
   useEffect(() => {
     if (tableData.length > 0) {
       const filteredData = tableData
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
         .filter((user) => user.isDeleted !== true);
-      
-      if (!serverSide) {
-        // For client-side sorting
-        filteredData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-      }
-      
       setData([...filteredData]);
-      
-      // If server-side pagination, update the total record count
-      if (serverSide && pagination) {
-        setTotalRecords(pagination.total);
-        setPageSize(pagination.limit);
-        setPageIndex(pagination.page - 1); // Convert 1-based to 0-based
-      }
     }
     setLoading(parentLoading);
-  }, [tableData, parentLoading, serverSide, pagination]);
+  }, [tableData, parentLoading]);
 
   useEffect(() => {
-    if (!serverSide && searchValue !== undefined && tableData.length > 0) {
-      // For client-side search
+    if (searchValue !== undefined && tableData.length > 0) {
       const searchLower = searchValue.toLowerCase();
       const filteredData = tableData
         .filter(user => user.isDeleted !== true)
@@ -122,13 +95,8 @@ export default function UserDataTable(props) {
         );
       setData([...filteredData]);
       setPageIndex(0); // Reset to first page when searching
-    } else if (serverSide && searchValue !== undefined) {
-      // For server-side search
-      if (onSearchChange) {
-        onSearchChange(searchValue);
-      }
     }
-  }, [searchValue, tableData, serverSide, onSearchChange]);
+  }, [searchValue, tableData]);
 
   const getStatusBadge = (status) => {
     let colorScheme;
@@ -432,19 +400,8 @@ export default function UserDataTable(props) {
 
   // Calculate pagination details
   const pageCount = Math.ceil(data.length / pageSize);
-  const currentPageStart = serverSide ? (pagination?.page - 1) * pagination?.limit + 1 : pageIndex * pageSize + 1;
-  const currentPageEnd = serverSide 
-    ? Math.min(pagination?.page * pagination?.limit, pagination?.total) 
-    : Math.min((pageIndex + 1) * pageSize, data.length);
-    
-  // Handle page size change
-  const handlePageSizeChange = (newPageSize) => {
-    if (serverSide && onPageSizeChange) {
-      onPageSizeChange(parseInt(newPageSize));
-    } else {
-      setPageSize(parseInt(newPageSize));
-    }
-  };
+  const currentPageStart = pageIndex * pageSize + 1;
+  const currentPageEnd = Math.min((pageIndex + 1) * pageSize, data.length);
 
   return (
     <Box w="100%">
@@ -535,39 +492,14 @@ export default function UserDataTable(props) {
           {/* Pagination */}
           {data.length > 0 && (
             <Flex align="center" justify="space-between" p={4} borderTop={`1px solid ${borderColor}`}>
-              <Flex align="center" gap={2}>
-                <Text fontSize="sm" color={textColorSecondary}>
-                  Showing {currentPageStart} to {currentPageEnd} of {serverSide ? pagination?.total : data.length} entries
-                </Text>
-                <Box ml={4}>
-                  <select 
-                    value={serverSide ? pagination?.limit : pageSize}
-                    onChange={(e) => handlePageSizeChange(e.target.value)}
-                    style={{ 
-                      padding: '2px 6px', 
-                      borderRadius: '4px', 
-                      border: '1px solid #E2E8F0',
-                      fontSize: '14px'
-                    }}
-                  >
-                    {[10, 25, 50, 100].map(size => (
-                      <option key={size} value={size}>
-                        Show {size}
-                      </option>
-                    ))}
-                  </select>
-                </Box>
-              </Flex>
+              <Text fontSize="sm" color={textColorSecondary}>
+                Showing {currentPageStart} to {currentPageEnd} of {data.length} agents
+              </Text>
               
               <HStack>
                 <Button
                   size="sm"
-                  onClick={() => {
-                    if (serverSide && onPageChange) {
-                      onPageChange(1); // First page is 1 for API
-                    }
-                    setPageIndex(0);
-                  }}
+                  onClick={() => setPageIndex(0)}
                   isDisabled={pageIndex === 0}
                   variant="ghost"
                 >
@@ -575,49 +507,27 @@ export default function UserDataTable(props) {
                 </Button>
                 <IconButton
                   icon={<ChevronLeftIcon />}
-                  onClick={() => {
-                    const newPage = Math.max(0, pageIndex - 1);
-                    if (serverSide && onPageChange) {
-                      onPageChange(newPage + 1); // Convert to 1-based for API
-                    } else {
-                      setPageIndex(newPage);
-                    }
-                  }}
+                  onClick={() => setPageIndex(Math.max(0, pageIndex - 1))}
                   isDisabled={pageIndex === 0}
                   size="sm"
                   variant="ghost"
                   aria-label="Previous page"
                 />
                 <Text fontSize="sm" fontWeight="medium" minW="4rem" textAlign="center">
-                  {pageIndex + 1} / {serverSide ? (pagination?.pages || 1) : pageCount}
+                  {pageIndex + 1} / {pageCount}
                 </Text>
                 <IconButton
                   icon={<ChevronRightIcon />}
-                  onClick={() => {
-                    const maxPage = serverSide ? (pagination?.pages || 1) - 1 : pageCount - 1;
-                    const newPage = Math.min(maxPage, pageIndex + 1);
-                    if (serverSide && onPageChange) {
-                      onPageChange(newPage + 1); // Convert to 1-based for API
-                    } else {
-                      setPageIndex(newPage);
-                    }
-                  }}
-                  isDisabled={serverSide ? (pageIndex >= (pagination?.pages || 1) - 1) : (pageIndex >= pageCount - 1)}
+                  onClick={() => setPageIndex(Math.min(pageCount - 1, pageIndex + 1))}
+                  isDisabled={pageIndex >= pageCount - 1}
                   size="sm"
                   variant="ghost"
                   aria-label="Next page"
                 />
                 <Button
                   size="sm"
-                  onClick={() => {
-                    const lastPage = serverSide ? pagination?.pages || 1 : pageCount;
-                    if (serverSide && onPageChange) {
-                      onPageChange(lastPage); // Use pagination.pages for API
-                    } else {
-                      setPageIndex(pageCount - 1);
-                    }
-                  }}
-                  isDisabled={serverSide ? (pageIndex >= (pagination?.pages || 1) - 1) : (pageIndex >= pageCount - 1)}
+                  onClick={() => setPageIndex(pageCount - 1)}
+                  isDisabled={pageIndex >= pageCount - 1}
                   variant="ghost"
                 >
                   Last

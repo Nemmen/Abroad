@@ -15,16 +15,32 @@ import {
   Stack,
   CircularProgress,
   Tooltip,
+  TextField,
+  Tabs,
+  Tab,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
 } from '@mui/material';
+import { KeyboardArrowUp, KeyboardArrowDown } from '@mui/icons-material';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
 import { useSelector } from 'react-redux';
+import { 
+  saveFiltersToStorage, 
+  loadFiltersFromStorage, 
+  clearFiltersFromStorage,
+  FILTER_STORAGE_KEYS,
+  DEFAULT_FILTERS 
+} from 'utils/filterUtils';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { useColorMode } from '@chakra-ui/react';
 import AddIcon from '@mui/icons-material/Add';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
+import TuneIcon from '@mui/icons-material/Tune';
 import CloseIcon from '@mui/icons-material/Close';
 import DataTable from 'components/DataTable';
 
@@ -38,22 +54,52 @@ const allColumns = [
   { field: 'studentPhoneNo', headerName: 'Student Contact', width: 130 },
   { field: 'bankVendor', headerName: 'Bank Vendor', width: 150 },
   { field: 'accFundingMonth', headerName: 'Acc Funding Month', width: 160 },
-  { field: 'commissionAmt', headerName: 'Commission Amt', width: 140 },
+  { field: 'agentCommission', headerName: 'Agent Commission', width: 150 },
   { field: 'tds', headerName: 'TDS', width: 100 },
   { field: 'netPayable', headerName: 'Net Payable', width: 140 },
-  { field: 'commissionStatus', headerName: 'Commission Status', width: 160 },
+  { 
+    field: 'commissionStatus', 
+    headerName: 'Commission Status', 
+    width: 160,
+    renderCell: (params) => {
+      let displayText = params.value;
+      
+      // Replace "not received" with "non claimable" and "received" with "paid"
+      if (displayText?.toLowerCase().includes('not received')) {
+        displayText = displayText.replace(/not received/gi, 'non claimable');
+      } else if (displayText?.toLowerCase().includes('received')) {
+        displayText = displayText.replace(/received/gi, 'paid');
+      }
+      
+      return (
+        <span style={{ fontWeight: '600' }}>
+          {displayText}
+        </span>
+      );
+    }
+  },
 ];
 
 const Gic = () => {
   const [rows, setRows] = useState([]);
   const [data, setData] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
   const [selectedColumns, setSelectedColumns] = useState(
     allColumns.map((col) => col.field),
   );
   const { user } = useSelector((state) => state.Auth);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const { colorMode } = useColorMode();
+  
+  // Filter states with persistent storage
+  const [filters, setFilters] = useState(() => 
+    loadFiltersFromStorage(FILTER_STORAGE_KEYS.AGENT_GIC, DEFAULT_FILTERS.AGENT_GIC)
+  );
+  const [tabValue, setTabValue] = useState("0");
+
+
 
   // Create MUI theme based on Chakra color mode
   const theme = createTheme({
@@ -98,44 +144,156 @@ const Gic = () => {
     },
   });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const response = await axios.get(
-          'https://abroad-backend-gray.vercel.app/auth/viewAllGicForm',
+  // Fetch all data without pagination
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get(
+        'https://abroad-backend-gray.vercel.app/auth/viewAllGicForm',
+      );
+      if (response.data.success) {
+        const userGicForms = response.data.gicForms.filter(
+          (form) => form.agentRef._id === user._id,
         );
-        if (response.data.success) {
-          const userGicForms = response.data.gicForms.filter(
-            (form) => form.agentRef._id === user._id,
-          );
-          setData(userGicForms);
-          const gicForms = userGicForms.map((form, index) => ({
-            id: form._id || index,
-            type: form.type || 'N/A',
-            Agent: form.agentRef.name.toUpperCase() || 'N/A',
-            accOpeningMonth: form.accOpeningMonth || 'N/A',
-            studentName: form.studentRef.name || 'N/A',
-            passportNo: form.studentPassportNo || 'N/A',
-            studentPhoneNo: form.studentPhoneNo || 'N/A',
-            bankVendor: form.bankVendor || 'N/A',
-            accFundingMonth: form.fundingMonth || 'N/A',
-            commissionAmt: form.commissionAmt || 0,
-            tds: form.tds || '0',
-            netPayable: form.netPayable || 0,
-            commissionStatus: form.commissionStatus || 'N/A',
-          }));
-          setRows(gicForms);
-        }
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      } finally {
-        setLoading(false);
+        setData(userGicForms);
+        
+        // Calculate pagination for filtered data
+        const totalAgentRecords = userGicForms.length;
+        
+        const gicForms = userGicForms.map((form, index) => ({
+          id: form._id || index,
+          type: form.type || 'N/A',
+          Agent: form.agentRef.name.toUpperCase() || 'N/A',
+          accOpeningMonth: form.accOpeningMonth || 'N/A',
+          studentName: form.studentRef.name || 'N/A',
+          passportNo: form.studentPassportNo || 'N/A',
+          studentPhoneNo: form.studentPhoneNo || 'N/A',
+          bankVendor: form.bankVendor || 'N/A',
+          accFundingMonth: form.fundingMonth || 'N/A',
+          agentCommission: form.commissionAmt || 0,
+          tds: form.tds || '0',
+          netPayable: form.netPayable || 0,
+          commissionStatus: form.commissionStatus || 'N/A',
+        }));
+        setRows(gicForms);
       }
-    };
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchData();
   }, [user._id]);
+
+  // Filter and sort data effect
+  useEffect(() => {
+    let processedData = [...rows];
+
+    // Apply name filters
+    if (filters.agentName) {
+      processedData = processedData.filter(item => 
+        item.Agent.toLowerCase().includes(filters.agentName.toLowerCase())
+      );
+    }
+    
+    if (filters.studentName) {
+      processedData = processedData.filter(item => 
+        item.studentName.toLowerCase().includes(filters.studentName.toLowerCase())
+      );
+    }
+
+    // Apply date filters
+    if (filters.specificDate) {
+      processedData = processedData.filter(item => {
+        const itemDate = new Date(item.accOpeningMonth);
+        const filterDate = new Date(filters.specificDate);
+        return itemDate.toDateString() === filterDate.toDateString();
+      });
+    }
+
+    if (filters.dateFrom && filters.dateTo) {
+      processedData = processedData.filter(item => {
+        const itemDate = new Date(item.accOpeningMonth);
+        const fromDate = new Date(filters.dateFrom);
+        const toDate = new Date(filters.dateTo);
+        return itemDate >= fromDate && itemDate <= toDate;
+      });
+    }
+
+    // Apply multi-select filters
+    if (filters.commissionStatus && filters.commissionStatus.length > 0) {
+      processedData = processedData.filter(item => 
+        filters.commissionStatus.includes(item.commissionStatus)
+      );
+    }
+
+    if (filters.accountType && filters.accountType.length > 0) {
+      processedData = processedData.filter(item => 
+        filters.accountType.includes(item.type)
+      );
+    }
+
+    if (filters.bankName && filters.bankName.length > 0) {
+      processedData = processedData.filter(item => 
+        filters.bankName.includes(item.bankVendor)
+      );
+    }
+
+    // Apply date sorting
+    if (filters.dateSort) {
+      processedData.sort((a, b) => {
+        const dateA = new Date(a.accOpeningMonth || 0);
+        const dateB = new Date(b.accOpeningMonth || 0);
+        
+        if (filters.dateSort === 'asc') {
+          return dateA - dateB;
+        } else if (filters.dateSort === 'desc') {
+          return dateB - dateA;
+        }
+        return 0;
+      });
+    }
+
+    setFilteredData(processedData);
+  }, [rows, filters]);
+
+  // Filter handlers
+  const handleFilterChange = (filterType, value) => {
+    const newFilters = {
+      ...filters,
+      [filterType]: value
+    };
+    setFilters(newFilters);
+    saveFiltersToStorage(FILTER_STORAGE_KEYS.AGENT_GIC, newFilters);
+  };
+
+  const clearAllFilters = () => {
+    const defaultFilters = DEFAULT_FILTERS.AGENT_GIC;
+    setFilters(defaultFilters);
+    saveFiltersToStorage(FILTER_STORAGE_KEYS.AGENT_GIC, defaultFilters);
+  };
+
+  // Multi-select filter handlers
+  const handleMultiSelectChange = (filterType, value, checked) => {
+    const newValues = checked 
+      ? [...(filters[filterType] || []), value]
+      : (filters[filterType] || []).filter(item => item !== value);
+    
+    handleFilterChange(filterType, newValues);
+  };
+
+  const clearMultiSelectFilter = (filterType) => {
+    handleFilterChange(filterType, []);
+  };
+
+  // Get unique values for multi-select filters
+  const getUniqueValues = (field) => {
+    const values = rows.map(row => row[field]).filter(Boolean);
+    return [...new Set(values)].sort();
+  };
 
   const handleDownloadExcel = () => {
     // Clean and prepare data
@@ -150,7 +308,7 @@ const Gic = () => {
         studentPhoneNo: item.studentPhoneNo || 'N/A',
         bankVendor: item.bankVendor || 'N/A',
         accFundingMonth: item.fundingMonth || 'N/A',
-        commissionAmt: item.commissionAmt || 0,
+        agentCommission: item.commissionAmt || 0,
         tds: item.tds || '0',
         netPayable: item.netPayable || 0,
         commissionStatus: item.commissionStatus || 'N/A',
@@ -190,7 +348,19 @@ const Gic = () => {
     [selectedColumns]
   );
   
-  const memoizedRows = useMemo(() => rows, [rows]);
+  const memoizedRows = useMemo(() => filteredData.length > 0 ? filteredData : rows, [filteredData, rows]);
+
+  const getRowClassName = (params) => {
+    const status = params.row.commissionStatus?.toLowerCase();
+    if (status?.includes('non claimable') || status?.includes('not received')) {
+      return 'row-non-claimable';
+    } else if (status?.includes('under processing')) {
+      return 'row-under-processing';
+    } else if (status?.includes('paid') || status?.includes('received')) {
+      return 'row-paid';
+    }
+    return '';
+  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -229,6 +399,24 @@ const Gic = () => {
                   }}
                 >
                   Filter Columns
+                </Button>
+              </Tooltip>
+              
+              <Tooltip title="Filter and sort data">
+                <Button
+                  onClick={() => setIsFilterModalOpen(true)}
+                  variant="outlined"
+                  startIcon={<TuneIcon />}
+                  sx={{ 
+                    color: 'white', 
+                    borderColor: 'rgba(255,255,255,0.5)',
+                    '&:hover': { 
+                      borderColor: 'white', 
+                      backgroundColor: 'rgba(255,255,255,0.1)' 
+                    } 
+                  }}
+                >
+                  Filter & Sort Data
                 </Button>
               </Tooltip>
               
@@ -333,6 +521,7 @@ const Gic = () => {
                 <DataTable 
                   columns={memoizedColumns} 
                   rows={memoizedRows} 
+                  getRowClassName={getRowClassName}
                 />
               </Box>
             )}
@@ -418,6 +607,191 @@ const Gic = () => {
               }}
             >
               Apply
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
+
+      {/* Data Filter and Sort Modal */}
+      <Modal
+        open={isFilterModalOpen}
+        onClose={() => setIsFilterModalOpen(false)}
+        aria-labelledby="filter-modal"
+      >
+        <Box sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: { xs: '95%', sm: '600px' },
+          bgcolor: 'background.paper',
+          borderRadius: 2,
+          boxShadow: 24,
+          p: 4,
+          outline: 'none',
+          maxHeight: '90vh',
+          overflow: 'auto'
+        }}>
+          <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+            <Typography variant="h6" component="h2" fontWeight={600}>
+              Filter & Sort Data
+            </Typography>
+            <IconButton onClick={() => setIsFilterModalOpen(false)} size="small">
+              <CloseIcon />
+            </IconButton>
+          </Box>
+          
+          <Divider sx={{ mb: 2 }} />
+          
+          <Box sx={{ width: '100%' }}>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+              <Tabs 
+                value={tabValue} 
+                onChange={(e, newValue) => setTabValue(newValue)}
+                variant="fullWidth"
+              >
+                <Tab label="Sort by Date" value="0" />
+                <Tab label="Filter by Date" value="1" />
+                <Tab label="Filter by Name" value="2" />
+              </Tabs>
+            </Box>
+
+            {/* Date Sorting Tab */}
+            {tabValue === "0" && (
+              <Box sx={{ p: 2 }}>
+                <Stack spacing={3}>
+                  <Typography variant="body2" color="text.secondary">
+                    Sort records by Account Opening Date
+                  </Typography>
+                  <Stack direction="row" spacing={2} flexWrap="wrap">
+                    <Button
+                      size="small"
+                      variant={filters.dateSort === 'asc' ? 'contained' : 'outlined'}
+                      startIcon={<KeyboardArrowUp />}
+                      onClick={() => handleFilterChange('dateSort', 'asc')}
+                    >
+                      Ascending (Old → New)
+                    </Button>
+                    <Button
+                      size="small"
+                      variant={filters.dateSort === 'desc' ? 'contained' : 'outlined'}
+                      startIcon={<KeyboardArrowDown />}
+                      onClick={() => handleFilterChange('dateSort', 'desc')}
+                    >
+                      Descending (New → Old)
+                    </Button>
+                    <Button
+                      size="small"
+                      variant="text"
+                      onClick={() => handleFilterChange('dateSort', '')}
+                    >
+                      Clear Sort
+                    </Button>
+                  </Stack>
+                </Stack>
+              </Box>
+            )}
+
+            {/* Date Filtering Tab */}
+            {tabValue === "1" && (
+              <Box sx={{ p: 2 }}>
+                <Stack spacing={3}>
+                  <Box>
+                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                      Filter by Specific Date
+                    </Typography>
+                    <TextField
+                      type="date"
+                      fullWidth
+                      size="small"
+                      value={filters.specificDate}
+                      onChange={(e) => handleFilterChange('specificDate', e.target.value)}
+                      InputLabelProps={{ shrink: true }}
+                    />
+                  </Box>
+                  
+                  <Divider />
+                  
+                  <Box>
+                    <Typography variant="body2" color="text.secondary" gutterBottom>
+                      Filter by Date Range
+                    </Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={6}>
+                        <TextField
+                          label="From Date"
+                          type="date"
+                          fullWidth
+                          size="small"
+                          value={filters.dateFrom}
+                          onChange={(e) => handleFilterChange('dateFrom', e.target.value)}
+                          InputLabelProps={{ shrink: true }}
+                        />
+                      </Grid>
+                      <Grid item xs={6}>
+                        <TextField
+                          label="To Date"
+                          type="date"
+                          fullWidth
+                          size="small"
+                          value={filters.dateTo}
+                          onChange={(e) => handleFilterChange('dateTo', e.target.value)}
+                          InputLabelProps={{ shrink: true }}
+                        />
+                      </Grid>
+                    </Grid>
+                  </Box>
+                </Stack>
+              </Box>
+            )}
+
+            {/* Name Filtering Tab */}
+            {tabValue === "2" && (
+              <Box sx={{ p: 2 }}>
+                <Stack spacing={3}>
+                  <TextField
+                    label="Filter by Agent Name"
+                    fullWidth
+                    size="small"
+                    placeholder="Enter agent name to search..."
+                    value={filters.agentName}
+                    onChange={(e) => handleFilterChange('agentName', e.target.value)}
+                  />
+                  
+                  <TextField
+                    label="Filter by Student Name"
+                    fullWidth
+                    size="small"
+                    placeholder="Enter student name to search..."
+                    value={filters.studentName}
+                    onChange={(e) => handleFilterChange('studentName', e.target.value)}
+                  />
+                </Stack>
+              </Box>
+            )}
+          </Box>
+          
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3, pt: 2, borderTop: 1, borderColor: 'divider' }}>
+            <Button 
+              onClick={clearAllFilters}
+              color="error"
+              sx={{ textTransform: 'none' }}
+            >
+              Clear All Filters
+            </Button>
+            <Button 
+              variant="contained" 
+              onClick={() => setIsFilterModalOpen(false)}
+              sx={{ 
+                minWidth: '100px',
+                background: 'linear-gradient(135deg, #11047A 0%, #4D1DB3 100%)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #0D0362 0%, #3B169A 100%)',
+                },
+                textTransform: 'none'
+              }}
+            >
+              Apply Filters
             </Button>
           </Box>
         </Box>
