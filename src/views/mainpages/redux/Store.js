@@ -3,6 +3,7 @@ import AuthSlice from './AuthSlice';
 import GicSlice, { Gic } from './GicSlice';
 import storage from 'redux-persist/lib/storage';
 import { persistReducer, persistStore } from 'redux-persist';
+import { FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from 'redux-persist';
 
 const persistConfig = {
   key: 'root',
@@ -18,6 +19,12 @@ export const store = configureStore({
     Auth: persistedReducer, // Correctly setting the persisted reducer under its slice name
     Gic: GicSlice,
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+      },
+    }),
 });
 
 export const persistor = persistStore(store);

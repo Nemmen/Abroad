@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const instance = axios.create({
-  baseURL: 'https://abroad-backend-ten.vercel.app',
+  baseURL: 'http://localhost:4000',
   headers: {
     'Content-Type': 'application/json'
   },
@@ -24,9 +24,15 @@ export const postWithFiles = (url, data) => {
   });
 };
 
-// Request and response interceptors (unchanged)
+// Request and response interceptors with token handling
 instance.interceptors.request.use(
   function (config) {
+    // Get the token from localStorage
+    const token = localStorage.getItem('token_auth');
+    // If token exists, add it to the headers
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
   },
   function (error) {

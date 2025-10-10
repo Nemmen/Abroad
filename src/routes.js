@@ -70,13 +70,7 @@ const routes = [
     path: '/email-promotions',
     component: <EmailTemplateGen/>,
   },
-  {
-    name: 'CONVERSIONS',
-    layout: '/admin',
-    icon: <Icon as={MdSwapHoriz} width="20px" height="20px" color="inherit" />,
-    path: '/conversion-requests',
-    component: <CurrencyExchangeIcon/>,
-  },
+  
 ];
 
 export const routeAjent = [
