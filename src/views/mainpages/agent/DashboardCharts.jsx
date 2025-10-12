@@ -224,7 +224,10 @@ const DashboardCharts = () => {
     const blockedValues = processedData.map(item => item.blocked);
 
     const chartProps = {
-      xAxis: [{ scaleType: 'point', data: xLabels }],
+      xAxis: [{ 
+        scaleType: chartType === 'bar' ? 'band' : 'point', 
+        data: xLabels 
+      }],
       series: [
         { data: forexValues, label: 'Forex', color: colors.forex },
         { data: gicValues, label: 'GIC', color: colors.gic },
@@ -245,7 +248,7 @@ const DashboardCharts = () => {
 
     return (
       <BarChart
-        xAxis={[{ scaleType: 'point', data: xLabels }]}
+        xAxis={[{ scaleType: 'band', data: xLabels }]}
         series={[
           { data: forexEarnings, label: 'Forex Earnings', color: colors.forex },
           { data: gicEarnings, label: 'GIC Earnings', color: colors.gic },
