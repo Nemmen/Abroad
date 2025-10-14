@@ -199,7 +199,7 @@ function GicForm() {
     if (!type || !Agents || !studentRef || !passportNo || !email) {
       toast({
         title: 'Form Incomplete',
-        description: 'Please fill in all fields, including document upload.',
+        description: 'Please fill in all required fields.',
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -707,7 +707,7 @@ function GicForm() {
           {Array.isArray(documents) &&
             documents.map((doc, index) => (
               <Flex key={index} direction="column" mb={4}>
-                <FormControl isRequired>
+                <FormControl>
                   <FormLabel>Document Type</FormLabel>
                   <Select
                     name="documentType"
@@ -724,7 +724,7 @@ function GicForm() {
                     ))}
                   </Select>
                 </FormControl>
-                <FormControl isRequired mt={5}>
+                <FormControl mt={5}>
                   <FormLabel>Upload Document</FormLabel>
                   <Flex align="center">
                     <Button
