@@ -150,7 +150,7 @@ const ForexCalculatePage = () => {
       const response = await axios.post(
         `${API_BASE_URL}/forex/calculate/${requestId}`, 
         calculationData,
-        getAuthHeaders()
+        getAuthConfig()
       );
       
       if (response.data && response.data.success) {
