@@ -47,13 +47,10 @@ import ForexCalculator from './ForexCalculator';
 const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'https://abroad-backend-gray.vercel.app/api';
 const REQUESTS_PER_PAGE = 10;
 
-// Auth headers utility
-const getAuthHeaders = () => {
-  const token = localStorage.getItem('token_auth');
+// Auth config utility for cookies
+const getAuthConfig = () => {
   return {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
+    withCredentials: true
   };
 };
 
@@ -281,7 +278,7 @@ const ForexDashboard = () => {
       
       const response = await axios.get(
         `${API_BASE_URL}/forex/requests?${queryParams.toString()}`,
-        getAuthHeaders()
+        getAuthConfig()
       );
       
       if (response.data && response.data.success) {

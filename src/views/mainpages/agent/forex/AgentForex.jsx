@@ -198,9 +198,9 @@ const Forex = () => {
         requestData,
         {
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token_auth')}`
-          }
+            'Content-Type': 'application/json'
+          },
+          withCredentials: true
         }
       );
       
