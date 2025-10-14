@@ -44,7 +44,7 @@ import { format, parseISO } from 'date-fns';
 import ForexCalculator from './ForexCalculator';
 
 // Constants
-const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:4000/api';
+const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'https://abroad-backend-gray.vercel.app/api';
 const REQUESTS_PER_PAGE = 10;
 
 // Auth headers utility

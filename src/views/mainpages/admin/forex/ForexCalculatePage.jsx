@@ -30,15 +30,12 @@ import {
 import axios from 'axios';
 
 // Constants
-const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:4000/api';
+const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'https://abroad-backend-gray.vercel.app/api';
 
-// Auth headers utility
-const getAuthHeaders = () => {
-  const token = localStorage.getItem('token_auth');
+// Auth config utility for cookies
+const getAuthConfig = () => {
   return {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
+    withCredentials: true
   };
 };
 
@@ -88,7 +85,7 @@ const ForexCalculatePage = () => {
         setLoading(true);
         const response = await axios.get(
           `${API_BASE_URL}/forex/request/${requestId}`, 
-          getAuthHeaders()
+          getAuthConfig()
         );
         
         if (response.data && response.data.success) {

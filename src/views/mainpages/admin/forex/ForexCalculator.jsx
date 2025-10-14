@@ -122,7 +122,7 @@ const ForexCalculator = () => {
       setIsRateLoading(true);
       try {
         const response = await axios.get(
-          `${process.env.REACT_APP_BACKEND_URL || 'http://localhost:4000/api'}/forex/get-rate/${debouncedCurrencyType}`,
+          `${process.env.REACT_APP_BACKEND_URL || 'https://abroad-backend-gray.vercel.app/api'}/forex/get-rate/${debouncedCurrencyType}`,
           getAuthHeaders()
         );
         
