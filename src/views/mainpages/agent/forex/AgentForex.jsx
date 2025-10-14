@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import {
   Box,
   Card,
@@ -17,6 +17,14 @@ import {
   TextField,
   Tabs,
   Tab,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+  FormHelperText,
+  Alert,
+  Paper,
+  InputAdornment,
 } from '@mui/material';
 import { KeyboardArrowUp, KeyboardArrowDown } from '@mui/icons-material';
 import DataTable from 'components/DataTable';
@@ -92,6 +100,20 @@ const Forex = () => {
     loadFiltersFromStorage(FILTER_STORAGE_KEYS.AGENT_FOREX, DEFAULT_FILTERS.AGENT_FOREX)
   );
   const [tabValue, setTabValue] = useState("0");
+  
+  // Forex Calculator states
+  const [calculatorForm, setCalculatorForm] = useState({
+    currencyType: '',
+    foreignAmount: '',
+    agentMargin: ''
+  });
+  const [formErrors, setFormErrors] = useState({
+    currencyType: '',
+    foreignAmount: '',
+    agentMargin: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
 
   // Pagination states
   const [pagination, setPagination] = useState({
@@ -100,6 +122,119 @@ const Forex = () => {
     total: 0,
     pages: 0
   });
+
+  // Form validation and handling
+  const validateForm = () => {
+    let isValid = true;
+    const errors = {
+      currencyType: '',
+      foreignAmount: '',
+      agentMargin: ''
+    };
+
+    if (!calculatorForm.currencyType) {
+      errors.currencyType = 'Please select a currency';
+      isValid = false;
+    }
+
+    if (!calculatorForm.foreignAmount) {
+      errors.foreignAmount = 'Please enter an amount';
+      isValid = false;
+    } else if (isNaN(calculatorForm.foreignAmount) || parseFloat(calculatorForm.foreignAmount) <= 0) {
+      errors.foreignAmount = 'Please enter a valid amount greater than 0';
+      isValid = false;
+    }
+
+    if (!calculatorForm.agentMargin) {
+      errors.agentMargin = 'Please enter a margin value';
+      isValid = false;
+    } else if (isNaN(calculatorForm.agentMargin) || parseFloat(calculatorForm.agentMargin) < 0) {
+      errors.agentMargin = 'Please enter a valid margin value (0 or greater)';
+      isValid = false;
+    }
+
+    setFormErrors(errors);
+    return isValid;
+  };
+
+  const handleCalculatorChange = useCallback((e) => {
+    const { name, value } = e.target;
+    setCalculatorForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    
+    // Clear the error for this field when user types
+    if (formErrors[name]) {
+      setFormErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
+  }, [formErrors]);
+  
+  // Declaration for fetchData - will be defined later but needs to be declared here
+  // Handler for submitting the forex calculation request - memoized to prevent unnecessary re-renders
+  const handleCalculatorSubmit = useCallback(async (e) => {
+    e.preventDefault();
+    
+    if (!validateForm()) {
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    try {
+      // Format the data for the API
+      const requestData = {
+        currencyType: calculatorForm.currencyType,
+        foreignAmount: parseFloat(calculatorForm.foreignAmount),
+        agentMargin: parseFloat(calculatorForm.agentMargin)
+      };
+      
+      // Make the API call
+      const response = await axios.post(
+        'https://abroad-backend-gray.vercel.app/api/forex/request', 
+        requestData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token_auth')}`
+          }
+        }
+      );
+      
+      if (response.data && response.data.success) {
+        // Reset the form after successful submission
+        setCalculatorForm({
+          currencyType: '',
+          foreignAmount: '',
+          agentMargin: ''
+        });
+        
+        // Show success modal
+        setIsSuccessModalOpen(true);
+        
+        // Refresh the data to include the new request
+        // Using setTimeout to ensure this happens after the current execution context
+        setTimeout(() => {
+          // This will call the fetchData function that will be defined later
+          // without creating a dependency on it
+          if (typeof window.updateForexData === 'function') {
+            window.updateForexData();
+          }
+        }, 0);
+      } else {
+        console.error('Error submitting forex request:', response.data);
+        alert('Failed to submit forex request. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error submitting forex request:', error);
+      alert(`Failed to submit forex request: ${error.response?.data?.message || error.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [calculatorForm, validateForm]);
 
   // Create MUI theme based on Chakra color mode
   const theme = createTheme({
@@ -146,6 +281,8 @@ const Forex = () => {
 
   // Fetch data with pagination
   const fetchData = async (page = pagination.page, limit = pagination.limit) => {
+    // Assign to window object for reference without dependencies
+    window.updateForexData = () => fetchData(pagination.page, pagination.limit);
     if (!user || !user._id) {
       console.log('Agent Forex - User not authenticated');
       setLoading(false);
@@ -231,6 +368,11 @@ const Forex = () => {
     } else {
       console.log('Agent Forex - User not available:', user);
     }
+    
+    // Cleanup function to remove window reference when component unmounts
+    return () => {
+      window.updateForexData = undefined;
+    };
   }, [user._id]);
 
   // Filter and sort data effect
@@ -420,6 +562,17 @@ const Forex = () => {
     fetchData(1, newPageSize);
   };
 
+  // Memoize the currency options to prevent unnecessary re-renders
+  const currencyOptions = useMemo(() => [
+    { value: 'USD', label: 'US Dollar (USD)' },
+    { value: 'EUR', label: 'Euro (EUR)' },
+    { value: 'GBP', label: 'British Pound (GBP)' },
+    { value: 'CAD', label: 'Canadian Dollar (CAD)' },
+    { value: 'AUD', label: 'Australian Dollar (AUD)' },
+    { value: 'AED', label: 'UAE Dirham (AED)' },
+    { value: 'MYR', label: 'Malaysian Ringgit (MYR)' },
+  ], []);
+
   const memoizedColumns = useMemo(
     () => allColumns.filter((col) => selectedColumns.includes(col.field)),
     [selectedColumns],
@@ -449,6 +602,150 @@ const Forex = () => {
   return (
     <ThemeProvider theme={theme}>
       <Box sx={{ px: { xs: 2, sm: 3 }, py: 2, maxWidth: '1400px', mx: 'auto' }}>
+        {/* Forex Calculator Card */}
+        <Paper 
+          elevation={3} 
+          sx={{ 
+            p: 3, 
+            mb: 3, 
+            borderRadius: '12px',
+            background: 'linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%)'
+          }}
+        >
+          <Typography variant="h5" fontWeight="600" color="#2E7D32" gutterBottom>
+            Forex Conversion Calculator
+          </Typography>
+          <Typography variant="body2" color="#1B5E20" sx={{ mb: 3 }}>
+            Submit a forex conversion request and our team will contact you with the best rates
+          </Typography>
+          
+          <form onSubmit={handleCalculatorSubmit}>
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={3}>
+                <FormControl 
+                  fullWidth 
+                  variant="outlined" 
+                  error={!!formErrors.currencyType}
+                >
+                  <InputLabel>Currency Type</InputLabel>
+                  <Select
+                    name="currencyType"
+                    value={calculatorForm.currencyType}
+                    onChange={handleCalculatorChange}
+                    label="Currency Type"
+                    disabled={isSubmitting}
+                  >
+                    {currencyOptions.map(option => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  {formErrors.currencyType && (
+                    <FormHelperText error>{formErrors.currencyType}</FormHelperText>
+                  )}
+                </FormControl>
+              </Grid>
+              
+              <Grid item xs={12} md={3}>
+                <TextField
+                  name="foreignAmount"
+                  label="Foreign Amount"
+                  variant="outlined"
+                  fullWidth
+                  type="number"
+                  value={calculatorForm.foreignAmount}
+                  onChange={handleCalculatorChange}
+                  error={!!formErrors.foreignAmount}
+                  helperText={formErrors.foreignAmount}
+                  disabled={isSubmitting}
+                  InputProps={{
+                    startAdornment: calculatorForm.currencyType ? (
+                      <InputAdornment position="start">
+                        {calculatorForm.currencyType}
+                      </InputAdornment>
+                    ) : null
+                  }}
+                />
+              </Grid>
+              
+              <Grid item xs={12} md={3}>
+                <TextField
+                  name="agentMargin"
+                  label="Your Margin (in paise per unit)"
+                  variant="outlined"
+                  fullWidth
+                  type="number"
+                  inputProps={{ step: "0.01" }}
+                  value={calculatorForm.agentMargin}
+                  onChange={handleCalculatorChange}
+                  error={!!formErrors.agentMargin}
+                  helperText={formErrors.agentMargin || "Example: 0.50 for 50 paise"}
+                  disabled={isSubmitting}
+                />
+              </Grid>
+              
+              <Grid item xs={12} md={3} sx={{ display: 'flex', alignItems: 'center' }}>
+                <Button 
+                  type="submit" 
+                  variant="contained"
+                  fullWidth
+                  sx={{ 
+                    height: '56px',
+                    backgroundColor: '#2E7D32',
+                    '&:hover': {
+                      backgroundColor: '#1B5E20'
+                    }
+                  }}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? <CircularProgress size={24} color="inherit" /> : 'Calculate & Submit Request'}
+                </Button>
+              </Grid>
+            </Grid>
+          </form>
+        </Paper>
+        
+        {/* Success Modal */}
+        <Modal
+          open={isSuccessModalOpen}
+          onClose={() => setIsSuccessModalOpen(false)}
+          aria-labelledby="success-modal-title"
+          aria-describedby="success-modal-description"
+        >
+          <Box sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: { xs: '90%', sm: 400 },
+            bgcolor: 'background.paper',
+            borderRadius: 2,
+            boxShadow: 24,
+            p: 4,
+          }}>
+            <Typography id="success-modal-title" variant="h6" component="h2" gutterBottom>
+              Request Submitted Successfully!
+            </Typography>
+            <Typography id="success-modal-description" sx={{ mt: 2, mb: 3 }}>
+              Thank you for your forex conversion request. Our admin team has been notified and will contact you soon with the best rates.
+            </Typography>
+            <Button 
+              onClick={() => setIsSuccessModalOpen(false)} 
+              variant="contained"
+              fullWidth
+              sx={{ 
+                backgroundColor: '#2E7D32',
+                '&:hover': {
+                  backgroundColor: '#1B5E20'
+                }
+              }}
+            >
+              Close
+            </Button>
+          </Box>
+        </Modal>
+        
         <Card elevation={1} sx={{ overflow: 'visible' }}>
           <Box 
             sx={{ 

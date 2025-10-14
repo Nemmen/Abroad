@@ -14,10 +14,12 @@ import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 import SubjectIcon from '@mui/icons-material/Subject';
 import CommentIcon from '@mui/icons-material/Comment';
+import axios from 'axios';
 
 // Styled components for the enquiry form
 const StyledCard = styled(Card)(({ theme }) => ({
-  background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 248, 255, 0.95) 100%)',
+  background:
+    'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 248, 255, 0.95) 100%)',
   backdropFilter: 'blur(10px)',
   borderRadius: '20px',
   border: '1px solid rgba(255, 255, 255, 0.2)',
@@ -28,7 +30,8 @@ const StyledCard = styled(Card)(({ theme }) => ({
     boxShadow: '0 25px 50px rgba(0, 0, 0, 0.15)',
   },
   ...theme.applyStyles('dark', {
-    background: 'linear-gradient(135deg, rgba(17, 25, 40, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)',
+    background:
+      'linear-gradient(135deg, rgba(17, 25, 40, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%)',
     border: '1px solid rgba(255, 255, 255, 0.1)',
     boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
   }),
@@ -108,17 +111,54 @@ export default function Features() {
     email: '',
     contact: '',
     subject: '',
-    comment: ''
+    comment: '',
   });
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const handleInputChange = (field) => (event) => {
     setFormData({ ...formData, [field]: event.target.value });
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log('Form submitted:', formData);
-    alert('Thank you for your enquiry! We will get back to you soon.');
+    setIsSubmitting(true);
+
+    try {
+      // Map form data to match backend API structure
+      const submitData = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.contact, // Backend expects 'phone' instead of 'contact'
+        subject: formData.subject,
+        message: formData.comment, // Backend expects 'message' instead of 'comment'
+      };
+
+      const response = await axios.post(
+        'https://abroad-backend-gray.vercel.app/admin/enquiries/create',
+        submitData,
+      );
+
+      if (response.data.success) {
+        alert('Thank you for your enquiry! We will get back to you within 24 hours.');
+        // Reset form
+        setFormData({
+          name: '',
+          email: '',
+          contact: '',
+          subject: '',
+          comment: '',
+        });
+      } else {
+        throw new Error('Failed to submit enquiry');
+      }
+    } catch (error) {
+      console.error('Error submitting enquiry:', error);
+      alert(
+        'Sorry, there was an error submitting your enquiry. Please try again or contact us directly.',
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -131,7 +171,7 @@ export default function Features() {
               component="h2"
               variant="h4"
               gutterBottom
-              sx={{ 
+              sx={{
                 fontWeight: 700,
                 background: 'linear-gradient(45deg, #1976d2, #42a5f5)',
                 backgroundClip: 'text',
@@ -139,19 +179,19 @@ export default function Features() {
                 WebkitTextFillColor: 'transparent',
                 mb: 3,
                 fontSize: { xs: '1.8rem', md: '2.8rem' },
-                lineHeight: 1.2
+                lineHeight: 1.2,
               }}
             >
               Your Global Exposure Partner!
             </Typography>
-            
+
             <Typography
               variant="h5"
-              sx={{ 
-                color: 'text.primary', 
+              sx={{
+                color: 'text.primary',
                 fontWeight: 600,
                 mb: 4,
-                lineHeight: 1.4
+                lineHeight: 1.4,
               }}
             >
               Seamless Financial Solutions for International Students
@@ -159,49 +199,53 @@ export default function Features() {
 
             <Typography
               variant="body1"
-              sx={{ 
-                color: 'text.secondary', 
+              sx={{
+                color: 'text.secondary',
                 fontSize: '1.1rem',
                 lineHeight: 1.8,
-                mb: 4
+                mb: 4,
               }}
             >
-              At AbroCare, we specialize in making your study abroad dreams a reality. 
-              Get expert assistance with GIC accounts, Blocked Accounts for Germany, 
-              and comprehensive Forex services - all managed seamlessly in one secure platform.
+              At AbroCare, we specialize in making your study abroad dreams a
+              reality. Get expert assistance with GIC accounts, Blocked Accounts
+              for Germany, and comprehensive Forex services - all managed
+              seamlessly in one secure platform.
             </Typography>
 
             {/* Features List */}
             {/* Features List */}
-<Box sx={{ mb: 4 }}>
-  {[
-    'Embassy-accepted GIC accounts for Canada - Get account number in 5 minutes',
-    'Fintiba-powered Blocked Accounts for Germany - Fully compliant',
-    'Competitive Forex rates with TCS-free payment options',
-    'Real-time tracking and transparent fee structures',
-    'Dedicated support from application to arrival'
-  ].map((feature, index) => (
-    <Box key={index} sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-      {/* Blue bullet */}
-      <Box
-        sx={{
-          width: 12,
-          height: 12,
-          minWidth: 12,
-          borderRadius: '50%',
-          backgroundColor: '#1976d2', // blue color
-          mr: 2,
-        }}
-      />
-      <Typography variant="body1" sx={{ color: 'text.primary', fontWeight: 500 }}>
-        {feature}
-      </Typography>
-    </Box>
-  ))}
-</Box>
-
-
-           
+            <Box sx={{ mb: 4 }}>
+              {[
+                'Embassy-accepted GIC accounts for Canada - Get account number in 5 minutes',
+                'Fintiba-powered Blocked Accounts for Germany - Fully compliant',
+                'Competitive Forex rates with TCS-free payment options',
+                'Real-time tracking and transparent fee structures',
+                'Dedicated support from application to arrival',
+              ].map((feature, index) => (
+                <Box
+                  key={index}
+                  sx={{ display: 'flex', alignItems: 'center', mb: 2 }}
+                >
+                  {/* Blue bullet */}
+                  <Box
+                    sx={{
+                      width: 12,
+                      height: 12,
+                      minWidth: 12,
+                      borderRadius: '50%',
+                      backgroundColor: '#1976d2', // blue color
+                      mr: 2,
+                    }}
+                  />
+                  <Typography
+                    variant="body1"
+                    sx={{ color: 'text.primary', fontWeight: 500 }}
+                  >
+                    {feature}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
           </Box>
         </Grid>
 
@@ -212,22 +256,23 @@ export default function Features() {
               <Typography
                 variant="h4"
                 gutterBottom
-                sx={{ 
+                sx={{
                   fontWeight: 700,
                   color: 'text.primary',
-                  mb: 1
+                  mb: 1,
                 }}
               >
                 Enquiry Now!
               </Typography>
               <Typography
                 variant="body1"
-                sx={{ 
+                sx={{
                   color: 'text.secondary',
-                  fontWeight: 400
+                  fontWeight: 400,
                 }}
               >
-                Get personalized guidance for your study abroad financial needs. We'll respond within 24 hours.
+                Get personalized guidance for your study abroad financial needs.
+                We'll respond within 24 hours.
               </Typography>
             </Box>
 
@@ -239,7 +284,10 @@ export default function Features() {
                     <IconBox>
                       <PersonIcon fontSize="small" />
                     </IconBox>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                    <Typography
+                      variant="subtitle1"
+                      sx={{ fontWeight: 600, color: 'text.primary' }}
+                    >
                       Full Name
                     </Typography>
                   </Box>
@@ -259,7 +307,10 @@ export default function Features() {
                     <IconBox>
                       <EmailIcon fontSize="small" />
                     </IconBox>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                    <Typography
+                      variant="subtitle1"
+                      sx={{ fontWeight: 600, color: 'text.primary' }}
+                    >
                       Email Address
                     </Typography>
                   </Box>
@@ -279,7 +330,10 @@ export default function Features() {
                     <IconBox>
                       <PhoneIcon fontSize="small" />
                     </IconBox>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                    <Typography
+                      variant="subtitle1"
+                      sx={{ fontWeight: 600, color: 'text.primary' }}
+                    >
                       Phone Number
                     </Typography>
                   </Box>
@@ -300,7 +354,10 @@ export default function Features() {
                     <IconBox>
                       <SubjectIcon fontSize="small" />
                     </IconBox>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                    <Typography
+                      variant="subtitle1"
+                      sx={{ fontWeight: 600, color: 'text.primary' }}
+                    >
                       Subject
                     </Typography>
                   </Box>
@@ -315,21 +372,25 @@ export default function Features() {
                 </Grid>
 
                 {/* Comment Field */}
-                 <Grid item xs={12}>
+                <Grid item xs={12}>
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                     <IconBox>
                       <CommentIcon fontSize="small" />
                     </IconBox>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                    <Typography
+                      variant="subtitle1"
+                      sx={{ fontWeight: 600, color: 'text.primary' }}
+                    >
                       Your Message
                     </Typography>
                   </Box>
                   <StyledTextField
                     fullWidth
-                    placeholder="Enter your message here  "
-                    value={formData.subject}
-                    onChange={handleInputChange('subject')}
-                    required
+                    placeholder="Enter your message here..."
+                    value={formData.comment}
+                    onChange={handleInputChange('comment')}
+                    multiline
+                    rows={4}
                     variant="outlined"
                   />
                 </Grid>
@@ -340,14 +401,15 @@ export default function Features() {
                     type="submit"
                     fullWidth
                     size="large"
+                    disabled={isSubmitting}
                     startIcon={<SendIcon />}
-                    sx={{ 
+                    sx={{
                       py: 1.5,
                       fontSize: '1.1rem',
-                      fontWeight: 600
+                      fontWeight: 600,
                     }}
                   >
-                    Send Enquiry
+                    {isSubmitting ? 'Sending...' : 'Send Enquiry'}
                   </StyledButton>
                 </Grid>
               </Grid>

@@ -58,7 +58,8 @@ export default function DataTable({
   checkboxSelection = false, 
   getRowClassName,
   loading = false,
-  pagination
+  pagination,
+  getRowId
 }) {
   const location = useLocation();
   const navigate = useNavigate();
@@ -103,6 +104,7 @@ export default function DataTable({
                 rows={rows}
                 columns={columns}
                 loading={loading}
+                getRowId={getRowId}
                 pageSizeOptions={[10, 15, 25]}
                 paginationMode={pagination ? 'server' : 'client'}
                 rowCount={pagination?.total || rows.length}

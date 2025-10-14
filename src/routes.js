@@ -8,7 +8,8 @@ import {
   MdAttachMoney,
   MdSwapHoriz,
   MdBusiness,
-  MdVerifiedUser
+  MdVerifiedUser,
+  MdContactSupport
 } from 'react-icons/md';
 
 import { SiAuthentik } from 'react-icons/si';
@@ -23,12 +24,14 @@ import AdminAgent from 'views/mainpages/admin/agent/Agent'
 import GicPage from 'views/mainpages/agent/gic/GicPage';
 import Gic from 'views/mainpages/admin/gic/Gic';
 import Forex from 'views/mainpages/admin/forex/Forex';
+import ForexDashboard from 'views/mainpages/admin/forex/ForexDashboard';
 import AgentForex from './views/mainpages/agent/forex/AgentForex.jsx'
 import BlockedPage from 'views/mainpages/agent/blocked/BlockedPage';
 import StudentPage from 'views/mainpages/agent/students/StudentPage';
 import ForgotPassword from "views/mainpages/login_signup/ForgotPassword";
 import ResetPassword from "views/mainpages/login_signup/ResetPassword";
 import EmailTemplateGen from 'views/mainpages/admin/main/components/EmailTemplateGen';
+import Enquiry from 'views/mainpages/admin/enquiry/Enquiry';
 
 const routes = [
   {
@@ -61,7 +64,14 @@ const routes = [
     layout: '/admin',
     icon: <Icon as={MdSwapHoriz} width="20px" height="20px" color="inherit" />,
     path: '/forex',
-    component: <Forex />,
+    component: <Forex/>
+  },
+  {
+  name: 'Exchange Requests',
+    layout: '/admin',
+    icon: <Icon as={MdSwapHoriz} width="20px" height="20px" color="inherit" />,
+    path: '/exchange-req',
+    component: <ForexDashboard />,
   },
   {
     name: 'EMAIL PROMOTIONS',
@@ -69,6 +79,13 @@ const routes = [
     icon: <Icon as={MdSwapHoriz} width="20px" height="20px" color="inherit" />,
     path: '/email-promotions',
     component: <EmailTemplateGen/>,
+  },
+  {
+    name: 'Website Enquiries',
+    layout: '/admin',
+    icon: <Icon as={MdContactSupport} width="20px" height="20px" color="inherit" />,
+    path: '/enquiry',
+    component: <Enquiry/>,
   },
 ];
 
