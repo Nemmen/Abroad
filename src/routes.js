@@ -24,6 +24,7 @@ import AdminAgent from 'views/mainpages/admin/agent/Agent'
 import GicPage from 'views/mainpages/agent/gic/GicPage';
 import Gic from 'views/mainpages/admin/gic/Gic';
 import Forex from 'views/mainpages/admin/forex/Forex';
+import ForexDashboard from 'views/mainpages/admin/forex/ForexDashboard';
 import AgentForex from './views/mainpages/agent/forex/AgentForex.jsx'
 import BlockedPage from 'views/mainpages/agent/blocked/BlockedPage';
 import StudentPage from 'views/mainpages/agent/students/StudentPage';
@@ -63,7 +64,14 @@ const routes = [
     layout: '/admin',
     icon: <Icon as={MdSwapHoriz} width="20px" height="20px" color="inherit" />,
     path: '/forex',
-    component: <Forex />,
+    component: <Forex/>
+  },
+  {
+  name: 'Exchange Requests',
+    layout: '/admin',
+    icon: <Icon as={MdSwapHoriz} width="20px" height="20px" color="inherit" />,
+    path: '/exchange-req',
+    component: <ForexDashboard />,
   },
   {
     name: 'EMAIL PROMOTIONS',
