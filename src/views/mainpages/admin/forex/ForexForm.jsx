@@ -60,6 +60,12 @@ function ForexForm() {
   const [studentSearch, setStudentSearch] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isStudentDropdownOpen, setIsStudentDropdownOpen] = useState(false);
+  const [isCreateStudentModalOpen, setIsCreateStudentModalOpen] = useState(false);
+  const [newStudentForm, setNewStudentForm] = useState({
+    name: '',
+    email: ''
+  });
+  const [isCreatingStudent, setIsCreatingStudent] = useState(false);
   // const [isModalOpen, setIsModalOpen] = useState(false);
   // const openModal = () => setIsModalOpen(true);
   // const closeModal = () => setIsModalOpen(false);
@@ -155,6 +161,107 @@ function ForexForm() {
     fetchAgents();
     fetchStudents();
   }, []);
+
+  // Handle new student form changes
+  const handleNewStudentChange = (e) => {
+    const { name, value } = e.target;
+    setNewStudentForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Handle create new student
+  const handleCreateStudent = async () => {
+    if (!newStudentForm.name || !newStudentForm.email) {
+      toast({
+        title: 'Validation Error',
+        description: 'Name and email are required.',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    if (!formData.agentRef) {
+      toast({
+        title: 'Error',
+        description: 'Please select an agent first.',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    try {
+      setIsCreatingStudent(true);
+      
+      const response = await fetch('https://abroad-backend-gray.vercel.app/auth/studentCreate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: newStudentForm.name,
+          email: newStudentForm.email,
+          agentRef: formData.agentRef
+        }),
+        withCredentials: true
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        // Add the new student to the students list
+        setStudents(prev => [...prev, result.newStudent]);
+        
+        // Update the agent's students array in the agents list
+        setAgents(prev => prev.map(agent => 
+          agent._id === formData.agentRef 
+            ? { ...agent, students: [...(agent.students || []), result.newStudent._id] }
+            : agent
+        ));
+
+        // Select the newly created student
+        setFormData(prev => ({ ...prev, studentRef: result.newStudent._id }));
+        setStudentSearch(result.newStudent.name);
+
+        // Reset modal form and close
+        setNewStudentForm({ name: '', email: '' });
+        setIsCreateStudentModalOpen(false);
+        setIsStudentDropdownOpen(false);
+
+        toast({
+          title: 'Success',
+          description: result.message || 'Student created successfully.',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+      } else {
+        toast({
+          title: 'Error',
+          description: result.message || 'Failed to create student.',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        });
+      }
+    } catch (error) {
+      console.error('Error creating student:', error);
+      toast({
+        title: 'Error',
+        description: 'Network error. Please try again.',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setIsCreatingStudent(false);
+    }
+  };
 
   const whoOptions = [
     'Self',
@@ -618,7 +725,7 @@ function ForexForm() {
                   {isStudentDropdownOpen ? <GoChevronUp /> : <GoChevronDown />}
                 </Box>
               </Box>
-              {isStudentDropdownOpen && formData.agentRef && filteredStudents.length > 0 && (
+              {isStudentDropdownOpen && formData.agentRef && (
                 <Box
                   position="absolute"
                   top="100%"
@@ -654,6 +761,26 @@ function ForexForm() {
                       )}
                     </Box>
                   ))}
+                  
+                  {/* Create New Student Option */}
+                  <Box
+                    p={3}
+                    cursor="pointer"
+                    _hover={{ bg: "blue.50" }}
+                    borderTop="1px solid"
+                    borderColor="gray.200"
+                    onClick={() => {
+                      setIsCreateStudentModalOpen(true);
+                      setIsStudentDropdownOpen(false);
+                    }}
+                  >
+                    <Text fontWeight="medium" color="blue.600">
+                      + Create New Student
+                    </Text>
+                    <Text fontSize="sm" color="gray.500">
+                      Add a new student to this agent
+                    </Text>
+                  </Box>
                 </Box>
               )}
             </Box>
@@ -1103,6 +1230,51 @@ function ForexForm() {
           </Button>
         )}
       </form>
+
+      {/* Create Student Modal */}
+      <Modal isOpen={isCreateStudentModalOpen} onClose={() => setIsCreateStudentModalOpen(false)}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Create New Student</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <FormControl isRequired mb={4}>
+              <FormLabel>Student Name</FormLabel>
+              <Input
+                name="name"
+                value={newStudentForm.name}
+                onChange={handleNewStudentChange}
+                placeholder="Enter student name"
+              />
+            </FormControl>
+            
+            <FormControl isRequired mb={4}>
+              <FormLabel>Email</FormLabel>
+              <Input
+                type="email"
+                name="email"
+                value={newStudentForm.email}
+                onChange={handleNewStudentChange}
+                placeholder="Enter student email"
+              />
+            </FormControl>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button variant="ghost" mr={3} onClick={() => setIsCreateStudentModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              colorScheme="blue" 
+              onClick={handleCreateStudent}
+              isLoading={isCreatingStudent}
+              loadingText="Creating..."
+            >
+              Create Student
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Box>
   );
 }
