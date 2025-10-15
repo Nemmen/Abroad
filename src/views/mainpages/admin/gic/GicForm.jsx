@@ -138,7 +138,7 @@ function GicForm() {
 
   useEffect(() => {
     const fetchAgents = async () => {
-      const apiUrl = 'https://abroad-backend-gray.vercel.app/auth/getAllusers';
+      const apiUrl = 'https://abroad-backend-gray.vercel.app/auth/getAllusers?limit=1000';
       try {
         const response = await fetch(apiUrl);
         const result = await response.json();
@@ -156,7 +156,7 @@ function GicForm() {
     };
 
     const fetchStudents = async () => {
-      const apiUrl = 'https://abroad-backend-gray.vercel.app/auth/getStudent';
+      const apiUrl = 'https://abroad-backend-gray.vercel.app/auth/getStudent?limit=1000';
       try {
         const response = await fetch(apiUrl);
         const result = await response.json();
