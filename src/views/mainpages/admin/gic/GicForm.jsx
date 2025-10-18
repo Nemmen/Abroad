@@ -366,33 +366,33 @@ function GicForm() {
     if (validateForm()) {
       // const { documentFile, documentType } = formData;
 
-      const newStudent = {
-        name: formData.studentRef,
-        email: formData.email,
-        agentRef: formData.Agents,
-      };
+      // const newStudent = {
+      //   name: formData.studentRef,
+      //   email: formData.email,
+      //   agentRef: formData.Agents,
+      // };
 
       try {
-        const response = await fetch(
-          'https://abroad-backend-gray.vercel.app/auth/studentCreate',
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newStudent),
-          },
-        );
-        const result = await response.json();
+        // const response = await fetch(
+        //   'https://abroad-backend-gray.vercel.app/auth/studentCreate',
+        //   {
+        //     method: 'POST',
+        //     headers: { 'Content-Type': 'application/json' },
+        //     body: JSON.stringify(newStudent),
+        //   },
+        // );
+        // const result = await response.json();
 
-        if (response.ok) {
-          // setStudents([...students, result.newStudent]);
-        } else {
-          setLoading(false);
-          throw new Error(result.message || 'Failed to create student.');
-        }
+        // if (response.ok) {
+        //   // setStudents([...students, result.newStudent]);
+        // } else {
+        //   setLoading(false);
+        //   throw new Error(result.message || 'Failed to create student.');
+        // }
 
         const formDataToSend = {
           type: formData.type,
-          studentRef: result.newStudent._id,
+          studentRef: formData.studentRef,
           commissionAmt: formData.commission,
           fundingMonth: formData.accFundingMonth,
           tds: formData.tds,
