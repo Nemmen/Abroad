@@ -70,7 +70,7 @@ export const DEFAULT_FILTERS = {
     ttCopyStatus: [],
   },
   ADMIN_GIC: {
-    dateSort: '',
+    dateSort: 'desc', // Default to latest first
     specificDate: '',
     agentName: '',
     studentName: '',
@@ -95,7 +95,7 @@ export const DEFAULT_FILTERS = {
     commissionStatuses: [],
   },
   AGENT_GIC: {
-    dateSort: '',
+    dateSort: 'desc', // Default to latest first
     specificDate: '',
     agentName: '',
     studentName: '',
