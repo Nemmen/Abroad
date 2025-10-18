@@ -428,7 +428,7 @@ function GicForm() {
         const types = [...documents.map((doc) => doc.documentType)];
         const filedata = new FormData();
         filedata.append('type', types);
-        filedata.append('studentRef', result.newStudent._id);
+        filedata.append('studentRef', formData.studentRef );
         filedata.append('folderId', '1WkdyWmBhKQAI6W_M4LNLbPylZoGZ7y6V');
         const files = [...documents.map((doc) => doc.documentFile)].filter(
           Boolean,
