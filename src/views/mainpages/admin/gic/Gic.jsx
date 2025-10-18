@@ -89,12 +89,19 @@ const Gic = () => {
   
   // Filter states
   const [filters, setFilters] = useState({
-    dateSort: '', // 'asc', 'desc', ''
+    dateSort: 'desc', // 'asc', 'desc', '' - Default to latest first
     specificDate: '',
     agentName: '',
     studentName: '',
     dateFrom: '',
     dateTo: '',
+  });
+
+  // Pagination state
+  const [pagination, setPagination] = useState({
+    page: 1,
+    pageSize: 100,
+    total: 0
   });
 
 
@@ -226,6 +233,13 @@ const Gic = () => {
     }
 
     setFilteredData(processedData);
+    
+    // Update pagination total
+    setPagination(prev => ({ 
+      ...prev, 
+      total: processedData.length,
+      page: 1 // Reset to first page when filters change
+    }));
   }, [rows, filters]);
 
   // Filter handlers
@@ -238,13 +252,22 @@ const Gic = () => {
 
   const clearAllFilters = () => {
     setFilters({
-      dateSort: '',
+      dateSort: 'desc', // Keep default sorting when clearing filters
       specificDate: '',
       agentName: '',
       studentName: '',
       dateFrom: '',
       dateTo: '',
     });
+  };
+
+  // Pagination handlers
+  const handlePageChange = (newPage) => {
+    setPagination(prev => ({ ...prev, page: newPage }));
+  };
+
+  const handlePageSizeChange = (newPageSize) => {
+    setPagination(prev => ({ ...prev, pageSize: newPageSize, page: 1 }));
   };
 
   const handleDownloadExcel = useCallback(() => {
@@ -409,6 +432,13 @@ const Gic = () => {
             columns={memoizedColumns} 
             rows={memoizedRows} 
             getRowClassName={getRowClassName}
+            pagination={{
+              page: pagination.page,
+              pageSize: pagination.pageSize,
+              total: pagination.total,
+              onPageChange: handlePageChange,
+              onPageSizeChange: handlePageSizeChange
+            }}
           />
         )}
       </Box>
