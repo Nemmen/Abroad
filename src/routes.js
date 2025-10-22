@@ -8,7 +8,8 @@ import {
   MdAttachMoney,
   MdSwapHoriz,
   MdBusiness,
-  MdVerifiedUser
+  MdVerifiedUser,
+  MdContactSupport
 } from 'react-icons/md';
 
 import { SiAuthentik } from 'react-icons/si';
@@ -30,6 +31,7 @@ import StudentPage from 'views/mainpages/agent/students/StudentPage';
 import ForgotPassword from "views/mainpages/login_signup/ForgotPassword";
 import ResetPassword from "views/mainpages/login_signup/ResetPassword";
 import EmailTemplateGen from 'views/mainpages/admin/main/components/EmailTemplateGen';
+import Enquiry from 'views/mainpages/admin/enquiry/Enquiry';
 
 const routes = [
   {
@@ -77,6 +79,13 @@ const routes = [
     icon: <Icon as={MdSwapHoriz} width="20px" height="20px" color="inherit" />,
     path: '/email-promotions',
     component: <EmailTemplateGen/>,
+  },
+  {
+    name: 'Website Enquiries',
+    layout: '/admin',
+    icon: <Icon as={MdContactSupport} width="20px" height="20px" color="inherit" />,
+    path: '/enquiry',
+    component: <Enquiry/>,
   },
 ];
 

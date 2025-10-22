@@ -196,13 +196,13 @@ const Forex = () => {
       
       // Make the API call
       const response = await axios.post(
-        'http://localhost:4000/api/forex/request', 
+        'https://abroad-backend-gray.vercel.app/api/forex/request', 
         requestData,
         {
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token_auth')}`
-          }
+            'Content-Type': 'application/json'
+          },
+          withCredentials: true
         }
       );
       

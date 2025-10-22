@@ -12,6 +12,7 @@ import ForexView from 'views/mainpages/admin/forex/ForexView';
 import GicForm from 'views/mainpages/admin/gic/GicForm';
 import GicView from 'views/mainpages/admin/gic/GicView';
 import UserDetailPage from 'views/mainpages/admin/main/components/UserDetailPage';
+import EnquiryView from 'views/mainpages/admin/enquiry/EnquiryView';
 
 // Custom Chakra theme
 export default function Dashboard(props) {
@@ -195,6 +196,10 @@ export default function Dashboard(props) {
                 <Route 
                 path='/forex/:id'
                 element={<ForexView />}
+                />
+                <Route 
+                path='/enquiry/:id'
+                element={<EnquiryView />}
                 />
 
               </Routes>

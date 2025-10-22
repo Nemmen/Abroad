@@ -50,13 +50,10 @@ const getAuthToken = () => {
   return localStorage.getItem('token_auth');
 };
 
-// Configure axios with auth headers
-const getAuthHeaders = () => {
-  const token = getAuthToken();
+// Auth config utility for cookies
+const getAuthConfig = () => {
   return {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    }
+    withCredentials: true
   };
 };
 
@@ -122,8 +119,8 @@ const ForexCalculator = () => {
       setIsRateLoading(true);
       try {
         const response = await axios.get(
-          `${process.env.REACT_APP_BACKEND_URL || 'http://localhost:4000/api'}/forex/get-rate/${debouncedCurrencyType}`,
-          getAuthHeaders()
+          `${process.env.REACT_APP_BACKEND_URL || 'https://abroad-backend-gray.vercel.app/api'}/forex/get-rate/${debouncedCurrencyType}`,
+          getAuthConfig()
         );
         
         if (response.data && response.data.success) {

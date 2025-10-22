@@ -55,8 +55,17 @@ function ForexForm() {
   // const [students, setStudents] = useState([]);
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [students, setStudents] = useState([]);
   const [agentSearch, setAgentSearch] = useState('');
+  const [studentSearch, setStudentSearch] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isStudentDropdownOpen, setIsStudentDropdownOpen] = useState(false);
+  const [isCreateStudentModalOpen, setIsCreateStudentModalOpen] = useState(false);
+  const [newStudentForm, setNewStudentForm] = useState({
+    name: '',
+    email: ''
+  });
+  const [isCreatingStudent, setIsCreatingStudent] = useState(false);
   // const [isModalOpen, setIsModalOpen] = useState(false);
   // const openModal = () => setIsModalOpen(true);
   // const closeModal = () => setIsModalOpen(false);
@@ -117,13 +126,13 @@ function ForexForm() {
 
   useEffect(() => {
     const fetchAgents = async () => {
-      const apiUrl = 'https://abroad-backend-gray.vercel.app/auth/getAllusers';
+      const apiUrl = 'https://abroad-backend-gray.vercel.app/auth/getAllusers?limit=1000';
       try {
         const response = await fetch(apiUrl);
         const result = await response.json();
         if (response.ok) {
-          const filterResult = result.data.filter(
-            (data) => data.userStatus === 'active',
+          const filterResult = result.users.filter(
+            (user) => user.userStatus === 'active' && !user.isDeleted,
           );
           setAgents(filterResult);
         } else {
@@ -133,8 +142,126 @@ function ForexForm() {
         console.error('Network Error:', error);
       }
     };
+
+    const fetchStudents = async () => {
+      const apiUrl = 'https://abroad-backend-gray.vercel.app/auth/getStudent?limit=1000';
+      try {
+        const response = await fetch(apiUrl);
+        const result = await response.json();
+        if (response.ok) {
+          setStudents(result.students);
+        } else {
+          console.error('Server Error:', result);
+        }
+      } catch (error) {
+        console.error('Network Error:', error);
+      }
+    };
+
     fetchAgents();
+    fetchStudents();
   }, []);
+
+  // Handle new student form changes
+  const handleNewStudentChange = (e) => {
+    const { name, value } = e.target;
+    setNewStudentForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Handle create new student
+  const handleCreateStudent = async () => {
+    if (!newStudentForm.name || !newStudentForm.email) {
+      toast({
+        title: 'Validation Error',
+        description: 'Name and email are required.',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    if (!formData.agentRef) {
+      toast({
+        title: 'Error',
+        description: 'Please select an agent first.',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    try {
+      setIsCreatingStudent(true);
+      
+      const response = await fetch('https://abroad-backend-gray.vercel.app/auth/studentCreate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: newStudentForm.name,
+          email: newStudentForm.email,
+          agentRef: formData.agentRef
+        }),
+        withCredentials: true
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        // Add the new student to the students list
+        setStudents(prev => [...prev, result.newStudent]);
+        
+        // Update the agent's students array in the agents list
+        setAgents(prev => prev.map(agent => 
+          agent._id === formData.agentRef 
+            ? { ...agent, students: [...(agent.students || []), result.newStudent._id] }
+            : agent
+        ));
+
+        // Select the newly created student
+        setFormData(prev => ({ ...prev, studentRef: result.newStudent._id }));
+        setStudentSearch(result.newStudent.name);
+
+        // Reset modal form and close
+        setNewStudentForm({ name: '', email: '' });
+        setIsCreateStudentModalOpen(false);
+        setIsStudentDropdownOpen(false);
+
+        toast({
+          title: 'Success',
+          description: result.message || 'Student created successfully.',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+      } else {
+        toast({
+          title: 'Error',
+          description: result.message || 'Failed to create student.',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+        });
+      }
+    } catch (error) {
+      console.error('Error creating student:', error);
+      toast({
+        title: 'Error',
+        description: 'Network error. Please try again.',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setIsCreatingStudent(false);
+    }
+  };
 
   const whoOptions = [
     'Self',
@@ -422,14 +549,30 @@ function ForexForm() {
   const filteredAgents = agents.filter(
     (agent) =>
       agent.name?.toLowerCase().includes(agentSearch.toLowerCase()) ||
-      agent.organisation?.toLowerCase().includes(agentSearch.toLowerCase()),
+      agent.organization?.toLowerCase().includes(agentSearch.toLowerCase()),
   );
 
-  // Handle clicking outside to close dropdown
+  // Filtered students based on selected agent and search
+  const filteredStudents = students.filter((student) => {
+    // First filter by selected agent
+    const selectedAgent = agents.find(agent => agent._id === formData.agentRef);
+    const belongsToAgent = selectedAgent && selectedAgent.students && selectedAgent.students.includes(student._id);
+    
+    // Then filter by search text
+    const matchesSearch = student.name?.toLowerCase().includes(studentSearch.toLowerCase()) ||
+                         student.email?.toLowerCase().includes(studentSearch.toLowerCase());
+    
+    return belongsToAgent && matchesSearch;
+  });
+
+  // Handle clicking outside to close dropdowns
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (!event.target.closest('.agent-dropdown-container')) {
         setIsDropdownOpen(false);
+      }
+      if (!event.target.closest('.student-dropdown-container')) {
+        setIsStudentDropdownOpen(false);
       }
     };
 
@@ -506,8 +649,9 @@ function ForexForm() {
                       cursor="pointer"
                       _hover={{ bg: 'gray.100' }}
                       onClick={() => {
-                        setFormData({ ...formData, agentRef: agent._id });
+                        setFormData({ ...formData, agentRef: agent._id, studentRef: '' });
                         setAgentSearch(agent.name.toUpperCase());
+                        setStudentSearch('');
                         setIsDropdownOpen(false);
                       }}
                     >
@@ -540,14 +684,106 @@ function ForexForm() {
 
           <FormControl isRequired>
             <FormLabel>Student Name</FormLabel>
-            <Input
-              name="studentRef"
-              value={formData.studentRef}
-              onChange={handleChange}
-              h="50px"
-              w="full"
-              placeholder="Enter student name"
-            />
+            <Box position="relative" className="student-dropdown-container">
+              <Box position="relative">
+                <Input
+                  type="text"
+                  placeholder={formData.agentRef ? "Search and select student by name or email" : "Please select an agent first"}
+                  value={studentSearch}
+                  onChange={(e) => {
+                    if (formData.agentRef) {
+                      setStudentSearch(e.target.value);
+                      setIsStudentDropdownOpen(true);
+                    }
+                  }}
+                  onFocus={() => {
+                    if (formData.agentRef) {
+                      setIsStudentDropdownOpen(true);
+                    }
+                  }}
+                  h="50px"
+                  w="full"
+                  autoComplete="off"
+                  pr="40px"
+                  isDisabled={!formData.agentRef}
+                  bg={!formData.agentRef ? "gray.100" : "white"}
+                />
+                <Box
+                  position="absolute"
+                  right="10px"
+                  top="50%"
+                  transform="translateY(-50%)"
+                  cursor={formData.agentRef ? "pointer" : "not-allowed"}
+                  onClick={() => {
+                    if (formData.agentRef) {
+                      setIsStudentDropdownOpen(!isStudentDropdownOpen);
+                    }
+                  }}
+                  color={formData.agentRef ? "blackAlpha.700" : "gray.300"}
+                  fontSize="20px"
+                >
+                  {isStudentDropdownOpen ? <GoChevronUp /> : <GoChevronDown />}
+                </Box>
+              </Box>
+              {isStudentDropdownOpen && formData.agentRef && (
+                <Box
+                  position="absolute"
+                  top="100%"
+                  left="0"
+                  right="0"
+                  bg="white"
+                  border="1px solid"
+                  borderColor="gray.200"
+                  borderRadius="md"
+                  boxShadow="lg"
+                  maxH="200px"
+                  overflowY="auto"
+                  zIndex="10"
+                  mt="2px"
+                >
+                  {filteredStudents.map((student) => (
+                    <Box
+                      key={student._id}
+                      p={3}
+                      cursor="pointer"
+                      _hover={{ bg: 'gray.100' }}
+                      onClick={() => {
+                        setFormData({ ...formData, studentRef: student._id });
+                        setStudentSearch(student.name);
+                        setIsStudentDropdownOpen(false);
+                      }}
+                    >
+                      <Text fontWeight="medium">{student.name}</Text>
+                      {student.email && (
+                        <Text fontSize="sm" color="gray.600">
+                          {student.email}
+                        </Text>
+                      )}
+                    </Box>
+                  ))}
+                  
+                  {/* Create New Student Option */}
+                  <Box
+                    p={3}
+                    cursor="pointer"
+                    _hover={{ bg: "blue.50" }}
+                    borderTop="1px solid"
+                    borderColor="gray.200"
+                    onClick={() => {
+                      setIsCreateStudentModalOpen(true);
+                      setIsStudentDropdownOpen(false);
+                    }}
+                  >
+                    <Text fontWeight="medium" color="blue.600">
+                      + Create New Student
+                    </Text>
+                    <Text fontSize="sm" color="gray.500">
+                      Add a new student to this agent
+                    </Text>
+                  </Box>
+                </Box>
+              )}
+            </Box>
           </FormControl>
 
           {/* <FormControl isRequired>
@@ -994,6 +1230,51 @@ function ForexForm() {
           </Button>
         )}
       </form>
+
+      {/* Create Student Modal */}
+      <Modal isOpen={isCreateStudentModalOpen} onClose={() => setIsCreateStudentModalOpen(false)}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Create New Student</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <FormControl isRequired mb={4}>
+              <FormLabel>Student Name</FormLabel>
+              <Input
+                name="name"
+                value={newStudentForm.name}
+                onChange={handleNewStudentChange}
+                placeholder="Enter student name"
+              />
+            </FormControl>
+            
+            <FormControl isRequired mb={4}>
+              <FormLabel>Email</FormLabel>
+              <Input
+                type="email"
+                name="email"
+                value={newStudentForm.email}
+                onChange={handleNewStudentChange}
+                placeholder="Enter student email"
+              />
+            </FormControl>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button variant="ghost" mr={3} onClick={() => setIsCreateStudentModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              colorScheme="blue" 
+              onClick={handleCreateStudent}
+              isLoading={isCreatingStudent}
+              loadingText="Creating..."
+            >
+              Create Student
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Box>
   );
 }

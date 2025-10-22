@@ -99,6 +99,12 @@ const Gic = () => {
   );
   const [tabValue, setTabValue] = useState("0");
 
+  // Pagination state
+  const [pagination, setPagination] = useState({
+    page: 1,
+    pageSize: 10,
+    total: 0
+  });
 
 
   // Create MUI theme based on Chakra color mode
@@ -258,6 +264,13 @@ const Gic = () => {
     }
 
     setFilteredData(processedData);
+    
+    // Update pagination total
+    setPagination(prev => ({ 
+      ...prev, 
+      total: processedData.length,
+      page: 1 // Reset to first page when filters change
+    }));
   }, [rows, filters]);
 
   // Filter handlers
@@ -283,6 +296,15 @@ const Gic = () => {
       : (filters[filterType] || []).filter(item => item !== value);
     
     handleFilterChange(filterType, newValues);
+  };
+
+  // Pagination handlers
+  const handlePageChange = (newPage) => {
+    setPagination(prev => ({ ...prev, page: newPage }));
+  };
+
+  const handlePageSizeChange = (newPageSize) => {
+    setPagination(prev => ({ ...prev, pageSize: newPageSize, page: 1 }));
   };
 
   const clearMultiSelectFilter = (filterType) => {
@@ -522,6 +544,13 @@ const Gic = () => {
                   columns={memoizedColumns} 
                   rows={memoizedRows} 
                   getRowClassName={getRowClassName}
+                  pagination={{
+                    page: pagination.page,
+                    pageSize: pagination.pageSize,
+                    total: pagination.total,
+                    onPageChange: handlePageChange,
+                    onPageSizeChange: handlePageSizeChange
+                  }}
                 />
               </Box>
             )}

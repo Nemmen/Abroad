@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dhanseva Platform Documentation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #005A9C;
+            --secondary-color: #0D99FF;
+            --text-color: #333333;
+            --header-color: #1A202C;
+            --bg-color: #FFFFFF;
+            --border-color: #E2E8F0;
+            --table-header-bg: #F7FAFC;
+        }
+        body {
+            font-family: 'Lato', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+            -webkit-print-color-adjust: exact;
+            color-adjust: exact;
+        }
+        .container {
+            max-width: 8.5in;
+            min-height: 11in;
+            margin: 0 auto;
+            padding: 50px 60px;
+            box-sizing: border-box;
+            background: white;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .logo {
+            width: 70px;
+            height: 70px;
+        }
+        .header-text {
+            text-align: right;
+        }
+        .header-text h1 {
+            color: var(--primary-color);
+            font-size: 28px;
+            font-weight: 900;
+            margin: 0;
+            text-transform: uppercase;
+        }
+        .header-text p {
+            font-size: 14px;
+            color: var(--text-color);
+            margin: 5px 0 0;
+        }
+        h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--header-color);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-top: 35px;
+            margin-bottom: 20px;
+        }
+
+        p, li {
+            font-size: 15px;
+        }
+        ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        ul li {
+            margin-bottom: 10px;
+        }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 14px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .styled-table th, .styled-table td {
+            border: 1px solid var(--border-color);
+            padding: 12px 15px;
+            text-align: left;
+        }
+        .styled-table th {
+            background-color: var(--table-header-bg);
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        .styled-table tr:nth-of-type(even) {
+            background-color: #F9F9FB;
+        }
+        .styled-table td:first-child {
+            font-weight: 700;
+        }
+        .summary-box {
+            background-color: #F7FAFC;
+            border-left: 5px solid var(--secondary-color);
+            padding: 20px;
+            margin-top: 25px;
+            font-style: italic;
+        }
+        .flow-diagram-container {
+            text-align: center;
+            padding: 20px;
+            background-color: #F9F9FB;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        .footer {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+        }
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+                margin: 0;
+                max-width: 100%;
+                padding: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <svg class="logo" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="48" fill="#005A9C"/>
+                <text x="50" y="68" font-family="Lato, sans-serif" font-size="50" fill="white" text-anchor="middle" font-weight="900">D</text>
+            </svg>
+            <div class="header-text">
+                <h1>DHANSEVA PLATFORM</h1>
+                <p>Business, Technical & Process Documentation</p>
+        
+            </div>
+        </div>
+
+        <h2>Project Overview</h2>
+        <p>
+            Dhanseva is a digital lending and loan-management platform that enables users to apply for, receive approval on, and make payments for loans — all within a single integrated ecosystem. Unlike traditional aggregators (like PaisaBazaar), Dhanseva does not depend on any secondary company or bank. All approvals, record-keeping, and payments happen internally on the Dhanseva system through an integrated payment gateway and wallet system.
+        </p>
+
+        <h2>Key Goals</h2>
+        <ul>
+            <li>Manage the entire loan lifecycle — application, approval, EMI, and record management — in-house.</li>
+            <li>Integrate payment gateway and wallet systems for fees, EMIs, and agent commissions.</li>
+            <li>Enable data-driven auto-approval logic and eligibility checks.</li>
+            <li>Maintain a transparent, easy-to-use platform for customers, agents, and admins.</li>
+        </ul>
+
+        <h2>User Roles and Responsibilities</h2>
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>Role</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Customer / User</td>
+                    <td>Applies for loans, uploads documents, tracks EMI and payment status.</td>
+                </tr>
+                <tr>
+                    <td>Agent</td>
+                    <td>Assists users in submitting applications, earns commission on approved loans.</td>
+                </tr>
+                <tr>
+                    <td>Office Staff</td>
+                    <td>Verifies documents and forwards valid applications to DSA/Admin.</td>
+                </tr>
+                <tr>
+                    <td>DSA / Admin</td>
+                    <td>Reviews and approves loans, configures products, manages wallets, users, and records.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>Loan Application Flow</h2>
+        <ol style="padding-left: 20px;">
+            <li>User selects loan type and uploads required documents.</li>
+            <li>Platform runs internal eligibility checks based on defined business logic (e.g., salary, credit history, or documents).</li>
+            <li>Loan is auto-approved if eligibility score meets the threshold; otherwise queued for manual approval by staff/DSA.</li>
+            <li>On approval, EMI schedule is auto-generated.</li>
+            <li>Payment gateway collects processing fee or first EMI.</li>
+            <li>Loan and payment records are stored in user’s dashboard.</li>
+        </ol>
+
+        <h2>System Architecture (Conceptual)</h2>
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>Module</th>
+                    <th>Function</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Loan Management</td><td>Application creation, eligibility logic, EMI setup</td></tr>
+                <tr><td>Wallet System</td><td>User, Agent, and Admin wallets; balance, ledger, and withdrawals</td></tr>
+                <tr><td>Payment Gateway</td><td>Razorpay / PayU / Cashfree for transactions</td></tr>
+                <tr><td>Document System</td><td>Upload, convert to PDF, verify</td></tr>
+                <tr><td>Referral System</td><td>Tracks referrals, rewards</td></tr>
+                <tr><td>Notifications</td><td>SMS / Email / WhatsApp integration</td></tr>
+                <tr><td>Admin Dashboard</td><td>Analytics, CRUD management, permissions</td></tr>
+                <tr><td>Translator API</td><td>Multi-language interface</td></tr>
+            </tbody>
+        </table>
+
+        <h2>End-to-End Platform Flow</h2>
+        <div class="flow-diagram-container">
+            <div class="mermaid">
+                graph TD
+                    A["User / Agent<br/>(Apply for Loan)"] --> B["Upload Documents<br/>+ Loan Details"];
+                    B --> C["Eligibility Check<br/>(Internal Logic)"];
+                    C --> D["Loan Approval<br/>(Auto/Manual)"];
+                    D --> E["Payment Gateway<br/>(Processing Fee/EMI)"];
+                    E --> F["Wallet Management<br/>(User ↔ Agent)"];
+                    F --> G["Dashboard + Record<br/>Tracking"];
+
+                    style A fill:#E3F2FD,stroke:#0D99FF,stroke-width:2px
+                    style G fill:#E8F5E9,stroke:#4CAF50,stroke-width:2px
+                    style C fill:#FFF3E0,stroke:#FB8C00,stroke-width:2px
+                    style D fill:#FFF3E0,stroke:#FB8C00,stroke-width:2px
+            </div>
+        </div>
+
+        <h2>Business Logic Simplified</h2>
+        <table class="styled-table">
+            <thead>
+                <tr><th>Process</th><th>Input</th><th>Action</th><th>Output</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>Loan Application</td><td>User Data + Documents</td><td>Validate & run eligibility logic</td><td>Loan request created</td></tr>
+                <tr><td>Auto-Approval</td><td>Eligibility score</td><td>If ≥ threshold → Approve</td><td>Loan approved</td></tr>
+                <tr><td>EMI Setup</td><td>Amount + Tenure</td><td>Auto calculate</td><td>EMI schedule created</td></tr>
+                <tr><td>Payment</td><td>User initiates</td><td>Gateway processes</td><td>Transaction logged</td></tr>
+                <tr><td>Commission</td><td>Loan disbursed</td><td>% credited to Agent Wallet</td><td>Agent rewarded</td></tr>
+            </tbody>
+        </table>
+
+        <h2>Legal & Compliance Highlights</h2>
+        <ul>
+            <li><strong>KYC (Know Your Customer):</strong> Aadhaar, PAN, and income proof collected and verified digitally.</li>
+            <li><strong>Data Privacy:</strong> All personal data stored securely with encryption.</li>
+            <li><strong>Consent Mechanism:</strong> Users accept T&C before application submission.</li>
+            <li><strong>RBI Norms:</strong> Though Dhanseva self-approves, follows digital lending best practices.</li>
+        </ul>
+
+        <h2>Recommended Technology Stack</h2>
+        <table class="styled-table">
+            <thead>
+                <tr><th>Layer</th><th>Technology</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>Frontend</td><td>React.js / Next.js (PWA support for mobile)</td></tr>
+                <tr><td>Backend</td><td>Node.js (Express/NestJS)</td></tr>
+                <tr><td>Database</td><td>PostgreSQL + Redis for caching</td></tr>
+                <tr><td>Storage</td><td>On-premise or MinIO (S3-compatible)</td></tr>
+                <tr><td>Payment Gateway</td><td>Razorpay / PayU / Cashfree</td></tr>
+                <tr><td>Authentication</td><td>JWT + OTP (Twilio / MSG91)</td></tr>
+                <tr><td>Deployment</td><td>Nginx + PM2 on VPS or Dedicated Server</td></tr>
+            </tbody>
+        </table>
+
+        <h2>Dashboard Features by Role</h2>
+        <table class="styled-table">
+            <thead>
+                <tr><th>Role</th><th>Key Dashboard Modules</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>User</td><td>Active loans, EMI tracker, wallet, payment history</td></tr>
+                <tr><td>Agent</td><td>Customer applications, commission log, referral tracking</td></tr>
+                <tr><td>Office Staff</td><td>Verification queue, document management</td></tr>
+                <tr><td>DSA/Admin</td><td>Approvals, analytics, wallet control, content management</td></tr>
+            </tbody>
+        </table>
+
+       
+
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'base', themeVariables: {
+            'primaryColor': '#F7FAFC',
+            'primaryTextColor': '#333',
+            'primaryBorderColor': '#005A9C',
+            'lineColor': '#0D99FF',
+            'secondaryColor': '#E3F2FD',
+            'tertiaryColor': '#fff'
+        }});
+    </script>
+</body>
+</html>
