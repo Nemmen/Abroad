@@ -82,7 +82,7 @@ const ForexCalculator = () => {
   const [foreignAmount, setForeignAmount] = useState(10000);
   const [ibrRate, setIbrRate] = useState(83.00);
   const [pmMargin, setPmMargin] = useState(0.10);
-  const [aeMargin, setAeMargin] = useState(0.25);
+  const [aeMargin, setAeMargin] = useState(0.05);
   const [agentMargin, setAgentMargin] = useState(0.35);
   const [includeFlyWire, setIncludeFlyWire] = useState(false);
   const [includeCIBC, setIncludeCIBC] = useState(false);
@@ -176,8 +176,8 @@ const ForexCalculator = () => {
     }
     
     // Calculate TCS (Tax Collected at Source)
-    // TCS is 5% on amounts over 7 lakhs
-    const tcs = inrConverted > 700000 ? (inrConverted - 700000) * 0.05 : 0;
+    // TCS is 5% on amounts over 10 lakhs
+    const tcs = inrConverted > 1000000 ? (inrConverted - 1000000) * 0.05 : 0;
     
     // Calculate additional charges
     const flyWireCharge = includeFlyWire ? parseFloat(flyWireAmount) : 0;
@@ -468,12 +468,12 @@ const ForexCalculator = () => {
                   </Stat>
                   
                   <Stat>
-                    <StatLabel>TCS (&gt;7L)</StatLabel>
+                    <StatLabel>TCS (&gt;10L)</StatLabel>
                     <StatNumber>
                       {formatCurrency(calculationResult.tcs)}
                     </StatNumber>
                     <StatHelpText>
-                      {calculationResult.tcs > 0 ? '5% on amount over ₹7,00,000' : 'Not Applicable'}
+                      {calculationResult.tcs > 0 ? '5% on amount over ₹10,00,000' : 'Not Applicable'}
                     </StatHelpText>
                   </Stat>
                 </Grid>
