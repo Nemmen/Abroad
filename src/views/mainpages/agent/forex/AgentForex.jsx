@@ -293,6 +293,7 @@ const Forex = () => {
     
     setLoading(true);
     try {
+      // Use the new agent-specific endpoint
       const params = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
@@ -301,17 +302,34 @@ const Forex = () => {
       });
 
       const response = await axios.get(
-        `https://abroad-backend-gray.vercel.app/auth/viewAllForexForms?${params}`,
+        `http://localhost:4000/agent/forex?${params}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token_auth")}`,
+          },
+          withCredentials: true
+        }
       );
       
-      if (response.data && response.data.forexForms && response.data.forexForms.length > 0) {
-        const userForexForms = response.data.forexForms.filter(
-          (form) => form.agentRef._id === user._id,
-        );
-
-        const forexForms = userForexForms.map((item) => ({
+      // Log the raw response structure to help diagnose issues
+      console.log('Agent Forex - Raw API response structure:', {
+        success: response.data?.success,
+        dataType: typeof response.data,
+        hasForexForms: !!response.data?.forexForms,
+        dataType: Array.isArray(response.data?.forexForms) ? 'array' : typeof response.data?.forexForms,
+        dataLength: response.data?.forexForms?.length || 0,
+        hasPagination: !!response.data?.pagination,
+        sample: response.data?.forexForms?.[0] ? { 
+          _id: response.data.forexForms[0]._id,
+          agentRef: response.data.forexForms[0].agentRef
+        } : null
+      });
+      
+      if (response.data && response.data.forexForms && Array.isArray(response.data.forexForms)) {
+        // Process all forex forms using the new API response format
+        const forexForms = response.data.forexForms.map((item) => ({
           id: item._id,
-          agentRef: item.agentRef?.name.toUpperCase() || 'N/A',
+          agentRef: item.agentRef?.name?.toUpperCase() || 'N/A',
           studentRef: item?.studentName || 'N/A',
           date: new Date(item.date).toLocaleDateString('en-US'),
           country: item.country || 'N/A',
@@ -326,29 +344,24 @@ const Forex = () => {
           commissionStatus: item.commissionStatus || 'N/A',
         }));
         
-        setRows(forexForms);
-        setData(userForexForms);
-        
-        console.log('Agent Forex - Fetched data:', {
-          totalBackendRecords: response.data.forexForms.length,
-          userRecords: userForexForms.length,
-          formattedRows: forexForms.length,
+        console.log('Agent Forex - Processed forms:', {
+          totalForexForms: response.data.forexForms.length,
+          processedForms: forexForms.length,
           userId: user._id
         });
         
-        // Calculate pagination for filtered data
-        const totalAgentRecords = userForexForms.length;
-        const totalRecordsFromBackend = response.data.pagination?.total || 0;
+        setRows(forexForms);
+        setData(response.data.forexForms);
         
-        // Adjust pagination based on agent's data
+        // Update pagination state directly from backend
         setPagination({
           page: page,
           limit: limit,
-          total: totalAgentRecords,
-          pages: Math.ceil(totalAgentRecords / limit)
+          total: response.data.pagination?.total || response.data.forexForms.length,
+          pages: response.data.pagination?.pages || Math.ceil(response.data.forexForms.length / limit)
         });
       } else {
-        console.log('Agent Forex - No data received from backend');
+        console.log('Agent Forex - No data received or no matching records found in backend response:', response.data);
         setRows([]);
         setData([]);
         setPagination(prev => ({
@@ -359,6 +372,14 @@ const Forex = () => {
       }
     } catch (error) {
       console.error('Error fetching forex forms:', error);
+      // Show a more helpful error message
+      setRows([]);
+      setData([]);
+      setPagination(prev => ({
+        ...prev,
+        total: 0,
+        pages: 0
+      }));
     } finally {
       setLoading(false);
     }
@@ -366,6 +387,7 @@ const Forex = () => {
 
   useEffect(() => {
     if (user && user._id) {
+      console.log('Agent Forex - Fetching data for user:', user._id);
       fetchData();
     } else {
       console.log('Agent Forex - User not available:', user);
@@ -375,7 +397,42 @@ const Forex = () => {
     return () => {
       window.updateForexData = undefined;
     };
-  }, [user._id]);
+  }, [user, user?._id]);
+  
+  // Additional useEffect to refetch data after component mounts with multiple attempts
+  useEffect(() => {
+    if (!user || !user._id) return;
+    
+    // First attempt after 1 second
+    const timer1 = setTimeout(() => {
+      if (user && user._id) {
+        console.log('Agent Forex - First refetch attempt after 1 second');
+        fetchData();
+      }
+    }, 1000);
+    
+    // Second attempt after 3 seconds
+    const timer2 = setTimeout(() => {
+      if (user && user._id) {
+        console.log('Agent Forex - Second refetch attempt after 3 seconds');
+        fetchData();
+      }
+    }, 3000);
+    
+    // Final attempt after 5 seconds
+    const timer3 = setTimeout(() => {
+      if (user && user._id) {
+        console.log('Agent Forex - Final refetch attempt after 5 seconds');
+        fetchData();
+      }
+    }, 5000);
+    
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+      clearTimeout(timer3);
+    };
+  }, [user, user?._id]);
 
   // Filter and sort data effect
   useEffect(() => {
@@ -583,11 +640,15 @@ const Forex = () => {
     console.log('Agent Forex - Memoized rows calculation:', {
       filteredDataLength: filteredData.length,
       rowsLength: rows.length,
-      usingFiltered: filteredData.length > 0,
-      result: filteredData.length > 0 ? filteredData : rows
+      usingFiltered: filteredData.length > 0 || (filters && Object.values(filters).some(val => val !== '' && val?.length > 0)),
+      result: (filteredData.length > 0 || (filters && Object.values(filters).some(val => val !== '' && val?.length > 0))) ? filteredData : rows
     });
-    return filteredData.length > 0 ? filteredData : rows;
-  }, [filteredData, rows]);
+    
+    // If filters are applied (any non-empty values), use filteredData even if it's empty
+    // Otherwise use rows data
+    const hasActiveFilters = filters && Object.values(filters).some(val => val !== '' && val?.length > 0);
+    return (hasActiveFilters) ? filteredData : rows;
+  }, [filteredData, rows, filters]);
 
   const getRowClassName = (params) => {
     const status = params.row.commissionStatus?.toLowerCase();
@@ -860,9 +921,24 @@ const Forex = () => {
                 <Typography variant="h6" color="text.secondary" gutterBottom>
                   No Forex records found
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                   Your forex transactions will appear here when they are created
                 </Typography>
+                <Alert severity="info" sx={{ mt: 2, maxWidth: "500px" }}>
+                  If you believe you should have records showing here, please refresh the page or try logging out and logging in again.
+                </Alert>
+                <Button 
+                  variant="outlined" 
+                  color="primary" 
+                  sx={{ mt: 2 }}
+                  onClick={() => {
+                    // Force a data refresh with a loading indicator
+                    setLoading(true);
+                    setTimeout(() => fetchData(), 500);
+                  }}
+                >
+                  Refresh Data
+                </Button>
               </Box>
             ) : (
               <Box sx={{ 

@@ -17,10 +17,13 @@ const AgentEarnings = () => {
         const token = localStorage.getItem("token_auth");
         const response = await axios.get("https://abroad-backend-gray.vercel.app/auth/getAgentCommission", {
           headers: { Authorization: `Bearer ${token}` },
+          timeout: 10000, // 10 seconds timeout
+          withCredentials: true // Include credentials
         });
-        setEarnings(response.data);
+        setEarnings(response.data || { gicCommission: 0, forexCommission: 0 });
       } catch (error) {
         console.error("Error fetching earnings:", error);
+        setEarnings({ gicCommission: 0, forexCommission: 0 }); // Set default values on error
       } finally {
         setLoading(false);
       }

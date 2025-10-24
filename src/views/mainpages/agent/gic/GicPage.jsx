@@ -150,28 +150,43 @@ const Gic = () => {
     },
   });
 
-  // Fetch all data without pagination
-  const fetchData = async () => {
+  // Fetch all data with pagination
+  const fetchData = async (page = pagination.page, pageSize = pagination.pageSize) => {
+    if (!user || !user._id) {
+      console.log('Agent GIC - User not authenticated');
+      setLoading(false);
+      return;
+    }
+    
     setLoading(true);
     try {
+      // Use the new agent-specific endpoint
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: pageSize.toString(),
+        sortField: 'accOpeningDate',
+        sortOrder: 'desc'
+      });
+      
       const response = await axios.get(
-        'https://abroad-backend-gray.vercel.app/auth/viewAllGicForm',
+        `http://localhost:4000/agent/gic?${params}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token_auth")}`,
+          },
+          withCredentials: true
+        }
       );
+      
       if (response.data.success) {
-        const userGicForms = response.data.gicForms.filter(
-          (form) => form.agentRef._id === user._id,
-        );
-        setData(userGicForms);
+        setData(response.data.gicForms);
         
-        // Calculate pagination for filtered data
-        const totalAgentRecords = userGicForms.length;
-        
-        const gicForms = userGicForms.map((form, index) => ({
+        const gicForms = response.data.gicForms.map((form, index) => ({
           id: form._id || index,
           type: form.type || 'N/A',
-          Agent: form.agentRef.name.toUpperCase() || 'N/A',
+          Agent: form.agentRef?.name?.toUpperCase() || 'N/A',
           accOpeningMonth: form.accOpeningMonth || 'N/A',
-          studentName: form.studentRef.name || 'N/A',
+          studentName: form.studentRef?.name || 'N/A',
           passportNo: form.studentPassportNo || 'N/A',
           studentPhoneNo: form.studentPhoneNo || 'N/A',
           bankVendor: form.bankVendor || 'N/A',
@@ -182,17 +197,43 @@ const Gic = () => {
           commissionStatus: form.commissionStatus || 'N/A',
         }));
         setRows(gicForms);
+        
+        // Update pagination from response
+        setPagination({
+          page: page,
+          pageSize: pageSize,
+          total: response.data.pagination?.total || gicForms.length
+        });
       }
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('Error fetching GIC data:', error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchData();
-  }, [user._id]);
+    if (user && user._id) {
+      fetchData();
+    }
+  }, [user?._id]);
+  
+  // Additional useEffect to refetch data after component mounts with multiple attempts
+  useEffect(() => {
+    if (!user || !user._id) return;
+    
+    // First attempt after 1 second
+    const timer1 = setTimeout(() => {
+      if (user && user._id) {
+        console.log('Agent GIC - First refetch attempt after 1 second');
+        fetchData();
+      }
+    }, 1000);
+    
+    return () => {
+      clearTimeout(timer1);
+    };
+  }, [user, user?._id]);
 
   // Filter and sort data effect
   useEffect(() => {

@@ -54,22 +54,45 @@ const DashboardCharts = () => {
         setLoading(true);
         const token = localStorage.getItem("token_auth");
         const headers = { Authorization: `Bearer ${token}` };
+        
+        // Configuration for axios requests with timeout and fallback
+        const axiosConfig = {
+          headers,
+          timeout: 10000, // 10 seconds timeout
+          withCredentials: true // Include credentials
+        };
 
-        // Fetch all data
-        const [forexResponse, gicResponse, blockedResponse, earningsResponse] = await Promise.all([
-          axios.get("https://abroad-backend-gray.vercel.app/auth/getForexByAgent", { headers }),
-          axios.get("https://abroad-backend-gray.vercel.app/auth/getGicByAgent", { headers }),
-          axios.get("https://abroad-backend-gray.vercel.app/auth/getBlockedByAgent", { headers }),
-          axios.get("https://abroad-backend-gray.vercel.app/auth/getAgentCommission", { headers }),
+        // Function to handle each request with error handling
+        const safeRequest = async (url) => {
+          try {
+            const response = await axios.get(url, axiosConfig);
+            return response.data;
+          } catch (error) {
+            console.warn(`Error fetching from ${url}:`, error);
+            return []; // Return empty array as fallback
+          }
+        };
+
+        // Fetch all data with error handling for each request
+        const [forexData, gicData, blockedData, earningsData] = await Promise.all([
+          safeRequest("https://abroad-backend-gray.vercel.app/auth/viewAllForexForms"),
+          safeRequest("https://abroad-backend-gray.vercel.app/auth/viewAllGicForm"),
+          safeRequest("https://abroad-backend-gray.vercel.app/auth/getAllBlockedData"),
+          safeRequest("https://abroad-backend-gray.vercel.app/auth/getAgentCommission")
         ]);
 
-        setForexData(forexResponse.data);
-        setGicData(gicResponse.data);
-        setBlockedData(blockedResponse.data);
-        setEarningsData(earningsResponse.data);
+        setForexData(forexData || []);
+        setGicData(gicData || []);
+        setBlockedData(blockedData || []);
+        setEarningsData(earningsData || { forexCommission: 0, gicCommission: 0 });
 
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
+        // Set default values in case of error
+        setForexData([]);
+        setGicData([]);
+        setBlockedData([]);
+        setEarningsData({ forexCommission: 0, gicCommission: 0 });
       } finally {
         setLoading(false);
       }
