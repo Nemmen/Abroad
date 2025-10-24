@@ -106,8 +106,9 @@ function ForexView() {
           
           // For agents, verify they own this record
           const user = JSON.parse(localStorage.getItem('user'));
-          if (formData1.agentRef._id !== user._id) {
+          if (formData1.agentRef && user && formData1.agentRef._id !== user._id) {
             console.error('Access denied: This record belongs to another agent');
+            setLoading(false);
             return;
           }
           
@@ -126,6 +127,15 @@ function ForexView() {
     return label
       .replace(/([A-Z])/g, ' $1')
       .replace(/\b\w/g, (char) => char.toUpperCase());
+  };
+
+  // Function to format dates to dd-mm-yyyy format
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
   };
 
   const getIcon = (label) => {
@@ -270,8 +280,8 @@ function ForexView() {
                               </Button>
                             ) : (
                               <Typography variant="h6" fontWeight="medium">
-                                {label === 'date'
-                                  ? new Date(value).toLocaleDateString('en-GB')
+                                {label === 'date' || label === 'commissionPaymentDate'
+                                  ? formatDate(value)
                                   : value}
                               </Typography>
                             )}
