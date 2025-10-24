@@ -296,7 +296,7 @@ const Forex = () => {
       // Use the new agent-specific endpoint
       const params = new URLSearchParams({
         page: page.toString(),
-        limit: limit.toString(),
+        limit:'1000',
         sortField: 'date',
         sortOrder: 'desc'
       });
