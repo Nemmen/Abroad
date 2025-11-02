@@ -665,126 +665,25 @@ const Forex = () => {
   return (
     <ThemeProvider theme={theme}>
       <Box sx={{ px: { xs: 2, sm: 3 }, py: 2, maxWidth: '1400px', mx: 'auto' }}>
-        {/* Forex Calculator Card with Tabs */}
-        <Paper 
-          elevation={3} 
-          sx={{ 
-            p: 3, 
-            mb: 3, 
+        {/* Forex Calculator - single compact calculator card (submit handled elsewhere) */}
+        <Paper
+          elevation={3}
+          sx={{
+            p: 3,
+            mb: 3,
             borderRadius: '12px',
             background: 'linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%)'
           }}
         >
-          <Tabs
-            value={calculatorTab}
-            onChange={(e, newValue) => setCalculatorTab(newValue)}
-            indicatorColor="primary"
-            textColor="primary"
-            variant="fullWidth"
-            sx={{ mb: 3 }}
-          >
-            <Tab label="Submit Request" />
-            <Tab label="Calculate Forex Conversion" />
-          </Tabs>
-          
-          {calculatorTab === 0 ? (
-            <>
-              <Typography variant="h5" fontWeight="600" color="#2E7D32" gutterBottom>
-                Forex Conversion Request
-              </Typography>
-              <Typography variant="body2" color="#1B5E20" sx={{ mb: 3 }}>
-                Submit a forex conversion request and our team will contact you with the best rates
-              </Typography>
-              
-              <form onSubmit={handleCalculatorSubmit}>
-                <Grid container spacing={3}>
-                  <Grid item xs={12} md={3}>
-                    <FormControl 
-                      fullWidth 
-                      variant="outlined" 
-                      error={!!formErrors.currencyType}
-                    >
-                      <InputLabel>Currency Type</InputLabel>
-                      <Select
-                        name="currencyType"
-                        value={calculatorForm.currencyType}
-                        onChange={handleCalculatorChange}
-                        label="Currency Type"
-                        disabled={isSubmitting}
-                      >
-                        {currencyOptions.map(option => (
-                          <MenuItem key={option.value} value={option.value}>
-                            {option.label}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                      {formErrors.currencyType && (
-                        <FormHelperText error>{formErrors.currencyType}</FormHelperText>
-                      )}
-                    </FormControl>
-                  </Grid>
-                  
-                  <Grid item xs={12} md={3}>
-                    <TextField
-                      name="foreignAmount"
-                      label="Foreign Amount"
-                      variant="outlined"
-                      fullWidth
-                      type="number"
-                      value={calculatorForm.foreignAmount}
-                      onChange={handleCalculatorChange}
-                      error={!!formErrors.foreignAmount}
-                      helperText={formErrors.foreignAmount}
-                      disabled={isSubmitting}
-                      InputProps={{
-                        startAdornment: calculatorForm.currencyType ? (
-                          <InputAdornment position="start">
-                            {calculatorForm.currencyType}
-                          </InputAdornment>
-                        ) : null
-                      }}
-                    />
-                  </Grid>
-                  
-                  <Grid item xs={12} md={3}>
-                    <TextField
-                      name="agentMargin"
-                      label="Your Margin (in paise per unit)"
-                      variant="outlined"
-                      fullWidth
-                      type="number"
-                      inputProps={{ step: "0.01" }}
-                      value={calculatorForm.agentMargin}
-                      onChange={handleCalculatorChange}
-                      error={!!formErrors.agentMargin}
-                      helperText={formErrors.agentMargin || "Example: 0.50 for 50 paise"}
-                      disabled={isSubmitting}
-                    />
-                  </Grid>
-                  
-                  <Grid item xs={12} md={3} sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Button 
-                      type="submit" 
-                      variant="contained"
-                      fullWidth
-                      sx={{ 
-                        height: '56px',
-                        backgroundColor: '#2E7D32',
-                        '&:hover': {
-                          backgroundColor: '#1B5E20'
-                        }
-                      }}
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? <CircularProgress size={24} color="inherit" /> : 'Calculate & Submit Request'}
-                    </Button>
-                  </Grid>
-                </Grid>
-              </form>
-            </>
-          ) : (
-            <AgentForexCalculator />
-          )}
+          <Typography variant="h5" fontWeight="600" color="#2E7D32" gutterBottom>
+            Forex Calculator
+          </Typography>
+          <Typography variant="body2" color="#1B5E20" sx={{ mb: 2 }}>
+            Quick conversion preview — use this to get an agent quote. To submit a request, use the "Submit Request" section below.
+          </Typography>
+
+          {/* Render the compact calculator component (keeps calculation and quote flow) */}
+          <AgentForexCalculator />
         </Paper>
         
         {/* Success Modal */}
