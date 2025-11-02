@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 import { 
   Box, Card, CardContent, Typography, 
   Grid, Avatar, CircularProgress 
@@ -39,7 +40,8 @@ const AgentEarnings = () => {
       value: `${earnings.forexCommission}/-`,
       icon: <BiDollar size={30} />,
       color: "#3B82F6",
-      bgColor: "#EFF6FF"
+      bgColor: "#EFF6FF",
+      link: "/agent/forex"
     },
     {
       id: 2,
@@ -47,7 +49,8 @@ const AgentEarnings = () => {
       value: `${earnings.gicCommission}/-`,
       icon: <FaUniversity size={26} />,
       color: "#10B981",
-      bgColor: "#ECFDF5"
+      bgColor: "#ECFDF5",
+      link: "/agent/gic"
     }
   ];
 
@@ -65,41 +68,44 @@ const AgentEarnings = () => {
         <Grid container spacing={3}>
           {earningsData.map((item) => (
             <Grid item xs={12} sm={6} key={item.id}>
-              <Card 
-                elevation={0}
-                sx={{ 
-                  borderRadius: 2, 
-                  boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
-                  transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
-                  "&:hover": {
-                    transform: "translateY(-4px)",
-                    boxShadow: "0 5px 15px rgba(0,0,0,0.1)",
-                  }
-                }}
-              >
-                <CardContent sx={{ p: 3 }}>
-                  <Box display="flex" alignItems="center" justifyContent="space-between">
-                    <Box>
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                        {item.title}
-                      </Typography>
-                      <Typography variant="h4" fontWeight="700" color={item.color}>
-                        {item.value}
-                      </Typography>
+              <Link to={item.link} style={{ textDecoration: 'none' }}>
+                <Card 
+                  elevation={0}
+                  sx={{ 
+                    borderRadius: 2, 
+                    boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
+                    transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
+                    cursor: "pointer",
+                    "&:hover": {
+                      transform: "translateY(-4px)",
+                      boxShadow: "0 5px 15px rgba(0,0,0,0.1)",
+                    }
+                  }}
+                >
+                  <CardContent sx={{ p: 3 }}>
+                    <Box display="flex" alignItems="center" justifyContent="space-between">
+                      <Box>
+                        <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                          {item.title}
+                        </Typography>
+                        <Typography variant="h4" fontWeight="700" color={item.color}>
+                          {item.value}
+                        </Typography>
+                      </Box>
+                      <Avatar 
+                        sx={{ 
+                          bgcolor: item.bgColor,
+                          color: item.color,
+                          width: 64,
+                          height: 64
+                        }}
+                      >
+                        {item.icon}
+                      </Avatar>
                     </Box>
-                    <Avatar 
-                      sx={{ 
-                        bgcolor: item.bgColor,
-                        color: item.color,
-                        width: 64,
-                        height: 64
-                      }}
-                    >
-                      {item.icon}
-                    </Avatar>
-                  </Box>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </Link>
             </Grid>
           ))}
         </Grid>

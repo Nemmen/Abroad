@@ -129,11 +129,7 @@ const AnimatedLogoBackground = () => {
           </p>
 
           {/* Service highlights */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
-              <div className="text-xl font-bold text-white">7+</div>
-              <div className="text-blue-200 text-sm">Global Partners</div>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-center">
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
               <div className="text-xl font-bold text-white">Secure</div>
               <div className="text-blue-200 text-sm">Transactions</div>
