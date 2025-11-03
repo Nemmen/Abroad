@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
+import { Link } from "react-router-dom";
 import {
   Box,
   Card,
@@ -63,9 +64,9 @@ const DashboardCharts = () => {
           axios.get("https://abroad-backend-gray.vercel.app/auth/getAgentCommission", { headers }),
         ]);
 
-        setForexData(forexResponse.data);
-        setGicData(gicResponse.data);
-        setBlockedData(blockedResponse.data);
+        setForexData(forexResponse.data?.data || []);
+        setGicData(gicResponse.data?.data || []);
+        setBlockedData(blockedResponse.data?.data || []);
         setEarningsData(earningsResponse.data);
 
       } catch (error) {
@@ -132,36 +133,42 @@ const DashboardCharts = () => {
 
       // Count items in this period
       const forexCount = forexData.filter(item => {
-        const itemDate = new Date(item.createdAt || item.date);
+        const itemDate = new Date(item.date);
         return itemDate >= intervalStart && itemDate <= intervalEnd;
       }).length;
 
       const gicCount = gicData.filter(item => {
-        const itemDate = new Date(item.createdAt || item.accOpeningMonth);
+        const itemDate = new Date(item.accOpeningDate);
         return itemDate >= intervalStart && itemDate <= intervalEnd;
       }).length;
 
       const blockedCount = blockedData.filter(item => {
-        const itemDate = new Date(item.createdAt || item.date);
+        const itemDate = new Date(item.accOpeningDate || item.date);
         return itemDate >= intervalStart && itemDate <= intervalEnd;
       }).length;
 
       // Calculate earnings for this period
       const forexEarnings = forexData
         .filter(item => {
-          const itemDate = new Date(item.createdAt || item.date);
+          const itemDate = new Date(item.date);
           return itemDate >= intervalStart && itemDate <= intervalEnd && 
-                 item.commissionStatus === 'received';
+                 item.commissionStatus === 'Paid';
         })
-        .reduce((sum, item) => sum + (parseFloat(item.agentCommission) || 0), 0);
+        .reduce((sum, item) => {
+          const commission = parseFloat(String(item.agentCommission || 0).replace(/,/g, ''));
+          return sum + (isNaN(commission) ? 0 : commission);
+        }, 0);
 
       const gicEarnings = gicData
         .filter(item => {
-          const itemDate = new Date(item.createdAt || item.accOpeningMonth);
+          const itemDate = new Date(item.accOpeningDate);
           return itemDate >= intervalStart && itemDate <= intervalEnd && 
-                 item.commissionStatus === 'received';
+                 item.commissionStatus === 'Paid';
         })
-        .reduce((sum, item) => sum + (parseFloat(item.commissionAmt) || 0), 0);
+        .reduce((sum, item) => {
+          const commission = parseFloat(String(item.commissionAmt || 0).replace(/,/g, ''));
+          return sum + (isNaN(commission) ? 0 : commission);
+        }, 0);
 
       return {
         period: periodLabel,
@@ -175,17 +182,26 @@ const DashboardCharts = () => {
       };
     });
 
-    // Calculate summary stats
-    const totalStats = result.reduce((acc, curr) => ({
-      totalForex: acc.totalForex + curr.forex,
-      totalGic: acc.totalGic + curr.gic,
-      totalBlocked: acc.totalBlocked + curr.blocked,
-      totalEarnings: acc.totalEarnings + curr.totalEarnings,
-    }), { totalForex: 0, totalGic: 0, totalBlocked: 0, totalEarnings: 0 });
+    // Calculate summary stats - use actual totals from all data
+    const totalForex = forexData.length;
+    const totalGic = gicData.length;
+    const totalBlocked = blockedData.length;
+    
+    // Get total earnings from earnings API response
+    const gicCommission = parseFloat(earningsData?.gicCommission || 0);
+    const forexCommission = parseFloat(earningsData?.forexCommission || 0);
+    const totalEarnings = gicCommission + forexCommission;
+
+    const totalStats = {
+      totalForex,
+      totalGic,
+      totalBlocked,
+      totalEarnings
+    };
 
     setSummaryStats(totalStats);
     return result;
-  }, [forexData, gicData, blockedData, timePeriod, dataRange]);
+  }, [forexData, gicData, blockedData, timePeriod, dataRange, earningsData]);
 
   // Chart colors
   const colors = {
@@ -272,22 +288,37 @@ const DashboardCharts = () => {
       {/* Summary Stats */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         {[
-          { label: 'Total Forex', value: summaryStats.totalForex, color: colors.forex },
-          { label: 'Total GIC', value: summaryStats.totalGic, color: colors.gic },
-          { label: 'Total Blocked', value: summaryStats.totalBlocked, color: colors.blocked },
-          { label: 'Total Earnings', value: `₹${summaryStats.totalEarnings.toLocaleString()}`, color: colors.earnings },
+          { label: 'Total Forex', value: summaryStats.totalForex, color: colors.forex, link: '/agent/forex' },
+          { label: 'Total GIC', value: summaryStats.totalGic, color: colors.gic, link: '/agent/gic' },
+          { label: 'Total Blocked', value: summaryStats.totalBlocked, color: colors.blocked, link: '/agent/gic' },
+          { label: 'Total Earnings', value: `₹${summaryStats.totalEarnings.toLocaleString()}`, color: colors.earnings, link: null },
         ].map((stat, index) => (
           <Grid item xs={12} sm={6} md={3} key={index}>
-            <Card sx={{ height: '100%' }}>
-              <CardContent sx={{ textAlign: 'center' }}>
-                <Typography variant="h4" sx={{ color: stat.color, fontWeight: 'bold' }}>
-                  {stat.value}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {stat.label}
-                </Typography>
-              </CardContent>
-            </Card>
+            {stat.link ? (
+              <Link to={stat.link} style={{ textDecoration: 'none' }}>
+                <Card sx={{ height: '100%', cursor: 'pointer', '&:hover': { boxShadow: 4, transform: 'translateY(-2px)', transition: 'all 0.2s' } }}>
+                  <CardContent sx={{ textAlign: 'center' }}>
+                    <Typography variant="h4" sx={{ color: stat.color, fontWeight: 'bold' }}>
+                      {stat.value}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {stat.label}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Link>
+            ) : (
+              <Card sx={{ height: '100%' }}>
+                <CardContent sx={{ textAlign: 'center' }}>
+                  <Typography variant="h4" sx={{ color: stat.color, fontWeight: 'bold' }}>
+                    {stat.value}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {stat.label}
+                  </Typography>
+                </CardContent>
+              </Card>
+            )}
           </Grid>
         ))}
       </Grid>

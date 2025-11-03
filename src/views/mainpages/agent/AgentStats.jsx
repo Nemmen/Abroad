@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
 import { 
   Box, Card, CardContent, Typography, 
   Grid, Avatar, CircularProgress 
@@ -40,7 +41,8 @@ const AgentStats = () => {
       value: stats.forexCount,
       icon: <GrDocumentVerified size={24} />,
       color: blue[500],
-      bgColor: blue[50]
+      bgColor: blue[50],
+      link: "/agent/forex"
     },
     {
       id: 2,
@@ -48,7 +50,8 @@ const AgentStats = () => {
       value: stats.gicCount,
       icon: <GrDocumentVerified size={24} />,
       color: "#6366F1",
-      bgColor: "#EEF2FF"
+      bgColor: "#EEF2FF",
+      link: "/agent/gic"
     },
     {
       id: 3,
@@ -56,7 +59,8 @@ const AgentStats = () => {
       value: stats.blockedCount || 0,
       icon: <GrDocumentVerified size={24} />,
       color: "#F59E0B",
-      bgColor: "#FEF3C7"
+      bgColor: "#FEF3C7",
+      link: "/agent/gic"
     },
   ];
 
@@ -74,42 +78,45 @@ const AgentStats = () => {
         <Grid container spacing={3}>
           {agentCardData.map((item) => (
             <Grid item xs={12} sm={6} md={4} key={item.id}>
-              <Card 
-                elevation={0}
-                sx={{ 
-                  borderRadius: 2, 
-                  boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
-                  transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
-                  "&:hover": {
-                    transform: "translateY(-4px)",
-                    boxShadow: "0 5px 15px rgba(0,0,0,0.1)",
-                  }
-                }}
-              >
-                <CardContent>
-                  <Box display="flex" alignItems="center">
-                    <Avatar 
-                      sx={{ 
-                        bgcolor: item.bgColor,
-                        color: item.color,
-                        width: 56,
-                        height: 56,
-                        mr: 2
-                      }}
-                    >
-                      {item.icon}
-                    </Avatar>
-                    <Box>
-                      <Typography variant="h4" fontWeight="700">
-                        {item.value}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {item.title}
-                      </Typography>
+              <Link to={item.link} style={{ textDecoration: 'none' }}>
+                <Card 
+                  elevation={0}
+                  sx={{ 
+                    borderRadius: 2, 
+                    boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
+                    transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
+                    cursor: "pointer",
+                    "&:hover": {
+                      transform: "translateY(-4px)",
+                      boxShadow: "0 5px 15px rgba(0,0,0,0.1)",
+                    }
+                  }}
+                >
+                  <CardContent>
+                    <Box display="flex" alignItems="center">
+                      <Avatar 
+                        sx={{ 
+                          bgcolor: item.bgColor,
+                          color: item.color,
+                          width: 56,
+                          height: 56,
+                          mr: 2
+                        }}
+                      >
+                        {item.icon}
+                      </Avatar>
+                      <Box>
+                        <Typography variant="h4" fontWeight="700">
+                          {item.value}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {item.title}
+                        </Typography>
+                      </Box>
                     </Box>
-                  </Box>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </Link>
             </Grid>
           ))}
         </Grid>
