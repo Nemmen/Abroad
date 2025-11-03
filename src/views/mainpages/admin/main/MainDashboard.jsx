@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 import { 
   Box, 
   Grid, 
@@ -261,86 +262,92 @@ export default function AdminDashboard() {
           ) : (
             <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={{ base: 3, md: 5 }}>
               {/* Agents Card */}
-              <Card borderRadius="xl" boxShadow="sm" bg={sectionBg} overflow="hidden">
-                <Box bg="blue.500" h={1} w="full" />
-                <CardBody p={5}>
-                  <Flex align="center" justify="space-between">
-                    <Stack>
-                      <Stat>
-                        <StatLabel fontSize="sm" color="gray.500">Total Agents</StatLabel>
-                        <StatNumber>{dashboardStats?.agents?.total || 0}</StatNumber>
-                        <Flex mt={1} gap={3}>
-                          <Badge colorScheme="green" px={2} py={0.5}>
-                            Active: {dashboardStats?.agents?.active || 0}
-                          </Badge>
-                          <Badge colorScheme="yellow" px={2} py={0.5}>
-                            Pending: {dashboardStats?.agents?.pending || 0}
-                          </Badge>
-                        </Flex>
-                      </Stat>
-                    </Stack>
-                    <Box 
-                      p={2} 
-                      bg={blueIconBg} 
-                      borderRadius="md"
-                    >
-                      <Icon as={MdPeople} boxSize={10} color="blue.500" />
-                    </Box>
-                  </Flex>
-                </CardBody>
-              </Card>
+              <Link to="/admin/agent" style={{ textDecoration: 'none' }}>
+                <Card borderRadius="xl" boxShadow="sm" bg={sectionBg} overflow="hidden" _hover={{ boxShadow: 'md', transform: 'translateY(-2px)', transition: 'all 0.2s' }} cursor="pointer">
+                  <Box bg="blue.500" h={1} w="full" />
+                  <CardBody p={5}>
+                    <Flex align="center" justify="space-between">
+                      <Stack>
+                        <Stat>
+                          <StatLabel fontSize="sm" color="gray.500">Total Agents</StatLabel>
+                          <StatNumber>{dashboardStats?.agents?.total || 0}</StatNumber>
+                          <Flex mt={1} gap={3}>
+                            <Badge colorScheme="green" px={2} py={0.5}>
+                              Active: {dashboardStats?.agents?.active || 0}
+                            </Badge>
+                            <Badge colorScheme="yellow" px={2} py={0.5}>
+                              Pending: {dashboardStats?.agents?.pending || 0}
+                            </Badge>
+                          </Flex>
+                        </Stat>
+                      </Stack>
+                      <Box 
+                        p={2} 
+                        bg={blueIconBg} 
+                        borderRadius="md"
+                      >
+                        <Icon as={MdPeople} boxSize={10} color="blue.500" />
+                      </Box>
+                    </Flex>
+                  </CardBody>
+                </Card>
+              </Link>
 
               {/* GIC Card */}
-              <Card borderRadius="xl" boxShadow="sm" bg={sectionBg} overflow="hidden">
-                <Box bg="purple.500" h={1} w="full" />
-                <CardBody p={5}>
-                  <Flex align="center" justify="space-between">
-                    <Stack>
-                      <Stat>
-                        <StatLabel fontSize="sm" color="gray.500">Total GIC</StatLabel>
-                        <StatNumber>{dashboardStats?.transactions?.totalGIC || 0}</StatNumber>
-                        <StatHelpText>
-                          <StatArrow type="increase" />
-                          {dashboardStats?.transactions?.currentMonthGIC || 0} this month
-                        </StatHelpText>
-                      </Stat>
-                    </Stack>
-                    <Box 
-                      p={2} 
-                      bg={purpleIconBg} 
-                      borderRadius="md"
-                    >
-                      <Icon as={MdAssignment} boxSize={10} color="purple.500" />
-                    </Box>
-                  </Flex>
-                </CardBody>
-              </Card>
+              <Link to="/admin/gic" style={{ textDecoration: 'none' }}>
+                <Card borderRadius="xl" boxShadow="sm" bg={sectionBg} overflow="hidden" _hover={{ boxShadow: 'md', transform: 'translateY(-2px)', transition: 'all 0.2s' }} cursor="pointer">
+                  <Box bg="purple.500" h={1} w="full" />
+                  <CardBody p={5}>
+                    <Flex align="center" justify="space-between">
+                      <Stack>
+                        <Stat>
+                          <StatLabel fontSize="sm" color="gray.500">Total GIC</StatLabel>
+                          <StatNumber>{dashboardStats?.transactions?.totalGIC || 0}</StatNumber>
+                          <StatHelpText>
+                            <StatArrow type="increase" />
+                            {dashboardStats?.transactions?.currentMonthGIC || 0} this month
+                          </StatHelpText>
+                        </Stat>
+                      </Stack>
+                      <Box 
+                        p={2} 
+                        bg={purpleIconBg} 
+                        borderRadius="md"
+                      >
+                        <Icon as={MdAssignment} boxSize={10} color="purple.500" />
+                      </Box>
+                    </Flex>
+                  </CardBody>
+                </Card>
+              </Link>
 
               {/* Forex Card */}
-              <Card borderRadius="xl" boxShadow="sm" bg={sectionBg} overflow="hidden">
-                <Box bg="cyan.500" h={1} w="full" />
-                <CardBody p={5}>
-                  <Flex align="center" justify="space-between">
-                    <Stack>
-                      <Stat>
-                        <StatLabel fontSize="sm" color="gray.500">Total Forex</StatLabel>
-                        <StatNumber>{dashboardStats?.transactions?.totalForex || 0}</StatNumber>
-                        <StatHelpText>
-                          <StatArrow type="increase" />
-                          {dashboardStats?.transactions?.currentMonthForex || 0} this month
-                        </StatHelpText>
-                      </Stat>
-                    </Stack>
-                    <Box 
-                      p={2} 
-                      bg={cyanIconBg} 
-                      borderRadius="md"
-                    >
-                      <Icon as={MdBusinessCenter} boxSize={10} color="cyan.500" />
-                    </Box>
-                  </Flex>
-                </CardBody>
-              </Card>
+              <Link to="/admin/forex" style={{ textDecoration: 'none' }}>
+                <Card borderRadius="xl" boxShadow="sm" bg={sectionBg} overflow="hidden" _hover={{ boxShadow: 'md', transform: 'translateY(-2px)', transition: 'all 0.2s' }} cursor="pointer">
+                  <Box bg="cyan.500" h={1} w="full" />
+                  <CardBody p={5}>
+                    <Flex align="center" justify="space-between">
+                      <Stack>
+                        <Stat>
+                          <StatLabel fontSize="sm" color="gray.500">Total Forex</StatLabel>
+                          <StatNumber>{dashboardStats?.transactions?.totalForex || 0}</StatNumber>
+                          <StatHelpText>
+                            <StatArrow type="increase" />
+                            {dashboardStats?.transactions?.currentMonthForex || 0} this month
+                          </StatHelpText>
+                        </Stat>
+                      </Stack>
+                      <Box 
+                        p={2} 
+                        bg={cyanIconBg} 
+                        borderRadius="md"
+                      >
+                        <Icon as={MdBusinessCenter} boxSize={10} color="cyan.500" />
+                      </Box>
+                    </Flex>
+                  </CardBody>
+                </Card>
+              </Link>
 
               {/* Commission Card */}
               <Card borderRadius="xl" boxShadow="sm" bg={sectionBg} overflow="hidden">
@@ -406,109 +413,117 @@ export default function AdminDashboard() {
           ) : (
             <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={{ base: 3, md: 5 }}>
               {/* Agent Commission Card */}
-              <Card borderRadius="xl" boxShadow="sm" bg={sectionBg} overflow="hidden">
-                <Box bg="teal.500" h={1} w="full" />
-                <CardBody p={5}>
-                  <Flex align="center" justify="space-between">
-                    <Stack>
-                      <Stat>
-                        <StatLabel fontSize="sm" color="gray.500">Agent Commission</StatLabel>
-                        <StatNumber>{formatCurrency(dashboardStats?.forex?.agentCommission?.total || 0)}</StatNumber>
-                        <Flex mt={1} gap={2}>
-                          <Text fontSize="xs" color="green.500">
-                            Paid: {formatCurrency(dashboardStats?.forex?.agentCommission?.paid || 0)}
-                          </Text>
-                          <Text fontSize="xs" color="orange.500">
-                            Pending: {formatCurrency(dashboardStats?.forex?.agentCommission?.pending || 0)}
-                          </Text>
-                        </Flex>
-                      </Stat>
-                    </Stack>
-                    <Box 
-                      p={2} 
-                      bg={greenIconBg} 
-                      borderRadius="md"
-                    >
-                      <Icon as={MdPeople} boxSize={10} color="teal.500" />
-                    </Box>
-                  </Flex>
-                </CardBody>
-              </Card>
+              <Link to="/admin/forex" style={{ textDecoration: 'none' }}>
+                <Card borderRadius="xl" boxShadow="sm" bg={sectionBg} overflow="hidden" _hover={{ boxShadow: 'md', transform: 'translateY(-2px)', transition: 'all 0.2s' }} cursor="pointer">
+                  <Box bg="teal.500" h={1} w="full" />
+                  <CardBody p={5}>
+                    <Flex align="center" justify="space-between">
+                      <Stack>
+                        <Stat>
+                          <StatLabel fontSize="sm" color="gray.500">Agent Commission</StatLabel>
+                          <StatNumber>{formatCurrency(dashboardStats?.forex?.agentCommission?.total || 0)}</StatNumber>
+                          <Flex mt={1} gap={2}>
+                            <Text fontSize="xs" color="green.500">
+                              Paid: {formatCurrency(dashboardStats?.forex?.agentCommission?.paid || 0)}
+                            </Text>
+                            <Text fontSize="xs" color="orange.500">
+                              Pending: {formatCurrency(dashboardStats?.forex?.agentCommission?.pending || 0)}
+                            </Text>
+                          </Flex>
+                        </Stat>
+                      </Stack>
+                      <Box 
+                        p={2} 
+                        bg={greenIconBg} 
+                        borderRadius="md"
+                      >
+                        <Icon as={MdPeople} boxSize={10} color="teal.500" />
+                      </Box>
+                    </Flex>
+                  </CardBody>
+                </Card>
+              </Link>
 
               {/* AE Commission Card */}
-              <Card borderRadius="xl" boxShadow="sm" bg={sectionBg} overflow="hidden">
-                <Box bg="green.500" h={1} w="full" />
-                <CardBody p={5}>
-                  <Flex align="center" justify="space-between">
-                    <Stack>
-                      <Stat>
-                        <StatLabel fontSize="sm" color="gray.500">AE Commission</StatLabel>
-                        <StatNumber>{formatCurrency(dashboardStats?.forex?.aeCommission || 0)}</StatNumber>
-                        <StatHelpText>
-                          From forex transactions
-                        </StatHelpText>
-                      </Stat>
-                    </Stack>
-                    <Box 
-                      p={2} 
-                      bg={greenIconBg} 
-                      borderRadius="md"
-                    >
-                      <Icon as={MdAttachMoney} boxSize={10} color="green.500" />
-                    </Box>
-                  </Flex>
-                </CardBody>
-              </Card>
+              <Link to="/admin/forex" style={{ textDecoration: 'none' }}>
+                <Card borderRadius="xl" boxShadow="sm" bg={sectionBg} overflow="hidden" _hover={{ boxShadow: 'md', transform: 'translateY(-2px)', transition: 'all 0.2s' }} cursor="pointer">
+                  <Box bg="green.500" h={1} w="full" />
+                  <CardBody p={5}>
+                    <Flex align="center" justify="space-between">
+                      <Stack>
+                        <Stat>
+                          <StatLabel fontSize="sm" color="gray.500">AE Commission</StatLabel>
+                          <StatNumber>{formatCurrency(dashboardStats?.forex?.aeCommission || 0)}</StatNumber>
+                          <StatHelpText>
+                            From forex transactions
+                          </StatHelpText>
+                        </Stat>
+                      </Stack>
+                      <Box 
+                        p={2} 
+                        bg={greenIconBg} 
+                        borderRadius="md"
+                      >
+                        <Icon as={MdAttachMoney} boxSize={10} color="green.500" />
+                      </Box>
+                    </Flex>
+                  </CardBody>
+                </Card>
+              </Link>
 
               {/* TDS Card */}
-              <Card borderRadius="xl" boxShadow="sm" bg={sectionBg} overflow="hidden">
-                <Box bg="orange.500" h={1} w="full" />
-                <CardBody p={5}>
-                  <Flex align="center" justify="space-between">
-                    <Stack>
-                      <Stat>
-                        <StatLabel fontSize="sm" color="gray.500">Total TDS</StatLabel>
-                        <StatNumber>{formatCurrency(dashboardStats?.forex?.tds || 0)}</StatNumber>
-                        <StatHelpText>
-                          Deducted from commissions
-                        </StatHelpText>
-                      </Stat>
-                    </Stack>
-                    <Box 
-                      p={2} 
-                      bg={orangeIconBg} 
-                      borderRadius="md"
-                    >
-                      <Icon as={MdMoneyOff} boxSize={10} color="orange.500" />
-                    </Box>
-                  </Flex>
-                </CardBody>
-              </Card>
+              <Link to="/admin/forex" style={{ textDecoration: 'none' }}>
+                <Card borderRadius="xl" boxShadow="sm" bg={sectionBg} overflow="hidden" _hover={{ boxShadow: 'md', transform: 'translateY(-2px)', transition: 'all 0.2s' }} cursor="pointer">
+                  <Box bg="orange.500" h={1} w="full" />
+                  <CardBody p={5}>
+                    <Flex align="center" justify="space-between">
+                      <Stack>
+                        <Stat>
+                          <StatLabel fontSize="sm" color="gray.500">Total TDS</StatLabel>
+                          <StatNumber>{formatCurrency(dashboardStats?.forex?.tds || 0)}</StatNumber>
+                          <StatHelpText>
+                            Deducted from commissions
+                          </StatHelpText>
+                        </Stat>
+                      </Stack>
+                      <Box 
+                        p={2} 
+                        bg={orangeIconBg} 
+                        borderRadius="md"
+                      >
+                        <Icon as={MdMoneyOff} boxSize={10} color="orange.500" />
+                      </Box>
+                    </Flex>
+                  </CardBody>
+                </Card>
+              </Link>
 
               {/* Net Payable Card */}
-              <Card borderRadius="xl" boxShadow="sm" bg={sectionBg} overflow="hidden">
-                <Box bg="blue.500" h={1} w="full" />
-                <CardBody p={5}>
-                  <Flex align="center" justify="space-between">
-                    <Stack>
-                      <Stat>
-                        <StatLabel fontSize="sm" color="gray.500">Net Payable</StatLabel>
-                        <StatNumber>{formatCurrency(dashboardStats?.forex?.netPayable || 0)}</StatNumber>
-                        <StatHelpText>
-                          Total after deductions
-                        </StatHelpText>
-                      </Stat>
-                    </Stack>
-                    <Box 
-                      p={2} 
-                      bg={blueIconBg} 
-                      borderRadius="md"
-                    >
-                      <Icon as={MdAccountBalance} boxSize={10} color="blue.500" />
-                    </Box>
-                  </Flex>
-                </CardBody>
-              </Card>
+              <Link to="/admin/forex" style={{ textDecoration: 'none' }}>
+                <Card borderRadius="xl" boxShadow="sm" bg={sectionBg} overflow="hidden" _hover={{ boxShadow: 'md', transform: 'translateY(-2px)', transition: 'all 0.2s' }} cursor="pointer">
+                  <Box bg="blue.500" h={1} w="full" />
+                  <CardBody p={5}>
+                    <Flex align="center" justify="space-between">
+                      <Stack>
+                        <Stat>
+                          <StatLabel fontSize="sm" color="gray.500">Net Payable</StatLabel>
+                          <StatNumber>{formatCurrency(dashboardStats?.forex?.netPayable || 0)}</StatNumber>
+                          <StatHelpText>
+                            Total after deductions
+                          </StatHelpText>
+                        </Stat>
+                      </Stack>
+                      <Box 
+                        p={2} 
+                        bg={blueIconBg} 
+                        borderRadius="md"
+                      >
+                        <Icon as={MdAccountBalance} boxSize={10} color="blue.500" />
+                      </Box>
+                    </Flex>
+                  </CardBody>
+                </Card>
+              </Link>
             </SimpleGrid>
           )}
         </Box>
