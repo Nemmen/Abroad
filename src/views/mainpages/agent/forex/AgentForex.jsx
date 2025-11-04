@@ -293,6 +293,7 @@ const Forex = () => {
     
     setLoading(true);
     try {
+      // Use the new agent-specific endpoint
       const params = new URLSearchParams({
         page: page.toString(),
         limit:'1000',
@@ -301,17 +302,34 @@ const Forex = () => {
       });
 
       const response = await axios.get(
-        `https://abroad-backend-gray.vercel.app/auth/viewAllForexForms?${params}`,
+        `http://localhost:4000/agent/forex?${params}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token_auth")}`,
+          },
+          withCredentials: true
+        }
       );
       
-      if (response.data && response.data.forexForms && response.data.forexForms.length > 0) {
-        const userForexForms = response.data.forexForms.filter(
-          (form) => form.agentRef._id === user._id,
-        );
-
-        const forexForms = userForexForms.map((item) => ({
+      // Log the raw response structure to help diagnose issues
+      console.log('Agent Forex - Raw API response structure:', {
+        success: response.data?.success,
+        dataType: typeof response.data,
+        hasForexForms: !!response.data?.forexForms,
+        dataType: Array.isArray(response.data?.forexForms) ? 'array' : typeof response.data?.forexForms,
+        dataLength: response.data?.forexForms?.length || 0,
+        hasPagination: !!response.data?.pagination,
+        sample: response.data?.forexForms?.[0] ? { 
+          _id: response.data.forexForms[0]._id,
+          agentRef: response.data.forexForms[0].agentRef
+        } : null
+      });
+      
+      if (response.data && response.data.forexForms && Array.isArray(response.data.forexForms)) {
+        // Process all forex forms using the new API response format
+        const forexForms = response.data.forexForms.map((item) => ({
           id: item._id,
-          agentRef: item.agentRef?.name.toUpperCase() || 'N/A',
+          agentRef: item.agentRef?.name?.toUpperCase() || 'N/A',
           studentRef: item?.studentName || 'N/A',
           date: new Date(item.date).toLocaleDateString('en-US'),
           country: item.country || 'N/A',
@@ -326,29 +344,24 @@ const Forex = () => {
           commissionStatus: item.commissionStatus || 'N/A',
         }));
         
-        setRows(forexForms);
-        setData(userForexForms);
-        
-        console.log('Agent Forex - Fetched data:', {
-          totalBackendRecords: response.data.forexForms.length,
-          userRecords: userForexForms.length,
-          formattedRows: forexForms.length,
+        console.log('Agent Forex - Processed forms:', {
+          totalForexForms: response.data.forexForms.length,
+          processedForms: forexForms.length,
           userId: user._id
         });
         
-        // Calculate pagination for filtered data
-        const totalAgentRecords = userForexForms.length;
-        const totalRecordsFromBackend = response.data.pagination?.total || 0;
+        setRows(forexForms);
+        setData(response.data.forexForms);
         
-        // Adjust pagination based on agent's data
+        // Update pagination state directly from backend
         setPagination({
           page: page,
           limit: limit,
-          total: totalAgentRecords,
-          pages: Math.ceil(totalAgentRecords / limit)
+          total: response.data.pagination?.total || response.data.forexForms.length,
+          pages: response.data.pagination?.pages || Math.ceil(response.data.forexForms.length / limit)
         });
       } else {
-        console.log('Agent Forex - No data received from backend');
+        console.log('Agent Forex - No data received or no matching records found in backend response:', response.data);
         setRows([]);
         setData([]);
         setPagination(prev => ({
@@ -359,6 +372,14 @@ const Forex = () => {
       }
     } catch (error) {
       console.error('Error fetching forex forms:', error);
+      // Show a more helpful error message
+      setRows([]);
+      setData([]);
+      setPagination(prev => ({
+        ...prev,
+        total: 0,
+        pages: 0
+      }));
     } finally {
       setLoading(false);
     }
@@ -366,6 +387,7 @@ const Forex = () => {
 
   useEffect(() => {
     if (user && user._id) {
+      console.log('Agent Forex - Fetching data for user:', user._id);
       fetchData();
     } else {
       console.log('Agent Forex - User not available:', user);
@@ -375,7 +397,42 @@ const Forex = () => {
     return () => {
       window.updateForexData = undefined;
     };
-  }, [user._id]);
+  }, [user, user?._id]);
+  
+  // Additional useEffect to refetch data after component mounts with multiple attempts
+  useEffect(() => {
+    if (!user || !user._id) return;
+    
+    // First attempt after 1 second
+    const timer1 = setTimeout(() => {
+      if (user && user._id) {
+        console.log('Agent Forex - First refetch attempt after 1 second');
+        fetchData();
+      }
+    }, 1000);
+    
+    // Second attempt after 3 seconds
+    const timer2 = setTimeout(() => {
+      if (user && user._id) {
+        console.log('Agent Forex - Second refetch attempt after 3 seconds');
+        fetchData();
+      }
+    }, 3000);
+    
+    // Final attempt after 5 seconds
+    const timer3 = setTimeout(() => {
+      if (user && user._id) {
+        console.log('Agent Forex - Final refetch attempt after 5 seconds');
+        fetchData();
+      }
+    }, 5000);
+    
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+      clearTimeout(timer3);
+    };
+  }, [user, user?._id]);
 
   // Filter and sort data effect
   useEffect(() => {
@@ -583,11 +640,15 @@ const Forex = () => {
     console.log('Agent Forex - Memoized rows calculation:', {
       filteredDataLength: filteredData.length,
       rowsLength: rows.length,
-      usingFiltered: filteredData.length > 0,
-      result: filteredData.length > 0 ? filteredData : rows
+      usingFiltered: filteredData.length > 0 || (filters && Object.values(filters).some(val => val !== '' && val?.length > 0)),
+      result: (filteredData.length > 0 || (filters && Object.values(filters).some(val => val !== '' && val?.length > 0))) ? filteredData : rows
     });
-    return filteredData.length > 0 ? filteredData : rows;
-  }, [filteredData, rows]);
+    
+    // If filters are applied (any non-empty values), use filteredData even if it's empty
+    // Otherwise use rows data
+    const hasActiveFilters = filters && Object.values(filters).some(val => val !== '' && val?.length > 0);
+    return (hasActiveFilters) ? filteredData : rows;
+  }, [filteredData, rows, filters]);
 
   const getRowClassName = (params) => {
     const status = params.row.commissionStatus?.toLowerCase();
@@ -604,126 +665,25 @@ const Forex = () => {
   return (
     <ThemeProvider theme={theme}>
       <Box sx={{ px: { xs: 2, sm: 3 }, py: 2, maxWidth: '1400px', mx: 'auto' }}>
-        {/* Forex Calculator Card with Tabs */}
-        <Paper 
-          elevation={3} 
-          sx={{ 
-            p: 3, 
-            mb: 3, 
+        {/* Forex Calculator - single compact calculator card (submit handled elsewhere) */}
+        <Paper
+          elevation={3}
+          sx={{
+            p: 3,
+            mb: 3,
             borderRadius: '12px',
             background: 'linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%)'
           }}
         >
-          <Tabs
-            value={calculatorTab}
-            onChange={(e, newValue) => setCalculatorTab(newValue)}
-            indicatorColor="primary"
-            textColor="primary"
-            variant="fullWidth"
-            sx={{ mb: 3 }}
-          >
-            <Tab label="Submit Request" />
-            <Tab label="Calculate Forex Conversion" />
-          </Tabs>
-          
-          {calculatorTab === 0 ? (
-            <>
-              <Typography variant="h5" fontWeight="600" color="#2E7D32" gutterBottom>
-                Forex Conversion Request
-              </Typography>
-              <Typography variant="body2" color="#1B5E20" sx={{ mb: 3 }}>
-                Submit a forex conversion request and our team will contact you with the best rates
-              </Typography>
-              
-              <form onSubmit={handleCalculatorSubmit}>
-                <Grid container spacing={3}>
-                  <Grid item xs={12} md={3}>
-                    <FormControl 
-                      fullWidth 
-                      variant="outlined" 
-                      error={!!formErrors.currencyType}
-                    >
-                      <InputLabel>Currency Type</InputLabel>
-                      <Select
-                        name="currencyType"
-                        value={calculatorForm.currencyType}
-                        onChange={handleCalculatorChange}
-                        label="Currency Type"
-                        disabled={isSubmitting}
-                      >
-                        {currencyOptions.map(option => (
-                          <MenuItem key={option.value} value={option.value}>
-                            {option.label}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                      {formErrors.currencyType && (
-                        <FormHelperText error>{formErrors.currencyType}</FormHelperText>
-                      )}
-                    </FormControl>
-                  </Grid>
-                  
-                  <Grid item xs={12} md={3}>
-                    <TextField
-                      name="foreignAmount"
-                      label="Foreign Amount"
-                      variant="outlined"
-                      fullWidth
-                      type="number"
-                      value={calculatorForm.foreignAmount}
-                      onChange={handleCalculatorChange}
-                      error={!!formErrors.foreignAmount}
-                      helperText={formErrors.foreignAmount}
-                      disabled={isSubmitting}
-                      InputProps={{
-                        startAdornment: calculatorForm.currencyType ? (
-                          <InputAdornment position="start">
-                            {calculatorForm.currencyType}
-                          </InputAdornment>
-                        ) : null
-                      }}
-                    />
-                  </Grid>
-                  
-                  <Grid item xs={12} md={3}>
-                    <TextField
-                      name="agentMargin"
-                      label="Your Margin (in paise per unit)"
-                      variant="outlined"
-                      fullWidth
-                      type="number"
-                      inputProps={{ step: "0.01" }}
-                      value={calculatorForm.agentMargin}
-                      onChange={handleCalculatorChange}
-                      error={!!formErrors.agentMargin}
-                      helperText={formErrors.agentMargin || "Example: 0.50 for 50 paise"}
-                      disabled={isSubmitting}
-                    />
-                  </Grid>
-                  
-                  <Grid item xs={12} md={3} sx={{ display: 'flex', alignItems: 'center' }}>
-                    <Button 
-                      type="submit" 
-                      variant="contained"
-                      fullWidth
-                      sx={{ 
-                        height: '56px',
-                        backgroundColor: '#2E7D32',
-                        '&:hover': {
-                          backgroundColor: '#1B5E20'
-                        }
-                      }}
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? <CircularProgress size={24} color="inherit" /> : 'Calculate & Submit Request'}
-                    </Button>
-                  </Grid>
-                </Grid>
-              </form>
-            </>
-          ) : (
-            <AgentForexCalculator />
-          )}
+          <Typography variant="h5" fontWeight="600" color="#2E7D32" gutterBottom>
+            Forex Calculator
+          </Typography>
+          <Typography variant="body2" color="#1B5E20" sx={{ mb: 2 }}>
+            Quick conversion preview — use this to get an agent quote. To submit a request, use the "Submit Request" section below.
+          </Typography>
+
+          {/* Render the compact calculator component (keeps calculation and quote flow) */}
+          <AgentForexCalculator />
         </Paper>
         
         {/* Success Modal */}
@@ -860,9 +820,24 @@ const Forex = () => {
                 <Typography variant="h6" color="text.secondary" gutterBottom>
                   No Forex records found
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
                   Your forex transactions will appear here when they are created
                 </Typography>
+                <Alert severity="info" sx={{ mt: 2, maxWidth: "500px" }}>
+                  If you believe you should have records showing here, please refresh the page or try logging out and logging in again.
+                </Alert>
+                <Button 
+                  variant="outlined" 
+                  color="primary" 
+                  sx={{ mt: 2 }}
+                  onClick={() => {
+                    // Force a data refresh with a loading indicator
+                    setLoading(true);
+                    setTimeout(() => fetchData(), 500);
+                  }}
+                >
+                  Refresh Data
+                </Button>
               </Box>
             ) : (
               <Box sx={{ 
