@@ -105,7 +105,7 @@ export default function Footer() {
                     fontSize: '1.1rem'
                   }}
                 >
-                  Your Global Exposure Partner! Get seamless financial solutions for international students. 
+                  Gateway to global finance! Get seamless financial solutions for international students. 
                   Manage GIC, Blocked Accounts, and Forex services with embassy-accepted, transparent, and secure solutions.
                 </Typography>
                 

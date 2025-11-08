@@ -229,6 +229,9 @@ import Gic from '../../components/homeComponents/GIC';
 import Box from '@mui/material/Box';
 import BlockAccount from '../../components/homeComponents/BlockAccount'
 import Forex from '../../components/homeComponents/Forex'
+import OSHC from '../../components/homeComponents/OSHC'
+import PaymentTagging from '../../components/homeComponents/PaymentTagging'
+import FinanceSupport from '../../components/homeComponents/FinanceSupport'
 export default function MarketingPage(props) {
   return (
     <AppTheme {...props}>
@@ -251,6 +254,12 @@ export default function MarketingPage(props) {
           <BlockAccount/>
           <Divider />
           <Forex/>
+          <Divider />
+          <OSHC/>
+          <Divider />
+          <PaymentTagging/>
+          <Divider />
+          <FinanceSupport/>
           <Testimonials />
           <Divider />
           <Highlights />
