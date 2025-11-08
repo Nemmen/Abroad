@@ -85,10 +85,18 @@ const BlockedPage = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await axios.get('https://abroad-backend-gray.vercel.app/auth/getAllBlockedData');
-        if (response.data.success) {
-          setData(response.data.gicForms);
-          const gicForms = response.data.gicForms.map((form, index) => ({
+        const response = await axios.get('http://localhost:4000/agent/blocked', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token_auth")}`,
+          },
+          withCredentials: true
+        });
+        
+        if (response.data && response.data.success) {
+          const blockedForms = response.data.gicForms || [];
+          setData(blockedForms);
+          
+          const formattedRows = blockedForms.map((form, index) => ({
             id: form._id || index, // Ensure each row has a unique id
             sNo: index + 1,
             accOpeningMonth: form.accOpeningMonth || 'N/A',
@@ -102,10 +110,11 @@ const BlockedPage = () => {
             netPayable: form.netPayable || 0,
             commissionStatus: form.commissionStatus || 'N/A',
           }));
-          setRows(gicForms);
+          
+          setRows(formattedRows);
         }
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching blocked data:", error);
       } finally {
         setLoading(false);
       }

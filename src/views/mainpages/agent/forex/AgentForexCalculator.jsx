@@ -1,27 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
-import {
-  Box,
-  Text,
-  FormControl,
-  FormLabel,
-  Input,
-  Select,
-  Grid,
-  GridItem,
-  Button,
-  VStack,
-  HStack,
-  Divider,
-  Stat,
-  StatLabel,
-  StatNumber,
-  StatHelpText,
-  Checkbox,
-  useToast,
-  Spinner,
-  Badge,
-  FormHelperText
-} from '@chakra-ui/react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 
 // Custom useDebounce hook
@@ -60,8 +37,8 @@ const getAuthHeaders = () => {
   };
 };
 
-// API base URL
-const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'https://abroad-backend-gray.vercel.app/api';
+// API base URL - use local test server
+const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:4000';
 
 // Currency options with symbols
 const CURRENCY_OPTIONS = [
@@ -90,525 +67,211 @@ const formatCurrency = (amount, currency = 'INR') => {
 };
 
 const AgentForexCalculator = () => {
-  const toast = useToast();
-  
-  // Form state
+  // Inputs
   const [currencyType, setCurrencyType] = useState('USD');
   const [foreignAmount, setForeignAmount] = useState(10000);
-  const [ibrRate, setIbrRate] = useState(83.00);
-  
-  // Fixed margins for agent view (non-modifiable)
-  const pmMargin = 0.10;
-  const aeMargin = 0.05;
   const [agentMargin, setAgentMargin] = useState(0.35);
-  
-  // Service charge settings
-  const [serviceChargePercentage, setServiceChargePercentage] = useState(1); // 1% service charge
-  const [serviceChargeBase, setServiceChargeBase] = useState(500); // Base service charge in INR
-  
-  // Optional charges are disabled for agent view
-  const includeFlyWire = false;
-  const includeCIBC = false;
-  const flyWireAmount = 750;
-  const cibcAmount = 1500;
-  
-  // Loading states
-  const [isRateLoading, setIsRateLoading] = useState(false);
-  
-  // Results state
-  const [calculationResult, setCalculationResult] = useState({
-    newRate: 0,
-    inrConverted: 0,
-    serviceCharge: 0,
-    gst: 0,
-    tcs: 0,
-    flyWireCharge: 0,
-    cibcCharge: 0,
-    grandTotal: 0,
-    pmMargin: 0,
-    aeMargin: 0,
-    agentMargin: 0
-  });
-  
-  // For debouncing currency type changes
-  const [debouncedCurrencyType, setDebouncedCurrencyType] = useState(currencyType);
 
-  // Handler for input fields
-  const handleNumberInput = (setter) => (e) => {
-    const value = e.target.value;
-    if (value === '' || !isNaN(value)) {
-      setter(value === '' ? '' : parseFloat(value));
+  // IBR
+  const [ibrRate, setIbrRate] = useState(83.0);
+  const [isRateLoading, setIsRateLoading] = useState(false);
+
+  // Quote
+  const [calculationResult, setCalculationResult] = useState(null);
+  const [isQuoteLoading, setIsQuoteLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
+
+  // Request submit
+  const [contactInfo, setContactInfo] = useState('');
+  const [reqLoading, setReqLoading] = useState(false);
+  const [reqSuccess, setReqSuccess] = useState(null);
+
+  // Tabs
+  const [tab, setTab] = useState(0);
+
+  // Debounce currency change for IBR fetch
+  const debouncedRef = useRef(null);
+  useEffect(() => {
+    if (debouncedRef.current) clearTimeout(debouncedRef.current);
+    debouncedRef.current = setTimeout(() => {
+      fetchIbrRate(currencyType);
+    }, 400);
+    return () => clearTimeout(debouncedRef.current);
+  }, [currencyType]);
+
+  const fetchIbrRate = async (currency) => {
+    setIsRateLoading(true);
+    try {
+      const res = await axios.get(`${API_BASE_URL}/api/forex/get-rate/${currency}`);
+      if (res?.data?.rate) setIbrRate(Number(res.data.rate));
+    } catch (err) {
+      console.debug('IBR fetch failed:', err?.message || err);
+    } finally {
+      setIsRateLoading(false);
     }
   };
 
-  // Debounce currency type changes
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setDebouncedCurrencyType(currencyType);
-    }, 500);
-    
-    return () => clearTimeout(timeoutId);
-  }, [currencyType]);
+  const handleNumberInput = (setter) => (e) => {
+    const v = e.target.value;
+    if (v === '' || !isNaN(v)) setter(v === '' ? '' : Number(v));
+  };
 
-  // Fetch IBR rate when currency type changes
-  useEffect(() => {
-    const fetchIbrRate = async () => {
-      if (!debouncedCurrencyType) return;
-      
-      setIsRateLoading(true);
-      try {
-        const response = await axios.get(
-          `${API_BASE_URL}/forex/get-rate/${debouncedCurrencyType}`,
-          getAuthHeaders()
-        );
-        
-        if (response.data && response.data.success) {
-          setIbrRate(parseFloat(response.data.rate).toFixed(2));
-          toast({
-            title: 'Rate updated',
-            description: `Current ${debouncedCurrencyType}/INR rate: ${parseFloat(response.data.rate).toFixed(2)}`,
-            status: 'success',
-            duration: 3000,
-            isClosable: true,
-          });
-        } else {
-          toast({
-            title: 'Error',
-            description: 'Failed to fetch current rate. Using default value.',
-            status: 'warning',
-            duration: 5000,
-            isClosable: true,
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching currency rate:', error);
-        toast({
-          title: 'Error',
-          description: 'Failed to fetch current rate. Using default value.',
-          status: 'error',
-          duration: 5000,
-          isClosable: true,
-        });
-      } finally {
-        setIsRateLoading(false);
+  const getAgentQuoteAPI = async () => {
+    setErrorMessage(null);
+    setIsQuoteLoading(true);
+    try {
+      const payload = { currencyType, foreignAmount: Number(foreignAmount), agentMargin: Number(agentMargin) };
+      const res = await axios.post(`${API_BASE_URL}/api/forex/agent/quote`, payload, getAuthHeaders());
+      if (res.data && res.data.success && res.data.quote) {
+        setCalculationResult(res.data.quote);
+      } else {
+        setCalculationResult(null);
+        setErrorMessage(res?.data?.message || 'Unexpected response from server');
       }
-    };
-    
-    fetchIbrRate();
-  }, [debouncedCurrencyType, toast]);
-  
-  // Calculate results when any input changes
-  useEffect(() => {
-    calculateResults();
-  }, [
-    ibrRate,
-    currencyType,
-    foreignAmount,
-    serviceChargePercentage,
-    serviceChargeBase,
-    pmMargin,
-    aeMargin,
-    agentMargin,
-  ]);
+    } catch (err) {
+      console.error('Agent quote error:', err?.response?.data || err.message || err);
+      setErrorMessage((err?.response?.data && err.response.data.message) ? err.response.data.message : 'Failed to fetch quote');
+      setCalculationResult(null);
+    } finally {
+      setIsQuoteLoading(false);
+    }
+  };
 
-  // Calculate results based on current values
-  const calculateResults = useCallback(() => {
-    // Calculate new currency rate
-    const newRate = parseFloat(ibrRate) + parseFloat(pmMargin) + parseFloat(aeMargin) + parseFloat(agentMargin);
-    
-    // Calculate INR amount
-    const inrConverted = (parseFloat(foreignAmount) || 0) * newRate;
-    
-    // Calculate service charge
-    const baseServiceCharge = parseFloat(serviceChargeBase) || 0;
-    const percentageServiceCharge = (inrConverted * (parseFloat(serviceChargePercentage) || 0)) / 100;
-    const serviceCharge = baseServiceCharge + percentageServiceCharge;
-    
-    // Calculate GST on service charge (18%)
-    const gst = serviceCharge * 0.18;
-    
-    // Calculate TCS (Tax Collected at Source)
-    // TCS is 5% on amounts over 10 lakhs
-    const tcs = inrConverted > 1000000 ? (inrConverted - 1000000) * 0.05 : 0;
-    
-    // Calculate optional charges (disabled for agents)
-    const flyWireCharge = includeFlyWire ? parseFloat(flyWireAmount) : 0;
-    const cibcCharge = includeCIBC ? parseFloat(cibcAmount) : 0;
-    
-    // Calculate grand total
-    const grandTotal = inrConverted + serviceCharge + gst + tcs + flyWireCharge + cibcCharge;
-    
-    // Update calculation result
-    setCalculationResult({
-      newRate,
-      inrConverted,
-      serviceCharge,
-      gst,
-      tcs,
-      flyWireCharge,
-      cibcCharge,
-      grandTotal,
-      pmMargin,
-      aeMargin,
-      agentMargin,
-      currencyType,
-      foreignAmount,
-    });
-  }, [
-    ibrRate, 
-    pmMargin, 
-    aeMargin, 
-    agentMargin, 
-    foreignAmount, 
-    serviceChargeBase, 
-    serviceChargePercentage, 
-    includeFlyWire, 
-    includeCIBC, 
-    flyWireAmount, 
-    cibcAmount,
-    currencyType
-  ]);
+  const submitForexRequest = async () => {
+    setReqSuccess(null);
+    setReqLoading(true);
+    setErrorMessage(null);
+    try {
+      const payload = { currencyType, foreignAmount: Number(foreignAmount), contactInfo };
+      const res = await axios.post(`${API_BASE_URL}/api/forex/request`, payload, getAuthHeaders());
+      if (res.data && res.data.success) {
+        setReqSuccess(true);
+      } else {
+        setReqSuccess(false);
+        setErrorMessage(res?.data?.message || 'Request failed');
+      }
+    } catch (err) {
+      console.error('Request submit error:', err?.response?.data || err.message || err);
+      setReqSuccess(false);
+      setErrorMessage((err?.response?.data && err.response.data.message) ? err.response.data.message : 'Failed to submit request');
+    } finally {
+      setReqLoading(false);
+    }
+  };
 
   return (
-    <Box p={{ base: 3, md: 5 }} bg="white" borderRadius="lg" boxShadow="md">
-      <Text fontSize="xl" fontWeight="bold" mb={2} color="green.700">
-        Agent Forex Calculator
-      </Text>
-      <Text fontSize="sm" color="gray.600" mb={{ base: 4, md: 5 }}>
-        Calculate currency conversions with your commission rate
-      </Text>
-
-      <Grid templateColumns={{ base: '1fr', md: 'repeat(12, 1fr)' }} gap={{ base: 4, md: 6 }}>
-        {/* Input Section */}
-        <GridItem colSpan={{ base: 12, md: 5 }}>
-          <VStack spacing={{ base: 4, md: 5 }} align="stretch">
-            <Box 
-              p={{ base: 4, md: 5 }} 
-              bg="gray.50" 
-              borderRadius="xl" 
-              boxShadow="sm" 
-              borderLeft="4px solid" 
-              borderColor="green.400"
-            >
-              <Text fontSize="md" fontWeight="semibold" mb={3} color="green.700">
-                Currency & Amount
-              </Text>
-
-              {/* Currency Selection */}
-              <FormControl mb={{ base: 3, md: 4 }}>
-                <FormLabel fontWeight="medium" mb={1}>Foreign Currency</FormLabel>
-                <Select
-                  value={currencyType}
-                  onChange={(e) => setCurrencyType(e.target.value)}
-                  bg="white"
-                  size="md"
-                  h="40px"
-                  _hover={{ borderColor: 'green.300' }}
-                  _focus={{ borderColor: 'green.500', boxShadow: '0 0 0 1px var(--chakra-colors-green-500)' }}
-                >
-                  {CURRENCY_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </Select>
-              </FormControl>
-
-              {/* Amount Input */}
-              <FormControl mb={{ base: 3, md: 4 }}>
-                <FormLabel fontWeight="medium" mb={1}>Foreign Amount</FormLabel>
-                <Input
-                  type="number"
-                  value={foreignAmount}
-                  onChange={handleNumberInput(setForeignAmount)}
-                  placeholder={`Enter amount in ${currencyType}`}
-                  bg="white"
-                  size="md"
-                  h="40px"
-                  _hover={{ borderColor: 'green.300' }}
-                  _focus={{ borderColor: 'green.500', boxShadow: '0 0 0 1px var(--chakra-colors-green-500)' }}
-                />
-                <FormHelperText mt={1}>Amount in {currencyType}</FormHelperText>
-              </FormControl>
-              
-              {/* IBR Rate Section */}
-              <FormControl mb={{ base: 1, md: 2 }}>
-                <HStack justify="space-between" mb={1}>
-                  <FormLabel mb={0} fontWeight="medium">IBR Rate</FormLabel>
-                  <Button
-                    size="xs"
-                    colorScheme="green"
-                    variant="outline"
-                    isLoading={isRateLoading}
-                    onClick={() => {
-                      if (currencyType) {
-                        setDebouncedCurrencyType(currencyType);
-                      }
-                    }}
-                    leftIcon={isRateLoading ? <Spinner size="xs" /> : null}
-                  >
-                    {isRateLoading ? 'Loading...' : 'Refresh Rate'}
-                  </Button>
-                </HStack>
-                <Input
-                  type="number"
-                  value={ibrRate}
-                  onChange={handleNumberInput(setIbrRate)}
-                  placeholder="IBR Rate"
-                  step="0.01"
-                  isReadOnly
-                  bg="white"
-                  size="md"
-                  h="40px"
-                  _hover={{ borderColor: 'green.300' }}
-                  _focus={{ borderColor: 'green.500', boxShadow: '0 0 0 1px var(--chakra-colors-green-500)' }}
-                />
-                <FormHelperText mt={1}>Interbank Rate (INR per {currencyType})</FormHelperText>
-              </FormControl>
-            </Box>
-
-            <Box 
-              p={{ base: 4, md: 5 }} 
-              bg="gray.50" 
-              borderRadius="xl" 
-              boxShadow="sm"
-              borderLeft="4px solid" 
-              borderColor="blue.400"
-            >
-              <Text fontSize="md" fontWeight="semibold" mb={3} color="blue.700">
-                Margins & Charges
-              </Text>
-
-              {/* Margins */}
-              <FormControl mb={{ base: 3, md: 4 }}>
-                <FormLabel fontWeight="medium" mb={1}>PM Margin</FormLabel>
-                <Input
-                  type="number"
-                  value={pmMargin}
-                  placeholder="Platform margin"
-                  step="0.01"
-                  isReadOnly
-                  bg="white"
-                  size="md"
-                  h="40px"
-                  opacity={0.8}
-                  _hover={{ borderColor: 'blue.300' }}
-                />
-                <FormHelperText mt={1}>Platform margin (fixed)</FormHelperText>
-              </FormControl>
-              
-              <FormControl mb={{ base: 3, md: 4 }}>
-                <FormLabel fontWeight="medium" mb={1}>AE Margin</FormLabel>
-                <Input
-                  type="number"
-                  value={aeMargin}
-                  placeholder="Abroad Educare margin"
-                  step="0.01"
-                  isReadOnly
-                  bg="white"
-                  size="md"
-                  h="40px"
-                  opacity={0.8}
-                  _hover={{ borderColor: 'blue.300' }}
-                />
-                <FormHelperText mt={1}>Abroad Educare's own margin (fixed)</FormHelperText>
-              </FormControl>
-              
-              <FormControl mb={{ base: 3, md: 4 }}>
-                <FormLabel fontWeight="medium" mb={1}>Agent Margin</FormLabel>
-                <Input
-                  type="number"
-                  value={agentMargin}
-                  onChange={handleNumberInput(setAgentMargin)}
-                  placeholder="Agent margin"
-                  step="0.01"
-                  bg="white"
-                  size="md"
-                  h="40px"
-                  _hover={{ borderColor: 'blue.300' }}
-                  _focus={{ borderColor: 'blue.500', boxShadow: '0 0 0 1px var(--chakra-colors-blue-500)' }}
-                />
-                <FormHelperText mt={1}>Your additional margin</FormHelperText>
-              </FormControl>
-              
-              <Divider my={{ base: 3, md: 4 }} borderColor="gray.300" />
-              
-              {/* Service Charge */}
-              <FormControl mb={{ base: 3, md: 4 }}>
-                <FormLabel fontWeight="medium" mb={1}>Service Charge Percentage</FormLabel>
-                <Input
-                  type="number"
-                  value={serviceChargePercentage}
-                  onChange={handleNumberInput(setServiceChargePercentage)}
-                  placeholder="Service charge %"
-                  step="0.01"
-                  bg="white"
-                  size="md"
-                  h="40px"
-                  _hover={{ borderColor: 'blue.300' }}
-                  _focus={{ borderColor: 'blue.500', boxShadow: '0 0 0 1px var(--chakra-colors-blue-500)' }}
-                />
-                <FormHelperText mt={1}>Percentage of converted amount</FormHelperText>
-              </FormControl>
-              
-              <FormControl mb={{ base: 1, md: 1 }}>
-                <FormLabel fontWeight="medium" mb={1}>Service Charge Base (INR)</FormLabel>
-                <Input
-                  type="number"
-                  value={serviceChargeBase}
-                  onChange={handleNumberInput(setServiceChargeBase)}
-                  placeholder="Base service charge"
-                  bg="white"
-                  size="md"
-                  h="40px"
-                  _hover={{ borderColor: 'blue.300' }}
-                  _focus={{ borderColor: 'blue.500', boxShadow: '0 0 0 1px var(--chakra-colors-blue-500)' }}
-                />
-                <FormHelperText mt={1}>Fixed amount in INR</FormHelperText>
-              </FormControl>
-            </Box>
-          </VStack>
-        </GridItem>
-
-        {/* Results Section */}
-        <GridItem colSpan={{ base: 12, md: 7 }}>
-          <Box 
-            p={6} 
-            borderRadius="xl" 
-            bgGradient="linear(to-b, green.50, green.100)" 
-            boxShadow="lg"
-            position="relative"
-            overflow="hidden"
+    <div className="max-w-3xl mx-auto p-4">
+      <div className="bg-white rounded-lg shadow-md p-5">
+        <div className="flex items-start justify-between mb-4">
+          <div>
+            <h3 className="text-lg font-semibold text-slate-800">Agent Quick Quote</h3>
+            <p className="text-sm text-slate-500">Minimal inputs — get an official quote from the test API (local).</p>
+          </div>
+          <button
+            title={"Guide: Select currency, enter foreign amount and your agent margin (optional). Click 'Get Quote' to fetch the official quote. Response includes effectiveRate, inrAmount, serviceCharge (base,gst,total) and tcs info if applicable."}
+            className="ml-2 text-sm text-slate-400 hover:text-slate-600"
           >
-            <Box 
-              position="absolute" 
-              top={0} 
-              left={0} 
-              right={0} 
-              h="5px" 
-              bgGradient="linear(to-r, green.400, green.600)" 
-            />
-            
-            <Text fontSize="lg" fontWeight="bold" mb={5} color="green.700">
-              CALCULATION RESULTS
-            </Text>
+            ℹ️
+          </button>
+        </div>
 
-            <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={6}>
-              {/* Exchange Rate */}
-              <Stat 
-                bg="white" 
-                p={4} 
-                borderRadius="lg" 
-                boxShadow="sm"
-                border="1px solid"
-                borderColor="gray.100"
-              >
-                <StatLabel color="gray.600" fontWeight="medium" fontSize="sm">Exchange Rate</StatLabel>
-                <StatNumber color="green.600" fontWeight="bold">
-                  ₹{calculationResult.newRate.toFixed(2)}
-                </StatNumber>
-                <StatHelpText fontSize="xs" mt={1}>
-                  IBR + Margins (per {currencyType})
-                </StatHelpText>
-              </Stat>
+        {/* Tabs */}
+        <div className="flex gap-2 mb-4">
+          <button onClick={() => setTab(0)} className={`${tab === 0 ? 'bg-sky-600 text-white' : 'bg-slate-100 text-slate-700'} px-4 py-2 rounded-md`}>Calculator</button>
+          <button onClick={() => setTab(1)} className={`${tab === 1 ? 'bg-sky-600 text-white' : 'bg-slate-100 text-slate-700'} px-4 py-2 rounded-md`}>Request Submit</button>
+        </div>
 
-              {/* INR Converted */}
-              <Stat 
-                bg="white" 
-                p={4} 
-                borderRadius="lg" 
-                boxShadow="sm"
-                border="1px solid"
-                borderColor="gray.100"
-              >
-                <StatLabel color="gray.600" fontWeight="medium" fontSize="sm">INR Converted</StatLabel>
-                <StatNumber color="green.600" fontWeight="bold">
-                  {formatCurrency(calculationResult.inrConverted)}
-                </StatNumber>
-                <StatHelpText fontSize="xs" mt={1}>
-                  {foreignAmount} {currencyType} × ₹{calculationResult.newRate.toFixed(2)}
-                </StatHelpText>
-              </Stat>
+        {tab === 0 ? (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Currency</label>
+                <select value={currencyType} onChange={(e) => setCurrencyType(e.target.value)} className="mt-1 block w-full border-gray-200 rounded-md shadow-sm p-2">
+                  {CURRENCY_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+                </select>
+              </div>
 
-              {/* Service Charge */}
-              <Stat 
-                bg="white" 
-                p={4} 
-                borderRadius="lg" 
-                boxShadow="sm"
-                border="1px solid"
-                borderColor="gray.100"
-              >
-                <StatLabel color="gray.600" fontWeight="medium" fontSize="sm">Service Charge</StatLabel>
-                <StatNumber color="blue.600" fontWeight="bold">
-                  {formatCurrency(calculationResult.serviceCharge)}
-                </StatNumber>
-                <StatHelpText fontSize="xs" mt={1}>
-                  Base (₹{serviceChargeBase}) + {serviceChargePercentage}%
-                </StatHelpText>
-              </Stat>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Foreign Amount</label>
+                <input type="number" value={foreignAmount} onChange={handleNumberInput(setForeignAmount)} className="mt-1 block w-full border-gray-200 rounded-md shadow-sm p-2" />
+              </div>
 
-              {/* GST */}
-              <Stat 
-                bg="white" 
-                p={4} 
-                borderRadius="lg" 
-                boxShadow="sm"
-                border="1px solid"
-                borderColor="gray.100"
-              >
-                <StatLabel color="gray.600" fontWeight="medium" fontSize="sm">GST (18%)</StatLabel>
-                <StatNumber color="blue.600" fontWeight="bold">
-                  {formatCurrency(calculationResult.gst)}
-                </StatNumber>
-                <StatHelpText fontSize="xs" mt={1}>
-                  On Service Charge
-                </StatHelpText>
-              </Stat>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Agent Margin (₹ or paise)</label>
+                <input type="number" value={agentMargin} onChange={handleNumberInput(setAgentMargin)} className="mt-1 block w-full border-gray-200 rounded-md shadow-sm p-2" />
+                <p className="text-xs text-slate-500 mt-1">Enter 0.35 for ₹0.35 or 35 for 35 paise (server heuristic)</p>
+              </div>
 
-              {/* TCS */}
-              <Stat 
-                bg="white" 
-                p={4} 
-                borderRadius="lg" 
-                boxShadow="sm"
-                border="1px solid"
-                borderColor="gray.100"
-              >
-                <StatLabel color="gray.600" fontWeight="medium" fontSize="sm">TCS (&gt;10L)</StatLabel>
-                <StatNumber color="orange.600" fontWeight="bold">
-                  {formatCurrency(calculationResult.tcs)}
-                </StatNumber>
-                <StatHelpText fontSize="xs" mt={1}>
-                  {calculationResult.tcs > 0 ? '5% on amount over ₹10,00,000' : 'Not Applicable'}
-                </StatHelpText>
-              </Stat>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">IBR (info)</label>
+                <div className="flex gap-2 mt-1">
+                  <input value={ibrRate} readOnly className="flex-1 border-gray-200 rounded-md shadow-sm p-2 bg-gray-50" />
+                  <button onClick={() => fetchIbrRate(currencyType)} className="px-3 rounded-md bg-sky-600 text-white" disabled={isRateLoading}>{isRateLoading ? '...' : 'Refresh'}</button>
+                </div>
+              </div>
+            </div>
 
-              {/* Total Amount - Full Width */}
-              <GridItem colSpan={{ base: 1, md: 2 }}>
-                <Box 
-                  bg="green.700" 
-                  p={5} 
-                  borderRadius="lg" 
-                  boxShadow="md"
-                >
-                  <Text color="green.100" fontSize="sm" fontWeight="medium" mb={1}>
-                    TOTAL AMOUNT
-                  </Text>
-                  <Text color="white" fontSize="2xl" fontWeight="bold">
-                    {formatCurrency(calculationResult.grandTotal)}
-                  </Text>
-                  <Text color="green.100" fontSize="xs" mt={1}>
-                    Final amount to be paid by customer
-                  </Text>
-                </Box>
-              </GridItem>
+            <div className="flex items-center gap-3">
+              <button onClick={getAgentQuoteAPI} className="px-4 py-2 bg-green-600 text-white rounded-md" disabled={isQuoteLoading}>{isQuoteLoading ? 'Loading...' : 'Get Quote'}</button>
+              <button onClick={() => { setCalculationResult(null); setErrorMessage(null); }} className="px-4 py-2 border rounded-md">Clear</button>
+            </div>
 
-            </Grid>
-          </Box>
-        </GridItem>
-      </Grid>
-    </Box>
+            {errorMessage && <div className="mt-3 p-3 bg-red-50 border border-red-100 text-red-700 rounded-md">{errorMessage}</div>}
+
+            {calculationResult && (
+              <div className="mt-4 p-4 bg-slate-50 border rounded-md grid grid-cols-1 md:grid-cols-2 gap-3 text-slate-800">
+                <div>
+                  <div className="text-xs text-slate-500">Effective Rate</div>
+                  <div className="text-lg font-semibold">₹{calculationResult.effectiveRate}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-slate-500">INR Amount</div>
+                  <div className="text-lg font-semibold">{formatCurrency(calculationResult.inrAmount)}</div>
+                </div>
+
+                <div>
+                  <div className="text-xs text-slate-500">Service Charge (total)</div>
+                  <div className="text-md font-semibold">{formatCurrency(calculationResult.serviceCharge?.total)}</div>
+                </div>
+
+                <div>
+                  <div className="text-xs text-slate-500">TCS</div>
+                  <div className="text-md">{calculationResult.tcs?.applicable ? `₹${calculationResult.tcs?.amount} (${(calculationResult.tcs?.rate || 0) * 100}%)` : 'Not applicable'}</div>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <p className="text-sm text-slate-600">Submit a forex request to admin. Fill minimal info and click Submit.</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Currency</label>
+                <select value={currencyType} onChange={(e) => setCurrencyType(e.target.value)} className="mt-1 block w-full border-gray-200 rounded-md shadow-sm p-2">
+                  {CURRENCY_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.value}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700">Amount</label>
+                <input type="number" value={foreignAmount} onChange={handleNumberInput(setForeignAmount)} className="mt-1 block w-full border-gray-200 rounded-md shadow-sm p-2" />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-slate-700">Contact info (phone/email)</label>
+                <input type="text" value={contactInfo} onChange={(e) => setContactInfo(e.target.value)} className="mt-1 block w-full border-gray-200 rounded-md shadow-sm p-2" />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button onClick={submitForexRequest} className="px-4 py-2 bg-sky-600 text-white rounded-md" disabled={reqLoading}>{reqLoading ? 'Submitting...' : 'Submit Request'}</button>
+              <button onClick={() => { setReqSuccess(null); setErrorMessage(null); setContactInfo(''); }} className="px-4 py-2 border rounded-md">Clear</button>
+            </div>
+
+            {reqSuccess === true && <div className="p-3 bg-green-50 border border-green-100 text-green-700 rounded-md">Request submitted successfully.</div>}
+            {reqSuccess === false && errorMessage && <div className="p-3 bg-red-50 border border-red-100 text-red-700 rounded-md">{errorMessage}</div>}
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 
