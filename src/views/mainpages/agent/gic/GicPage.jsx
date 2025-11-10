@@ -160,7 +160,7 @@ const Gic = () => {
     
     setLoading(true);
     try {
-      // Use the new agent-specific endpoint
+      // Use the agent-specific endpoint
       const params = new URLSearchParams({
         page: page.toString(),
         limit: pageSize.toString(),
@@ -169,7 +169,7 @@ const Gic = () => {
       });
       
       const response = await axios.get(
-        `https://abroad-backend-gray.vercel.app/agent/gic?${params}`,
+        `https://abroad-backend-gray.vercel.app/auth/getGicByAgent?${params}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token_auth")}`,
