@@ -9,7 +9,8 @@ import {
   MdSwapHoriz,
   MdBusiness,
   MdVerifiedUser,
-  MdContactSupport
+  MdContactSupport,
+  MdLocalHospital
 } from 'react-icons/md';
 
 import { SiAuthentik } from 'react-icons/si';
@@ -32,6 +33,14 @@ import ForgotPassword from "views/mainpages/login_signup/ForgotPassword";
 import ResetPassword from "views/mainpages/login_signup/ResetPassword";
 import EmailTemplateGen from 'views/mainpages/admin/main/components/EmailTemplateGen';
 import Enquiry from 'views/mainpages/admin/enquiry/Enquiry';
+
+// OSHC imports
+import OshcPage from 'views/mainpages/agent/oshc/OshcPage';
+import OshcForm from 'views/mainpages/agent/oshc/OshcForm';
+import OshcView from 'views/mainpages/agent/oshc/OshcView';
+import AdminOshc from 'views/mainpages/admin/oshc/AdminOshc';
+import AdminOshcForm from 'views/mainpages/admin/oshc/AdminOshcForm';
+import AdminOshcView from 'views/mainpages/admin/oshc/AdminOshcView';
 
 const routes = [
   {
@@ -87,6 +96,28 @@ const routes = [
     path: '/enquiry',
     component: <Enquiry/>,
   },
+  {
+    name: 'OSHC',
+    layout: '/admin',
+    icon: <Icon as={MdLocalHospital} width="20px" height="20px" color="inherit" />,
+    path: '/oshc',
+    component: <AdminOshc/>,
+  },
+  {
+    layout: '/admin',
+    path: '/oshc/add',
+    component: <AdminOshcForm/>,
+  },
+  {
+    layout: '/admin',
+    path: '/oshc/edit/:id',
+    component: <AdminOshcForm/>,
+  },
+  {
+    layout: '/admin',
+    path: '/oshc/view/:id',
+    component: <AdminOshcView/>,
+  },
 ];
 
 export const routeAjent = [
@@ -128,6 +159,28 @@ export const routeAjent = [
     path: '/students',
     icon: <Icon as={MdVerifiedUser} width="20px" height="20px" color="inherit" />,
     component: <StudentPage/>,
+  },
+  {
+    name: 'OSHC',
+    layout: '/agent',
+    path: '/oshc',
+    icon: <Icon as={MdLocalHospital} width="20px" height="20px" color="inherit" />,
+    component: <OshcPage/>,
+  },
+  {
+    layout: '/agent',
+    path: '/oshc/add',
+    component: <OshcForm/>,
+  },
+  {
+    layout: '/agent',
+    path: '/oshc/edit/:id',
+    component: <OshcForm/>,
+  },
+  {
+    layout: '/agent',
+    path: '/oshc/view/:id',
+    component: <OshcView/>,
   },
   
 ];

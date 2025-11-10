@@ -85,7 +85,7 @@ const BlockedPage = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await axios.get('http://localhost:4000/agent/blocked', {
+        const response = await axios.get('https://abroad-backend-gray.vercel.app/agent/blocked', {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token_auth")}`,
           },

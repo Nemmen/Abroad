@@ -51,6 +51,11 @@ export function SidebarLinks(props) {
         route.layout === "/auth" ||
         route.layout === "/agent"
       ) {
+        // Skip routes without a name (hidden routes like add/edit forms)
+        if (!route.name) {
+          return null;
+        }
+        
         return (
           <NavLink key={index} to={route.layout + route.path}>
             {route.icon ? (

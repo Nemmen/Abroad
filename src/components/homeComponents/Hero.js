@@ -94,7 +94,7 @@ export default function Hero() {
       },
     })}
   >
-    Global Exposure Partner!
+    Gateway to global finance!
   </Typography>
 </Typography>
 

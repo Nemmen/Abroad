@@ -51,7 +51,7 @@ const theme = createTheme({
 
 export default function DataTable({ 
   columns, 
-  rows, 
+  rows = [], 
   link, 
   sx, 
   onSelectionChange, 
@@ -59,13 +59,20 @@ export default function DataTable({
   getRowClassName,
   loading = false,
   pagination,
-  getRowId
+  getRowId,
+  onRowClick
 }) {
   const location = useLocation();
   const navigate = useNavigate();
 
   const viewHandle = (params) => {
-    navigate(`${location.pathname}/${params.id}`);
+    // If custom onRowClick is provided, use it
+    if (onRowClick) {
+      onRowClick(params);
+    } else {
+      // Default behavior
+      navigate(`${location.pathname}/${params.id}`);
+    }
   };
 
   const handleSelectionChange = (newSelection) => {
