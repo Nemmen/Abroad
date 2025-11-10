@@ -10,7 +10,8 @@ import {
   MdBusiness,
   MdVerifiedUser,
   MdContactSupport,
-  MdLocalHospital
+  MdLocalHospital,
+  MdAccountBalance
 } from 'react-icons/md';
 
 import { SiAuthentik } from 'react-icons/si';
@@ -41,6 +42,14 @@ import OshcView from 'views/mainpages/agent/oshc/OshcView';
 import AdminOshc from 'views/mainpages/admin/oshc/AdminOshc';
 import AdminOshcForm from 'views/mainpages/admin/oshc/AdminOshcForm';
 import AdminOshcView from 'views/mainpages/admin/oshc/AdminOshcView';
+
+// Student Funding imports
+import StudentFundingPage from 'views/mainpages/agent/studentFunding/StudentFundingPage';
+import StudentFundingForm from 'views/mainpages/agent/studentFunding/StudentFundingForm';
+import StudentFundingView from 'views/mainpages/agent/studentFunding/StudentFundingView';
+import AdminStudentFunding from 'views/mainpages/admin/studentFunding/AdminStudentFunding';
+import AdminStudentFundingForm from 'views/mainpages/admin/studentFunding/AdminStudentFundingForm';
+import AdminStudentFundingView from 'views/mainpages/admin/studentFunding/AdminStudentFundingView';
 
 const routes = [
   {
@@ -118,6 +127,28 @@ const routes = [
     path: '/oshc/view/:id',
     component: <AdminOshcView/>,
   },
+  {
+    name: 'Student Funding',
+    layout: '/admin',
+    icon: <Icon as={MdAccountBalance} width="20px" height="20px" color="inherit" />,
+    path: '/student-funding',
+    component: <AdminStudentFunding/>,
+  },
+  {
+    layout: '/admin',
+    path: '/student-funding/add',
+    component: <AdminStudentFundingForm/>,
+  },
+  {
+    layout: '/admin',
+    path: '/student-funding/edit/:id',
+    component: <AdminStudentFundingForm/>,
+  },
+  {
+    layout: '/admin',
+    path: '/student-funding/view/:id',
+    component: <AdminStudentFundingView/>,
+  },
 ];
 
 export const routeAjent = [
@@ -181,6 +212,28 @@ export const routeAjent = [
     layout: '/agent',
     path: '/oshc/view/:id',
     component: <OshcView/>,
+  },
+  {
+    name: 'Student Funding',
+    layout: '/agent',
+    path: '/student-funding',
+    icon: <Icon as={MdAccountBalance} width="20px" height="20px" color="inherit" />,
+    component: <StudentFundingPage/>,
+  },
+  {
+    layout: '/agent',
+    path: '/student-funding/add',
+    component: <StudentFundingForm/>,
+  },
+  {
+    layout: '/agent',
+    path: '/student-funding/edit/:id',
+    component: <StudentFundingForm/>,
+  },
+  {
+    layout: '/agent',
+    path: '/student-funding/view/:id',
+    component: <StudentFundingView/>,
   },
   
 ];

@@ -18,6 +18,10 @@ import { useSelector } from 'react-redux';
 import OshcForm from '../../views/mainpages/agent/oshc/OshcForm';
 import OshcView from '../../views/mainpages/agent/oshc/OshcView';
 
+// Student Funding imports
+import StudentFundingForm from '../../views/mainpages/agent/studentFunding/StudentFundingForm';
+import StudentFundingView from '../../views/mainpages/agent/studentFunding/StudentFundingView';
+
 export default function Dashboard(props) {
   const { ...rest } = props;
 
@@ -121,6 +125,9 @@ export default function Dashboard(props) {
               <Route path="/oshc/add" element={<OshcForm />} />
               <Route path="/oshc/edit/:id" element={<OshcForm />} />
               <Route path="/oshc/view/:id" element={<OshcView />} />
+              <Route path="/student-funding/add" element={<StudentFundingForm />} />
+              <Route path="/student-funding/edit/:id" element={<StudentFundingForm />} />
+              <Route path="/student-funding/view/:id" element={<StudentFundingView />} />
             </Routes>
           </Box>
         </Box>
