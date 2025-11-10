@@ -18,6 +18,10 @@ import EnquiryView from 'views/mainpages/admin/enquiry/EnquiryView';
 import AdminOshcView from 'views/mainpages/admin/oshc/AdminOshcView';
 import AdminOshcForm from 'views/mainpages/admin/oshc/AdminOshcForm';
 
+// Student Funding imports
+import AdminStudentFundingView from 'views/mainpages/admin/studentFunding/AdminStudentFundingView';
+import AdminStudentFundingForm from 'views/mainpages/admin/studentFunding/AdminStudentFundingForm';
+
 // Custom Chakra theme
 export default function Dashboard(props) {
   const { ...rest } = props;
@@ -216,6 +220,18 @@ export default function Dashboard(props) {
                 <Route 
                 path='/oshc/edit/:id'
                 element={<AdminOshcForm />}
+                />
+                <Route 
+                path='/student-funding/view/:id'
+                element={<AdminStudentFundingView />}
+                />
+                <Route 
+                path='/student-funding/add'
+                element={<AdminStudentFundingForm />}
+                />
+                <Route 
+                path='/student-funding/edit/:id'
+                element={<AdminStudentFundingForm />}
                 />
 
               </Routes>
