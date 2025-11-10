@@ -2,9 +2,8 @@ import * as React from 'react';
 import Box from '@mui/material/Box';
 import { DataGrid } from '@mui/x-data-grid';
 import { Container } from '@mui/system';
-import { Button, Paper } from '@mui/material';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Box as Box1 } from '@chakra-ui/react';
 
 const theme = createTheme({
