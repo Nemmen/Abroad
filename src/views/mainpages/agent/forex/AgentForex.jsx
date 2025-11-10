@@ -293,7 +293,7 @@ const Forex = () => {
     
     setLoading(true);
     try {
-      // Use the new agent-specific endpoint
+      // Use the agent-specific endpoint
       const params = new URLSearchParams({
         page: page.toString(),
         limit:'1000',
@@ -302,7 +302,7 @@ const Forex = () => {
       });
 
       const response = await axios.get(
-        `https://abroad-backend-gray.vercel.app/agent/forex?${params}`,
+        `https://abroad-backend-gray.vercel.app/auth/getForexByAgent?${params}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token_auth")}`,
