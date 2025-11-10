@@ -10,6 +10,8 @@ const FILTER_STORAGE_KEYS = {
   AGENT_GIC: 'agent_gic_filters',
   OSHC: 'agent_oshc_filters',
   ADMIN_OSHC: 'admin_oshc_filters',
+  AGENT_PAYMENT_TAGGING: 'agent_payment_tagging_filters',
+  ADMIN_PAYMENT_TAGGING: 'admin_payment_tagging_filters',
 };
 
 /**
@@ -130,6 +132,17 @@ export const DEFAULT_FILTERS = {
     studentId: '',
     dateRange: { start: '', end: '' },
     showFilters: false
+  },
+  AGENT_PAYMENT_TAGGING: {
+    letterType: 'all',
+    status: 'all',
+    searchTerm: '',
+  },
+  ADMIN_PAYMENT_TAGGING: {
+    agentRef: 'all',
+    letterType: 'all',
+    status: 'all',
+    searchTerm: '',
   },
 };
 
