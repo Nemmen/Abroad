@@ -7,6 +7,7 @@ import AuthRoutes from './routes/Auth.js'
 import AdminRoutes from './routes/AdminRoutes.js'
 
 import uploadRoutes from './routes/uploadRoutes.js';
+import paymentTaggingRoutes from './routes/paymentTaggingRoutes.js';
 
 
 dotenv.config()
@@ -26,6 +27,7 @@ app.use(cors({
 app.use('/auth',AuthRoutes)
 app.use('/admin',AdminRoutes)
 app.use('/api/uploads', uploadRoutes);
+app.use('/api/payment-tagging', paymentTaggingRoutes);
 
 app.get('/',(req,res)=>{
     res.send('Server is running')

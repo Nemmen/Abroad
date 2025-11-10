@@ -11,7 +11,8 @@ import {
   MdVerifiedUser,
   MdContactSupport,
   MdLocalHospital,
-  MdAccountBalance
+  MdAccountBalance,
+  MdPayment
 } from 'react-icons/md';
 
 import { SiAuthentik } from 'react-icons/si';
@@ -50,6 +51,14 @@ import StudentFundingView from 'views/mainpages/agent/studentFunding/StudentFund
 import AdminStudentFunding from 'views/mainpages/admin/studentFunding/AdminStudentFunding';
 import AdminStudentFundingForm from 'views/mainpages/admin/studentFunding/AdminStudentFundingForm';
 import AdminStudentFundingView from 'views/mainpages/admin/studentFunding/AdminStudentFundingView';
+
+// Payment Tagging imports
+import AgentPaymentTagging from 'views/mainpages/agent/paymentTagging/AgentPaymentTagging';
+import PaymentTaggingForm from 'views/mainpages/agent/paymentTagging/PaymentTaggingForm';
+import AgentPaymentTaggingView from 'views/mainpages/agent/paymentTagging/AgentPaymentTaggingView';
+import AdminPaymentTagging from 'views/mainpages/admin/paymentTagging/AdminPaymentTagging';
+import AdminPaymentTaggingForm from 'views/mainpages/admin/paymentTagging/AdminPaymentTaggingForm';
+import AdminPaymentTaggingView from 'views/mainpages/admin/paymentTagging/AdminPaymentTaggingView';
 
 const routes = [
   {
@@ -149,6 +158,28 @@ const routes = [
     path: '/student-funding/view/:id',
     component: <AdminStudentFundingView/>,
   },
+  {
+    name: 'Payment Tagging',
+    layout: '/admin',
+    icon: <Icon as={MdPayment} width="20px" height="20px" color="inherit" />,
+    path: '/payment-tagging',
+    component: <AdminPaymentTagging/>,
+  },
+  {
+    layout: '/admin',
+    path: '/payment-tagging/form',
+    component: <AdminPaymentTaggingForm/>,
+  },
+  {
+    layout: '/admin',
+    path: '/payment-tagging/form/:id',
+    component: <AdminPaymentTaggingForm/>,
+  },
+  {
+    layout: '/admin',
+    path: '/payment-tagging/view/:id',
+    component: <AdminPaymentTaggingView/>,
+  },
 ];
 
 export const routeAjent = [
@@ -234,6 +265,28 @@ export const routeAjent = [
     layout: '/agent',
     path: '/student-funding/view/:id',
     component: <StudentFundingView/>,
+  },
+  {
+    name: 'Payment Tagging',
+    layout: '/agent',
+    icon: <Icon as={MdPayment} width="20px" height="20px" color="inherit" />,
+    path: '/payment-tagging',
+    component: <AgentPaymentTagging/>,
+  },
+  {
+    layout: '/agent',
+    path: '/payment-tagging/form',
+    component: <PaymentTaggingForm/>,
+  },
+  {
+    layout: '/agent',
+    path: '/payment-tagging/form/:id',
+    component: <PaymentTaggingForm/>,
+  },
+  {
+    layout: '/agent',
+    path: '/payment-tagging/view/:id',
+    component: <AgentPaymentTaggingView/>,
   },
   
 ];
