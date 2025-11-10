@@ -14,6 +14,10 @@ import AgentForexView from '../../views/mainpages/agent/forex/AgentForexView';
 import AgentProfilePage from 'views/mainpages/agent/profile/app_agent-profile_page';
 import { useSelector } from 'react-redux';
 
+// OSHC imports
+import OshcForm from '../../views/mainpages/agent/oshc/OshcForm';
+import OshcView from '../../views/mainpages/agent/oshc/OshcView';
+
 export default function Dashboard(props) {
   const { ...rest } = props;
 
@@ -114,6 +118,9 @@ export default function Dashboard(props) {
               <Route path="/gic/form" element={<CreateGICModal />} />
               <Route path="/gic/:id" element={<GicView />} />
               <Route path="/forex/:id" element={<AgentForexView />} />
+              <Route path="/oshc/add" element={<OshcForm />} />
+              <Route path="/oshc/edit/:id" element={<OshcForm />} />
+              <Route path="/oshc/view/:id" element={<OshcView />} />
             </Routes>
           </Box>
         </Box>

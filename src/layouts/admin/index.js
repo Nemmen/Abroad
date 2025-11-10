@@ -14,6 +14,10 @@ import GicView from 'views/mainpages/admin/gic/GicView';
 import UserDetailPage from 'views/mainpages/admin/main/components/UserDetailPage';
 import EnquiryView from 'views/mainpages/admin/enquiry/EnquiryView';
 
+// OSHC imports
+import AdminOshcView from 'views/mainpages/admin/oshc/AdminOshcView';
+import AdminOshcForm from 'views/mainpages/admin/oshc/AdminOshcForm';
+
 // Custom Chakra theme
 export default function Dashboard(props) {
   const { ...rest } = props;
@@ -200,6 +204,18 @@ export default function Dashboard(props) {
                 <Route 
                 path='/enquiry/:id'
                 element={<EnquiryView />}
+                />
+                <Route 
+                path='/oshc/view/:id'
+                element={<AdminOshcView />}
+                />
+                <Route 
+                path='/oshc/add'
+                element={<AdminOshcForm />}
+                />
+                <Route 
+                path='/oshc/edit/:id'
+                element={<AdminOshcForm />}
                 />
 
               </Routes>

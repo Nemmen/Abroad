@@ -8,6 +8,8 @@ const FILTER_STORAGE_KEYS = {
   ADMIN_GIC: 'admin_gic_filters',
   AGENT_FOREX: 'agent_forex_filters',
   AGENT_GIC: 'agent_gic_filters',
+  OSHC: 'agent_oshc_filters',
+  ADMIN_OSHC: 'admin_oshc_filters',
 };
 
 /**
@@ -105,6 +107,29 @@ export const DEFAULT_FILTERS = {
     accountType: [],
     bankName: [],
     accountStatus: [],
+  },
+  OSHC: {
+    studentName: '',
+    email: '',
+    mobile: '',
+    partner: '',
+    status: '',
+    passportNumber: '',
+    studentId: '',
+    dateRange: { start: '', end: '' },
+    showFilters: false
+  },
+  ADMIN_OSHC: {
+    Agent: '',
+    studentName: '',
+    email: '',
+    mobile: '',
+    partner: '',
+    status: '',
+    passportNumber: '',
+    studentId: '',
+    dateRange: { start: '', end: '' },
+    showFilters: false
   },
 };
 

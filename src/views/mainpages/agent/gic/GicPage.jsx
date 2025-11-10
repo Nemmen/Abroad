@@ -169,7 +169,7 @@ const Gic = () => {
       });
       
       const response = await axios.get(
-        `http://localhost:4000/agent/gic?${params}`,
+        `https://abroad-backend-gray.vercel.app/agent/gic?${params}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token_auth")}`,

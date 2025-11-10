@@ -64,7 +64,7 @@ const StudentPage = () => {
       });
       
       const response = await axios.get(
-        `http://localhost:4000/agent/students?${params}`,
+        `https://abroad-backend-gray.vercel.app/agent/students?${params}`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token_auth")}`,
@@ -104,7 +104,7 @@ const StudentPage = () => {
         });
         
         const forexResponse = await axios.get(
-          `http://localhost:4000/agent/forex?${forexParams}`,
+          `https://abroad-backend-gray.vercel.app/agent/forex?${forexParams}`,
           {
             headers: {
               Authorization: `Bearer ${localStorage.getItem("token_auth")}`,
