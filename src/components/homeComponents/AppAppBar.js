@@ -93,6 +93,15 @@ export default function AppAppBar() {
               <Button variant="text" color="info" size="medium" href="#forex" sx={{ fontSize: '1rem', fontWeight: 500 }}>
                 Forex
               </Button>
+              <Button variant="text" color="info" size="medium" href="#oshc" sx={{ fontSize: '1rem', fontWeight: 500 }}>
+                OSHC
+              </Button>
+              <Button variant="text" color="info" size="medium" href="#payment-tagging" sx={{ fontSize: '1rem', fontWeight: 500 }}>
+                Payment Tagging
+              </Button>
+              <Button variant="text" color="info" size="medium" href="#student-funding" sx={{ fontSize: '1rem', fontWeight: 500 }}>
+                Student Funding
+              </Button>
               <Button variant="text" color="info" size="medium" href="https://abroadeducares.com/" sx={{ fontSize: '1rem', fontWeight: 500 }}> 
                 Immigration
               </Button>
@@ -154,6 +163,15 @@ export default function AppAppBar() {
   </Button>
   <Button variant="text" color="info" size="medium" href="#forex" sx={{ fontSize: '1rem', fontWeight: 500 }}>
     Forex
+  </Button>
+  <Button variant="text" color="info" size="medium" href="#oshc" sx={{ fontSize: '1rem', fontWeight: 500 }}>
+    OSHC
+  </Button>
+  <Button variant="text" color="info" size="medium" href="#payment-tagging" sx={{ fontSize: '1rem', fontWeight: 500 }}>
+    Payment Tagging
+  </Button>
+  <Button variant="text" color="info" size="medium" href="#student-funding" sx={{ fontSize: '1rem', fontWeight: 500 }}>
+    Student Funding
   </Button>
   <Button variant="text" color="info" size="medium" href="https://abroadeducares.com/" sx={{ fontSize: '1rem', fontWeight: 500 }}>
     Immigration

@@ -10,7 +10,7 @@ export default function FinanceSupport() {
   
   return (
     <Box
-      id="finance-support"
+      id="student-funding"
       sx={{
         py: 6,
         px: 2,
