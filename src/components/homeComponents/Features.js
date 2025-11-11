@@ -182,7 +182,7 @@ export default function Features() {
                 lineHeight: 1.2,
               }}
             >
-              Your Global Exposure Partner!
+              Your Gateway to global finance!
             </Typography>
 
             <Typography
@@ -262,7 +262,7 @@ export default function Features() {
                   mb: 1,
                 }}
               >
-                Enquiry Now!
+                Enquire Now!
               </Typography>
               <Typography
                 variant="body1"
