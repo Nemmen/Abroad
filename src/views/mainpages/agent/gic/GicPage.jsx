@@ -179,9 +179,9 @@ const Gic = () => {
       );
       
       if (response.data.success) {
-        setData(response.data.gicForms);
+        setData(response.data.data);
         
-        const gicForms = response.data.gicForms.map((form, index) => ({
+        const data = response.data.data.map((form, index) => ({
           id: form._id || index,
           type: form.type || 'N/A',
           Agent: form.agentRef?.name?.toUpperCase() || 'N/A',
@@ -196,13 +196,13 @@ const Gic = () => {
           netPayable: form.netPayable || 0,
           commissionStatus: form.commissionStatus || 'N/A',
         }));
-        setRows(gicForms);
+        setRows(data);
         
         // Update pagination from response
         setPagination({
           page: page,
           pageSize: pageSize,
-          total: response.data.pagination?.total || gicForms.length
+          total: response.data.pagination?.total || data.length
         });
       }
     } catch (error) {
