@@ -315,19 +315,19 @@ const Forex = () => {
       console.log('Agent Forex - Raw API response structure:', {
         success: response.data?.success,
         dataType: typeof response.data,
-        hasForexForms: !!response.data?.forexForms,
-        dataType: Array.isArray(response.data?.forexForms) ? 'array' : typeof response.data?.forexForms,
-        dataLength: response.data?.forexForms?.length || 0,
+        hasdata: !!response.data?.data,
+        dataType: Array.isArray(response.data?.data) ? 'array' : typeof response.data?.data,
+        dataLength: response.data?.data?.length || 0,
         hasPagination: !!response.data?.pagination,
-        sample: response.data?.forexForms?.[0] ? { 
-          _id: response.data.forexForms[0]._id,
-          agentRef: response.data.forexForms[0].agentRef
+        sample: response.data?.data?.[0] ? { 
+          _id: response.data.data[0]._id,
+          agentRef: response.data.data[0].agentRef
         } : null
       });
       
-      if (response.data && response.data.forexForms && Array.isArray(response.data.forexForms)) {
+      if (response.data && response.data.data && Array.isArray(response.data.data)) {
         // Process all forex forms using the new API response format
-        const forexForms = response.data.forexForms.map((item) => ({
+        const data = response.data.data.map((item) => ({
           id: item._id,
           agentRef: item.agentRef?.name?.toUpperCase() || 'N/A',
           studentRef: item?.studentName || 'N/A',
@@ -345,20 +345,20 @@ const Forex = () => {
         }));
         
         console.log('Agent Forex - Processed forms:', {
-          totalForexForms: response.data.forexForms.length,
-          processedForms: forexForms.length,
+          totaldata: response.data.data.length,
+          processedForms: data.length,
           userId: user._id
         });
         
-        setRows(forexForms);
-        setData(response.data.forexForms);
+        setRows(data);
+        setData(response.data.data);
         
         // Update pagination state directly from backend
         setPagination({
           page: page,
           limit: limit,
-          total: response.data.pagination?.total || response.data.forexForms.length,
-          pages: response.data.pagination?.pages || Math.ceil(response.data.forexForms.length / limit)
+          total: response.data.pagination?.total || response.data.data.length,
+          pages: response.data.pagination?.pages || Math.ceil(response.data.data.length / limit)
         });
       } else {
         console.log('Agent Forex - No data received or no matching records found in backend response:', response.data);

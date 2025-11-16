@@ -82,33 +82,34 @@ export default function AppAppBar() {
               display: { xs: 'none', md: 'flex' }, 
               flexGrow: 1,
               justifyContent: 'center',
-              gap: 1
+              gap: { md: 0.25, lg: 0.5, xl: 1 },
+              flexWrap: 'nowrap'
             }}>
-              <Button variant="text" color="info" size="medium" href="#GIC" sx={{ fontSize: '1rem', fontWeight: 500 }}>
+              <Button variant="text" color="info" size="small" href="#GIC" sx={{ fontSize: { md: '0.7rem', lg: '0.85rem', xl: '1rem' }, fontWeight: 500, px: { md: 0.5, lg: 1, xl: 1.5 }, minWidth: 'auto', whiteSpace: 'nowrap' }}>
                 GIC
               </Button>
-              <Button variant="text" color="info" size="medium" href="#BlockAccount" sx={{ fontSize: '1rem', fontWeight: 500 }}>
+              <Button variant="text" color="info" size="small" href="#BlockAccount" sx={{ fontSize: { md: '0.7rem', lg: '0.85rem', xl: '1rem' }, fontWeight: 500, px: { md: 0.5, lg: 1, xl: 1.5 }, minWidth: 'auto', whiteSpace: 'nowrap' }}>
                 Blocked Account
               </Button>
-              <Button variant="text" color="info" size="medium" href="#forex" sx={{ fontSize: '1rem', fontWeight: 500 }}>
+              <Button variant="text" color="info" size="small" href="#forex" sx={{ fontSize: { md: '0.7rem', lg: '0.85rem', xl: '1rem' }, fontWeight: 500, px: { md: 0.5, lg: 1, xl: 1.5 }, minWidth: 'auto', whiteSpace: 'nowrap' }}>
                 Forex
               </Button>
-              <Button variant="text" color="info" size="medium" href="#oshc" sx={{ fontSize: '1rem', fontWeight: 500 }}>
+              <Button variant="text" color="info" size="small" href="#oshc" sx={{ fontSize: { md: '0.7rem', lg: '0.85rem', xl: '1rem' }, fontWeight: 500, px: { md: 0.5, lg: 1, xl: 1.5 }, minWidth: 'auto', whiteSpace: 'nowrap' }}>
                 OSHC
               </Button>
-              <Button variant="text" color="info" size="medium" href="#payment-tagging" sx={{ fontSize: '1rem', fontWeight: 500 }}>
+              <Button variant="text" color="info" size="small" href="#payment-tagging" sx={{ fontSize: { md: '0.7rem', lg: '0.85rem', xl: '1rem' }, fontWeight: 500, px: { md: 0.5, lg: 1, xl: 1.5 }, minWidth: 'auto', whiteSpace: 'nowrap' }}>
                 Payment Tagging
               </Button>
-              <Button variant="text" color="info" size="medium" href="#student-funding" sx={{ fontSize: '1rem', fontWeight: 500 }}>
+              <Button variant="text" color="info" size="small" href="#student-funding" sx={{ fontSize: { md: '0.7rem', lg: '0.85rem', xl: '1rem' }, fontWeight: 500, px: { md: 0.5, lg: 1, xl: 1.5 }, minWidth: 'auto', whiteSpace: 'nowrap' }}>
                 Student Funding
               </Button>
-              <Button variant="text" color="info" size="medium" href="https://abroadeducares.com/" sx={{ fontSize: '1rem', fontWeight: 500 }}> 
+              <Button variant="text" color="info" size="small" href="https://abroadeducares.com/" sx={{ fontSize: { md: '0.7rem', lg: '0.85rem', xl: '1rem' }, fontWeight: 500, px: { md: 0.5, lg: 1, xl: 1.5 }, minWidth: 'auto', whiteSpace: 'nowrap' }}> 
                 Immigration
               </Button>
-              <Button variant="text" color="info" size="medium" sx={{ minWidth: 0, fontSize: '1rem', fontWeight: 500 }} href="#FAQ">
+              <Button variant="text" color="info" size="small" sx={{ fontSize: { md: '0.7rem', lg: '0.85rem', xl: '1rem' }, fontWeight: 500, px: { md: 0.5, lg: 1, xl: 1.5 }, minWidth: 'auto', whiteSpace: 'nowrap' }} href="#FAQ">
                 FAQ
               </Button>
-              <Button  variant="text" color="info" size="medium" sx={{ minWidth: 0, fontSize: '1rem', fontWeight: 500 }} href="#enquiry">
+              <Button  variant="text" color="info" size="small" sx={{ fontSize: { md: '0.7rem', lg: '0.85rem', xl: '1rem' }, fontWeight: 500, px: { md: 0.5, lg: 1, xl: 1.5 }, minWidth: 'auto', whiteSpace: 'nowrap' }} href="#enquiry">
                 Contact Us
               </Button>
             </Box>
