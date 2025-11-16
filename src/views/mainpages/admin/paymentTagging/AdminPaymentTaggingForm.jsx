@@ -216,27 +216,15 @@ function AdminPaymentTaggingForm() {
 
   const validateForm = () => {
     const {
-      agentRef,
-      studentRef,
-      email,
-      mobile,
-      institutionName,
       paymentReferenceNumber,
-      dateOfLetterGeneration,
       letterType,
     } = formData;
 
     if (
-      !agentRef ||
-      !studentRef ||
-      !email ||
-      !mobile ||
-      !institutionName ||
       !paymentReferenceNumber ||
-      !dateOfLetterGeneration ||
       !letterType
     ) {
-      showToast('Please fill in all required fields', 'error');
+      showToast('Please fill in all required fields (Payment Reference Number and Letter Type)', 'error');
       return false;
     }
 
@@ -358,7 +346,7 @@ function AdminPaymentTaggingForm() {
               <Grid container spacing={3}>
                 {/* Agent Selection */}
                 <Grid item xs={12} md={6}>
-                  <FormControl fullWidth required>
+                  <FormControl fullWidth>
                     <InputLabel>Agent</InputLabel>
                     <Select
                       name="agentRef"
@@ -380,7 +368,7 @@ function AdminPaymentTaggingForm() {
 
                 {/* Student Selection */}
                 <Grid item xs={12} md={6}>
-                  <FormControl fullWidth required disabled={!formData.agentRef}>
+                  <FormControl fullWidth disabled={!formData.agentRef}>
                     <InputLabel>Student</InputLabel>
                     <Select
                       name="studentRef"
@@ -410,7 +398,6 @@ function AdminPaymentTaggingForm() {
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
-                    required
                     label="Email"
                     name="email"
                     type="email"
@@ -422,7 +409,6 @@ function AdminPaymentTaggingForm() {
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
-                    required
                     label="Mobile Number"
                     name="mobile"
                     value={formData.mobile}
@@ -433,7 +419,6 @@ function AdminPaymentTaggingForm() {
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
-                    required
                     label="Institution Name"
                     name="institutionName"
                     value={formData.institutionName}
@@ -455,7 +440,6 @@ function AdminPaymentTaggingForm() {
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
-                    required
                     label="Date of Letter Generation"
                     name="dateOfLetterGeneration"
                     type="date"

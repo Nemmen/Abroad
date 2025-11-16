@@ -185,25 +185,15 @@ function PaymentTaggingForm() {
 
   const validateForm = () => {
     const {
-      studentRef,
-      email,
-      mobile,
-      institutionName,
       paymentReferenceNumber,
-      dateOfLetterGeneration,
       letterType,
     } = formData;
 
     if (
-      !studentRef ||
-      !email ||
-      !mobile ||
-      !institutionName ||
       !paymentReferenceNumber ||
-      !dateOfLetterGeneration ||
       !letterType
     ) {
-      showToast('Please fill in all required fields', 'error');
+      showToast('Please fill in all required fields (Payment Reference Number and Letter Type)', 'error');
       return false;
     }
 
@@ -326,7 +316,7 @@ function PaymentTaggingForm() {
               <Grid container spacing={3}>
                 {/* Student Selection */}
                 <Grid item xs={12} md={6}>
-                  <FormControl fullWidth required>
+                  <FormControl fullWidth>
                     <InputLabel>Student</InputLabel>
                     <Select
                       name="studentRef"
@@ -357,7 +347,6 @@ function PaymentTaggingForm() {
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
-                    required
                     label="Email"
                     name="email"
                     type="email"
@@ -370,7 +359,6 @@ function PaymentTaggingForm() {
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
-                    required
                     label="Mobile Number"
                     name="mobile"
                     value={formData.mobile}
@@ -382,7 +370,6 @@ function PaymentTaggingForm() {
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
-                    required
                     label="Institution Name"
                     name="institutionName"
                     value={formData.institutionName}
@@ -406,7 +393,6 @@ function PaymentTaggingForm() {
                 <Grid item xs={12} md={6}>
                   <TextField
                     fullWidth
-                    required
                     label="Date of Letter Generation"
                     name="dateOfLetterGeneration"
                     type="date"

@@ -124,14 +124,14 @@ function AdminOshcView() {
               : []
           );
         } else {
-          console.error('OSHC entry not found with ID:', id);
+          console.error('Insurance entry not found with ID:', id);
           setFormData({});
         }
       } catch (error) {
         console.error('Error fetching data:', error);
         toast({
           title: 'Error',
-          description: 'Failed to load OSHC data',
+          description: 'Failed to load Insurance data',
           status: 'error',
           duration: 3000,
           isClosable: true,
@@ -292,17 +292,17 @@ function AdminOshcView() {
         setIsEditing(false);
         toast({
           title: 'Success',
-          description: 'OSHC entry updated successfully!',
+          description: 'Insurance entry updated successfully!',
           status: 'success',
           duration: 3000,
           isClosable: true,
         });
       }
     } catch (error) {
-      console.error('Error updating OSHC entry:', error);
+      console.error('Error updating Insurance entry:', error);
       toast({
         title: 'Error',
-        description: error.response?.data?.message || 'Error updating OSHC entry. Please try again.',
+        description: error.response?.data?.message || 'Error updating Insurance entry. Please try again.',
         status: 'error',
         duration: 3000,
         isClosable: true,
@@ -331,7 +331,7 @@ function AdminOshcView() {
       <Box p={6} bg={pageBg} minH="100vh">
         <Flex justify="center" align="center" minH="400px">
           <VStack spacing={4}>
-            <Text fontSize="lg">Loading OSHC data...</Text>
+            <Text fontSize="lg">Loading Insurance data...</Text>
             <Text fontSize="sm" color="gray.500">ID: {id}</Text>
           </VStack>
         </Flex>
@@ -354,7 +354,7 @@ function AdminOshcView() {
             Back to List
           </Button>
         </Flex>
-        <Text>No OSHC entry found with ID: {id}</Text>
+        <Text>No Insurance entry found with ID: {id}</Text>
       </Box>
     );
   }

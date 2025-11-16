@@ -115,7 +115,7 @@ const routes = [
     component: <Enquiry/>,
   },
   {
-    name: 'OSHC',
+    name: 'Insurance',
     layout: '/admin',
     icon: <Icon as={MdLocalHospital} width="20px" height="20px" color="inherit" />,
     path: '/oshc',
@@ -223,7 +223,7 @@ export const routeAjent = [
     component: <StudentPage/>,
   },
   {
-    name: 'OSHC',
+    name: 'Insurance',
     layout: '/agent',
     path: '/oshc',
     icon: <Icon as={MdLocalHospital} width="20px" height="20px" color="inherit" />,
