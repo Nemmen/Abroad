@@ -318,7 +318,7 @@ function OshcPage() {
         <Card sx={{ p: 3, mb: 3, backgroundColor: 'primary.main', color: 'white' }}>
           <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 2 }}>
             <LocalHospitalIcon sx={{ mr: 2, fontSize: 'inherit' }} />
-            OSHC Management
+            Insurance for Australia and New Zealand
           </Typography>
           <Typography variant="body1" sx={{ color: 'rgba(255,255,255,0.9)', mb: 3 }}>
             Manage health insurance policies for Australian study visas

@@ -387,7 +387,7 @@ function AdminOshc() {
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
             <LocalHospitalIcon sx={{ mr: 2, color: 'primary.main', fontSize: 28 }} />
             <Typography variant="h4" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
-              OSHC Management (Admin)
+              Insurance for Australia and New Zealand (Admin)
             </Typography>
           </Box>
           

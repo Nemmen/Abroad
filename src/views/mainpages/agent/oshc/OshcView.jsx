@@ -252,7 +252,7 @@ function OshcView() {
       <ThemeProvider theme={theme}>
         <Box sx={{ p: 3, backgroundColor: 'background.default', minHeight: '100vh' }}>
           <Alert severity="warning">
-            OSHC entry not found.
+            Insurance entry not found.
           </Alert>
         </Box>
       </ThemeProvider>

@@ -402,7 +402,7 @@ function AdminOshcForm() {
         <Card sx={{ maxWidth: 1200, mx: 'auto' }}>
           <CardContent sx={{ p: 4 }}>
             <Typography variant="h4" sx={{ mb: 3, fontWeight: 'bold', color: 'text.primary' }}>
-              {isEditMode ? 'Edit OSHC Entry' : 'New OSHC Entry'}
+              {isEditMode ? 'Edit Insurance Entry' : 'New Insurance Entry'}
             </Typography>
 
             <form onSubmit={handleSubmit}>
