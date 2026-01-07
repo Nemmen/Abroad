@@ -6,10 +6,18 @@ import {
   Grid, Avatar, CircularProgress 
 } from "@mui/material";
 import { GrDocumentVerified } from "react-icons/gr";
+import { MdHealthAndSafety, MdSchool, MdPayment } from "react-icons/md";
 import { blue } from "@mui/material/colors";
 
 const AgentStats = () => {
-  const [stats, setStats] = useState({ gicCount: 0, forexCount: 0, blockedCount: 0 });
+  const [stats, setStats] = useState({ 
+    gicCount: 0, 
+    forexCount: 0, 
+    blockedCount: 0,
+    oshcCount: 0,
+    studentFundingCount: 0,
+    paymentTaggingCount: 0
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -61,6 +69,33 @@ const AgentStats = () => {
       color: "#F59E0B",
       bgColor: "#FEF3C7",
       link: "/agent/gic"
+    },
+    {
+      id: 4,
+      title: "Insurance (OSHC)",
+      value: stats.oshcCount || 0,
+      icon: <MdHealthAndSafety size={24} />,
+      color: "#EC4899",
+      bgColor: "#FCE7F3",
+      link: "/agent/oshc"
+    },
+    {
+      id: 5,
+      title: "Student Funding",
+      value: stats.studentFundingCount || 0,
+      icon: <MdSchool size={24} />,
+      color: "#14B8A6",
+      bgColor: "#CCFBF1",
+      link: "/agent/student-funding"
+    },
+    {
+      id: 6,
+      title: "Payment Tagging",
+      value: stats.paymentTaggingCount || 0,
+      icon: <MdPayment size={24} />,
+      color: "#F97316",
+      bgColor: "#FFEDD5",
+      link: "/agent/payment-tagging"
     },
   ];
 

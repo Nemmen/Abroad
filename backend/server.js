@@ -8,6 +8,8 @@ import AdminRoutes from './routes/AdminRoutes.js'
 
 import uploadRoutes from './routes/uploadRoutes.js';
 import paymentTaggingRoutes from './routes/paymentTaggingRoutes.js';
+import oshcRoutes from './routes/oshcRoutes.js';
+import studentFundingRoutes from './routes/studentFundingRoutes.js';
 
 
 dotenv.config()
@@ -28,6 +30,8 @@ app.use('/auth',AuthRoutes)
 app.use('/admin',AdminRoutes)
 app.use('/api/uploads', uploadRoutes);
 app.use('/api/payment-tagging', paymentTaggingRoutes);
+app.use('/api/oshc', oshcRoutes);
+app.use('/api/student-funding', studentFundingRoutes);
 
 app.get('/',(req,res)=>{
     res.send('Server is running')

@@ -9,6 +9,9 @@ import transporter from '../config/emailConfig.js';
 import { sendRegistrationEmail,sendOtpEmail, verifyOtp } from '../services/emailService.js';
 import ForexModel from '../models/forexModel.js';
 import GICModel from '../models/gicModel.js';
+import OshcModel from '../models/oshcModel.js';
+import StudentFundingModel from '../models/studentFundingModel.js';
+import PaymentTaggingModel from '../models/paymentTaggingModel.js';
 // import BLOCKEDModel from '../models/blockedModel.js';
 dotenv.config();
 
@@ -670,6 +673,15 @@ export const getAgentStats = async (req, res) => {
     // Count forex transactions for the logged-in agent
     const forexCount = await ForexModel.countDocuments({ agentRef: agentId });
 
+    // Count OSHC transactions for the logged-in agent
+    const oshcCount = await OshcModel.countDocuments({ agentId: agentId });
+
+    // Count Student Funding requests for the logged-in agent
+    const studentFundingCount = await StudentFundingModel.countDocuments({ agentId: agentId });
+
+    // Count Payment Tagging entries for the logged-in agent
+    const paymentTaggingCount = await PaymentTaggingModel.countDocuments({ agentId: agentId });
+
     // Count blocked transactions for the logged-in agent
     // const blockedCount = await BLOCKEDModel.countDocuments({ agentRef: agentId });
 
@@ -677,6 +689,9 @@ export const getAgentStats = async (req, res) => {
       message: "Agent stats fetched successfully",
       gicCount,
       forexCount,
+      oshcCount,
+      studentFundingCount,
+      paymentTaggingCount,
       // blockedCount,
     });
   } catch (error) {
