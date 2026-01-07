@@ -1,6 +1,9 @@
 import UserModel from '../models/user.js';
 import ForexModel from '../models/forexModel.js';
 import GICModel from '../models/gicModel.js';
+import OshcModel from '../models/oshcModel.js';
+import StudentFundingModel from '../models/studentFundingModel.js';
+import PaymentTaggingModel from '../models/paymentTaggingModel.js';
 import moment from 'moment';
 // import RecordModel from '../models/record.js';
 import {
@@ -349,10 +352,22 @@ export const getForexAndGicData = async (req, res) => {
     // Fetch the count of GIC entries
     const gicCount = await GICModel.countDocuments();
 
-    // Return the data in the format required for the Pie Chart
+    // Fetch the count of OSHC entries
+    const oshcCount = await OshcModel.countDocuments();
+
+    // Fetch the count of Student Funding entries
+    const studentFundingCount = await StudentFundingModel.countDocuments();
+
+    // Fetch the count of Payment Tagging entries
+    const paymentTaggingCount = await PaymentTaggingModel.countDocuments();
+
+    // Return the data in the format required for the dashboard
     res.json({
       forexCount,
       gicCount,
+      oshcCount,
+      studentFundingCount,
+      paymentTaggingCount,
     });
   } catch (error) {
     // console.error('Error fetching forex and GIC data:', error);

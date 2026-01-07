@@ -40,7 +40,10 @@ import {
   MdDateRange,
   MdBusinessCenter,
   MdAccountBalance,
-  MdMoneyOff
+  MdMoneyOff,
+  MdHealthAndSafety,
+  MdSchool,
+  MdPayment
 } from 'react-icons/md';
 
 // Custom components
@@ -72,6 +75,9 @@ export default function AdminDashboard() {
   const greenIconBg = useColorModeValue('green.50', 'green.900');
   const orangeIconBg = useColorModeValue('orange.50', 'orange.900');
   const redIconBg = useColorModeValue('red.50', 'red.900');
+  const pinkIconBg = useColorModeValue('pink.50', 'pink.900');
+  const tealIconBg = useColorModeValue('teal.50', 'teal.900');
+  const yellowIconBg = useColorModeValue('yellow.50', 'yellow.900');
   
   // States for data
   const [dashboardStats, setDashboardStats] = useState(null);
@@ -378,6 +384,123 @@ export default function AdminDashboard() {
                   </Flex>
                 </CardBody>
               </Card>
+            </SimpleGrid>
+          )}
+        </Box>
+
+        {/* New Statistics - Insurance, Student Funding, Payment Tagging */}
+        <Box mb={{ base: 6, md: 8 }}>
+          <Flex 
+            align="center"
+            mb={4}
+          >
+            <Heading 
+              size="md" 
+              color={headingColor}
+              fontWeight="600"
+            >
+              Additional Services
+            </Heading>
+            <Divider ml={4} flex="1" />
+          </Flex>
+
+          {loading ? (
+            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={{ base: 3, md: 5 }}>
+              {[1, 2, 3].map((item) => (
+                <Skeleton key={item} height="120px" borderRadius="xl" />
+              ))}
+            </SimpleGrid>
+          ) : error ? (
+            <Card bg={statBgNegative} borderRadius="xl" p={3}>
+              <CardBody>
+                <Text color="red.500">{error}</Text>
+              </CardBody>
+            </Card>
+          ) : (
+            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={{ base: 3, md: 5 }}>
+              {/* Insurance (OSHC) Card */}
+              <Link to="/admin/oshc" style={{ textDecoration: 'none' }}>
+                <Card borderRadius="xl" boxShadow="sm" bg={sectionBg} overflow="hidden" _hover={{ boxShadow: 'md', transform: 'translateY(-2px)', transition: 'all 0.2s' }} cursor="pointer">
+                  <Box bg="pink.500" h={1} w="full" />
+                  <CardBody p={5}>
+                    <Flex align="center" justify="space-between">
+                      <Stack>
+                        <Stat>
+                          <StatLabel fontSize="sm" color="gray.500">Total Insurance</StatLabel>
+                          <StatNumber>{dashboardStats?.transactions?.totalOshc || 0}</StatNumber>
+                          <StatHelpText>
+                            <StatArrow type="increase" />
+                            {dashboardStats?.transactions?.currentMonthOshc || 0} this month
+                          </StatHelpText>
+                        </Stat>
+                      </Stack>
+                      <Box 
+                        p={2} 
+                        bg={pinkIconBg} 
+                        borderRadius="md"
+                      >
+                        <Icon as={MdHealthAndSafety} boxSize={10} color="pink.500" />
+                      </Box>
+                    </Flex>
+                  </CardBody>
+                </Card>
+              </Link>
+
+              {/* Student Funding Card */}
+              <Link to="/admin/student-funding" style={{ textDecoration: 'none' }}>
+                <Card borderRadius="xl" boxShadow="sm" bg={sectionBg} overflow="hidden" _hover={{ boxShadow: 'md', transform: 'translateY(-2px)', transition: 'all 0.2s' }} cursor="pointer">
+                  <Box bg="teal.500" h={1} w="full" />
+                  <CardBody p={5}>
+                    <Flex align="center" justify="space-between">
+                      <Stack>
+                        <Stat>
+                          <StatLabel fontSize="sm" color="gray.500">Student Funding</StatLabel>
+                          <StatNumber>{dashboardStats?.transactions?.totalStudentFunding || 0}</StatNumber>
+                          <StatHelpText>
+                            <StatArrow type="increase" />
+                            {dashboardStats?.transactions?.currentMonthStudentFunding || 0} this month
+                          </StatHelpText>
+                        </Stat>
+                      </Stack>
+                      <Box 
+                        p={2} 
+                        bg={tealIconBg} 
+                        borderRadius="md"
+                      >
+                        <Icon as={MdSchool} boxSize={10} color="teal.500" />
+                      </Box>
+                    </Flex>
+                  </CardBody>
+                </Card>
+              </Link>
+
+              {/* Payment Tagging Card */}
+              <Link to="/admin/payment-tagging" style={{ textDecoration: 'none' }}>
+                <Card borderRadius="xl" boxShadow="sm" bg={sectionBg} overflow="hidden" _hover={{ boxShadow: 'md', transform: 'translateY(-2px)', transition: 'all 0.2s' }} cursor="pointer">
+                  <Box bg="orange.500" h={1} w="full" />
+                  <CardBody p={5}>
+                    <Flex align="center" justify="space-between">
+                      <Stack>
+                        <Stat>
+                          <StatLabel fontSize="sm" color="gray.500">Payment Tagging</StatLabel>
+                          <StatNumber>{dashboardStats?.transactions?.totalPaymentTagging || 0}</StatNumber>
+                          <StatHelpText>
+                            <StatArrow type="increase" />
+                            {dashboardStats?.transactions?.currentMonthPaymentTagging || 0} this month
+                          </StatHelpText>
+                        </Stat>
+                      </Stack>
+                      <Box 
+                        p={2} 
+                        bg={orangeIconBg} 
+                        borderRadius="md"
+                      >
+                        <Icon as={MdPayment} boxSize={10} color="orange.500" />
+                      </Box>
+                    </Flex>
+                  </CardBody>
+                </Card>
+              </Link>
             </SimpleGrid>
           )}
         </Box>
