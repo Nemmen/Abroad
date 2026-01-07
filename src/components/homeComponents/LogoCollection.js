@@ -141,7 +141,7 @@ export default function LogoCollection() {
               key={index}
               sx={{
                 ...containerStyle,
-                backgroundColor: theme.palette.mode === 'dark' ? '#1e1e1e' : '#ffffff',
+                backgroundColor: theme.palette.mode === 'dark' ? '#ffffff' : '#ffffff',
                 '& img:hover': {
                   filter: 'grayscale(0%)',
                 },
