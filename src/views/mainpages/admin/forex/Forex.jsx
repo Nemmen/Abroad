@@ -161,11 +161,11 @@ const Forex = () => {
         setRows(forexForms);
         setData(response.data.forexForms);
         
-        console.log('Admin Forex - Fetched data:', {
-          totalRecords: response.data.forexForms.length,
-          formattedRows: forexForms.length,
-          pagination: response.data.pagination
-        });
+        // console.log('Admin Forex - Fetched data:', {
+        //   totalRecords: response.data.forexForms.length,
+        //   formattedRows: forexForms.length,
+        //   pagination: response.data.pagination
+        // });
         
         // Update pagination info
         if (response.data.pagination) {
@@ -514,12 +514,12 @@ const Forex = () => {
     [selectedColumns],
   );
   const memoizedRows = useMemo(() => {
-    console.log('Admin Forex - Memoized rows calculation:', {
-      filteredDataLength: filteredData.length,
-      rowsLength: rows.length,
-      usingFiltered: filteredData.length > 0,
-      result: filteredData.length > 0 ? filteredData : rows
-    });
+    // console.log('Admin Forex - Memoized rows calculation:', {
+    //   filteredDataLength: filteredData.length,
+    //   rowsLength: rows.length,
+    //   usingFiltered: filteredData.length > 0,
+    //   result: filteredData.length > 0 ? filteredData : rows
+    // });
     return filteredData.length > 0 ? filteredData : rows;
   }, [filteredData, rows]);
 

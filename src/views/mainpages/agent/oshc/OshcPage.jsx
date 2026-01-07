@@ -29,12 +29,12 @@ import axios from 'axios';
 import { get } from 'views/mainpages/services/ApiEndpoint';
 import * as XLSX from 'xlsx';
 import { useSelector } from 'react-redux';
-import { 
-  saveFiltersToStorage, 
-  loadFiltersFromStorage, 
+import {
+  saveFiltersToStorage,
+  loadFiltersFromStorage,
   clearFiltersFromStorage,
   FILTER_STORAGE_KEYS,
-  DEFAULT_FILTERS 
+  DEFAULT_FILTERS,
 } from 'utils/filterUtils';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { useColorMode } from '@chakra-ui/react';
@@ -48,11 +48,36 @@ import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 
 // Partner logos (using placeholder URLs - replace with actual logos)
 const partnerLogos = [
-  { name: 'AHM', logo: '/assets/partners/ahm-logo.png', alt: 'AHM Logo' },
-  { name: 'NIB', logo: '/assets/partners/nib-logo.png', alt: 'NIB Logo' },
-  { name: 'Allianz', logo: '/assets/partners/allianz-logo.png', alt: 'Allianz Logo' },
-  { name: 'Medibank', logo: '/assets/partners/medibank-logo.png', alt: 'Medibank Logo' },
-  { name: 'Bupa', logo: '/assets/partners/bupa-logo.png', alt: 'Bupa Logo' },
+  {
+    name: 'AHM',
+    logo: '/assets/partners/ahm-logo.png',
+    alt: 'AHM Logo',
+    link: 'https://www.ahmoshc.com.au/',
+  },
+  {
+    name: 'NIB',
+    logo: '/assets/partners/nib-logo.png',
+    alt: 'NIB Logo',
+    link: 'https://www.nib.com.au/overseas-students/',
+  },
+  {
+    name: 'Allianz',
+    logo: '/assets/partners/allianz-logo.png',
+    alt: 'Allianz Logo',
+    link: 'https://www.allianzcare.com.au/en/visas/student-visa-oshc.html',
+  },
+  {
+    name: 'Medibank',
+    logo: '/assets/partners/medibank-logo.png',
+    alt: 'Medibank Logo',
+    link: 'https://www.medibank.com.au/overseas-health-insurance/oshc/',
+  },
+  {
+    name: 'Bupa',
+    logo: '/assets/partners/bupa-logo.png',
+    alt: 'Bupa Logo',
+    link: 'https://www.bupa.com.au/health-insurance/oshc',
+  },
 ];
 
 // Define the columns
@@ -82,32 +107,36 @@ function OshcPage() {
   const [error, setError] = useState(null);
 
   // Filter states
-  const [filters, setFilters] = useState(DEFAULT_FILTERS.OSHC || {
-    studentName: '',
-    email: '',
-    mobile: '',
-    partner: '',
-    status: '',
-    passportNumber: '',
-    studentId: '',
-    dateRange: { start: '', end: '' },
-    showFilters: false
-  });
+  const [filters, setFilters] = useState(
+    DEFAULT_FILTERS.OSHC || {
+      studentName: '',
+      email: '',
+      mobile: '',
+      partner: '',
+      status: '',
+      passportNumber: '',
+      studentId: '',
+      dateRange: { start: '', end: '' },
+      showFilters: false,
+    },
+  );
 
   const [columnVisibility, setColumnVisibility] = useState(() => {
     const savedVisibility = localStorage.getItem('oshcColumnVisibility');
-    return savedVisibility ? JSON.parse(savedVisibility) : {
-      Agent: true,
-      studentName: true,
-      email: true,
-      mobile: true,
-      partner: true,
-      policyStartDate: true,
-      policyEndDate: true,
-      passportNumber: false,
-      studentId: false,
-      status: true,
-    };
+    return savedVisibility
+      ? JSON.parse(savedVisibility)
+      : {
+          Agent: true,
+          studentName: true,
+          email: true,
+          mobile: true,
+          partner: true,
+          policyStartDate: true,
+          policyEndDate: true,
+          passportNumber: false,
+          studentId: false,
+          status: true,
+        };
   });
 
   // Create MUI theme based on Chakra color mode
@@ -146,35 +175,45 @@ function OshcPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('https://abroad-backend-gray.vercel.app/api/oshc', {
-        method: 'GET',
-        credentials: 'include', // For cookie-based auth
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        'https://abroad-backend-gray.vercel.app/api/oshc',
+        {
+          method: 'GET',
+          credentials: 'include', // For cookie-based auth
+          headers: {
+            'Content-Type': 'application/json',
+          },
         },
-      });
+      );
 
       // Check if response is JSON
       const contentType = response.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
-        throw new Error(`Server returned ${response.status}: ${response.statusText}. Please check your authentication or try again later.`);
+        throw new Error(
+          `Server returned ${response.status}: ${response.statusText}. Please check your authentication or try again later.`,
+        );
       }
 
       const result = await response.json();
 
       if (response.ok && result.success) {
         const oshcData = result.data || [];
-        
+
         // Normalize the data structure - API returns populated studentRef and agentRef
         const normalized = oshcData.map((item) => ({
           id: item._id || item.id,
           Agent: item.agentRef?.name || user?.name || 'N/A',
           studentName: item.studentRef?.name || 'N/A',
           email: item.studentRef?.email || 'N/A',
-          mobile: item.studentRef?.phoneNumber || item.studentRef?.mobile || 'N/A',
+          mobile:
+            item.studentRef?.phoneNumber || item.studentRef?.mobile || 'N/A',
           partner: item.partner || 'N/A',
-          policyStartDate: item.policyStartDate ? new Date(item.policyStartDate).toLocaleDateString() : 'N/A',
-          policyEndDate: item.policyEndDate ? new Date(item.policyEndDate).toLocaleDateString() : 'N/A',
+          policyStartDate: item.policyStartDate
+            ? new Date(item.policyStartDate).toLocaleDateString()
+            : 'N/A',
+          policyEndDate: item.policyEndDate
+            ? new Date(item.policyEndDate).toLocaleDateString()
+            : 'N/A',
           passportNumber: item.passportNumber || 'N/A',
           studentId: item.studentId || 'N/A',
           status: item.status || 'N/A',
@@ -189,7 +228,6 @@ function OshcPage() {
       } else {
         throw new Error(result.message || 'Failed to fetch OSHC data');
       }
-      
     } catch (error) {
       console.error('Error fetching OSHC data:', error);
       setError(error.message || 'Failed to fetch OSHC data. Please try again.');
@@ -210,49 +248,49 @@ function OshcPage() {
     let filtered = [...data];
 
     if (filters.studentName) {
-      filtered = filtered.filter(item => 
-        item.studentName.toLowerCase().includes(filters.studentName.toLowerCase())
+      filtered = filtered.filter((item) =>
+        item.studentName
+          .toLowerCase()
+          .includes(filters.studentName.toLowerCase()),
       );
     }
 
     if (filters.email) {
-      filtered = filtered.filter(item => 
-        item.email.toLowerCase().includes(filters.email.toLowerCase())
+      filtered = filtered.filter((item) =>
+        item.email.toLowerCase().includes(filters.email.toLowerCase()),
       );
     }
 
     if (filters.mobile) {
-      filtered = filtered.filter(item => 
-        item.mobile.includes(filters.mobile)
+      filtered = filtered.filter((item) =>
+        item.mobile.includes(filters.mobile),
       );
     }
 
     if (filters.partner) {
-      filtered = filtered.filter(item => 
-        item.partner === filters.partner
-      );
+      filtered = filtered.filter((item) => item.partner === filters.partner);
     }
 
     if (filters.status) {
-      filtered = filtered.filter(item => 
-        item.status === filters.status
-      );
+      filtered = filtered.filter((item) => item.status === filters.status);
     }
 
     if (filters.passportNumber) {
-      filtered = filtered.filter(item => 
-        item.passportNumber.toLowerCase().includes(filters.passportNumber.toLowerCase())
+      filtered = filtered.filter((item) =>
+        item.passportNumber
+          .toLowerCase()
+          .includes(filters.passportNumber.toLowerCase()),
       );
     }
 
     if (filters.studentId) {
-      filtered = filtered.filter(item => 
-        item.studentId.toLowerCase().includes(filters.studentId.toLowerCase())
+      filtered = filtered.filter((item) =>
+        item.studentId.toLowerCase().includes(filters.studentId.toLowerCase()),
       );
     }
 
     if (filters.dateRange.start && filters.dateRange.end) {
-      filtered = filtered.filter(item => {
+      filtered = filtered.filter((item) => {
         const createdDate = new Date(item.createdAt);
         const startDate = new Date(filters.dateRange.start);
         const endDate = new Date(filters.dateRange.end);
@@ -271,24 +309,27 @@ function OshcPage() {
   };
 
   const clearFilters = () => {
-    const clearedFilters = { ...DEFAULT_FILTERS.OSHC, showFilters: filters.showFilters };
+    const clearedFilters = {
+      ...DEFAULT_FILTERS.OSHC,
+      showFilters: filters.showFilters,
+    };
     setFilters(clearedFilters);
     clearFiltersFromStorage(FILTER_STORAGE_KEYS.OSHC);
   };
 
   // Export to Excel
   const exportToExcel = () => {
-    const dataToExport = filteredData.map(item => ({
+    const dataToExport = filteredData.map((item) => ({
       'Agent Name': item.Agent,
       'Student Name': item.studentName,
-      'Email': item.email,
+      Email: item.email,
       'Mobile Number': item.mobile,
-      'Partner': item.partner,
+      Partner: item.partner,
       'Policy Start Date': item.policyStartDate,
       'Policy End Date': item.policyEndDate,
       'Passport Number': item.passportNumber,
       'Student ID': item.studentId,
-      'Status': item.status,
+      Status: item.status,
       'Created Date': item.createdAt,
       'Last Updated': item.updatedAt,
     }));
@@ -296,59 +337,90 @@ function OshcPage() {
     const ws = XLSX.utils.json_to_sheet(dataToExport);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'OSHC Data');
-    XLSX.writeFile(wb, `oshc_data_${new Date().toISOString().split('T')[0]}.xlsx`);
+    XLSX.writeFile(
+      wb,
+      `oshc_data_${new Date().toISOString().split('T')[0]}.xlsx`,
+    );
   };
 
   // Handle column visibility
   const handleColumnVisibilityChange = (field) => {
-    const newVisibility = { ...columnVisibility, [field]: !columnVisibility[field] };
+    const newVisibility = {
+      ...columnVisibility,
+      [field]: !columnVisibility[field],
+    };
     setColumnVisibility(newVisibility);
     localStorage.setItem('oshcColumnVisibility', JSON.stringify(newVisibility));
   };
 
-  const visibleColumns = useMemo(() => 
-    allColumns.filter(col => columnVisibility[col.field]),
-    [columnVisibility]
+  const visibleColumns = useMemo(
+    () => allColumns.filter((col) => columnVisibility[col.field]),
+    [columnVisibility],
   );
 
   return (
     <ThemeProvider theme={theme}>
-      <Box sx={{ p: 3, backgroundColor: 'background.default', minHeight: '100vh' }}>
+      <Box
+        sx={{ p: 3, backgroundColor: 'background.default', minHeight: '100vh' }}
+      >
         {/* Header */}
-        <Card sx={{ p: 3, mb: 3, backgroundColor: 'primary.main', color: 'white' }}>
+        <Card
+          sx={{ p: 3, mb: 3, backgroundColor: 'primary.main', color: 'white' }}
+        >
           <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 2 }}>
             <LocalHospitalIcon sx={{ mr: 2, fontSize: 'inherit' }} />
             Insurance for Australia and New Zealand
           </Typography>
-          <Typography variant="body1" sx={{ color: 'rgba(255,255,255,0.9)', mb: 3 }}>
+          <Typography
+            variant="body1"
+            sx={{ color: 'rgba(255,255,255,0.9)', mb: 3 }}
+          >
             Manage health insurance policies for Australian study visas
           </Typography>
 
-          <Box sx={{ p: 2, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 2 }}>
-            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: 'white' }}>
+          <Box
+            sx={{
+              p: 2,
+              backgroundColor: 'rgba(255,255,255,0.1)',
+              borderRadius: 2,
+            }}
+          >
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: 'bold', mb: 2, color: 'white' }}
+            >
               Our Partners:
             </Typography>
             <Grid container spacing={2} alignItems="center">
               {partnerLogos.map((partner, index) => (
                 <Grid item key={index}>
-                  <Box
-                    sx={{
-                      p: 1.5,
-                      border: 1,
-                      borderColor: 'rgba(255,255,255,0.2)',
-                      borderRadius: 2,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      backgroundColor: 'rgba(255,255,255,0.9)',
-                      minWidth: 80,
-                      minHeight: 40,
-                    }}
+                  <a
+                    href={partner.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
                   >
-                    <Typography variant="body2" sx={{ fontWeight: 'bold', color: 'primary.main' }}>
-                      {partner.name}
-                    </Typography>
-                  </Box>
+                    <Box
+                      sx={{
+                        p: 1.5,
+                        border: 1,
+                        borderColor: 'rgba(255,255,255,0.2)',
+                        borderRadius: 2,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backgroundColor: 'rgba(255,255,255,0.9)',
+                        minWidth: 80,
+                        minHeight: 40,
+                      }}
+                    >
+                      <Typography
+                        variant="body2"
+                        sx={{ fontWeight: 'bold', color: 'primary.main' }}
+                      >
+                        {partner.name}
+                      </Typography>
+                    </Box>
+                  </a>
                 </Grid>
               ))}
             </Grid>
@@ -357,8 +429,23 @@ function OshcPage() {
 
         {/* Action Bar */}
         <Card sx={{ p: 2, mb: 3, backgroundColor: 'background.paper' }}>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 2,
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex',
+                gap: 2,
+                alignItems: 'center',
+                flexWrap: 'wrap',
+              }}
+            >
               <Button
                 component={Link}
                 to="/agent/oshc/add"
@@ -371,20 +458,27 @@ function OshcPage() {
               >
                 Add New OSHC
               </Button>
-              
+
               <Button
                 variant="outlined"
                 startIcon={<FilterAltIcon />}
-                onClick={() => handleFilterChange('showFilters', !filters.showFilters)}
+                onClick={() =>
+                  handleFilterChange('showFilters', !filters.showFilters)
+                }
                 sx={{ color: 'text.primary', borderColor: 'divider' }}
               >
                 {filters.showFilters ? 'Hide Filters' : 'Show Filters'}
               </Button>
-              
+
               <Button
                 variant="outlined"
                 startIcon={<TuneIcon />}
-                onClick={() => setFilters(prev => ({ ...prev, showColumnSettings: !prev.showColumnSettings }))}
+                onClick={() =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    showColumnSettings: !prev.showColumnSettings,
+                  }))
+                }
                 sx={{ color: 'text.primary', borderColor: 'divider' }}
               >
                 Columns
@@ -395,7 +489,7 @@ function OshcPage() {
               <Typography variant="body2" sx={{ color: 'text.secondary' }}>
                 Total: {filteredData.length} entries
               </Typography>
-              
+
               <Button
                 variant="contained"
                 startIcon={<FileDownloadIcon />}
@@ -414,26 +508,38 @@ function OshcPage() {
         {/* Filters Panel */}
         {filters.showFilters && (
           <Card sx={{ p: 3, mb: 3, backgroundColor: 'background.paper' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-              <Typography variant="h6" sx={{ fontWeight: 'bold', color: 'text.primary' }}>
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                mb: 2,
+              }}
+            >
+              <Typography
+                variant="h6"
+                sx={{ fontWeight: 'bold', color: 'text.primary' }}
+              >
                 Filters
               </Typography>
               <Button onClick={clearFilters} size="small" variant="text">
                 Clear All
               </Button>
             </Box>
-            
+
             <Grid container spacing={2}>
               <Grid item xs={12} sm={6} md={3}>
                 <TextField
                   label="Student Name"
                   value={filters.studentName}
-                  onChange={(e) => handleFilterChange('studentName', e.target.value)}
+                  onChange={(e) =>
+                    handleFilterChange('studentName', e.target.value)
+                  }
                   size="small"
                   fullWidth
                 />
               </Grid>
-              
+
               <Grid item xs={12} sm={6} md={3}>
                 <TextField
                   label="Email"
@@ -443,7 +549,7 @@ function OshcPage() {
                   fullWidth
                 />
               </Grid>
-              
+
               <Grid item xs={12} sm={6} md={3}>
                 <TextField
                   label="Mobile Number"
@@ -453,77 +559,99 @@ function OshcPage() {
                   fullWidth
                 />
               </Grid>
-              
+
               <Grid item xs={12} sm={6} md={3}>
                 <FormControl fullWidth size="small">
                   <InputLabel>Partner</InputLabel>
                   <Select
                     value={filters.partner}
-                    onChange={(e) => handleFilterChange('partner', e.target.value)}
+                    onChange={(e) =>
+                      handleFilterChange('partner', e.target.value)
+                    }
                     label="Partner"
                   >
                     <MenuItem value="">All Partners</MenuItem>
-                    {partnerOptions.map(partner => (
-                      <MenuItem key={partner} value={partner}>{partner}</MenuItem>
+                    {partnerOptions.map((partner) => (
+                      <MenuItem key={partner} value={partner}>
+                        {partner}
+                      </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
               </Grid>
-              
+
               <Grid item xs={12} sm={6} md={3}>
                 <FormControl fullWidth size="small">
                   <InputLabel>Status</InputLabel>
                   <Select
                     value={filters.status}
-                    onChange={(e) => handleFilterChange('status', e.target.value)}
+                    onChange={(e) =>
+                      handleFilterChange('status', e.target.value)
+                    }
                     label="Status"
                   >
                     <MenuItem value="">All Status</MenuItem>
-                    {statusOptions.map(status => (
-                      <MenuItem key={status} value={status}>{status}</MenuItem>
+                    {statusOptions.map((status) => (
+                      <MenuItem key={status} value={status}>
+                        {status}
+                      </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
               </Grid>
-              
+
               <Grid item xs={12} sm={6} md={3}>
                 <TextField
                   label="Passport Number"
                   value={filters.passportNumber}
-                  onChange={(e) => handleFilterChange('passportNumber', e.target.value)}
+                  onChange={(e) =>
+                    handleFilterChange('passportNumber', e.target.value)
+                  }
                   size="small"
                   fullWidth
                 />
               </Grid>
-              
+
               <Grid item xs={12} sm={6} md={3}>
                 <TextField
                   label="Student ID"
                   value={filters.studentId}
-                  onChange={(e) => handleFilterChange('studentId', e.target.value)}
+                  onChange={(e) =>
+                    handleFilterChange('studentId', e.target.value)
+                  }
                   size="small"
                   fullWidth
                 />
               </Grid>
-              
+
               <Grid item xs={12} sm={6} md={3}>
                 <TextField
                   type="date"
                   label="Start Date"
                   value={filters.dateRange.start}
-                  onChange={(e) => handleFilterChange('dateRange', { ...filters.dateRange, start: e.target.value })}
+                  onChange={(e) =>
+                    handleFilterChange('dateRange', {
+                      ...filters.dateRange,
+                      start: e.target.value,
+                    })
+                  }
                   size="small"
                   fullWidth
                   InputLabelProps={{ shrink: true }}
                 />
               </Grid>
-              
+
               <Grid item xs={12} sm={6} md={3}>
                 <TextField
                   type="date"
                   label="End Date"
                   value={filters.dateRange.end}
-                  onChange={(e) => handleFilterChange('dateRange', { ...filters.dateRange, end: e.target.value })}
+                  onChange={(e) =>
+                    handleFilterChange('dateRange', {
+                      ...filters.dateRange,
+                      end: e.target.value,
+                    })
+                  }
                   size="small"
                   fullWidth
                   InputLabelProps={{ shrink: true }}
@@ -536,30 +664,39 @@ function OshcPage() {
         {/* Column Settings Modal */}
         <Modal
           open={filters.showColumnSettings}
-          onClose={() => setFilters(prev => ({ ...prev, showColumnSettings: false }))}
+          onClose={() =>
+            setFilters((prev) => ({ ...prev, showColumnSettings: false }))
+          }
         >
-          <Box sx={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: 400,
-            bgcolor: 'background.paper',
-            boxShadow: 24,
-            p: 4,
-            borderRadius: 2,
-          }}>
-            <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: 'text.primary' }}>
+          <Box
+            sx={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: 400,
+              bgcolor: 'background.paper',
+              boxShadow: 24,
+              p: 4,
+              borderRadius: 2,
+            }}
+          >
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: 'bold', mb: 2, color: 'text.primary' }}
+            >
               Column Visibility
             </Typography>
             <FormGroup>
-              {allColumns.map(column => (
+              {allColumns.map((column) => (
                 <FormControlLabel
                   key={column.field}
                   control={
                     <Checkbox
                       checked={columnVisibility[column.field]}
-                      onChange={() => handleColumnVisibilityChange(column.field)}
+                      onChange={() =>
+                        handleColumnVisibilityChange(column.field)
+                      }
                     />
                   }
                   label={column.headerName}
@@ -568,7 +705,9 @@ function OshcPage() {
             </FormGroup>
             <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
               <Button
-                onClick={() => setFilters(prev => ({ ...prev, showColumnSettings: false }))}
+                onClick={() =>
+                  setFilters((prev) => ({ ...prev, showColumnSettings: false }))
+                }
                 variant="contained"
               >
                 Close
