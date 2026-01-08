@@ -80,10 +80,13 @@ const ForexCalculator = () => {
   // Form state
   const [currencyType, setCurrencyType] = useState('USD');
   const [foreignAmount, setForeignAmount] = useState(10000);
-  const [ibrRate, setIbrRate] = useState(83.00);
-  const [pmMargin, setPmMargin] = useState(0.10);
-  const [aeMargin, setAeMargin] = useState(0.05);
+  const [ibrRate, setIbrRate] = useState(83.00); // Live IBR rate from API
+  const [pmMargin, setPmMargin] = useState(0.20); // Base PM margin (fixed at ₹0.20)
+  const [aeMargin, setAeMargin] = useState(0.00); // AE margin - admin adjustable, visible to admin only
   const [agentMargin, setAgentMargin] = useState(0.35);
+  
+  // AE Margin persistence state
+  const [isSavingAeMargin, setIsSavingAeMargin] = useState(false);
   const [includeFlyWire, setIncludeFlyWire] = useState(false);
   const [includeCIBC, setIncludeCIBC] = useState(false);
   const [flyWireAmount, setFlyWireAmount] = useState(750);
@@ -110,6 +113,61 @@ const ForexCalculator = () => {
   useDebounce(() => {
     setDebouncedCurrencyType(currencyType);
   }, 500, [currencyType]);
+  
+  // Load AE margin from backend API on mount
+  useEffect(() => {
+    const fetchAeMargin = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.REACT_APP_BACKEND_URL || 'https://abroad-backend-gray.vercel.app/api'}/forex/admin/ae-margin`,
+          getAuthConfig()
+        );
+        if (response.data && response.data.success && response.data.data) {
+          setAeMargin(parseFloat(response.data.data.aeMargin) || 0);
+        }
+      } catch (error) {
+        console.error('Error fetching AE margin:', error);
+        // Default to 0 if fetch fails
+        setAeMargin(0);
+      }
+    };
+    fetchAeMargin();
+  }, []);
+  
+  // Save AE margin to backend API
+  const saveAeMargin = async () => {
+    setIsSavingAeMargin(true);
+    try {
+      const response = await axios.post(
+        `${process.env.REACT_APP_BACKEND_URL || 'https://abroad-backend-gray.vercel.app/api'}/forex/admin/ae-margin`,
+        { aeMargin: parseFloat(aeMargin) },
+        getAuthConfig()
+      );
+      
+      if (response.data && response.data.success) {
+        toast({
+          title: 'AE Margin Saved',
+          description: `AE margin set to ₹${aeMargin}. This will be applied to all agent quotes.`,
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+      } else {
+        throw new Error(response.data?.message || 'Failed to save');
+      }
+    } catch (error) {
+      console.error('Error saving AE margin:', error);
+      toast({
+        title: 'Error',
+        description: error.response?.data?.message || 'Failed to save AE margin',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setIsSavingAeMargin(false);
+    }
+  };
   
   // Fetch IBR rate from API when currency changes
   useEffect(() => {
@@ -316,7 +374,7 @@ const ForexCalculator = () => {
               </FormControl>
               
               <FormControl>
-                <FormLabel>PM Margin</FormLabel>
+                <FormLabel>PM Margin (Base ₹0.20)</FormLabel>
                 <Input
                   type="number"
                   value={pmMargin}
@@ -324,19 +382,7 @@ const ForexCalculator = () => {
                   placeholder="Platform margin"
                   step="0.01"
                 />
-                <FormHelperText>Additional amount per unit</FormHelperText>
-              </FormControl>
-              
-              <FormControl>
-                <FormLabel>AE Margin</FormLabel>
-                <Input
-                  type="number"
-                  value={aeMargin}
-                  onChange={handleNumberInput(setAeMargin)}
-                  placeholder="Abroad Educare margin"
-                  step="0.01"
-                />
-                <FormHelperText>Abroad Educare's own margin</FormHelperText>
+                <FormHelperText>Base platform margin (default ₹0.20 added to IBR)</FormHelperText>
               </FormControl>
               
               <FormControl>
@@ -354,7 +400,7 @@ const ForexCalculator = () => {
               <Divider my={2} />
               
               {/* Optional Charges */}
-              <FormControl>
+              {/* <FormControl>
                 <HStack>
                   <Checkbox
                     isChecked={includeFlyWire}
@@ -371,9 +417,9 @@ const ForexCalculator = () => {
                     width="150px"
                   />
                 </HStack>
-              </FormControl>
+              </FormControl> */}
               
-              <FormControl>
+              {/* <FormControl>
                 <HStack>
                   <Checkbox
                     isChecked={includeCIBC}
@@ -390,19 +436,54 @@ const ForexCalculator = () => {
                     width="150px"
                   />
                 </HStack>
-              </FormControl>
+              </FormControl> */}
               
-              {/* Refresh Rate Button */}
-              <Button
-                colorScheme="blue"
-                onClick={() => {
-                  setDebouncedCurrencyType(currencyType);
-                }}
-                isLoading={isRateLoading}
-                loadingText="Fetching"
-              >
-                Refresh Currency Rate
-              </Button>
+              {/* Rate Controls Section */}
+              <Box p={4} borderRadius="md" bgColor="orange.50" borderWidth="1px" borderColor="orange.200">
+                <Text fontWeight="medium" color="gray.600" mb={3}>Rate Controls</Text>
+                <HStack spacing={4} flexWrap="wrap">
+                  <Button
+                    colorScheme="blue"
+                    onClick={() => {
+                      setDebouncedCurrencyType(currencyType);
+                    }}
+                    isLoading={isRateLoading}
+                    loadingText="Fetching"
+                    size="sm"
+                  >
+                    Refresh Currency Rate
+                  </Button>
+                  
+                  {/* AE Margin Control - Visible to Admin Only */}
+                  <HStack>
+                    <FormControl width="120px">
+                      <FormLabel fontSize="xs" color="gray.600" mb={1}>AE Margin (₹)</FormLabel>
+                      <Input
+                        type="number"
+                        value={aeMargin}
+                        onChange={handleNumberInput(setAeMargin)}
+                        placeholder="0.00"
+                        step="0.01"
+                        size="sm"
+                        bg="white"
+                      />
+                    </FormControl>
+                    <Button
+                      colorScheme="orange"
+                      onClick={saveAeMargin}
+                      isLoading={isSavingAeMargin}
+                      loadingText="Saving"
+                      size="sm"
+                      mt={6}
+                    >
+                      Save AE Margin
+                    </Button>
+                  </HStack>
+                </HStack>
+                <Text fontSize="xs" color="gray.500" mt={2}>
+                  AE Margin is added on top of IBR + ₹0.20 and applied to all agent calculations.
+                </Text>
+              </Box>
             </VStack>
           </GridItem>
           
@@ -432,7 +513,18 @@ const ForexCalculator = () => {
                     </Badge>
                   </HStack>
                   <Text fontSize="sm" color="gray.500">
-                    IBR ({ibrRate}) + PM ({pmMargin}) + AE ({aeMargin}) + Agent ({agentMargin})
+                    IBR ({ibrRate}) + PM/Base ({pmMargin}) + AE ({aeMargin}) + Agent ({agentMargin})
+                  </Text>
+                </Box>
+                
+                {/* AE Margin Info Box - Admin Only */}
+                <Box p={3} borderRadius="md" bgColor="orange.50" borderWidth="1px" borderColor="orange.200">
+                  <HStack justify="space-between">
+                    <Text fontSize="sm" fontWeight="medium" color="orange.700">Current AE Margin:</Text>
+                    <Badge colorScheme="orange" fontSize="md">₹{parseFloat(aeMargin).toFixed(2)}</Badge>
+                  </HStack>
+                  <Text fontSize="xs" color="gray.500" mt={1}>
+                    Adjusted Base Rate: IBR + ₹0.20 = ₹{(parseFloat(ibrRate) + 0.20).toFixed(2)}
                   </Text>
                 </Box>
                 

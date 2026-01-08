@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Button,
@@ -15,32 +14,29 @@ import {
   TabPanels,
   Tab,
   TabPanel,
-  IconButton,
   useToast,
   Badge,
   Tooltip,
-  Flex,
   Heading,
   Grid,
   Alert,
   AlertIcon,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  useDisclosure,
+  RadioGroup,
+  Radio,
+  Stack,
 } from '@chakra-ui/react';
-import {
-  ChevronDownIcon,
-  ChevronUpIcon,
-  CheckIcon,
-  DeleteIcon,
-  EditIcon,
-  ViewIcon,
-  WarningTwoIcon,
-  PhoneIcon,
-  EmailIcon,
-  InfoIcon,
-} from '@chakra-ui/icons';
 import DataTable from 'components/DataTable';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 import ForexCalculator from './ForexCalculator';
 
 // Constants
@@ -54,10 +50,8 @@ const getAuthConfig = () => {
   };
 };
 
-// Forward declarations of handler functions
-let handleViewRequest;
-let handleOpenCalculatePage;
-let handleMarkAsContacted;
+// Forward declaration for handler function
+let handleOpenStatusModal;
 
 // Define columns for request table
 const allColumns = [
@@ -126,7 +120,13 @@ const allColumns = [
           color = 'blue';
           break;
         case 'contacted':
+          color = 'teal';
+          break;
+        case 'completed':
           color = 'green';
+          break;
+        case 'rejected':
+          color = 'red';
           break;
         default:
           color = 'gray';
@@ -138,81 +138,11 @@ const allColumns = [
       );
     },
   },
-  { 
-    field: 'actions', 
-    headerName: 'Actions', 
-    width: 220,
-    align: 'center',
-    headerAlign: 'center',
-    renderCell: (params) => (
-      <Flex 
-        justify="center" 
-        align="center" 
-        width="100%" 
-        height={30}
-        onClick={(e) => {
-          // Stop propagation to prevent row click
-          e.stopPropagation();
-        }}
-      >
-        <HStack spacing={5} >
-          <Tooltip label="View Details" placement="top">
-            <IconButton 
-              icon={<ViewIcon />} 
-              size="md" 
-              colorScheme="blue" 
-              variant="solid"
-              borderRadius="full"
-              boxShadow="md"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleViewRequest(params.row._id);
-              }}
-            />
-          </Tooltip>
-          
-          {params.row.status === 'pending' && (
-            <Tooltip label="Calculate" placement="top">
-              <IconButton 
-                icon={<EditIcon />} 
-                size="md" 
-                colorScheme="green" 
-                variant="solid"
-                borderRadius="full"
-                boxShadow="md"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleOpenCalculatePage(params.row);
-                }}
-              />
-            </Tooltip>
-          )}
-          
-          {params.row.status === 'calculated' && (
-            <Tooltip label="Mark as Contacted" placement="top">
-              <IconButton 
-                icon={<PhoneIcon />} 
-                size="md" 
-                colorScheme="purple" 
-                variant="solid"
-                borderRadius="full"
-                boxShadow="md"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleMarkAsContacted(params.row._id);
-                }}
-              />
-            </Tooltip>
-          )}
-        </HStack>
-      </Flex>
-    ),
-  },
 ];
 
 const ForexDashboard = () => {
   const toast = useToast();
-  const navigate = useNavigate();
+  const { isOpen: isStatusModalOpen, onOpen: onStatusModalOpen, onClose: onStatusModalClose } = useDisclosure();
   
   // State variables
   const [activeTab, setActiveTab] = useState(0);
@@ -223,6 +153,11 @@ const ForexDashboard = () => {
     limit: REQUESTS_PER_PAGE,
     total: 0,
   });
+  
+  // Status update modal state
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [newStatus, setNewStatus] = useState('');
+  const [statusUpdating, setStatusUpdating] = useState(false);
   
   // Filter states
   const [filters, setFilters] = useState({
@@ -235,9 +170,6 @@ const ForexDashboard = () => {
   
   // State for auth check
   const [isAuthenticated, setIsAuthenticated] = useState(true);
-  
-  // Forward declarations for handler functions
-  let handleViewRequest, handleOpenCalculatePage, handleMarkAsContacted;
   
   // Check authentication on mount
   useEffect(() => {
@@ -308,7 +240,7 @@ const ForexDashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, [pagination.page, pagination.limit, filters, toast]);
+  }, [pagination.page, pagination.limit, filters, toast, isAuthenticated]);
   
   // Fetch data on initial load and when dependencies change
   useEffect(() => {
@@ -317,45 +249,59 @@ const ForexDashboard = () => {
   
   // Memoized data for the table
   const memoizedForexRequests = useMemo(() => forexRequests, [forexRequests]);
-  
-  // Assign the handler functions to the forward declared variables
-  handleViewRequest = (requestId) => {
-    if (!isAuthenticated) return;
+
+  // Handle opening status update modal
+  handleOpenStatusModal = (request) => {
+    setSelectedRequest(request);
+    setNewStatus(request.status);
+    onStatusModalOpen();
+  };
+
+  // Handle status update
+  const handleUpdateStatus = async () => {
+    if (!selectedRequest || !newStatus) return;
     
+    setStatusUpdating(true);
     try {
-      // If requestId is actually a row ID (agentCode), find the corresponding request
-      let actualRequestId = requestId;
-      if (typeof requestId === 'string' && requestId.startsWith('AGT')) {
-        const matchingRequest = forexRequests.find(r => r.agent?.agentCode === requestId);
-        if (matchingRequest) {
-          actualRequestId = matchingRequest._id;
-        }
+      const response = await axios.put(
+        `${API_BASE_URL}/forex/request/${selectedRequest._id}/status`,
+        { status: newStatus },
+        getAuthConfig()
+      );
+      
+      if (response.data && response.data.success) {
+        toast({
+          title: 'Status Updated',
+          description: `Request status updated to ${newStatus}`,
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+        
+        // Refresh the requests list
+        fetchForexRequests();
+        onStatusModalClose();
+      } else {
+        toast({
+          title: 'Error',
+          description: response.data?.message || 'Failed to update status',
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        });
       }
-      
-      // Navigate to the detail page
-      navigate(`/admin/forex/request/${actualRequestId}`);
-      
     } catch (error) {
-      console.error('Error navigating to request details:', error);
+      console.error('Error updating status:', error);
       toast({
         title: 'Error',
-        description: 'Failed to navigate to request details',
+        description: error.response?.data?.message || 'Failed to update status',
         status: 'error',
-        duration: 3000,
+        duration: 5000,
         isClosable: true,
       });
+    } finally {
+      setStatusUpdating(false);
     }
-  };
-  
-  // Handle opening calculate page
-  handleOpenCalculatePage = (request) => {
-    navigate(`/admin/forex/calculate/${request._id}`);
-  };
-  
-  // Handle marking request as contacted (redirect to details page to perform the action)
-  handleMarkAsContacted = (requestId) => {
-    if (!isAuthenticated) return;
-    navigate(`/admin/forex/request/${requestId}`);
   };
   
   // Handle page change
@@ -429,15 +375,6 @@ const ForexDashboard = () => {
     });
   };
   
-  // Format currency
-  const formatCurrency = (amount, currency = 'INR') => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency,
-      maximumFractionDigits: 2
-    }).format(amount);
-  };
-  
   return (
     <Box px={4} py={6}>
       <Heading size="lg" mb={6}>Forex Management Dashboard</Heading>
@@ -486,6 +423,8 @@ const ForexDashboard = () => {
                         <option value="pending">Pending</option>
                         <option value="calculated">Calculated</option>
                         <option value="contacted">Contacted</option>
+                        <option value="completed">Completed</option>
+                        <option value="rejected">Rejected</option>
                       </Select>
                     </FormControl>
                     
@@ -545,8 +484,8 @@ const ForexDashboard = () => {
                 columns={allColumns} 
                 rows={memoizedForexRequests} 
                 loading={loading}
-                getRowId={(row) => row.agent?.agentCode || row._id}
-                onRowClick={(params) => handleViewRequest(params.id)}
+                getRowId={(row) => row._id}
+                onRowClick={(params) => handleOpenStatusModal(params.row)}
                 pagination={{
                   page: pagination.page,
                   pageSize: pagination.limit,
@@ -576,6 +515,90 @@ const ForexDashboard = () => {
           </TabPanel>
         </TabPanels>
       </Tabs>
+
+      {/* Status Update Modal */}
+      <Modal isOpen={isStatusModalOpen} onClose={onStatusModalClose} isCentered>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Update Request Status</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            {selectedRequest && (
+              <VStack align="stretch" spacing={4}>
+                <Box p={3} bg="gray.50" borderRadius="md">
+                  <Text fontSize="sm" color="gray.600">Agent</Text>
+                  <Text fontWeight="medium">{selectedRequest.agent?.name || 'N/A'}</Text>
+                  <Text fontSize="sm" color="gray.500">{selectedRequest.agent?.agentCode}</Text>
+                </Box>
+                
+                <Box p={3} bg="gray.50" borderRadius="md">
+                  <HStack justify="space-between">
+                    <Box>
+                      <Text fontSize="sm" color="gray.600">Currency</Text>
+                      <Text fontWeight="medium">{selectedRequest.currencyType}</Text>
+                    </Box>
+                    <Box>
+                      <Text fontSize="sm" color="gray.600">Amount</Text>
+                      <Text fontWeight="medium">{selectedRequest.foreignAmount?.toLocaleString()}</Text>
+                    </Box>
+                  </HStack>
+                </Box>
+
+                <Box p={3} bg="gray.50" borderRadius="md">
+                  <Text fontSize="sm" color="gray.600" mb={1}>Current Status</Text>
+                  <Badge colorScheme={
+                    selectedRequest.status === 'pending' ? 'orange' :
+                    selectedRequest.status === 'completed' ? 'green' :
+                    selectedRequest.status === 'rejected' ? 'red' : 'gray'
+                  }>
+                    {selectedRequest.status?.toUpperCase()}
+                  </Badge>
+                </Box>
+
+                <FormControl>
+                  <FormLabel fontWeight="medium">Select New Status</FormLabel>
+                  <RadioGroup value={newStatus} onChange={setNewStatus}>
+                    <Stack spacing={3}>
+                      <Radio value="pending" colorScheme="orange">
+                        <HStack>
+                          <Badge colorScheme="orange">PENDING</Badge>
+                          <Text fontSize="sm" color="gray.600">- Request is awaiting action</Text>
+                        </HStack>
+                      </Radio>
+                      <Radio value="completed" colorScheme="green">
+                        <HStack>
+                          <Badge colorScheme="green">COMPLETED</Badge>
+                          <Text fontSize="sm" color="gray.600">- Request has been fulfilled</Text>
+                        </HStack>
+                      </Radio>
+                      <Radio value="rejected" colorScheme="red">
+                        <HStack>
+                          <Badge colorScheme="red">REJECTED</Badge>
+                          <Text fontSize="sm" color="gray.600">- Request has been declined</Text>
+                        </HStack>
+                      </Radio>
+                    </Stack>
+                  </RadioGroup>
+                </FormControl>
+              </VStack>
+            )}
+          </ModalBody>
+
+          <ModalFooter>
+            <Button variant="ghost" mr={3} onClick={onStatusModalClose}>
+              Cancel
+            </Button>
+            <Button 
+              colorScheme="blue" 
+              onClick={handleUpdateStatus}
+              isLoading={statusUpdating}
+              isDisabled={!newStatus || newStatus === selectedRequest?.status}
+            >
+              Update Status
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Box>
   );
 };
