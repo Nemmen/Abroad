@@ -463,12 +463,15 @@ function ForexForm() {
       );
 
       // Step 3: Submit the final form data
+      // Find the selected student's name
+      const selectedStudent = students.find(student => student._id === formData.studentRef);
+      
       const finalFormData = {
         ...formData,
         date: accOpeningDate1,
         commissionPaymentDate: formattedcommissionPaymentDate,
         // studentRef: studentId,
-        studentRef: formData.studentRef,
+        studentName: selectedStudent?.name || '',
         passportFile: {
           fileId: uploadResult?.uploads[0]?.fileId,
           documentFile: uploadResult?.uploads[0]?.viewLink,
