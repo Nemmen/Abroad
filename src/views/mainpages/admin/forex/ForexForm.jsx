@@ -468,7 +468,7 @@ function ForexForm() {
         date: accOpeningDate1,
         commissionPaymentDate: formattedcommissionPaymentDate,
         // studentRef: studentId,
-        studentName: formData.studentRef,
+        studentRef: formData.studentRef,
         passportFile: {
           fileId: uploadResult?.uploads[0]?.fileId,
           documentFile: uploadResult?.uploads[0]?.viewLink,
