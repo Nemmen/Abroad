@@ -107,6 +107,26 @@ const allColumns = [
     ),
   },
   { 
+    field: 'ibr', 
+    headerName: 'IBR', 
+    width: 110,
+    renderCell: (params) => (
+      <span>
+        {params.value?.toFixed(4) || 'N/A'}
+      </span>
+    ),
+  },
+  { 
+    field: 'indianAmount', 
+    headerName: 'INR Amount', 
+    width: 140,
+    renderCell: (params) => (
+      <span>
+        ₹{params.value?.toLocaleString('en-IN', { maximumFractionDigits: 2 }) || 'N/A'}
+      </span>
+    ),
+  },
+  { 
     field: 'status', 
     headerName: 'Status', 
     width: 140,
