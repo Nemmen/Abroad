@@ -75,6 +75,7 @@ const AgentForexCalculator = () => {
   const [currencyType, setCurrencyType] = useState('USD');
   const [foreignAmount, setForeignAmount] = useState(10000);
   const [pmMargin, setPmMargin] = useState(0.35); // Agent's PM margin (agent-controlled)
+  
 
   // IBR
   const [ibrRate, setIbrRate] = useState(83.0);
@@ -164,11 +165,25 @@ const AgentForexCalculator = () => {
     setIsQuoteLoading(true);
 
     try {
+      const effectiveRate = Number(displayedRate) || 0;
+      const fxAmount = Number(foreignAmount) || 0;
+
+      const inrAmount = effectiveRate * fxAmount;
+      const gst =
+        inrAmount <= 100000
+          ? inrAmount * 0.0018
+          : 100000 * 0.0018 + (inrAmount - 100000) * 0.0009;
+      const serviceChargeBase = 590;
+      const tcsAmount = inrAmount > 1000000 ? (inrAmount - 1000000) * 0.05 : 0;
+      const grandTotal = inrAmount + gst + serviceChargeBase + tcsAmount;
+
       // Submit the forex request to the API
       const requestPayload = {
         currencyType,
-        foreignAmount: Number(foreignAmount),
-        agentMargin: Number(pmMargin), // Send agent's PM margin to backend
+        ibr: effectiveRate,
+        indianAmount: grandTotal,
+        foreignAmount: fxAmount,
+        agentMargin: Number(pmMargin) || 0, // Send agent's PM margin to backend
       };
       const response = await axios.post(
         `${API_BASE_URL}/api/forex/request`,
@@ -185,17 +200,8 @@ const AgentForexCalculator = () => {
           setCalculationResult(response.data.quote);
         } else {
           // Calculate locally for display since API doesn't return quote details
-          const inrAmount = displayedRate * Number(foreignAmount);
-          const gst =
-            inrAmount <= 100000
-              ? inrAmount * 0.0018
-              : 100000 * 0.0018 + (inrAmount - 100000) * 0.0009;
-          const serviceChargeBase = 590;
-          const tcsAmount =
-            inrAmount > 1000000 ? (inrAmount - 1000000) * 0.05 : 0;
-
           setCalculationResult({
-            effectiveRate: displayedRate.toFixed(2),
+            effectiveRate: effectiveRate.toFixed(2),
             inrAmount: inrAmount,
             serviceCharge: {
               base: serviceChargeBase,
