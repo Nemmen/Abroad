@@ -41,10 +41,8 @@ const getAuthHeaders = () => {
 const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'https://abroad-backend-gray.vercel.app';
 
 // Base margin (₹0.20 added to IBR to get adjusted IBR)
-const BASE_MARGIN = 0.20;
+const BASE_MARGIN = 0.15;
 
-// PM Margin (fixed ₹0.10)
-const PM_MARGIN = 0.10;
 
 // Currency options with symbols
 const CURRENCY_OPTIONS = [
@@ -123,7 +121,7 @@ const AgentForexCalculator = () => {
   // Rate = (IBR + ₹0.20) + PM margin (0.10) + Agent's margin
   useEffect(() => {
     const adjustedIbr = Number(ibrRate) + BASE_MARGIN; // IBR + 0.20
-    const calculatedRate = adjustedIbr + PM_MARGIN + aeMargin + Number(pmMargin || 0);
+    const calculatedRate = adjustedIbr + aeMargin + Number(pmMargin || 0);
     setDisplayedRate(calculatedRate);
   }, [ibrRate, pmMargin, aeMargin]);
 
@@ -224,7 +222,7 @@ const AgentForexCalculator = () => {
             <p className="text-sm text-slate-500">Get a quote and submit request in one click.</p>
           </div>
           <button
-            title={"Guide: Select currency, enter foreign amount and your PM margin. Click 'Get Quote & Submit' to calculate the quote and submit the request automatically."}
+            title={"Guide: Select currency, enter foreign amount and your PM margin. Click 'Book Now' to calculate the quote and submit the request automatically."}
             className="ml-2 text-sm text-slate-400 hover:text-slate-600"
           >
             ℹ️
@@ -284,7 +282,7 @@ const AgentForexCalculator = () => {
                       <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-md">1 {currencyType} = ₹{displayedRate.toFixed(2)}</span>
                     </div>
                     <div className="text-sm text-slate-500">
-                      IBR ({(Number(ibrRate) + BASE_MARGIN + aeMargin).toFixed(2)}) + PM ({PM_MARGIN}) + Your Margin ({pmMargin})
+                      IBR ({(Number(ibrRate) + BASE_MARGIN + aeMargin).toFixed(2)})+ Your Margin ({pmMargin})
                     </div>
                     
                     {/* INR Converted */}
@@ -340,7 +338,7 @@ const AgentForexCalculator = () => {
               className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors" 
               disabled={isQuoteLoading}
             >
-              {isQuoteLoading ? 'Processing...' : 'Get Quote & Submit'}
+              {isQuoteLoading ? 'Processing...' : 'Book Now'}
             </button>
             <button 
               onClick={() => { setCalculationResult(null); setErrorMessage(null); setReqSuccess(null); }} 
@@ -369,7 +367,7 @@ const AgentForexCalculator = () => {
                   <span className="text-xl font-bold text-blue-600">₹{calculationResult.effectiveRate}</span>
                   <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">1 {currencyType} = ₹{calculationResult.effectiveRate}</span>
                 </div>
-                <div className="text-xs text-slate-500 mt-1">IBR ({(Number(ibrRate) + BASE_MARGIN + aeMargin).toFixed(2)}) + PM ({PM_MARGIN}) + Your Margin ({pmMargin})</div>
+                <div className="text-xs text-slate-500 mt-1">IBR ({(Number(ibrRate) + BASE_MARGIN + aeMargin).toFixed(2)}) + Your Margin ({pmMargin})</div>
               </div>
 
               {/* INR Converted Amount */}

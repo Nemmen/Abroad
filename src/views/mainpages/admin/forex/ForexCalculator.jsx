@@ -81,7 +81,7 @@ const ForexCalculator = () => {
   const [currencyType, setCurrencyType] = useState('USD');
   const [foreignAmount, setForeignAmount] = useState(10000);
   const [ibrRate, setIbrRate] = useState(83.00); // Live IBR rate from API
-  const [pmMargin, setPmMargin] = useState(0.20); // Base PM margin (fixed at ₹0.20)
+  const [pmMargin, setPmMargin] = useState(0.15); // Base PM margin (fixed at ₹0.20)
   const [aeMargin, setAeMargin] = useState(0.00); // AE margin - admin adjustable, visible to admin only
   const [agentMargin, setAgentMargin] = useState(0.35);
   
@@ -373,7 +373,7 @@ const ForexCalculator = () => {
                 </FormHelperText>
               </FormControl>
               
-              <FormControl>
+              {/* <FormControl>
                 <FormLabel>PM Margin (Base ₹0.20)</FormLabel>
                 <Input
                   type="number"
@@ -384,7 +384,7 @@ const ForexCalculator = () => {
                 />
                 <FormHelperText>Base platform margin (default ₹0.20 added to IBR)</FormHelperText>
               </FormControl>
-              
+               */}
               <FormControl>
                 <FormLabel>Agent Margin</FormLabel>
                 <Input
@@ -481,7 +481,7 @@ const ForexCalculator = () => {
                   </HStack>
                 </HStack>
                 <Text fontSize="xs" color="gray.500" mt={2}>
-                  AE Margin is added on top of IBR + ₹0.20 and applied to all agent calculations.
+                  AE Margin is added on top of IBR + ₹0.15 and applied to all agent calculations.
                 </Text>
               </Box>
             </VStack>
@@ -513,7 +513,7 @@ const ForexCalculator = () => {
                     </Badge>
                   </HStack>
                   <Text fontSize="sm" color="gray.500">
-                    IBR ({ibrRate}) + PM/Base ({pmMargin}) + AE ({aeMargin}) + Agent ({agentMargin})
+                    IBR ({ibrRate}) + base({pmMargin}) + AE ({aeMargin}) + Agent ({agentMargin})
                   </Text>
                 </Box>
                 
@@ -524,7 +524,7 @@ const ForexCalculator = () => {
                     <Badge colorScheme="orange" fontSize="md">₹{parseFloat(aeMargin).toFixed(2)}</Badge>
                   </HStack>
                   <Text fontSize="xs" color="gray.500" mt={1}>
-                    Adjusted Base Rate: IBR + ₹0.20 = ₹{(parseFloat(ibrRate) + 0.20).toFixed(2)}
+                    Adjusted Base Rate: IBR + {pmMargin} = ₹{(parseFloat(ibrRate) + parseFloat(pmMargin)).toFixed(2)}
                   </Text>
                 </Box>
                 
