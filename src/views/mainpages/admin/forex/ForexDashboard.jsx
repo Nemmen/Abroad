@@ -328,7 +328,7 @@ const ForexDashboard = () => {
   const handlePageChange = (newPage) => {
     setPagination(prev => ({
       ...prev,
-      page: newPage,
+      page: newPage - 1, // DataTable sends 1-indexed, convert to 0-indexed
     }));
   };
   
@@ -507,7 +507,7 @@ const ForexDashboard = () => {
                 getRowId={(row) => row._id}
                 onRowClick={(params) => handleOpenStatusModal(params.row)}
                 pagination={{
-                  page: pagination.page,
+                  page: pagination.page + 1, // DataTable expects 1-indexed
                   pageSize: pagination.limit,
                   total: pagination.total,
                   pageSizeOptions: [10, 25, 50],
