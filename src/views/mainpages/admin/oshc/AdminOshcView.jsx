@@ -17,6 +17,12 @@ import {
   Textarea,
   NumberInput,
   NumberInputField,
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogContent,
+  AlertDialogOverlay,
 } from '@chakra-ui/react';
 import {
   FiFileText,
@@ -31,6 +37,7 @@ import {
 } from 'react-icons/fi';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { deleteOshc } from '../../services/ApiEndpoint';
 
 const formatOshcData = (data) => {
   // Function to format the date to a readable format (YYYY-MM-DD)
@@ -82,6 +89,11 @@ function AdminOshcView() {
 
   // Document management states
   const [documents, setDocuments] = useState([]);
+  
+  // DELETE functionality states
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const cancelRef = React.useRef();
 
   // Document type options to match OshcForm
   const documentTypeOptions = ['Policy Document', 'Receipt', 'Application Form', 'Other'];
@@ -164,6 +176,51 @@ function AdminOshcView() {
   const removeDocument = (index) => {
     const updatedDocuments = documents.filter((_, i) => i !== index);
     setDocuments(updatedDocuments);
+  };
+
+  // DELETE functionality - Handle delete confirmation
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      const response = await deleteOshc(id);
+      
+      if (response.data.success) {
+        toast({
+          title: 'Success',
+          description: 'OSHC entry deleted successfully',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+        
+        // Close dialog and navigate back to OSHC list
+        setIsDeleteDialogOpen(false);
+        navigate('/admin/oshc');
+      }
+    } catch (error) {
+      console.error('Error deleting OSHC entry:', error);
+      
+      // Handle different error scenarios
+      let errorMessage = 'Failed to delete OSHC entry';
+      
+      if (error.response?.status === 404) {
+        errorMessage = 'OSHC entry not found or already deleted';
+      } else if (error.response?.status === 401) {
+        errorMessage = 'Unauthorized - Admin access required';
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+      
+      toast({
+        title: 'Error',
+        description: errorMessage,
+        status: 'error',
+        duration: 4000,
+        isClosable: true,
+      });
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const handleDocumentChange = (index, name, value) => {
@@ -373,9 +430,19 @@ function AdminOshcView() {
             Back to List
           </Button>
           {!isEditing ? (
-            <Button colorScheme="blue" onClick={() => setIsEditing(true)}>
-              Edit
-            </Button>
+            <>
+              <Button colorScheme="blue" onClick={() => setIsEditing(true)}>
+                Edit
+              </Button>
+              <Button
+                colorScheme="red"
+                leftIcon={<Icon as={FiTrash2} />}
+                onClick={() => setIsDeleteDialogOpen(true)}
+                isLoading={isDeleting}
+              >
+                Delete
+              </Button>
+            </>
           ) : (
             <>
               <Button
@@ -588,6 +655,44 @@ function AdminOshcView() {
           )}
         </VStack>
       </Box>
+
+      {/* DELETE Confirmation Dialog */}
+      <AlertDialog
+        isOpen={isDeleteDialogOpen}
+        leastDestructiveRef={cancelRef}
+        onClose={() => setIsDeleteDialogOpen(false)}
+      >
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader fontSize="lg" fontWeight="bold">
+              Delete OSHC Entry
+            </AlertDialogHeader>
+
+            <AlertDialogBody>
+              Are you sure you want to delete this OSHC entry? This action cannot be undone.
+            </AlertDialogBody>
+
+            <AlertDialogFooter>
+              <Button
+                ref={cancelRef}
+                onClick={() => setIsDeleteDialogOpen(false)}
+                isDisabled={isDeleting}
+              >
+                Cancel
+              </Button>
+              <Button
+                colorScheme="red"
+                onClick={handleDelete}
+                ml={3}
+                isLoading={isDeleting}
+                loadingText="Deleting..."
+              >
+                Delete
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
     </Box>
   );
 }

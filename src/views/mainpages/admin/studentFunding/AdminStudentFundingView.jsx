@@ -19,6 +19,7 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  DialogContentText,
   DialogActions,
 } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -26,6 +27,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { useColorMode } from '@chakra-ui/react';
 import { useToast } from '@chakra-ui/react';
 import axios from 'axios';
+import { deleteStudentFunding } from '../../services/ApiEndpoint';
 
 // Icons
 import EditIcon from '@mui/icons-material/Edit';
@@ -57,6 +59,10 @@ function AdminStudentFundingView() {
   const [editableData, setEditableData] = useState({});
   const [documents, setDocuments] = useState([]);
   const [documentPreview, setDocumentPreview] = useState({ open: false, url: '', title: '' });
+  
+  // DELETE functionality states
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const paymentTenureOptions = ['Less than 3 Months', '6 Months', 'More than 6 Months'];
   const statusOptions = ['Pending', 'In Progress', 'Approved', 'Rejected', 'Completed'];
@@ -167,6 +173,52 @@ function AdminStudentFundingView() {
 
   const removeDocument = (index) => {
     setDocuments(documents.filter((_, i) => i !== index));
+  };
+
+  // DELETE functionality - Handle delete confirmation
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      const response = await deleteStudentFunding(id);
+      
+      if (response.data.success) {
+        toast({
+          title: 'Success',
+          description: 'Student Funding request deleted successfully',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+        
+        // Close dialog and navigate back to list
+        setTimeout(() => {
+          setIsDeleteDialogOpen(false);
+          navigate('/admin/student-funding');
+        }, 1000);
+      }
+    } catch (error) {
+      console.error('Error deleting Student Funding request:', error);
+      
+      let errorMessage = 'Failed to delete Student Funding request';
+      
+      if (error.response?.status === 404) {
+        errorMessage = 'Student Funding request not found or already deleted';
+      } else if (error.response?.status === 401) {
+        errorMessage = 'Unauthorized - Admin access required';
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+      
+      toast({
+        title: 'Error',
+        description: errorMessage,
+        status: 'error',
+        duration: 4000,
+        isClosable: true,
+      });
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const handleFileChange = async (index, event) => {
@@ -370,17 +422,28 @@ function AdminStudentFundingView() {
               Back to List
             </Button>
             {!isEditMode ? (
-              <Button
-                variant="contained"
-                startIcon={<EditIcon />}
-                onClick={handleEditToggle}
-                sx={{
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  color: 'white',
-                }}
-              >
-                Edit
-              </Button>
+              <>
+                <Button
+                  variant="contained"
+                  startIcon={<EditIcon />}
+                  onClick={handleEditToggle}
+                  sx={{
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    color: 'white',
+                  }}
+                >
+                  Edit
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  startIcon={<DeleteIcon />}
+                  onClick={() => setIsDeleteDialogOpen(true)}
+                  disabled={isDeleting}
+                >
+                  Delete
+                </Button>
+              </>
             ) : (
               <>
                 <Button
@@ -835,6 +898,40 @@ function AdminStudentFundingView() {
           <DialogActions>
             <Button onClick={() => window.open(documentPreview.url, '_blank')}>
               Download
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* DELETE Confirmation Dialog */}
+        <Dialog
+          open={isDeleteDialogOpen}
+          onClose={() => !isDeleting && setIsDeleteDialogOpen(false)}
+          aria-labelledby="delete-dialog-title"
+          aria-describedby="delete-dialog-description"
+        >
+          <DialogTitle id="delete-dialog-title">
+            Delete Student Funding Request
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText id="delete-dialog-description">
+              Are you sure you want to delete this Student Funding request? This action cannot be undone.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button 
+              onClick={() => setIsDeleteDialogOpen(false)}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleDelete}
+              color="error"
+              variant="contained"
+              disabled={isDeleting}
+              autoFocus
+            >
+              {isDeleting ? 'Deleting...' : 'Delete'}
             </Button>
           </DialogActions>
         </Dialog>

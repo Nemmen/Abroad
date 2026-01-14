@@ -10,6 +10,12 @@ import {
   CircularProgress,
   Link as MuiLink,
   Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  IconButton,
 } from '@mui/material';
 import {
   FileText as FileTextIcon,
@@ -21,11 +27,13 @@ import {
   Percent as PercentIcon,
   Folder as FolderIcon,
   ExternalLink as ExternalLinkIcon,
+  Trash2 as Trash2Icon,
 } from 'react-feather';
 import axios from 'axios';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { useColorMode } from '@chakra-ui/react';
+import { useColorMode, useToast } from '@chakra-ui/react';
+import { deleteForexRequest } from '../../services/ApiEndpoint';
 
 const fieldIcons = {
   sNo: FileTextIcon,
@@ -47,9 +55,15 @@ const fieldIcons = {
 
 function ForexView() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const toast = useToast();
   const [formData, setFormData] = useState({});
   const [loading, setLoading] = useState(true);
   const { colorMode } = useColorMode();
+  
+  // DELETE functionality states
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // Create MUI theme based on Chakra color mode
   const theme = createTheme({
@@ -122,6 +136,51 @@ function ForexView() {
       });
   }, [id]);
 
+  // DELETE functionality - Handle delete confirmation  
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      const response = await deleteForexRequest(id);
+      
+      if (response.data.success) {
+        toast({
+          title: 'Success',
+          description: 'Forex record deleted successfully',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+        
+        // Close dialog and navigate back to forex list
+        setIsDeleteDialogOpen(false);
+        navigate('/agent/forex');
+      }
+    } catch (error) {
+      console.error('Error deleting Forex record:', error);
+      
+      // Handle different error scenarios
+      let errorMessage = 'Failed to delete Forex record';
+      
+      if (error.response?.status === 404) {
+        errorMessage = 'Forex record not found or already deleted';
+      } else if (error.response?.status === 401) {
+        errorMessage = 'Unauthorized - You can only delete your own records';
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+      
+      toast({
+        title: 'Error',
+        description: errorMessage,
+        status: 'error',
+        duration: 4000,
+        isClosable: true,
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   // Function to format field labels for display
   const formatFieldLabel = (label) => {
     return label
@@ -152,12 +211,28 @@ function ForexView() {
               p: 3, 
               backgroundImage: 'linear-gradient(135deg, #11047A 0%, #4D1DB3 100%)',
               borderTopLeftRadius: '12px',
-              borderTopRightRadius: '12px'
+              borderTopRightRadius: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
             }}
           >
             <Typography variant="h5" fontWeight="600" color="white">
               Forex Transaction Details
             </Typography>
+            {/* DELETE button */}
+            <IconButton
+              onClick={() => setIsDeleteDialogOpen(true)}
+              disabled={loading}
+              sx={{
+                color: 'white',
+                '&:hover': {
+                  bgcolor: 'rgba(255, 255, 255, 0.1)',
+                },
+              }}
+            >
+              <Trash2Icon size={20} />
+            </IconButton>
           </Box>
           
           <CardContent sx={{ p: 3 }}>
@@ -367,6 +442,35 @@ function ForexView() {
             )}
           </CardContent>
         </Card>
+
+        {/* DELETE Confirmation Dialog */}
+        <Dialog
+          open={isDeleteDialogOpen}
+          onClose={() => setIsDeleteDialogOpen(false)}
+        >
+          <DialogTitle>Delete Forex Record</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Are you sure you want to delete this Forex record? This action cannot be undone.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => setIsDeleteDialogOpen(false)}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDelete}
+              color="error"
+              variant="contained"
+              disabled={isDeleting}
+            >
+              {isDeleting ? 'Deleting...' : 'Delete'}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </ThemeProvider>
   );

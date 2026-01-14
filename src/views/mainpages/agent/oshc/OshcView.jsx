@@ -14,6 +14,7 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  DialogContentText,
   DialogActions,
   Alert,
 } from '@mui/material';
@@ -23,6 +24,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { useColorMode } from '@chakra-ui/react';
 import { useToast } from '@chakra-ui/react';
 import axios from 'axios';
+import { deleteOshc } from '../../services/ApiEndpoint';
 
 // Icons
 import EditIcon from '@mui/icons-material/Edit';
@@ -38,6 +40,7 @@ import BusinessIcon from '@mui/icons-material/Business';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import DescriptionIcon from '@mui/icons-material/Description';
 import CloseIcon from '@mui/icons-material/Close';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 function OshcView() {
   const { id } = useParams();
@@ -49,6 +52,10 @@ function OshcView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [documentPreview, setDocumentPreview] = useState({ open: false, url: '', title: '' });
+  
+  // DELETE functionality states
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // Determine if we're in admin or agent context
   const isAdmin = window.location.pathname.includes('/admin/');
@@ -222,6 +229,51 @@ function OshcView() {
     }
   };
 
+  // DELETE functionality - Handle delete confirmation
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      const response = await deleteOshc(id);
+      
+      if (response.data.success) {
+        toast({
+          title: 'Success',
+          description: 'OSHC record deleted successfully',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+        
+        // Close dialog and navigate back to OSHC list
+        setIsDeleteDialogOpen(false);
+        navigate(isAdmin ? '/admin/oshc' : '/agent/oshc');
+      }
+    } catch (error) {
+      console.error('Error deleting OSHC record:', error);
+      
+      // Handle different error scenarios
+      let errorMessage = 'Failed to delete OSHC record';
+      
+      if (error.response?.status === 404) {
+        errorMessage = 'OSHC record not found or already deleted';
+      } else if (error.response?.status === 401) {
+        errorMessage = 'Unauthorized - You can only delete your own records';
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+      
+      toast({
+        title: 'Error',
+        description: errorMessage,
+        status: 'error',
+        duration: 4000,
+        isClosable: true,
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   if (loading) {
     return (
       <ThemeProvider theme={theme}>
@@ -281,17 +333,35 @@ function OshcView() {
             </Box>
             
             {!isAdmin && (
-              <Button
-                variant="contained"
-                startIcon={<EditIcon />}
-                onClick={() => navigate(`/agent/oshc/edit/${id}`)}
-                sx={{
-                  backgroundColor: 'primary.main',
-                  '&:hover': { backgroundColor: 'primary.dark' },
-                }}
-              >
-                Edit Entry
-              </Button>
+              <Stack direction="row" spacing={2}>
+                <Button
+                  variant="contained"
+                  startIcon={<EditIcon />}
+                  onClick={() => navigate(`/agent/oshc/edit/${id}`)}
+                  sx={{
+                    backgroundColor: 'primary.main',
+                    '&:hover': { backgroundColor: 'primary.dark' },
+                  }}
+                >
+                  Edit Entry
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  startIcon={<DeleteIcon />}
+                  onClick={() => setIsDeleteDialogOpen(true)}
+                  disabled={isDeleting}
+                  sx={{
+                    borderColor: 'error.main',
+                    '&:hover': { 
+                      borderColor: 'error.dark',
+                      backgroundColor: 'rgba(211, 47, 47, 0.04)'
+                    },
+                  }}
+                >
+                  Delete
+                </Button>
+              </Stack>
             )}
           </Box>
         </Card>
@@ -611,6 +681,40 @@ function OshcView() {
           <DialogActions>
             <Button onClick={() => setDocumentPreview({ open: false, url: '', title: '' })}>
               Close
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* DELETE Confirmation Dialog */}
+        <Dialog
+          open={isDeleteDialogOpen}
+          onClose={() => !isDeleting && setIsDeleteDialogOpen(false)}
+          aria-labelledby="delete-dialog-title"
+          aria-describedby="delete-dialog-description"
+        >
+          <DialogTitle id="delete-dialog-title">
+            Delete OSHC Entry
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText id="delete-dialog-description">
+              Are you sure you want to delete this OSHC entry? This action cannot be undone.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button 
+              onClick={() => setIsDeleteDialogOpen(false)}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleDelete}
+              color="error"
+              variant="contained"
+              disabled={isDeleting}
+              autoFocus
+            >
+              {isDeleting ? 'Deleting...' : 'Delete'}
             </Button>
           </DialogActions>
         </Dialog>

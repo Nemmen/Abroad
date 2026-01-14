@@ -18,6 +18,11 @@ import {
   Select,
   Snackbar,
   Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from '@mui/material';
 import {
   FileText as FileTextIcon,
@@ -33,10 +38,11 @@ import {
   Upload as UploadIcon,
   Trash2 as Trash2Icon,
 } from 'react-feather';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { useColorMode } from '@chakra-ui/react';
+import { deleteGicForm } from '../../services/ApiEndpoint';
 
 const formatGICData = (data) => {
   // Function to format the date to a readable format (YYYY-MM-DD)
@@ -84,6 +90,7 @@ const formatFieldLabel = (label) => {
 
 function GicView() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({});
   const [editableData, setEditableData] = useState({});
   const [isEditing, setIsEditing] = useState(false);
@@ -94,6 +101,10 @@ function GicView() {
   // Document management states
   const [documents, setDocuments] = useState([]);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+  
+  // DELETE functionality states
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // Document type options to match GicForm
   const documentTypeOptions = ['aadhar', 'pan', 'ol', 'passport'];
@@ -271,6 +282,49 @@ function GicView() {
   const removeDocument = (index) => {
     const updatedDocuments = documents.filter((_, i) => i !== index);
     setDocuments(updatedDocuments);
+  };
+
+  // DELETE functionality - Handle delete confirmation
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      const response = await deleteGicForm(id);
+      
+      if (response.data.success) {
+        setSnackbar({
+          open: true,
+          message: 'GIC record deleted successfully',
+          severity: 'success'
+        });
+        
+        // Close dialog and navigate back to GIC list
+        setTimeout(() => {
+          setIsDeleteDialogOpen(false);
+          navigate('/agent/gic');
+        }, 1000);
+      }
+    } catch (error) {
+      console.error('Error deleting GIC record:', error);
+      
+      // Handle different error scenarios
+      let errorMessage = 'Failed to delete GIC record';
+      
+      if (error.response?.status === 404) {
+        errorMessage = 'GIC record not found or already deleted';
+      } else if (error.response?.status === 401) {
+        errorMessage = 'Unauthorized - Please login again';
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+      
+      setSnackbar({
+        open: true,
+        message: errorMessage,
+        severity: 'error'
+      });
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const handleDocumentChange = (index, name, value) => {
@@ -486,20 +540,39 @@ function GicView() {
                 </Button>
               </Box>
             ) : (
-              <Button
-                variant="contained"
-                onClick={() => setIsEditing(true)}
-                startIcon={<EditIcon size={18} />}
-                sx={{ 
-                  bgcolor: 'white', 
-                  color: '#11047A',
-                  '&:hover': { 
-                    bgcolor: 'rgba(255,255,255,0.9)',
-                  } 
-                }}
-              >
-                Edit
-              </Button>
+              <Box display="flex" gap={2}>
+                <Button
+                  variant="contained"
+                  onClick={() => setIsEditing(true)}
+                  startIcon={<EditIcon size={18} />}
+                  sx={{ 
+                    bgcolor: 'white', 
+                    color: '#11047A',
+                    '&:hover': { 
+                      bgcolor: 'rgba(255,255,255,0.9)',
+                    } 
+                  }}
+                >
+                  Edit
+                </Button>
+                <Button
+                  variant="outlined"
+                  onClick={() => setIsDeleteDialogOpen(true)}
+                  startIcon={<Trash2Icon size={18} />}
+                  disabled={isDeleting}
+                  sx={{ 
+                    color: 'white', 
+                    borderColor: 'rgba(255,255,255,0.5)',
+                    '&:hover': { 
+                      borderColor: '#ef4444', 
+                      backgroundColor: 'rgba(239,68,68,0.1)',
+                      color: '#fca5a5'
+                    } 
+                  }}
+                >
+                  Delete
+                </Button>
+              </Box>
             )}
           </Box>
           
@@ -924,6 +997,40 @@ function GicView() {
             {snackbar.message}
           </Alert>
         </Snackbar>
+
+        {/* DELETE Confirmation Dialog */}
+        <Dialog
+          open={isDeleteDialogOpen}
+          onClose={() => !isDeleting && setIsDeleteDialogOpen(false)}
+          aria-labelledby="delete-dialog-title"
+          aria-describedby="delete-dialog-description"
+        >
+          <DialogTitle id="delete-dialog-title">
+            Delete GIC Record
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText id="delete-dialog-description">
+              Are you sure you want to delete this GIC record? This action cannot be undone.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button 
+              onClick={() => setIsDeleteDialogOpen(false)}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleDelete}
+              color="error"
+              variant="contained"
+              disabled={isDeleting}
+              autoFocus
+            >
+              {isDeleting ? 'Deleting...' : 'Delete'}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </ThemeProvider>
   );

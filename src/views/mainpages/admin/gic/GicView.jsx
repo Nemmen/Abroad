@@ -17,6 +17,12 @@ import {
   FormControl,
   FormLabel,
   useToast,
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogContent,
+  AlertDialogOverlay,
 } from '@chakra-ui/react';
 import {
   FiFileText,
@@ -28,8 +34,9 @@ import {
   FiUpload,
   FiTrash2,
 } from 'react-icons/fi';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { deleteGicForm } from '../../services/ApiEndpoint';
 
 const formatGICData = (data) => {
   // Function to format the date to a readable format (YYYY-MM-DD)
@@ -68,11 +75,17 @@ const fieldIcons = {
 
 function GicView() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const toast = useToast();
   const [formData, setFormData] = useState({});
   const [editableData, setEditableData] = useState({});
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+  
+  // DELETE functionality states
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const cancelRef = React.useRef();
   
   // Document management states
   const [documents, setDocuments] = useState([]);
@@ -302,6 +315,51 @@ function GicView() {
     setLoading(false);
   };
 
+  // DELETE functionality - Handle delete confirmation
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      const response = await deleteGicForm(id);
+      
+      if (response.data.success) {
+        toast({
+          title: 'Success',
+          description: 'GIC record deleted successfully',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+        
+        // Close dialog and navigate back to GIC list
+        setIsDeleteDialogOpen(false);
+        navigate('/admin/gic');
+      }
+    } catch (error) {
+      console.error('Error deleting GIC record:', error);
+      
+      // Handle different error scenarios
+      let errorMessage = 'Failed to delete GIC record';
+      
+      if (error.response?.status === 404) {
+        errorMessage = 'GIC record not found or already deleted';
+      } else if (error.response?.status === 401) {
+        errorMessage = 'Unauthorized - Admin access required';
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+      
+      toast({
+        title: 'Error',
+        description: errorMessage,
+        status: 'error',
+        duration: 4000,
+        isClosable: true,
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const labelColor = useColorModeValue('gray.500', 'gray.400');
   const valueColor = useColorModeValue('gray.900', 'white');
   const bgColor = useColorModeValue('white', 'gray.800');
@@ -338,9 +396,20 @@ function GicView() {
             </Button>
           </Flex>
         ) : (
-          <Button colorScheme="blue" onClick={() => setIsEditing(true)}>
-            Edit
-          </Button>
+          <Flex>
+            <Button colorScheme="blue" onClick={() => setIsEditing(true)} mr={4}>
+              Edit
+            </Button>
+            {/* DELETE button */}
+            <Button
+              colorScheme="red"
+              leftIcon={<Icon as={FiTrash2} />}
+              onClick={() => setIsDeleteDialogOpen(true)}
+              isDisabled={loading}
+            >
+              Delete
+            </Button>
+          </Flex>
         )}
       </Flex>
 
@@ -707,6 +776,44 @@ function GicView() {
           </Box>
         </>
       )}
+
+      {/* DELETE Confirmation Dialog */}
+      <AlertDialog
+        isOpen={isDeleteDialogOpen}
+        leastDestructiveRef={cancelRef}
+        onClose={() => setIsDeleteDialogOpen(false)}
+      >
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader fontSize="lg" fontWeight="bold">
+              Delete GIC Record
+            </AlertDialogHeader>
+
+            <AlertDialogBody>
+              Are you sure you want to delete this GIC record? This action cannot be undone.
+            </AlertDialogBody>
+
+            <AlertDialogFooter>
+              <Button
+                ref={cancelRef}
+                onClick={() => setIsDeleteDialogOpen(false)}
+                isDisabled={isDeleting}
+              >
+                Cancel
+              </Button>
+              <Button
+                colorScheme="red"
+                onClick={handleDelete}
+                ml={3}
+                isLoading={isDeleting}
+                loadingText="Deleting..."
+              >
+                Delete
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
     </Box>
   );
 }
