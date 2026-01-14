@@ -14,6 +14,7 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  DialogContentText,
   DialogActions,
   Alert,
   Table,
@@ -27,9 +28,11 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { useColorMode } from '@chakra-ui/react';
 import { useToast } from '@chakra-ui/react';
 import axios from 'axios';
+import { deleteStudentFunding } from '../../services/ApiEndpoint';
 
 // Icons
 import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import DownloadIcon from '@mui/icons-material/Download';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
@@ -54,6 +57,10 @@ function StudentFundingView() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [documentPreview, setDocumentPreview] = useState({ open: false, url: '', title: '' });
+  
+  // DELETE functionality states
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const theme = createTheme({
     palette: {
@@ -159,6 +166,52 @@ function StudentFundingView() {
     });
   };
 
+  // DELETE functionality - Handle delete confirmation
+  // Note: This API is admin-only, so agents will receive an authorization error
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      const response = await deleteStudentFunding(id);
+      
+      if (response.data.success) {
+        toast({
+          title: 'Success',
+          description: 'Student Funding request deleted successfully',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+        
+        setTimeout(() => {
+          setIsDeleteDialogOpen(false);
+          navigate('/agent/student-funding');
+        }, 1000);
+      }
+    } catch (error) {
+      console.error('Error deleting Student Funding request:', error);
+      
+      let errorMessage = 'Failed to delete Student Funding request';
+      
+      if (error.response?.status === 403 || error.response?.status === 401) {
+        errorMessage = 'You do not have permission to delete this request. Only administrators can delete Student Funding requests.';
+      } else if (error.response?.status === 404) {
+        errorMessage = 'Student Funding request not found or already deleted';
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+      
+      toast({
+        title: 'Error',
+        description: errorMessage,
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const handleDocumentView = (url, title) => {
     setDocumentPreview({ open: true, url, title });
   };
@@ -243,6 +296,15 @@ function StudentFundingView() {
               }}
             >
               Edit
+            </Button>
+            <Button
+              variant="outlined"
+              color="error"
+              startIcon={<DeleteIcon />}
+              onClick={() => setIsDeleteDialogOpen(true)}
+              disabled={isDeleting}
+            >
+              Delete
             </Button>
           </Stack>
         </Card>
@@ -534,6 +596,44 @@ function StudentFundingView() {
           <DialogActions>
             <Button onClick={() => window.open(documentPreview.url, '_blank')}>
               Download
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* DELETE Confirmation Dialog */}
+        <Dialog
+          open={isDeleteDialogOpen}
+          onClose={() => !isDeleting && setIsDeleteDialogOpen(false)}
+          aria-labelledby="delete-dialog-title"
+          aria-describedby="delete-dialog-description"
+        >
+          <DialogTitle id="delete-dialog-title">
+            Delete Student Funding Request
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText id="delete-dialog-description">
+              Are you sure you want to delete this Student Funding request? This action cannot be undone.
+              <br />
+              <br />
+              <strong>Note:</strong> Only administrators have permission to delete Student Funding requests. 
+              If you proceed, you may receive an authorization error.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button 
+              onClick={() => setIsDeleteDialogOpen(false)}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleDelete}
+              color="error"
+              variant="contained"
+              disabled={isDeleting}
+              autoFocus
+            >
+              {isDeleting ? 'Deleting...' : 'Delete'}
             </Button>
           </DialogActions>
         </Dialog>

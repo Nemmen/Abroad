@@ -11,11 +11,17 @@ import {
   Link as MuiLink,
   Button,
   Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  IconButton,
 } from '@mui/material';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { useColorMode } from '@chakra-ui/react';
+import { useColorMode, useToast } from '@chakra-ui/react';
 import {
   User as UserIcon,
   Mail as MailIcon,
@@ -26,14 +32,21 @@ import {
   Tag as TagIcon,
   CheckCircle as CheckCircleIcon,
   Edit as EditIcon,
+  Trash2 as Trash2Icon,
 } from 'react-feather';
+import { deletePaymentTagging } from '../../services/ApiEndpoint';
 
 function AgentPaymentTaggingView({ isAdmin = false, onEdit = null }) {
   const { id } = useParams();
   const navigate = useNavigate();
+  const toast = useToast();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const { colorMode } = useColorMode();
+  
+  // DELETE functionality states
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const theme = createTheme({
     palette: {
@@ -93,6 +106,51 @@ function AgentPaymentTaggingView({ isAdmin = false, onEdit = null }) {
       fetchData();
     }
   }, [id]);
+
+  // DELETE functionality - Handle delete confirmation
+  const handleDelete = async () => {
+    setIsDeleting(true);
+    try {
+      const response = await deletePaymentTagging(id);
+      
+      if (response.data.success) {
+        toast({
+          title: 'Success',
+          description: 'Payment Tagging record deleted successfully',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+        
+        // Close dialog and navigate back to payment tagging list
+        setIsDeleteDialogOpen(false);
+        navigate(isAdmin ? '/admin/payment-tagging' : '/agent/payment-tagging');
+      }
+    } catch (error) {
+      console.error('Error deleting Payment Tagging record:', error);
+      
+      // Handle different error scenarios
+      let errorMessage = 'Failed to delete Payment Tagging record';
+      
+      if (error.response?.status === 404) {
+        errorMessage = 'Payment Tagging record not found or already deleted';
+      } else if (error.response?.status === 401) {
+        errorMessage = 'Unauthorized - Admin access required';
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+      
+      toast({
+        title: 'Error',
+        description: errorMessage,
+        status: 'error',
+        duration: 4000,
+        isClosable: true,
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
@@ -168,20 +226,37 @@ function AgentPaymentTaggingView({ isAdmin = false, onEdit = null }) {
               <Typography variant="h5" fontWeight="600" color="white">
                 Payment Tagging Details
               </Typography>
-              <Button
-                variant="contained"
-                sx={{ bgcolor: 'white', color: 'primary.main' }}
-                startIcon={<EditIcon size={18} />}
-                onClick={() => {
-                  if (onEdit) {
-                    onEdit();
-                  } else {
-                    navigate(`/agent/payment-tagging/form/${id}`);
-                  }
-                }}
-              >
-                Edit
-              </Button>
+              <Stack direction="row" spacing={2}>
+                <Button
+                  variant="contained"
+                  sx={{ bgcolor: 'white', color: 'primary.main' }}
+                  startIcon={<EditIcon size={18} />}
+                  onClick={() => {
+                    if (onEdit) {
+                      onEdit();
+                    } else {
+                      navigate(`/agent/payment-tagging/form/${id}`);
+                    }
+                  }}
+                >
+                  Edit
+                </Button>
+                {/* DELETE button - Admin only for this service */}
+                {isAdmin && (
+                  <IconButton
+                    onClick={() => setIsDeleteDialogOpen(true)}
+                    disabled={loading}
+                    sx={{
+                      color: 'white',
+                      '&:hover': {
+                        bgcolor: 'rgba(255, 255, 255, 0.1)',
+                      },
+                    }}
+                  >
+                    <Trash2Icon size={20} />
+                  </IconButton>
+                )}
+              </Stack>
             </Stack>
           </Box>
 
@@ -382,6 +457,35 @@ function AgentPaymentTaggingView({ isAdmin = false, onEdit = null }) {
             )}
           </CardContent>
         </Card>
+
+        {/* DELETE Confirmation Dialog */}
+        <Dialog
+          open={isDeleteDialogOpen}
+          onClose={() => setIsDeleteDialogOpen(false)}
+        >
+          <DialogTitle>Delete Payment Tagging Record</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Are you sure you want to delete this Payment Tagging record? This action cannot be undone.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={() => setIsDeleteDialogOpen(false)}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleDelete}
+              color="error"
+              variant="contained"
+              disabled={isDeleting}
+            >
+              {isDeleting ? 'Deleting...' : 'Delete'}
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </ThemeProvider>
   );

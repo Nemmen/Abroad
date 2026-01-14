@@ -13,6 +13,8 @@ const instance = axios.create({
 export const get = (url, params) => instance.get(url, { params });
 export const post = (url, data) => instance.post(url, data);
 export const put = (url, data) => instance.put(url, data);
+export const deleteRequest = (url) => instance.delete(url);
+// Legacy alias for backwards compatibility
 export const deleteUser = (url) => instance.delete(url);
 
 // New function for handling multipart form-data uploads
@@ -50,3 +52,57 @@ instance.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+// =====================================================
+// DELETE API Service Functions
+// =====================================================
+
+/**
+ * Delete a Forex request (Admin only)
+ * DELETE /api/forex/request/:id
+ */
+export const deleteForexRequest = (id) => {
+  return instance.delete(`/api/forex/request/${id}`);
+};
+
+/**
+ * Delete a GIC form
+ * DELETE /auth/deleteGicForm/:id
+ */
+export const deleteGicForm = (id) => {
+  return instance.delete(`/auth/deleteGicForm/${id}`);
+};
+
+/**
+ * Delete a Blocked Account record
+ * DELETE /auth/deleteBlockedAccount/:id
+ */
+export const deleteBlockedAccount = (id) => {
+  return instance.delete(`/auth/deleteBlockedAccount/${id}`);
+};
+
+/**
+ * Delete an OSHC entry (Agents: own only, Admins: all)
+ * DELETE /api/oshc/:id
+ */
+export const deleteOshc = (id) => {
+  return instance.delete(`/api/oshc/${id}`);
+};
+
+/**
+ * Delete a Student Funding request (Admin only)
+ * DELETE /api/student-funding/admin/delete/:id
+ */
+export const deleteStudentFunding = (id) => {
+  return instance.delete(`/api/student-funding/admin/delete/${id}`);
+};
+
+/**
+ * Delete a Payment Tagging record (Admin only)
+ * DELETE /api/payment-tagging/admin/delete/:id
+ */
+export const deletePaymentTagging = (id) => {
+  return instance.delete(`/api/payment-tagging/admin/delete/${id}`);
+};
+
+export default instance;
