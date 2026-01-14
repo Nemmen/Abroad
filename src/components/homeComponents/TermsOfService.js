@@ -432,8 +432,8 @@ function TermsOfServiceContent() {
                 lineHeight: 1.6
               }}
             >
-              SCO No. 4, First Floor, La Prisma Market,<br />
-              Nagla Rd, Zirakpur, Punjab 140603
+              Unit 202, Tower A, Skyline Elevate,<br />
+              PR-7, Airport Road, Zirakpur, Punjab 140603
             </Typography>
           </Box>
         </StyledPaper>

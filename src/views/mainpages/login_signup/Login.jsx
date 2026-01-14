@@ -356,16 +356,29 @@ export default function Login() {
                 </button>
               </div>
 
-              <div className="text-center">
-                <span className="text-sm text-gray-600">
-                  Don't have an account?{' '}
+              <div className="text-center space-y-3">
+                <div>
                   <Link
-                    to="/auth/signup"
-                    className="font-medium text-blue-600 hover:text-blue-500 transition duration-150 ease-in-out"
+                    to="/"
+                    className="text-sm text-gray-600 hover:text-gray-800 transition duration-150 ease-in-out inline-flex items-center gap-1"
                   >
-                    Sign up now
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    Back to Home
                   </Link>
-                </span>
+                </div>
+                <div>
+                  <span className="text-sm text-gray-600">
+                    Don't have an account?{' '}
+                    <Link
+                      to="/auth/signup"
+                      className="font-medium text-blue-600 hover:text-blue-500 transition duration-150 ease-in-out"
+                    >
+                      Sign up now
+                    </Link>
+                  </span>
+                </div>
               </div>
             </form>
           </div>

@@ -6,6 +6,7 @@ import { useTheme } from '@mui/system';
 import forex from "../../assets/img/home/forex.jpg";
 import flywireLogo from "../../assets/img/home/flywireLogo.png";
 import cibcLogo from "../../assets/img/home/cibcLogo.png";
+import converaLogo from "../../assets/img/home/convera.png";
 
 export default function Forex() {
   const theme = useTheme();
@@ -199,6 +200,10 @@ export default function Forex() {
             </Box>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <Box component="img" src={cibcLogo} alt="CIBC" sx={{ width: '100px', height: 'auto' }} />
+             
+            </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box component="img" src={converaLogo} alt="CONVERA" sx={{ width: '100px', height: 'auto' }} />
              
             </Box>
           </Box>

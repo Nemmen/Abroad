@@ -69,7 +69,7 @@ export default function Footer() {
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1.5 }}>
                   <Box
                     component="img"
-                    src="/logo.png"
+                    src="/Logo.png"
                     alt="AbroCare Logo"
                     sx={{
                       height: 40,
@@ -118,7 +118,7 @@ export default function Footer() {
                     transition: 'all 0.3s ease',
                   }}
                 >
-                  Enquiry Now
+                  Inquire Now
                 </Button>
               </Box>
             </Grid>
@@ -213,9 +213,9 @@ export default function Footer() {
                         fontSize: '0.75rem'
                       }}
                     >
-                      Office No. 04, First Floor<br />
-                      La Prisma Market, Nagla Road<br />
-                      Zirakpur, 140603, Punjab, India
+                      Unit 202, Tower A, Skyline Elevate<br />
+                      PR-7, Airport Road<br />
+                      Zirakpur, Punjab 140603
                     </Typography>
                   </Box>
                 </Box>

@@ -629,16 +629,29 @@ export default function Register() {
                 </button>
               </div>
 
-              <div className="text-center pt-2">
-                <span className="text-sm text-gray-600">
-                  Already have an account?{' '}
+              <div className="text-center pt-2 space-y-3">
+                <div>
                   <Link
-                    to="/auth/login"
-                    className="font-medium text-indigo-600 hover:text-indigo-500 transition duration-150 ease-in-out"
+                    to="/"
+                    className="text-sm text-gray-600 hover:text-gray-800 transition duration-150 ease-in-out inline-flex items-center gap-1"
                   >
-                    Sign in here
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    Back to Home
                   </Link>
-                </span>
+                </div>
+                <div>
+                  <span className="text-sm text-gray-600">
+                    Already have an account?{' '}
+                    <Link
+                      to="/auth/login"
+                      className="font-medium text-indigo-600 hover:text-indigo-500 transition duration-150 ease-in-out"
+                    >
+                      Sign in here
+                    </Link>
+                  </span>
+                </div>
               </div>
             </form>
           </div>
